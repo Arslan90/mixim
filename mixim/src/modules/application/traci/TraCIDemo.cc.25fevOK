@@ -1,0 +1,148 @@
+//
+// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+//
+// Documentation for these modules is at http://veins.car2x.org/
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+
+#include "application/traci/TraCIDemo.h"
+
+#include "NetwControlInfo.h"
+#include "SimpleAddress.h"
+#include "ApplPkt_m.h"
+
+#define MYDEBUG EV //cela pour envoyer data à OUPUT.
+
+Define_Module(TraCIDemo);
+
+const simsignalwrap_t TraCIDemo::mobilityStateChangedSignal = simsignalwrap_t(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
+
+void TraCIDemo::initialize(int stage) {
+	BaseApplLayer::initialize(stage);
+	if (stage == 0) {
+		debug = par("debug");
+
+		traci = TraCIMobilityAccess().get(getParentModule());
+		findHost()->subscribe(mobilityStateChangedSignal, this);
+
+		sentMessage = false;
+	}
+}
+
+void TraCIDemo::handleSelfMsg(cMessage *msg) {
+	EV << "ReceiveSelfMessage "<< endl;
+}
+
+void TraCIDemo::handleLowerMsg(cMessage* msg) {
+	//les deux lignes suivants j'ai les trouves sur src/modules/application/BurstAppsLayer.cc  et src/base/modules/TestAppLayer
+	ApplPkt *m  = static_cast<ApplPkt *>(msg);
+	//EV << "Received reply from host["<< m->getSrcAddr() << " of b" << m->getDestAddr << endl;
+	EV << "ReceiveLowerMessage from SRC: "<< m->getSrcAddr() << endl; // " DEST: " <<  m->getDestAddr() << endl;
+	if (!sentMessage) sendMessage();
+	delete msg;
+}
+
+void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+	EV << "ReceiveSignal from SRC: "<< source << " DEST: " <<  signalID << endl;
+    MYDEBUG << "DEBUG(tracidemo.cc) signalID: " << signalID << endl;
+    MYDEBUG << "DEBUG getVectorSize: " << traci->getSignalName(signalID) <<endl;
+    //MYDEBUG << "DEBUG getLocalSignalListeners: " << traci->getLocalSignalListeners(signalID) <<endl;
+
+	Enter_Method_Silent();
+	if (signalID == mobilityStateChangedSignal) {
+		handlePositionUpdate();
+	}
+}
+
+void TraCIDemo::handlePositionUpdate() {
+    if ( traci->getPositionAt(simTime()).x > 150 ) { //envoi message quand depasse une position de X
+		if (!sentMessage) sendMessage();
+	}
+}
+
+void TraCIDemo::sendMessage() {
+    // TRACI->GET
+    MYDEBUG << "DEBUG getID: " << traci->getId() <<endl;
+    MYDEBUG << "DEBUG getIndex: " << traci->getIndex() <<endl;
+    MYDEBUG << "DEBUG getCurrentPosition: " << traci->getCurrentPosition() <<endl;
+    MYDEBUG << "DEBUG getCurrentSpeed: " << traci->getCurrentSpeed() <<endl;
+    MYDEBUG << "DEBUG getfullPath: " << traci->getFullPath() <<endl;
+    MYDEBUG << "DEBUG getDefaultOwner: " << traci->getDefaultOwner() <<endl;
+    MYDEBUG << "DEBUG getExternalId: " << traci->getExternalId() <<endl;
+    MYDEBUG << "DEBUG getFullName: " << traci->getFullName() <<endl;
+    MYDEBUG << "DEBUG getLiveObjectCount: " << traci->getLiveObjectCount() <<endl;
+    MYDEBUG << "DEBUG getManager: " << traci->getManager() <<endl;
+    MYDEBUG << "DEBUG getRoadId: " << traci->getRoadId() <<endl;
+    MYDEBUG << "DEBUG getSpeed: " << traci->getSpeed() <<endl;
+    MYDEBUG << "DEBUG getAngleRad: " << traci->getAngleRad() <<endl;
+    MYDEBUG << "DEBUG getSubscribeCount: " << traci->getSubscribeCount() <<endl;
+    MYDEBUG << "DEBUG getPositionAt(simTime()): " << traci->getPositionAt(simTime()) <<endl;
+    MYDEBUG << "DEBUG getVectorSize: " << traci->getVectorSize() <<endl;
+    MYDEBUG << "DEBUG getClassName: " << traci->getClassName() <<endl;
+    MYDEBUG << "DEBUG getComponentType: " << traci->getComponentType() <<endl;
+    MYDEBUG << "DEBUG getDefaultOwner: " << traci->getDefaultOwner() <<endl;
+    MYDEBUG << "DEBUG getDescriptor: " << traci->getDescriptor() <<endl;
+    MYDEBUG << "DEBUG getDisplayString: " << traci->getDisplayString() <<endl;
+    //MYDEBUG << "DEBUG getVectorSize: " << traci->getLocalListenedSignals() <<endl;
+    //MYDEBUG << "DEBUG getGateNames: " << traci->getGateNames() <<endl;
+    MYDEBUG << "DEBUG getTotalObjectCount: " << traci->getTotalObjectCount() <<endl;
+    MYDEBUG << "DEBUG commandGetArcCO2: " << traci->commandGetArcCO2("C2")  <<endl;
+    MYDEBUG << "DEBUG commandGetArcOccupancy: " << traci->commandGetArcOccupancy("C2")  <<endl;
+
+
+
+    /* TRACI->COMMANDS */
+    //On change le parcours d'un voiture..
+    if (traci->getExternalId() == "veh.1") {
+    traci->commandSetSpeed(2); //set speed to 2m/s
+    traci->commandStopNode("B1",80.0,0,5,5);
+    traci->commandChangeRoute("B2",30.0); //set TT
+    traci->commandChangeRoute("C2",30.0);
+    traci->commandChangeRoute("A3",30.0);
+    traci->commandChangeRoute("B3",30.0);
+    }
+
+    MYDEBUG << "DEBUG getExternalId: " << traci->getExternalId() <<endl; //vehicle.ID
+    std::list<std::string> vehiclesId = traci->commandGetVehiclesIds();
+	for (std::list<std::string>::const_iterator i = vehiclesId.begin(); i != vehiclesId.end(); ++i) {
+	    MYDEBUG << "DEBUG commandGetVehiclesIds: " << *i  <<endl;
+	}
+/*
+    MYDEBUG << "DEBUG getExternalId: " << traci->getExternalId() <<endl; //print Vehicle.ID
+    std::list<std::string> arcId = traci->commandGetArcIds();
+	for (std::list<std::string>::const_iterator i = arcId.begin(); i != arcId.end(); ++i) {
+	    MYDEBUG << "DEBUG commandGetArcIds: " << *i  <<endl;
+	}
+*/
+    MYDEBUG << "DEBUGHERE getExternalId: " << traci->getExternalId() <<endl; //print Vehicle.ID
+    std::list<std::string> vehicleId = traci->commandGetVehicleRoutes();
+	for (std::list<std::string>::const_iterator i = vehicleId.begin(); i != vehicleId.end(); ++i) {
+	    MYDEBUG << "DEBUG commandGetVehicleRoutes: " << *i  <<endl;
+	}
+
+	sentMessage = true;
+
+	ApplPkt *pkt = new ApplPkt("REQUESTING_ROUTE_PLAN", 0);
+	pkt->setDestAddr(-1);
+	pkt->setSrcAddr(myApplAddr());
+	pkt->setBitLength(headerLength);
+
+	NetwControlInfo::setControlInfo(pkt, LAddress::L3BROADCAST );
+
+	sendDown(pkt);
+}
+
+

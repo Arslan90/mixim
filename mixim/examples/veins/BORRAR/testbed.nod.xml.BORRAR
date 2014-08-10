@@ -1,0 +1,27 @@
+<nodes>
+<node id="0" x="100" y="200"/>
+<node id="1" x="200" y="200"/>
+<!--
+-->
+<node id="2" x="300" y="200" type="traffic_light"/>
+<node id="2" x="300" y="200" />
+
+<node id="3" x="400" y="200"/>
+
+<node id="4i" x="-10" y="100"/>
+<node id="4" x="0" y="100"/>
+<node id="5" x="100" y="100"/>
+<node id="6" x="200" y="100"/>
+<node id="7" x="300" y="100" type="traffic_light"/>
+<node id="8" x="400" y="100"/>
+<node id="9" x="500" y="100"/>
+<node id="9i" x="510" y="100"/>
+
+<node id="10" x="100" y="0"/>
+<node id="11" x="200" y="0"/>
+<!--
+-->
+<node id="12" x="300" y="0" type="traffic_light"/>
+<node id="12" x="300" y="0"/>
+<node id="13" x="400" y="0"/>
+</nodes>

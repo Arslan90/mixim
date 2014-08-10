@@ -1,0 +1,29 @@
+
+<routes>
+
+<!-- TYPE OF CAR BEHAVIOR -->
+<vType id="CarA" accel="3.0" decel="6.0"  length="5.0" maxSpeed="50.0" sigma="0.5"/>
+
+
+<!-- ROUTES FROM LEFT TO RIGHT AND  BOTTOM TO TOP -->
+<route id="route1" edges="11-5 12-5 13-5 14-5 15-5 16-5 17-5 18-5 19-5 20-5 21-5 22-5 23-5 24-5 25-5 26-5 27-5 28-5 15-19v 16-19v 17-19v 18-19v 19-19v 20-19v 21-19v 22-19v 23-19v 24-19v 29-15"/>
+
+<route id="route2" edges="11-10 12-10 13-10 14-10 15-10 16-10 17-10 18-10 19-10 20-10 21-10 22-10 23-10 24-10 25-10 26-10 27-10 28-10 29-10"/>
+
+<route id="route3" edges="11-15 12-15 13-15 14-15 15-15 16-15 17-15 18-15 19-15 20-15 21-15 22-15 23-15 24-15 25-15 26-15 27-15 28-15 -24-19v -23-19v -22-19v -21-19v -20-19v -19-19v -18-19v -17-19v -16-19v -15-19v 29-5"/>
+
+<route id="route4" edges="11-5v 12-5v 13-5v 14-5v 15-5v 16-5v 17-5v 18-5v 19-5v 20-5v 21-5v 22-5v 23-5v 24-5v 25-5v 26-5v 27-5v 28-5v 29-5v"/>
+
+<route id="route5" edges="11-10v 12-10v 13-10v 14-10v 15-10v 16-10v 17-10v 18-10v 19-10v 20-10v 21-10v 22-10v 23-10v 24-10v 25-10v 26-10v 27-10v 28-10v 29-10v"/>
+
+<route id="route6" edges="11-15v 12-15v 13-15v 14-15v 15-15v 16-15v 17-15v 18-15v 19-15v 20-15v 21-15v 22-15v 23-15v 24-15v 25-15v 26-15v 27-15v 28-15v 29-15v"/>
+
+<!-- FLOWS FOR EVERY SOURCE -->
+<flow id="S1" route="route1" type="CarA" depart="1000000" repno="10" period="5"/>
+<flow id="S2" route="route2" type="CarA" depart="1000000" repno="10" period="5"/>
+<flow id="S3" route="route3" type="CarA" depart="1000000" repno="10" period="5"/>
+<flow id="S4" route="route4" type="CarA" depart="1000000" repno="10" period="5"/>
+<flow id="S5" route="route5" type="CarA" depart="1000000" repno="10" period="5"/>
+<flow id="S6" route="route6" type="CarA" depart="1000000" repno="10" period="5"/>
+
+</routes>

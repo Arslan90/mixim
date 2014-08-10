@@ -1,0 +1,4 @@
+<a>
+<e1-detector id="0" lane="B1_0" pos="80" freq="30" friendly_pos="x" file="det.out"/>
+<e1-detector id="1" lane="B0_0" pos="80" freq="30" friendly_pos="x" file="det.out"/>
+</a>

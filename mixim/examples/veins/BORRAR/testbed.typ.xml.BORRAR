@@ -1,0 +1,7 @@
+<types>
+<!-- VELOCITé DEFINIé PAR DEFAUT.. Je pense que la vitesse et donne en km/h
+<type id="a" priority="1" numlanes="4" speed="27.78"/>
+<type id="a" priority="1" numlanes="4" speed="100"/>
+-->
+<type id="a" priority="1" numlanes="4" speed="50"/>
+</types>

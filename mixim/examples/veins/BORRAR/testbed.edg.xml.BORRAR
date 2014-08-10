@@ -1,0 +1,51 @@
+<edges>
+<edge id="A1" from="0" to="1" type="a" />
+<edge id="A1R" from="1" to="0" type="a" />
+<edge id="A2" from="1" to="2" type="a" />
+<edge id="A2R" from="2" to="1" type="a" />
+<edge id="A3" from="2" to="3" type="a" />
+<edge id="A3R" from="3" to="2" type="a" />
+
+<edge id="start" from="4i" to="4" type="a" />
+<edge id="B0" from="4" to="5" type="a" />
+<edge id="B0R" from="5" to="4" type="a" />
+<edge id="B1" from="5" to="6" type="a" />
+<edge id="B1R" from="6" to="5" type="a" />
+<edge id="B2" from="6" to="7" type="a" />
+
+<!-- 
+this is to change the Max-Speed-Allowed sur l'arc with the value by default
+<edge id="B2" from="6" to="7"  />
+-->
+
+<edge id="B2R" from="7" to="6" type="a" />
+<edge id="B3" from="7" to="8" type="a" />
+<edge id="B3R" from="8" to="7" type="a" />
+<edge id="B4" from="8" to="9" type="a" />
+<edge id="B4R" from="9" to="8" type="a" />
+<edge id="end" from="9" to="9i" type="a" />
+
+<edge id="C1" from="10" to="11" type="a" />
+<edge id="C1R" from="11" to="10" type="a" />
+<edge id="C2" from="11" to="12" type="a" />
+<edge id="C2R" from="12" to="11" type="a" />
+<edge id="C3" from="12" to="13" type="a" />
+<edge id="C3R" from="13" to="12" type="a" />
+
+<edge id="D1" from="5" to="10" type="a" />
+<edge id="D1R" from="10" to="5" type="a" />
+<edge id="D2" from="5" to="0" type="a" />
+<edge id="D2R" from="0" to="5" type="a" />
+<edge id="E1" from="6" to="11" type="a" />
+<edge id="E1R" from="11" to="6" type="a" />
+<edge id="E2" from="6" to="1" type="a" />
+<edge id="E2R" from="1" to="6" type="a" />
+<edge id="F1" from="7" to="12" type="a" />
+<edge id="F1R" from="12" to="7" type="a" />
+<edge id="F2" from="7" to="2" type="a" />
+<edge id="F2R" from="2" to="7" type="a" />
+<edge id="G1" from="13" to="8" type="a" />
+<edge id="G1R" from="8" to="13" type="a" />
+<edge id="G2" from="3" to="8" type="a" />
+<edge id="G2R" from="8" to="3" type="a" />
+</edges>

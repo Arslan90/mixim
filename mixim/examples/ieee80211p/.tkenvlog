@@ -1,0 +1,3651 @@
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa1dd178-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa38f040-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95f1810-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa529718-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb0536c0-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa88f910-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9fa4d10-2 "551x340+721+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa55a860-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9724138-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x972a8c0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xacdc608-2 "651x341+625+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0d55b8-2 "651x341+625+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x96506b8-2 "651x341+625+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa2fb798-2 "651x341+621+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9eb3950-2 "651x341+621+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91537e8-2 "651x341+621+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9dbf198-2 "651x341+621+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9500260-2 "651x341+621+96:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae52ef0-2 "651x341+621+120:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x92a7158-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf8c460-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa92e750-2 "651x341+589+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae43760-2 "651x341+593+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9d91028-2 "651x341+597+96:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xad502b8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9e4e230-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa121da8-2 "651x341+609+168:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x98f2d30-2 "651x341+609+168:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6bc088-2 "651x341+613+192:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa7ed750-2 "651x341+617+216:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x979c338-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9449c20-2 "651x341+1901+132:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x957ff90-2 "651x341+1901+156:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa954758-2 "651x341+1901+204:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xafcd2a0-2 "651x341+1901+228:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0db7e8-2 "651x341+1901+276:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9bc27a0-2 "651x341+1901+300:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac4c1c0-2 "651x341+1876+87:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9c78d98-2 "651x341+1880+111:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab77da8-2 "651x341+1884+135:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb0db5f0-2 "651x341+1888+159:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x94e8628-2 "651x341+1892+183:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa719070-2 "651x341+1896+207:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9367280-2 "651x341+1900+231:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6e5658-2 "651x341+1901+255:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x99762c0-2 "651x341+1901+303:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f30ef8-2 "651x341+1901+327:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa612d30-2 "651x341+1901+351:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa93fe08-2 "651x341+1901+375:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91d6e20-2 "651x341+1901+399:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9449f70-2 "651x341+1901+423:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa2851a0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9c3d268-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0675d8-2 "651x341+1814+49:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xacb2800-2 "651x341+1822+97:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5e87b8-2 "651x341+1826+121:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaad07a0-2 "651x341+1830+145:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9657770-2 "651x341+1834+169:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa217788-2 "651x341+1838+193:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab568e0-2 "651x341+1842+217:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9376d08-2 "651x341+1846+241:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac8d868-2 "651x341+1850+265:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f58d40-2 "651x341+1854+289:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91a4798-2 "651x341+1858+313:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9aaa738-2 "651x341+1862+337:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab46d58-2 "651x341+1866+361:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac21a80-2 "651x341+1870+385:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa31f938-2 "651x341+1874+409:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa726578-2 "651x341+1878+433:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9e7d850-2 "651x341+1882+457:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa4942b0-2 "651x341+1886+481:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab631a8-2 "651x341+1890+505:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9246b10-2 "651x341+1894+529:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x93446e8-2 "651x341+1894+529:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9126cd0-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaa2ce30-2 "651x340+8+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9ce35e8-2 "651x340+8+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae13440-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb003650-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5a25c0-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb30c550-2 "651x340+24+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab01590-2 "651x340+28+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa7ef520-2 "651x340+32+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa773998-2 "651x340+36+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95faa88-2 "651x340+36+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9b0f6d8-2 "651x340+36+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x97b5078-2 "651x340+36+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95ce030-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9ea03c8-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x99d6f40-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa24e2d0-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5a2618-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xabb20b0-2 "651x340+20+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9c8afb0-2 "651x340+24+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x92ea418-2 "651x340+28+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa9de618-2 "651x340+32+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9336d90-2 "651x340+36+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95c5798-2 "651x340+44+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9d420d0-2 "651x340+48+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f78c38-2 "651x340+52+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa72bc30-2 "651x340+56+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6efd80-2 "651x340+60+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa8fa880-2 "651x340+64+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa18f870-2 "651x340+68+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9598db8-2 "651x340+72+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa2ef698-2 "651x340+72+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xad2a2e8-2 "651x340+76+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9e08df8-2 """
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa163bf0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf04438-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa27e220-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9faa2b8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xad23320-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0a0978-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9d103e8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa90f838-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac20388-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae60718-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x986d328-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa12e618-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5338f0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9fef088-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb08cd90-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x92e6350-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa71beb0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x953fba0-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6f2958-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x90d98f0-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf6c458-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xafd6a98-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac72be0-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5e2158-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa755a90-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa024ec0-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9711eb8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa696b88-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa160608-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x98bdcc0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91260f8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9ba3538-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9fb62f8-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xab2f940-2 "651x340+8+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa011c88-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa21ee78-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x960d100-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa3a4590-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x917b9d8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa86ac08-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9743188-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb049300-2 "651x340+8+72:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa15e3d8-2 "651x340+12+96:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xafbe820-2 "651x340+12+96:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf613a0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9b4c0f8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa8b7370-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa516958-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0b2d40-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9854188-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9ea31b0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9fabac0-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9418478-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa692198-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9214cc8-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9910d98-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9bf10b0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x98c3b80-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f8fcf0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa240d20-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaade2b0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac38250-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa9aed48-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9e9bee8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xacc4f80-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91ea090-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa179840-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa68cb70-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x96f6870-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x929f000-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x951ec50-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae1e320-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x94233f0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f4fce8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa04a368-2 "651x340+171+415:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x922a1d8-2 "651x340+175+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9873388-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xac862d8-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa3e2720-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x92152b0-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0b92b0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9803410-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9370278-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x957bb60-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x921a310-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaca1c30-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa444388-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9a8e560-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9187bd8-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xad8a1a0-2 "651x340+28+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa94ae88-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaba0038-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaae33f8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9bfa590-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf35158-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae1df90-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa0a81e8-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9772330-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae2f4f8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x93dfba0-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9c33dc8-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9913e40-2 "651x340+12+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaba7f38-2 "651x340+16+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa7d5160-2 "651x340+28+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x924ff18-2 "651x340+28+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa3fa0e8-2 "651x340+625+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9f754c0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9912018-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x952ebc0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa1de028-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6d2850-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9afa268-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa473578-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9d5c190-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa9de170-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x963fb10-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae0c3d8-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xb0091f0-2 "651x340+8+407:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa8f12d0-2 "651x340+4+431:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9b33200-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa177ad8-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9961558-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9a5fd78-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95c8470-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa8fb050-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x92b6258-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9de7448-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaceb380-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa9ee408-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa7482e8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xabc22e0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xae11318-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa5e38e8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9a45578-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9513140-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9746b30-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa6e7a78-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa39d818-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa808300-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x95f0230-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9cacde0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x9ed8fc8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x93d8fc8-2 "651x340+4+48:normal""
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa26c180-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xacf0f48-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf3dec0-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x98b1f28-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf48f98-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa4f6eb8-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa3bf898-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0x91c3f78-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xa360098-2 """
+
+
+----------------------------------------------------------------------
+
+
+Tcl error: modinsp.cc#237: syntax error in expression "-": premature end of expression
+    while executing
+"expr [lindex $bb 2]-[lindex $bb 0]"
+    (procedure "graphmodwin_adjust_windowsize_and_zoom" line 13)
+    invoked from within
+"graphmodwin_adjust_windowsize_and_zoom $w"
+    (procedure "create_graphicalmodwindow" line 104)
+    invoked from within
+"create_graphicalmodwindow .ptr0xaf50d58-2 """
+
+

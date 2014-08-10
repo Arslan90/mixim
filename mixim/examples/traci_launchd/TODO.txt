@@ -1,0 +1,4 @@
+Voci le registre de taches à faire. 
+
+1. 	je un petite problème la variable concantenée de VPAId + numeroSequence. Il ajoute de déchets
+	Donc je dois de remplir avec des spaces tout le tableu.  

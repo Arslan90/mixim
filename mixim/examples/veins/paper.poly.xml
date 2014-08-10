@@ -1,0 +1,8 @@
+<shapes> 
+
+<poi id="0" type="VPA 0" color="1.0,0.0,0.0"  fill="1" layer="-1" x="100" y="100" /> 
+<poi id="1" type="VPA 1" color="1.0,0.0,0.0"  fill="1" layer="-1" x="100" y="300" /> 
+<poi id="2" type="VPA 3" color="1.0,0.0,0.0"  fill="1" layer="-1" x="300" y="300" /> 
+<poi id="3" type="VPA 4" color="1.0,0.0,0.0"  fill="1" layer="-1" x="300" y="100" /> 
+
+</shapes> 

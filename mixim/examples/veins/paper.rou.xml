@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<!-- generated on Thu Oct 27 22:54:17 2011 by SUMO duarouter Version 0.12.0
+<configuration>
+
+    <input>
+        <net-file value="testbed.net.xml"/>
+        <trip-defs value="./trip-files.xml"/>
+    </input>
+
+    <output>
+        <output-file value="./testbed.rou.xml"/>
+    </output>
+
+</configuration>
+
+<routes>
+<vtype id="CarA" accel="3.0" decel="6.0"  length="5.0" maxspeed="50.0" sigma="0.5"/>
+<route id="center" edges="start B0 B1 B2 B3 B4 end"/>
+<flow id="veh" route="center" type="CarA" depart="1" repno="10" period="10"/>
+</routes>
+-->
+
+<routes>
+<vtype id="CarA" accel="3.0" decel="6.0"  length="5.0" maxspeed="50.0" sigma="0.5"/>
+
+<route id="S1" edges="S1 B1 B2 3CR 2CR 1CR SINK"/>
+<route id="S2" edges="S2 A1 A2 4CR 3CR 2CR 1CR SINK"/>
+<route id="S3" edges="S3 4CR 3CR 2CR 1CR SINK"/>
+<route id="S4" edges="S4 A4R A3R 4CR 3CR 2CR 1CR SINK"/>
+<route id="S5" edges="S5 B4R B3R 3CR 2CR 1CR SINK"/>
+
+<flow id="S1" route="S1" type="CarA" depart="1"  period="15"/>
+<flow id="S2" route="S2" type="CarA" depart="1"  period="15"/>
+<flow id="S3" route="S3" type="CarA" depart="1"  period="15"/>
+<flow id="S4" route="S4" type="CarA" depart="1"  period="15"/>
+<flow id="S5" route="S5" type="CarA" depart="1"  period="15"/>
+
+</routes>

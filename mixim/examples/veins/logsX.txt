@@ -1,0 +1,29 @@
+cat results/General-1.elog | grep logs > results/logs-1.txt &
+cat results/General-2.elog | grep logs > results/logs-2.txt &
+cat results/General-3.elog | grep logs > results/logs-3.txt &
+cat results/General-4.elog | grep logs > results/logs-4.txt &
+cat results/General-5.elog | grep logs > results/logs-5.txt &
+
+grep 'rx,' results/logs-1.txt | wc -l
+grep 'rx,' results/logs-2.txt | wc -l
+grep 'rx,' results/logs-3.txt | wc -l
+grep 'rx,' results/logs-4.txt | wc -l
+grep 'rx,' results/logs-5.txt | wc -l
+
+#################
+
+./mobileSimulationRepetitions.pl 1
+./mobileSimulationRepetitions.pl 2
+./mobileSimulationRepetitions.pl 3
+./mobileSimulationRepetitions.pl 4
+./mobileSimulationRepetitions.pl 5
+
+./run -u Cmdenv -f paper80211p.omnetpp.ini -r 1
+tail -f results/logs-1.txt | grep 
+grep rx results/logs-1.txt | wc -l
+
+vi paper80211p.omnetpp.ini  
+ vi ../../src/modules/utility/Consts80211p.h
+
+
+grep 'Nr. 5' results/logs-1.txt  | wc -l

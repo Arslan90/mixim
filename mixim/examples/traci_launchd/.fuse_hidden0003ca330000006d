@@ -1,0 +1,13 @@
+Loading net-file from 'small.net.xml'... 
+ done (763ms).
+Loading done.
+***Starting server on port 9999 ***
+Performance: 
+ Duration: 27163 ms
+ Real time factor: 0
+ UPS: 0.000000
+Vehicles: 
+ Emitted: 0
+ Running: 0
+ Waiting: 0
+

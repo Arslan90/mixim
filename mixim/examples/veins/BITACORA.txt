@@ -1,0 +1,9 @@
+mercredi 28 novembre 2012, 20:46:21 (UTC+0100)
+
+
+Running FALSE FALSE  n COLOGNE con VPA=VEH=1km 
+Vehicles period= 5s
+VPA period= 5s
+Distance junction=20m.
+
+TURNED OFF vehiclesVideo  to accelerate the simulation.

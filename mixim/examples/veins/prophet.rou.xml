@@ -1,0 +1,30 @@
+<routes>
+<vtype id="CarA" accel="3.0" decel="6.0"  length="5.0" maxspeed="50.0" sigma="0.5"/>
+<vtype id="CarB" accel="2.0" decel="6.0"  length="7.5" maxspeed="50.0" sigma="0.5"/>
+<vtype id="CarC" accel="1.0" decel="5.0"  length="5.0" maxspeed="40.0" sigma="0.5"/>
+<vtype id="CarD" accel="1.0" decel="5.0"  length="7.5" maxspeed="30.0" sigma="0.5"/>
+
+
+<route id="center" edges="start B0 B1 B2 B3 B4 end"/>
+<route id="centerbackwards" edges="B4R B3R B2R B1R D2 A1"/>
+<route id="vertical" edges="F1R F2 A3"/>
+
+<!--
+<route id="upper"  edges="start B0 D2 A1 A2 A3 G2 B4 end"/>
+<route id="bottom"  edges="start B0 D1 C1 C2 C3 G1 B4 end"/>
+-->
+
+<!--
+  <vehicle depart="1" id="1" route="upper" type="CarA" color="1,0,0" />
+  <vehicle depart="1" id="2" route="bottom" type="CarA" color="1,0,0" />
+  <vehicle depart="1" id="0" route="center" type="CarD" color="0,1,0" />
+
+-->
+
+<flow id="veh" route="center" type="CarA" depart="1000000" repno="10" period="20"/>
+<flow id="vehBack" route="centerbackwards" type="CarA" depart="1000000" repno="10" period="25"/>
+<flow id="vehVert" route="vertical" type="CarA" depart="1000000" repno="10" period="15"/>
+<!--flow id="vehBack" route="centerbackwards" type="CarA" depart="1000000" repno="10" period="7"/-->
+<!--flow id="vehVert" route="vertical" type="CarA" depart="1000000" repno="10" period="10"/-->
+
+</routes>

@@ -1,0 +1,11 @@
+<trips> 
+<!-- Routes From left to right -->
+ <trip id="route1" depart="1" from="11-5" to="29-15"/>
+ <trip id="route2" depart="1" from="11-10" to="29-10"/>
+ <trip id="route3" depart="1" from="11-15" to="29-5"/>
+
+<!-- Routes From right left -->
+ <trip id="route4" depart="1" from="11-5v" to="29-5v"/>
+ <trip id="route5" depart="1" from="11-10v" to="29-10v"/>
+ <trip id="route6" depart="1" from="11-15v" to="29-15v"/>
+</trips>

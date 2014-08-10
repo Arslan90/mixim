@@ -1,0 +1,3 @@
+/home/arturo/SIM-TOOLS/sumo-0.13.1/bin/netconvert -e small.edg.xml -n small.nod.xml -t small.typ.xml -o small.net.xml
+
+#/home/arturo/SIM-TOOLS/sumo-0.13.1/bin/duarouter -n small.net.xml  -t tripinfo.xml  -o small.rou.txt

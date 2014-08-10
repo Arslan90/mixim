@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<!-- generated on Sat 24 Mar 2012 08:03:50 PM CET by SUMO gui Version 0.13.1
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/sumo-gui.exeConfiguration.xsd">
+
+    <input>
+        <net-file value="small.net.xml"/>
+        <route-files value="small.rou.xml"/>
+    </input>
+
+    <output>
+        <summary-output value="SUMO.emissions.txt"/>
+        <tripinfo-output value="SUMO.tripinfo.txt"/>
+        <vehroute-output value="SUMO.vehroute.txt"/>
+        <vehroute-output.exit-times value="true"/>
+    </output>
+
+    <time>
+        <begin value="0"/>
+        <end value="1000"/>
+        <step-length value="0.5"/>
+    </time>
+
+    <traci_server>
+        <remote-port value="9999"/>
+    </traci_server>
+
+</configuration>
