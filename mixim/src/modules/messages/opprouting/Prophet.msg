@@ -22,7 +22,7 @@ cplusplus {{
 #include "Prophet_Struct.h"
 //typedef Prophet_Struct::preds preds;
 typedef std::map<LAddress::L3Type, double> predictions;
-typedef std::vector<Prophet_Struct::bndl_meta> bndlMeta;
+typedef std::list<Prophet_Struct::bndl_meta> bndlMeta;
 }}
 packet NetwPkt;
 
@@ -40,5 +40,5 @@ packet Prophet extends NetwPkt {
     int tlv_Flags;
     predictions preds = std::map<LAddress::L3Type, double>();
 //    preds predictions = std::map<LAddress::L3Type, double>();
-    bndlMeta bndlInfo = std::vector<Prophet_Struct::bndl_meta>();
+    bndlMeta bndlmeta = std::list<Prophet_Struct::bndl_meta>();
 }

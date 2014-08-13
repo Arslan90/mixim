@@ -26,6 +26,7 @@
 #include <list>
 #include <iterator>
 #include <math.h>
+#include <algorithm>
 
 #include "BaseNetwLayer.h"
 #include "WaveShortMessage_m.h"
@@ -71,6 +72,11 @@ protected:
 		QUEUING_SHLI,
 		QUEUING_LEPR,
 	};
+
+	struct fwdGRTRmaxComparator {
+	  bool operator() (std::pair<LAddress::L3Type, double> i,std::pair<LAddress::L3Type, double> j)
+	  { return (i.second>j.second);}
+	} fwdGRTRmax_CompObject;
 
 private:
 	/** delivery predictability initialization constant*/
@@ -126,7 +132,7 @@ private:
 	void ageDeliveryPreds();
 
 	/** Function for updating & exchanging probabilities*/
-	void update();
+	void update(Prophet *prophetPkt);
 
 //	/** Function to verify if the transmission will not fail*/
 //	void canITransmit();
@@ -137,7 +143,11 @@ private:
 
 	void executeListenerRole(short  kind, Prophet *prophetPkt = NULL);
 
+	void definingBundleOffer(Prophet *prophetPkt);
+
 	bool existingBundle(WaveShortMessage *msg);
+
+//	bool fwd_GRTRmax_sortingFunc(std::pair<LAddress::L3Type, double> firstPair, std::pair<LAddress::L3Type, double> secondPair);
 
 	void storeBundle(WaveShortMessage *msg);
 
