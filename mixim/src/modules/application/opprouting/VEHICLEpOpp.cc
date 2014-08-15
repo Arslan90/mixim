@@ -442,7 +442,8 @@ void VEHICLEpOpp::sendMessage() {
 
 	//Sending message
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
-	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
+//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
+	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,intrand(INT32_MAX)));
 
 }
 

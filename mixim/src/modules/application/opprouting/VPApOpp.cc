@@ -101,7 +101,8 @@ void VPApOpp::sendVPApBroadcast(int messageSequence) {
 	//Interesting! when using the SCH instead the CCH I got worst TX/RX performance.
 	//Anyway I do not have time to check it out. I'll stay tuned with CCH.
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
-	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,2));
+//	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,2));
+	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,intrand(INT32_MAX)));
 	//sendWSM(prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1));
 
 	//EV << "logs,tx,"<< simTime() <<",Sending VPA broadcast packet!" <<","<< endl;
