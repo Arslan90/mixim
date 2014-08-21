@@ -505,81 +505,81 @@ void VEHICLEpOpp::entra(int droppedMac80211p, int currentCW, int myNicId) {
 
 //Read the nic/files.txt in order to retrieve the node information and update internal messages.
 void VEHICLEpOpp::readNicFiles() {
- // Ok, Here the objective is to obtain an average per second of the dropped messages and current CW.
- // I've to open the corresponding file, retrieve the information and maintain an average
- // dropped packets every second.
- // First define the file named with the MacID. Is always the next number of myId.
- // Next read the file and update my average file.
+	// Ok, Here the objective is to obtain an average per second of the dropped messages and current CW.
+	// I've to open the corresponding file, retrieve the information and maintain an average
+	// dropped packets every second.
+	// First define the file named with the MacID. Is always the next number of myId.
+	// Next read the file and update my average file.
 
-//Retrieve nic/file.txt based on the NicId.
-//EV << " items:"<< myApplAddr() <<", TIME= "<< simTime() <<endl;
+	//Retrieve nic/file.txt based on the NicId.
+	//EV << " items:"<< myApplAddr() <<", TIME= "<< simTime() <<endl;
 
-int myFile= myId + 2;//I noticed that myId is 2 numbers behind of the NicId. Based in this remark I can identify the file.
-std::stringstream sstm;
-sstm << "nic/" << myFile << ".txt"; //concatenate.
-std::string result = sstm.str();//pass from sstm to string
-EV << "File items:"<< myApplAddr() << ",file," << result <<endl;
-const char* fileNameConst= result.c_str(); //convert from string to const char*
-std::ifstream readFile(fileNameConst); //finally target my file.
+	int myFile= myId + 2;//I noticed that myId is 2 numbers behind of the NicId. Based in this remark I can identify the file.
+	std::stringstream sstm;
+	sstm << "nic/" << myFile << ".txt"; //concatenate.
+	std::string result = sstm.str();//pass from sstm to string
+	EV << "File items:"<< myApplAddr() << ",file," << result <<endl;
+	const char* fileNameConst= result.c_str(); //convert from string to const char*
+	std::ifstream readFile(fileNameConst); //finally target my file.
 
-//read all the file by line.
-std::string line;
-if (readFile.is_open())
-  {
-    while ( readFile.good() )
-    {
-      getline(readFile,line);
-      //EV <<"printing file: "<<":" << line << endl;
-    }
-    readFile.close();
-  }
-  else EV << "File items: Unable to open file: "<< fileNameConst <<endl;
+	//read all the file by line.
+	std::string line;
+	if (readFile.is_open())
+	{
+		while ( readFile.good() )
+		{
+			getline(readFile,line);
+			//EV <<"printing file: "<<":" << line << endl;
+		}
+		readFile.close();
+	}
+	else EV << "File items: Unable to open file: "<< fileNameConst <<endl;
 
-  readFile.close();
+	readFile.close();
 
-  //HERE: Splitting data, Damn it's so long the string handling with C++.
-    std::string item[4];//create an array to deposit the strings.
-    std::istringstream iss(line);
-    int i=0;//just a counter.
-    std::string sub;
-    do
-    {
-        iss >> sub; //do the split
-        //EV << "Substring: " << sub <<endl;
-        item[i]= sub;
-        i++;
-    } while (iss);
+	//HERE: Splitting data, Damn it's so long the string handling with C++.
+	std::string item[4];//create an array to deposit the strings.
+	std::istringstream iss(line);
+	int i=0;//just a counter.
+	std::string sub;
+	do
+	{
+		iss >> sub; //do the split
+		//EV << "Substring: " << sub <<endl;
+		item[i]= sub;
+		i++;
+	} while (iss);
 
-    //Finally the retrieved data from the files.
-    //sample: 20.005281054597:3:7:
-    //EV << "Final items: " << item[0] <<":"<<  item[1]<< ":"<< item[2] <<":" <<endl;
-    double mac80211psimTimer= strtod(item[0].c_str(), NULL); //string to double
-    int mac80211pDrops= atoi(item[1].c_str()); //string to int
-    int mac80211pCW= atoi(item[2].c_str()); //string to int
-    EV << "File items:"<< myApplAddr() <<","<< mac80211psimTimer <<":"<<  mac80211pDrops << ":"<< mac80211pCW <<":" <<endl;
+	//Finally the retrieved data from the files.
+	//sample: 20.005281054597:3:7:
+	//EV << "Final items: " << item[0] <<":"<<  item[1]<< ":"<< item[2] <<":" <<endl;
+	double mac80211psimTimer= strtod(item[0].c_str(), NULL); //string to double
+	int mac80211pDrops= atoi(item[1].c_str()); //string to int
+	int mac80211pCW= atoi(item[2].c_str()); //string to int
+	EV << "File items:"<< myApplAddr() <<","<< mac80211psimTimer <<":"<<  mac80211pDrops << ":"<< mac80211pCW <<":" <<endl;
 
-    //NOW: here I define the dropped messages in the last second
-    // This will contain dropped messages in the last second.
-    // In case no dropped messages in the last second I use 0
+	//NOW: here I define the dropped messages in the last second
+	// This will contain dropped messages in the last second.
+	// In case no dropped messages in the last second I use 0
 
-    //Check if there is update of dropped message 1 second ago.
-    EV << "Current items:" << myApplAddr() <<",droppedMessages," << droppedMessages <<",currentCW,"<< currentCW <<endl; //<<",counterDroppedMessages,"<<  counterDroppedMessages <<endl;
+	//Check if there is update of dropped message 1 second ago.
+	EV << "Current items:" << myApplAddr() <<",droppedMessages," << droppedMessages <<",currentCW,"<< currentCW <<endl; //<<",counterDroppedMessages,"<<  counterDroppedMessages <<endl;
 
-    if ( (simTime() - mac80211psimTimer) <= 6 ) {
-    	//EV << "operation items:" << myApplAddr() <<","<< mac80211pDrops<< "-"<<  counterDroppedMessages<<endl;
-    	droppedMessages= mac80211pDrops;// - counterDroppedMessages;//number of dropped messages in the last second.
-    	//counterDroppedMessages= mac80211pDrops;//update my own counter
-    }
-    else
-    {
-    	droppedMessages= 0; //if not updates in the last second, I set my droopped messages = 0
-    }
+	if ( (simTime() - mac80211psimTimer) <= 6 ) {
+		//EV << "operation items:" << myApplAddr() <<","<< mac80211pDrops<< "-"<<  counterDroppedMessages<<endl;
+		droppedMessages= mac80211pDrops;// - counterDroppedMessages;//number of dropped messages in the last second.
+		//counterDroppedMessages= mac80211pDrops;//update my own counter
+	}
+	else
+	{
+		droppedMessages= 0; //if not updates in the last second, I set my droopped messages = 0
+	}
 
-    //if (mac80211pCW){ currentCW= mac80211pCW; }  else  {	currentCW= CWMIN_11P/2;    }
-    currentCW= CWMIN_11P/2;
+	//if (mac80211pCW){ currentCW= mac80211pCW; }  else  {	currentCW= CWMIN_11P/2;    }
+	currentCW= CWMIN_11P/2;
 
-    EV << "Updated items:" << myApplAddr() <<",droppedMessages," << droppedMessages <<",currentCW,"<< currentCW <<endl;// <<",counterDroppedMessages,"<<  counterDroppedMessages <<endl;
- }
+	EV << "Updated items:" << myApplAddr() <<",droppedMessages," << droppedMessages <<",currentCW,"<< currentCW <<endl;// <<",counterDroppedMessages,"<<  counterDroppedMessages <<endl;
+}
 
 
 

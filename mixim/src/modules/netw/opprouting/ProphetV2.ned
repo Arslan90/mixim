@@ -33,4 +33,5 @@ simple ProphetV2 extends BaseNetwLayer
     	int secondsInTimeUnit =default(30);
     	int fwdStrategy =default(7);
     	int qStrategy = default(1);
+    	int storageSize = default(100);
 }

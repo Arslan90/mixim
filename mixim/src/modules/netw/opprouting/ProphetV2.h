@@ -42,10 +42,43 @@
 //#include "../../utility/opprouting/Prophet_Enum.h"
 //#include "../../messages/opprouting/Prophet_m.h"
 
-typedef std::map<LAddress::L3Type, double>::iterator map_it;
-typedef std::multimap<LAddress::L3Type, WaveShortMessage*>::iterator multimap_it;
+typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
+
+typedef std::map<int ,WaveShortMessage*> innerIndexMap;
+typedef std::map<int ,WaveShortMessage*>::iterator innerIndexIterator;
+
+typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
 
 class ProphetV2: public BaseNetwLayer {
+/*******************************************************************
+**
+** 							Variables section
+**
+********************************************************************/
+public:
+	/**
+	 * @brief The message kinds used by PRoPHETv2 as implemented.
+	 * Defined as described in RFC 6693,
+	 * the only difference is the Bundle Enum that is not defined in RFC
+	 * it value is taken from Experimental values (bounded between 0xD0 & 0xFF)
+	 */
+	enum Prophetv2MessageKinds {
+		HELLO = 0x00,
+		ERROR = 0x01,
+		RIBD  = 0xA0,
+		RIB   = 0xA1,
+		Bundle_Offer = 0xA4,
+		Bundle_Response = 0xA5,
+		Bundle = 0xFF,
+	};
+	/**
+	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
+	 */
+	enum prophetNetwControlKinds {
+		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
+		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
+		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
+	};
 protected:
 
 	/**
@@ -73,6 +106,9 @@ protected:
 		QUEUING_LEPR,
 	};
 
+	/**
+	 * Comparator used to sort Bundles_Offer when using @FWD_GRTRmax forward strategy
+	 */
 	struct fwdGRTRmaxComparator {
 	  bool operator() (std::pair<LAddress::L3Type, double> i,std::pair<LAddress::L3Type, double> j)
 	  { return (i.second>j.second);}
@@ -108,6 +144,9 @@ private:
 	/** last delivery predictability update (sim)time */
 	double lastAgeUpdate;
 
+	/** Size of the WMS Storage structure */
+	int bundlesStructureSize;
+
 	/** Fifo structure for WMS Storage*/
 	std::list<WaveShortMessage*> bundles;
 
@@ -116,11 +155,16 @@ private:
 	 * This structure simplify the search of WSMessage destinated
 	 * to a specific node
 	 * */
-	std::multimap<LAddress::L3Type, WaveShortMessage*> mapsForBundles;
+	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
 
 	/** Boolean to verify if the transmission will not fail*/
 	bool canITransmit;
-
+/*******************************************************************
+**
+** 							Methods section
+**
+********************************************************************/
+private:
 	/** Function for calculating P(A,B)*/
 	void updateDeliveryPredsFor(const LAddress::L3Type BAdress);
 
@@ -146,6 +190,8 @@ private:
 	void definingBundleOffer(Prophet *prophetPkt);
 
 	bool existingBundle(WaveShortMessage *msg);
+
+	bool existingBundle(Prophet_Struct::bndl_meta bndlMeta);
 
 //	bool fwd_GRTRmax_sortingFunc(std::pair<LAddress::L3Type, double> firstPair, std::pair<LAddress::L3Type, double> secondPair);
 
@@ -177,32 +223,10 @@ private:
 //
 //	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
 public:
-	/**
-	 * @brief The message kinds used by PRoPHETv2 as implemented.
-	 * Defined as described in RFC 6693,
-	 * the only difference is the Bundle Enum that is not defined in RFC
-	 * it value is taken from Experimental values (bounded between 0xD0 & 0xFF)
-	 */
-	enum Prophetv2MessageKinds {
-		HELLO = 0x00,
-		ERROR = 0x01,
-		RIBD  = 0xA0,
-		RIB   = 0xA1,
-		Bundle_Offer = 0xA4,
-		Bundle_Response = 0xA5,
-		Bundle = 0xFF,
-	};
-	/**
-	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
-	 */
-	enum prophetNetwControlKinds {
-		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
-		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
-		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
-	};
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();
+
 };
 
 #endif /* PROPHETV2_H_ */

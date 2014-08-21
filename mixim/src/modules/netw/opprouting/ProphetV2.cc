@@ -23,25 +23,39 @@ void ProphetV2::initialize(int stage)
 {
 	BaseNetwLayer::initialize(stage);
 	if (stage==0){
+		/*
+		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
+		 */
+//		myNetwAddr = LAddress::L3Type( getId() );
+
+		/*
+		 * Initialization of ProphetV2 parameters
+		 */
 		PEncMax = par("PEncMax").doubleValue();
 		I_TYP = par("I_TYP").doubleValue();
 		Beta = par("Beta").doubleValue();
 		GAMMA = par("GAMMA").doubleValue();
 		secondsInTimeUnit = par("secondsInTimeUnit");
+		/*
+		 * Initialization of the forward strategy &
+		 * the queuing strategy
+		 */
 		int fwd = par("fwdStrategy");
 		fwdStrategy = static_cast<t_prophet_forward>(fwd);
 		int q = par("qStrategy");
 		qStrategy = static_cast<t_prophet_queuing>(q);
 		/*
-		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
+		 * Initialization of the used structures
 		 */
-//		myNetwAddr = LAddress::L3Type( getId() );
 		lastAgeUpdate = 0;
+
 		preds = std::map<LAddress::L3Type,double>();
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
+
 		lastEncouterTime = std::map<LAddress::L3Type,double>();
+
+		bundlesStructureSize = par("storageSize");
 		bundles = std::list<WaveShortMessage*>();
-		mapsForBundles = std::multimap<LAddress::L3Type,WaveShortMessage*>();
 	}
 }
 void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
@@ -52,8 +66,8 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 	 */
 	ageDeliveryPreds();
 	double encTime = simTime().dbl();
-	map_it it= preds.find(BAdress);
-	map_it it2= lastEncouterTime.find(BAdress);
+	predsIterator it= preds.find(BAdress);
+	predsIterator it2= lastEncouterTime.find(BAdress);
 	if (it==preds.end()){
 		/*
 		 * if iterator is equal map.end(), it means that there is no entry for BAdress in preds
@@ -98,12 +112,12 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 
 	double predsForB,predsForC,BpredsForC;
 	LAddress::L3Type CAdress;
-	map_it tmp_it;
+	predsIterator tmp_it;
 	/*
 	 * before calculating transitive predictions, we must age preds.
 	 */
 	ageDeliveryPreds();
-	for (map_it it=Bpreds.begin(); it!=Bpreds.end();it++){
+	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
 		if (it->first==myNetwAddr)
 			continue;
 
@@ -131,7 +145,7 @@ void ProphetV2::ageDeliveryPreds()
 		return;
 	}else {
 		double mult = std::pow(GAMMA, timeDiff);
-		for (map_it it=preds.begin();it!=preds.end();it++){
+		for (predsIterator it=preds.begin();it!=preds.end();it++){
 			it->second = it->second * mult;
 		}
 		lastAgeUpdate = simTime().dbl();
@@ -186,7 +200,7 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 	if(cInfo == NULL){
 	EV << "warning: Application layer did not specifiy a destination L3 address\n"
 	   << "\tusing broadcast address instead\n";
-	netwAddr = LAddress::L3BROADCAST;
+		netwAddr = LAddress::L3BROADCAST;
 	} else {
 	coreEV <<"CInfo removed, netw addr="<< NetwControlInfo::getAddressFromControlInfo( cInfo ) << std::endl;
 		netwAddr = NetwControlInfo::getAddressFromControlInfo( cInfo );
@@ -230,23 +244,40 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 			break;
 		case RIB:
 			{
-				Prophet *proPkt = check_and_cast<Prophet *>(netwpckt);
-				executeListenerRole(RIB,proPkt);
+				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+				// first step : updating preds
+				executeListenerRole(RIB,prophetPkt);
+				// second step : starting of Bundle_Offer phase
+				executeListenerRole(Bundle_Offer,prophetPkt);
 			}
 			break;
 		case Bundle_Offer:
+			{
+				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+				executeInitiatorRole(Bundle_Offer,prophetPkt);
+				executeInitiatorRole(Bundle_Response,prophetPkt);
+			}
 			break;
 		case Bundle_Response:
+			{
+				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+				executeListenerRole(Bundle_Response,prophetPkt);
+				executeListenerRole(Bundle,prophetPkt);
+			}
 			break;
 		case Bundle:
+			{
+				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+				executeInitiatorRole(Bundle,prophetPkt);
+			}
 			break;
 		default:
-			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
-			WaveShortMessage *wsm = tmp->dup();
-			if (LAddress::isL3Broadcast(m->getDestAddr())){
-				storeBundle(wsm);
-			}
-			sendUp(netwpckt);
+//			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
+//			WaveShortMessage *wsm = tmp->dup();
+//			if (LAddress::isL3Broadcast(m->getDestAddr())){
+//				storeBundle(wsm);
+//			}
+//			sendUp(netwpckt);
 			break;
 	}
 //    if (netwpckt->getKind()==RIB){
@@ -340,15 +371,10 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 //	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
 //}
 
-void ProphetV2::finish()
-{
-
-}
-
 void ProphetV2::resumeConnection()
 {
 	if (canITransmit){
-		Prophet *msg = new Prophet("test",RIB);
+		Prophet *msg = new Prophet("RIB Prophet",RIB);
 		msg->setBitLength(headerLength);
 		msg->setSrcAddr(myNetwAddr);
 		msg->setDestAddr(LAddress::L3BROADCAST);
@@ -367,10 +393,65 @@ void ProphetV2::resumeConnection()
 
 void ProphetV2::storeBundle(WaveShortMessage *msg)
 {
-	if ((mapsForBundles.count(msg->getRecipientAddress())==0)||(!existingBundle(msg))){
-			bundles.push_back(msg);
-			mapsForBundles.insert(std::pair<LAddress::L3Type, WaveShortMessage*>(msg->getRecipientAddress(),msg));
+		// step 1 : check if the bundle is already stored
+	if (!existingBundle(msg)){
+
+		// step 2 : add the bundle to stored bundles
+		switch (qStrategy) {
+//		QUEUING_FIFO=1,
+//		QUEUING_MOFO,
+//		QUEUING_MOPR,
+//		QUEUING_LinearMOPR,
+//		QUEUING_SHLI,
+//		QUEUING_LEPR,
+			case QUEUING_FIFO:
+			{
+				if (bundles.size()==bundlesStructureSize){
+					bundles.pop_front();
+				}else if (bundles.size()>bundlesStructureSize){
+					opp_error("bundles storage structure exceed its maximum size");
+				}
+			}
+				break;
+			case QUEUING_MOFO:
+				opp_error("QUEUING Strategy not supported yet");
+				break;
+			case QUEUING_MOPR:
+				opp_error("QUEUING Strategy not supported yet");
+				break;
+			case QUEUING_LinearMOPR:
+				opp_error("QUEUING Strategy not supported yet");
+				break;
+			case QUEUING_SHLI:
+				opp_error("QUEUING Strategy not supported yet");
+				break;
+			case QUEUING_LEPR:
+				opp_error("QUEUING Strategy not supported yet");
+				break;
+		}
+		bundles.push_back(msg);
+
+		// step 3 : adding this bundle to index
+		if (bundlesIndex.count(msg->getRecipientAddress())==0){
+			// no entry for msg->getRecipientAddress())
+			std::map <int, WaveShortMessage*> inner_map;
+			inner_map.insert(std::pair<int,WaveShortMessage*>(msg->getSerial(),msg));
+			bundlesIndex.insert(std::pair<LAddress::L3Type, innerIndexMap >(msg->getRecipientAddress(),inner_map));
+		}else {
+			/*
+			 * there is a current entry for this address,
+			 * we have to add this message to the existing entry
+			 */
+			bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
+			it->second.insert(std::pair<int,WaveShortMessage*>(msg->getSerial(),msg));
+		}
 	}
+//	if ((bundlesIndex.count(msg->getRecipientAddress())==0)||(!existingBundle(msg))){
+//			bundles.push_back(msg);
+//			std::map <int, WaveShortMessage*> inner_map;
+//			inner_map.insert(std::pair<int,WaveShortMessage*>(msg->getSerial(),msg));
+//			bundlesIndex.insert(std::pair<LAddress::L3Type, innerIndexMap >(msg->getRecipientAddress(),inner_map));
+//	}
 }
 
 void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
@@ -393,16 +474,53 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
 			tmp.insert(preds.begin(),preds.end());
 			ribPkt->setPreds(tmp);
-			sendDown(ribPkt);
-
+//			sendDown(ribPkt);
+//			uniform(0.001,1);
+			sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
 		}
 			break;
 		case Bundle_Offer:
-			executeInitiatorRole(Bundle_Response,prophetPkt);
+			/*
+			 * nothing to do for now
+			 */
 			break;
 		case Bundle_Response:
+		{
+			std::list<Prophet_Struct::bndl_meta> bundleToAcceptMeta;
+			bundleToAcceptMeta = prophetPkt->getBndlmeta();
+			
+			/*
+			 * step one : check if offered bundles are already stored in this node, 
+			 * in that case delete them from the offered list 
+			 */ 
+			for (std::list<Prophet_Struct::bndl_meta>::iterator it = bundleToAcceptMeta.begin(); it !=bundleToAcceptMeta.end(); ++it) {
+				if (existingBundle(*it)){
+					it = bundleToAcceptMeta.erase(it);
+				}
+			}
+			
+			/*
+			 * second step : sending the response
+			 */
+			
+			Prophet *responsePkt = new Prophet();
+			responsePkt->setBitLength(headerLength);
+			responsePkt->setKind(Bundle_Response);
+			responsePkt->setSrcAddr(myNetwAddr);
+			responsePkt->setDestAddr(prophetPkt->getSrcAddr());
+			responsePkt->setBndlmeta(bundleToAcceptMeta);
+			sendDown(responsePkt);
+		}
 			break;
 		case Bundle:
+		{
+			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+			WaveShortMessage *wsm = tmp->dup();
+			storeBundle(wsm);
+			if ((tmp->getRecipientAddress()==LAddress::L3BROADCAST)||(tmp->getRecipientAddress()==myNetwAddr)){
+				sendUp(prophetPkt);
+			}
+		}
 			break;
 		default:
 			assert(false);
@@ -421,10 +539,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 			break;
 		case RIB:
 		{
-			// first step : updating preds
 			update(prophetPkt);
-			// second step : starting of Bundle_Offer phase
-			executeListenerRole(Bundle_Offer,prophetPkt);
 		}
 			break;
 		case Bundle_Offer:
@@ -433,12 +548,33 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 		}
 			break;
 		case Bundle_Response:
-		{
-
-		}
+			/*
+			 * nothing to do for now
+			 */
 			break;
 		case Bundle:
-			break;
+		{
+			std::list<Prophet_Struct::bndl_meta> bundleToSendMeta;
+			bundleToSendMeta = prophetPkt->getBndlmeta();
+			for (std::list<Prophet_Struct::bndl_meta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
+				bundlesIndexIterator it2 = bundlesIndex.find(it->recipientAddress);
+				if (it2!=bundlesIndex.end()){
+					innerIndexIterator it3 = it2->second.find(it->serial);
+					if (it3!=it2->second.end()){
+						Prophet *bundlePkt = new Prophet();
+						bundlePkt->setBitLength(headerLength);
+						bundlePkt->setKind(Bundle);
+						bundlePkt->setSrcAddr(myNetwAddr);
+						bundlePkt->setDestAddr(prophetPkt->getSrcAddr());
+						bundlePkt->encapsulate((it3->second)->dup());
+						if (canITransmit){
+							sendDown(bundlePkt);
+						}
+					}
+				}
+			}
+		}
+					break;
 		default:
 			assert(false);
 		break;
@@ -455,22 +591,38 @@ void ProphetV2::definingBundleOffer(Prophet *prophetPkt)
 
 	// first step : check if we have any bundle that are addressed to @encouterdNode
 
-	std::pair <multimap_it, multimap_it> ret;
-	ret = mapsForBundles.equal_range(encounterdNode);
-	for (multimap_it it=ret.first; it!=ret.second; ++it){
-		bundleToOffer.push_back(it->second);
-		Prophet_Struct::bndl_meta meta;
-		meta.senderAddress = it->second->getSenderAddress();
-		meta.recipientAddress = it->second->getRecipientAddress();
-		meta.serial = it->second->getSerial();
-		meta.timestamp = it->second->getTimestamp();
-		meta.bFlags = Prophet_Enum::Bndl_Accepted;
-		bundleToOfferMeta.push_back(meta);
+	bundlesIndexIterator it = bundlesIndex.find(encounterdNode);
+	if (it != bundlesIndex.end()){
+		innerIndexMap innerMap(it->second);
+		innerIndexIterator it2;
+		for (it2 = innerMap.begin(); it2 !=innerMap.end(); ++it2){
+			bundleToOffer.push_back(it2->second);
+			Prophet_Struct::bndl_meta meta;
+			meta.senderAddress = it2->second->getSenderAddress();
+			meta.recipientAddress = it2->second->getRecipientAddress();
+			meta.serial = it2->second->getSerial();
+			meta.timestamp = it2->second->getTimestamp();
+			meta.bFlags = Prophet_Enum::Bndl_Accepted;
+			bundleToOfferMeta.push_back(meta);
+		}
 	}
 
+//	std::pair <bundleIndexIterator, bundleIndexIterator> ret;
+//	ret = bundlesIndex.equal_range(encounterdNode);
+//	for (bundleIndexIterator it=ret.first; it!=ret.second; ++it){
+//		bundleToOffer.push_back(it->second);
+//		Prophet_Struct::bndl_meta meta;
+//		meta.senderAddress = it->second->getSenderAddress();
+//		meta.recipientAddress = it->second->getRecipientAddress();
+//		meta.serial = it->second->getSerial();
+//		meta.timestamp = it->second->getTimestamp();
+//		meta.bFlags = Prophet_Enum::Bndl_Accepted;
+//		bundleToOfferMeta.push_back(meta);
+//	}
+
 	// second step : check if we have any bundle that can be offered to @encouterdNode
-	map_it itCurrentNode;
-	for (map_it itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
+	predsIterator itCurrentNode;
+	for (predsIterator itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
 		itCurrentNode = preds.find(itEncouterdNode->first);
 		if (itCurrentNode != preds.end()){
 			// the current node have a prediction for @it->first 
@@ -519,17 +671,33 @@ void ProphetV2::definingBundleOffer(Prophet *prophetPkt)
 
 
 	for (std::vector<std::pair<LAddress::L3Type, double> >::iterator it= sortedPreds.begin(); it != sortedPreds.end(); ++it){
-		ret = mapsForBundles.equal_range(it->first);
-		for (multimap_it it2=ret.first; it2!=ret.second; ++it2){
-				bundleToOffer.push_back(it2->second);
-				Prophet_Struct::bndl_meta meta;
-				meta.senderAddress = it2->second->getSenderAddress();
-				meta.recipientAddress = it2->second->getRecipientAddress();
-				meta.serial = it2->second->getSerial();
-				meta.timestamp = it2->second->getTimestamp();
-				meta.bFlags = Prophet_Enum::Bndl_Accepted;
-				bundleToOfferMeta.push_back(meta);
-		}
+//		ret = bundlesIndex.equal_range(it->first);
+//		for (bundleIndexIterator it2=ret.first; it2!=ret.second; ++it2){
+//				bundleToOffer.push_back(it2->second);
+//				Prophet_Struct::bndl_meta meta;
+//				meta.senderAddress = it2->second->getSenderAddress();
+//				meta.recipientAddress = it2->second->getRecipientAddress();
+//				meta.serial = it2->second->getSerial();
+//				meta.timestamp = it2->second->getTimestamp();
+//				meta.bFlags = Prophet_Enum::Bndl_Accepted;
+//				bundleToOfferMeta.push_back(meta);
+//		}
+//
+		bundlesIndexIterator it2 = bundlesIndex.find(it->first);
+			if (it2 != bundlesIndex.end()){
+				innerIndexMap innerMap(it2->second);
+				innerIndexIterator it3;
+				for (it3 = innerMap.begin(); it3 !=innerMap.end(); ++it3){
+					bundleToOffer.push_back(it3->second);
+					Prophet_Struct::bndl_meta meta;
+					meta.senderAddress = it3->second->getSenderAddress();
+					meta.recipientAddress = it3->second->getRecipientAddress();
+					meta.serial = it3->second->getSerial();
+					meta.timestamp = it3->second->getTimestamp();
+					meta.bFlags = Prophet_Enum::Bndl_Accepted;
+					bundleToOfferMeta.push_back(meta);
+				}
+			}
 	}
 
 	//third step : sending the ProphetPckt
@@ -543,29 +711,54 @@ void ProphetV2::definingBundleOffer(Prophet *prophetPkt)
 	sendDown(offerPkt);
 }
 
+
+
 //bool ProphetV2::fwd_GRTRmax_sortingFunc(std::pair<LAddress::L3Type,double> firstPair, std::pair<LAddress::L3Type,double> secondPair)
 //{
 //	return firstPair.second >secondPair.second;
 //}
 
-ProphetV2::~ProphetV2()
-{
-}
-
-
-
-
 bool ProphetV2::existingBundle(WaveShortMessage *msg)
 {
 	bool exist = false;
-	std::pair<multimap_it, multimap_it> iterpair = mapsForBundles.equal_range(msg->getRecipientAddress());
-	for (multimap_it it = iterpair.first; it != iterpair.second; ++it){
-		if (it->second == msg){
+	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
+	if (it != bundlesIndex.end()){
+		innerIndexMap innerMap(it->second);
+		innerIndexIterator it2 = innerMap.find(msg->getSerial());
+		if (it2 !=innerMap.end()){
 			exist = true;
-			break;
+		}
+	}
+//	std::pair<bundleIndexIterator, bundleIndexIterator> iterpair = bundlesIndex.equal_range(msg->getRecipientAddress());
+//	for (bundleIndexIterator it = iterpair.first; it != iterpair.second; ++it){
+//		if (it->second == msg){
+//			exist = true;
+//			break;
+//		}
+//	}
+	return exist;
+}
+
+bool ProphetV2::existingBundle(Prophet_Struct::bndl_meta bndlMeta)
+{
+	bool exist = false;
+	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.recipientAddress);
+	if (it != bundlesIndex.end()){
+		innerIndexMap innerMap(it->second);
+		innerIndexIterator it2 = innerMap.find(bndlMeta.serial);
+		if (it2 !=innerMap.end()){
+			exist = true;
 		}
 	}
 	return exist;
 }
 
+void ProphetV2::finish()
+{
 
+}
+
+ProphetV2::~ProphetV2()
+{
+
+}

@@ -121,9 +121,9 @@ void Mac1609_4_opp::attachAndSend(cMessage* msg, ChannelSelectorState channel, t
 
 //	int priority = (dynamic_cast<WaveShortMessage*>(m->getEncapsulatedPacket()))->getPriority();
 	int priority;
-	(m->getEncapsulatedPacket()!=NULL) ? priority = (dynamic_cast<WaveShortMessage*>(m->getEncapsulatedPacket()))->getPriority() : priority = 0;
-
-	Mac1609_4To80211pControlInfo* addInfo = new Mac1609_4To80211pControlInfo(-1, 0, frequency, channelType);
+	(m->getEncapsulatedPacket()!=NULL) ? priority = (dynamic_cast<WaveShortMessage*>(m->getEncapsulatedPacket()))->getPriority() : priority = 3;
+	ASSERT(priority <= 3 && priority >= 0);
+	Mac1609_4To80211pControlInfo* addInfo = new Mac1609_4To80211pControlInfo(-1, priority, frequency, channelType);
 //	Mac80211Pkt* pkt = new Mac80211Pkt("MacPkt including WSA");
 	Mac80211Pkt* pkt;
 	(m->getEncapsulatedPacket()!=NULL) ? pkt = new Mac80211Pkt("MacPkt including WSA") : pkt = new Mac80211Pkt("MacPkt including Prophet MSG");;
