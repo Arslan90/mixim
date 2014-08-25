@@ -145,7 +145,7 @@ private:
 	double lastAgeUpdate;
 
 	/** Size of the WMS Storage structure */
-	int bundlesStructureSize;
+	unsigned int bundlesStructureSize;
 
 	/** Fifo structure for WMS Storage*/
 	std::list<WaveShortMessage*> bundles;
@@ -157,7 +157,7 @@ private:
 	 * */
 	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
 
-	/** Boolean to verify if the transmission will not fail*/
+	/** Boolean to verify if the transmission is possible */
 	bool canITransmit;
 /*******************************************************************
 **
@@ -175,26 +175,39 @@ private:
 	/** Function for aging P(A,B)*/
 	void ageDeliveryPreds();
 
-	/** Function for updating & exchanging probabilities*/
+	/** Function for updating & exchanging probabilities */
 	void update(Prophet *prophetPkt);
 
-//	/** Function to verify if the transmission will not fail*/
-//	void canITransmit();
-
-	void resumeConnection();
-
+	/** Function for executing all actions of Initiator Role in the IEP Phase*/
 	void executeInitiatorRole(short  kind, Prophet *prophetPkt = NULL);
 
+	/** Function for executing all actions of Listener Role in the IEP Phase*/
 	void executeListenerRole(short  kind, Prophet *prophetPkt = NULL);
 
-	void definingBundleOffer(Prophet *prophetPkt);
+	/** Function for preparing Prophet message */
+	Prophet* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
+			std::list<Prophet_Struct::bndl_meta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
 
-	bool existingBundle(WaveShortMessage *msg);
+	/**
+	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
+	 */
+	void defineBundleOffer(Prophet *prophetPkt);
 
-	bool existingBundle(Prophet_Struct::bndl_meta bndlMeta);
+	/**
+	 * @brief Function that check if the WaveShortMessage identified by
+	 * @param *msg is currently stored in this node
+	 */
+	bool exist(WaveShortMessage *msg);
 
-//	bool fwd_GRTRmax_sortingFunc(std::pair<LAddress::L3Type, double> firstPair, std::pair<LAddress::L3Type, double> secondPair);
+	/**
+	 * @brief Function that check if the WaveShortMessage identified by
+	 * @param bndlMeta is currently stored in this node
+	 */
+	bool exist(Prophet_Struct::bndl_meta bndlMeta);
 
+	/*
+	 * Function that store bundles according to the current Queuing Strategy
+	 */
 	void storeBundle(WaveShortMessage *msg);
 
 	/** @brief Handle messages from upper layer */
@@ -208,20 +221,19 @@ private:
 
 	/** @brief Handle control messages from lower layer */
 	virtual void handleLowerControl(cMessage* msg);
-//
-//	/** @brief Handle control messages from lower layer */
-//	virtual void handleUpperControl(cMessage* msg);
+
+	/** @brief Handle control messages from lower layer */
+	virtual void handleUpperControl(cMessage* msg);
 
 	/** @brief decapsulate higher layer message from NetwPkt */
 	virtual cMessage* decapsMsg(NetwPkt*);
 
-	/** @brief Encapsulate higher layer packet into an NetwPkt*/
+	/** @brief Encapsulate higher layer packet into an NetwPkt */
 	virtual NetwPkt* encapsMsg(cPacket*);
 
+	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
 
-//	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
-//
-//	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
+	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
 public:
 	virtual void initialize(int stage);
 	virtual void finish();
