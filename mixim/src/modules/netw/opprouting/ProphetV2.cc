@@ -61,6 +61,21 @@ void ProphetV2::initialize(int stage)
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
 		bundles = std::list<WaveShortMessage*>();
+
+		/*
+		 * Collecting data & metrics
+		 */
+	    numSent = 0;
+	    numReceived = 0;
+	    WATCH(numSent);
+	    WATCH(numReceived);
+
+	    sentStats.setName("Sent Prophet message");
+	    sentStats.setRangeAutoUpper(0);
+	    sentVector.setName("Statistics for sent Prophet Message");
+	    receivedStats.setName("Received Prophet message");
+	    sentStats.setRangeAutoUpper(0);
+	    receivedVector.setName("Statistics for received Prophet Message");
 	}
 }
 void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
@@ -218,6 +233,11 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 
 void ProphetV2::handleLowerMsg(cMessage* msg)
 {
+
+	// collecting data
+	numReceived++;
+    receivedVector.record(numReceived);
+    receivedStats.collect(numReceived);
 //	NetwPkt *m = static_cast<NetwPkt *>(msg);
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
@@ -510,6 +530,13 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 
 Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<Prophet_Struct::bndl_meta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
+	/*
+	 * Collecting data
+	 */
+	numSent++;
+    sentVector.record(numSent);
+    sentStats.collect(numSent);
+
 	Prophet *prophetMsg = new Prophet();
 	prophetMsg->setKind(kind);
 	prophetMsg->setSrcAddr(srcAddr);
@@ -657,7 +684,24 @@ bool ProphetV2::exist(Prophet_Struct::bndl_meta bndlMeta)
 
 void ProphetV2::finish()
 {
+    // This function is called by OMNeT++ at the end of the simulation.
+    EV << "Sent:     " << numSent << endl;
+    EV << "Received: " << numReceived << endl;
+//    EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
+//    EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
+//    EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
+//    EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
 
+
+	recordScalar("#total sent", numSent);
+    recordScalar("#total received", numReceived);
+
+    EV << "Number of Prophet message sent, total:    " << sentStats.getCount() << endl;
+    sentStats.recordAs("Total sent");
+
+    EV << "Number of Prophet message received, total:    " << receivedStats.getCount() << endl;
+	receivedStats.recordAs("Total received");
+//    hopCountStats.recordAs("hop count");
 }
 
 /*******************************************************************

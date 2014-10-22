@@ -115,6 +115,15 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
+    long numSent;
+    long numReceived;
+//    cLongHistogram sentStats;
+//    cOutVector sentVector;
+//    cLongHistogram receivedStats;
+//    cOutVector receivedVector;
+    cLongHistogram hopCountStats;
+    cOutVector hopCountVector;
+
 	/** delivery predictability initialization constant*/
 	double PEncMax;
 	/** typical interconnection time in seconds*/
