@@ -188,10 +188,10 @@ private:
 	void update(Prophet *prophetPkt);
 
 	/** Function for executing all actions of Initiator Role in the IEP Phase*/
-	void executeInitiatorRole(short  kind, Prophet *prophetPkt = NULL);
+	void executeInitiatorRole(short  kind, Prophet *prophetPkt = NULL, LAddress::L3Type destAddr = 0);
 
 	/** Function for executing all actions of Listener Role in the IEP Phase*/
-	void executeListenerRole(short  kind, Prophet *prophetPkt = NULL);
+	void executeListenerRole(short  kind, Prophet *prophetPkt = NULL, LAddress::L3Type destAddr = 0);
 
 	/** Function for preparing Prophet message */
 	Prophet* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
@@ -244,6 +244,7 @@ private:
 
 	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
 public:
+	const LAddress::L3Type getMyNetwAddress();
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();

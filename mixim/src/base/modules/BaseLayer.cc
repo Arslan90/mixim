@@ -137,11 +137,20 @@ void BaseLayer::sendControlDown(cMessage *msg) {
     }
 }
 
-void BaseLayer::enForceExecution(short controlKind)
+void BaseLayer::enForceExecution(short controlKind, int addr)
 {
 	Enter_Method("enForceExecution");
 	cMessage *msg = new cMessage();
 	msg->setKind(controlKind);
+
+	if (addr != 0){
+		std::ostringstream flux;
+		flux << addr;
+		std::string s = flux.str();
+		msg->setName(s.c_str());
+	} else {
+		msg->setName(NULL);
+	}
 	sendControlUp(msg);
 }
 

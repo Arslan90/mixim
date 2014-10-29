@@ -70,12 +70,16 @@ void ProphetV2::initialize(int stage)
 	    WATCH(numSent);
 	    WATCH(numReceived);
 
-	    sentStats.setName("Sent Prophet message");
-	    sentStats.setRangeAutoUpper(0);
-	    sentVector.setName("Statistics for sent Prophet Message");
-	    receivedStats.setName("Received Prophet message");
-	    sentStats.setRangeAutoUpper(0);
-	    receivedVector.setName("Statistics for received Prophet Message");
+	    hopCountStats.setName("hopCountStats");
+	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
+	    hopCountVector.setName("HopCount");
+
+//	    sentStats.setName("Sent Prophet message");
+//	    sentStats.setRangeAutoUpper(0);
+//	    sentVector.setName("Statistics for sent Prophet Message");
+//	    receivedStats.setName("Received Prophet message");
+//	    sentStats.setRangeAutoUpper(0);
+//	    receivedVector.setName("Statistics for received Prophet Message");
 	}
 }
 void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
@@ -234,85 +238,116 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 void ProphetV2::handleLowerMsg(cMessage* msg)
 {
 
-	// collecting data
-	numReceived++;
-    receivedVector.record(numReceived);
-    receivedStats.collect(numReceived);
+//    receivedVector.record(numReceived);
+//    receivedStats.collect(numReceived);
 //	NetwPkt *m = static_cast<NetwPkt *>(msg);
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
     NetwPkt *netwpckt = check_and_cast<NetwPkt *>(m->decapsulate());
-    switch (netwpckt->getKind()) {
-		case HELLO:
-			break;
-		case ERROR:
-			break;
-		case RIBD:
-			break;
-		case RIB:
-			{
-				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
-				// first step : updating preds
-				executeListenerRole(RIB,prophetPkt);
-				// second step : starting of Bundle_Offer phase
-				executeListenerRole(Bundle_Offer,prophetPkt);
-			}
-			break;
-		case Bundle_Offer:
-			{
-				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
-				executeInitiatorRole(Bundle_Offer,prophetPkt);
-				executeInitiatorRole(Bundle_Response,prophetPkt);
-			}
-			break;
-		case Bundle_Response:
-			{
-				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
-				executeListenerRole(Bundle_Response,prophetPkt);
-				executeListenerRole(Bundle,prophetPkt);
-			}
-			break;
-		case Bundle:
-			{
-				Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
-				executeInitiatorRole(Bundle,prophetPkt);
-			}
-			break;
-		default:
-//			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
-//			WaveShortMessage *wsm = tmp->dup();
-//			if (LAddress::isL3Broadcast(m->getDestAddr())){
-//				storeBundle(wsm);
-//			}
-//			sendUp(netwpckt);
-			break;
+    Prophet *prophetPkt0 = check_and_cast<Prophet *>(netwpckt);
+
+    int hopcount;
+
+    if ((prophetPkt0->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt0->getDestAddr()==myNetwAddr)){
+
+		switch (netwpckt->getKind()) {
+			case HELLO:
+				break;
+			case ERROR:
+				break;
+			case RIBD:
+				break;
+			case RIB:
+				{
+					 // collecting data
+						numReceived++;
+						hopcount = prophetPkt0->getHopCount();
+						hopCountVector.record(hopcount);
+						hopCountStats.collect(hopcount);
+
+					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+					// first step : updating preds
+					executeListenerRole(RIB,prophetPkt);
+					// second step : starting of Bundle_Offer phase
+					executeListenerRole(Bundle_Offer,prophetPkt);
+				}
+				break;
+			case Bundle_Offer:
+				{
+					// collecting data
+										numReceived++;
+										hopcount = prophetPkt0->getHopCount();
+										hopCountVector.record(hopcount);
+										hopCountStats.collect(hopcount);
+
+					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+					executeInitiatorRole(Bundle_Offer,prophetPkt);
+					executeInitiatorRole(Bundle_Response,prophetPkt);
+				}
+				break;
+			case Bundle_Response:
+				{
+					// collecting data
+										numReceived++;
+										hopcount = prophetPkt0->getHopCount();
+										hopCountVector.record(hopcount);
+										hopCountStats.collect(hopcount);
+
+					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+					executeListenerRole(Bundle_Response,prophetPkt);
+					executeListenerRole(Bundle,prophetPkt);
+				}
+				break;
+			case Bundle:
+				{
+					// collecting data
+										numReceived++;
+										hopcount = prophetPkt0->getHopCount();
+										hopCountVector.record(hopcount);
+										hopCountStats.collect(hopcount);
+
+					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+					executeInitiatorRole(Bundle,prophetPkt);
+				}
+				break;
+			default:
+	//			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
+	//			WaveShortMessage *wsm = tmp->dup();
+	//			if (LAddress::isL3Broadcast(m->getDestAddr())){
+	//				storeBundle(wsm);
+	//			}
+	//			sendUp(netwpckt);
+				break;
+		}
+	//    if (netwpckt->getKind()==RIB){
+	//    	updateDeliveryPredsFor(netwpckt->getSrcAddr());
+	//    }else {
+	//    	WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
+	//		WaveShortMessage *wsm = tmp->dup();
+	//		if (LAddress::isL3Broadcast(m->getDestAddr())){
+	//			storeBundle(wsm);
+	//		}
+	//		sendUp(netwpckt);
+	//    	//    WaveShortMessage *tmp = static_cast<WaveShortMessage*>(decapsMsg(m));
+	//    	//    WaveShortMessage *dup = tmp->dup();
+	//    	//    if (LAddress::isL3Broadcast(m->getDestAddr())||(m->getDestAddr()==myNetwAddr)){
+	//    	//    	sendUp(decapsMsg(m));
+	//    	//    }
+	//
+	//    	//    WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(m->getEncapsulatedPacket());
+	//    	//    cMessage *tmp =decapsMsg(m);
+	//    	//    WaveShortMessage *copy = wsm->dup();
+	//    	//	if (LAddress::isL3Broadcast(m->getDestAddr())){
+	//    	//		storeBundle(copy);
+	//    	//	}
+	//    	//    sendUp(tmp);
+	//
+	//    	//    sendUp(msg);
+	//
+	//    }
+    } else {
+    	delete(msg);
 	}
-//    if (netwpckt->getKind()==RIB){
-//    	updateDeliveryPredsFor(netwpckt->getSrcAddr());
-//    }else {
-//    	WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
-//		WaveShortMessage *wsm = tmp->dup();
-//		if (LAddress::isL3Broadcast(m->getDestAddr())){
-//			storeBundle(wsm);
-//		}
-//		sendUp(netwpckt);
-//    	//    WaveShortMessage *tmp = static_cast<WaveShortMessage*>(decapsMsg(m));
-//    	//    WaveShortMessage *dup = tmp->dup();
-//    	//    if (LAddress::isL3Broadcast(m->getDestAddr())||(m->getDestAddr()==myNetwAddr)){
-//    	//    	sendUp(decapsMsg(m));
-//    	//    }
-//
-//    	//    WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(m->getEncapsulatedPacket());
-//    	//    cMessage *tmp =decapsMsg(m);
-//    	//    WaveShortMessage *copy = wsm->dup();
-//    	//	if (LAddress::isL3Broadcast(m->getDestAddr())){
-//    	//		storeBundle(copy);
-//    	//	}
-//    	//    sendUp(tmp);
-//
-//    	//    sendUp(msg);
-//
-//    }
 }
 
 void ProphetV2::handleUpperMsg(cMessage* msg)
@@ -334,7 +369,14 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 		case NEW_NEIGHBOR:
 			{
 				if (canITransmit){
-					executeInitiatorRole(RIB,NULL);
+					string tmp = msg->getName();
+					int addr = 0;
+					if (tmp!=""){
+						std::istringstream iss(tmp);
+						iss >> addr;
+					}
+					LAddress::L3Type destAddr = addr;
+					executeInitiatorRole(RIB,NULL,destAddr);
 				}
 			}
 			break;
@@ -395,7 +437,7 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 	}
 }
 
-void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
+void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
 	switch (kind) {
 		case HELLO:
@@ -416,11 +458,18 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
 			tmp.insert(preds.begin(),preds.end());
 //			ribPkt->setPreds(tmp);
-			ribPkt = prepareProphet(RIB, myNetwAddr, LAddress::L3BROADCAST, NULL, &tmp);
+//			ribPkt = prepareProphet(RIB, myNetwAddr, LAddress::L3BROADCAST, NULL, &tmp);
+			ribPkt = prepareProphet(RIB, myNetwAddr, destAddr, NULL, &tmp);
 			ribPkt->setBitLength(headerLength);
 //			sendDown(ribPkt);
 //			uniform(0.001,1);
 			sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+			/*
+			 * Collecting data
+			 */
+			numSent++;
+			ribPkt->setHopCount(ribPkt->getHopCount()+1);
+
 		}
 			break;
 		case Bundle_Offer:
@@ -455,6 +504,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 //			responsePkt->setDestAddr(prophetPkt->getSrcAddr());
 //			responsePkt->setBndlmeta(bundleToAcceptMeta);
 			sendDown(responsePkt);
+			/*
+			 * Collecting data
+			 */
+			numSent++;
+			responsePkt->setHopCount(responsePkt->getHopCount()+1);
 		}
 			break;
 		case Bundle:
@@ -473,7 +527,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 	}
 }
 
-void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
+void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
 	switch (kind) {
 		case HELLO:
@@ -515,6 +569,11 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 //						bundlePkt->encapsulate((it3->second)->dup());
 						if (canITransmit){
 							sendDown(bundlePkt);
+							/*
+							 * Collecting data
+							 */
+							numSent++;
+							bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
 						}
 					}
 				}
@@ -530,12 +589,9 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 
 Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<Prophet_Struct::bndl_meta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
-	/*
-	 * Collecting data
-	 */
-	numSent++;
-    sentVector.record(numSent);
-    sentStats.collect(numSent);
+
+//    sentVector.record(numSent);
+//    sentStats.collect(numSent);
 
 	Prophet *prophetMsg = new Prophet();
 	prophetMsg->setKind(kind);
@@ -652,6 +708,11 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 //	offerPkt->setDestAddr(encounterdNode);
 //	offerPkt->setBndlmeta(bundleToOfferMeta);
 	sendDown(offerPkt);
+	/*
+	 * Collecting data
+	 */
+	numSent++;
+	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 }
 
 bool ProphetV2::exist(WaveShortMessage *msg)
@@ -684,24 +745,35 @@ bool ProphetV2::exist(Prophet_Struct::bndl_meta bndlMeta)
 
 void ProphetV2::finish()
 {
-    // This function is called by OMNeT++ at the end of the simulation.
-    EV << "Sent:     " << numSent << endl;
-    EV << "Received: " << numReceived << endl;
-//    EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
-//    EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
-//    EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
-//    EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
+	EV << "Sent:     " << numSent << endl;
+	EV << "Received: " << numReceived << endl;
+	EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
+	EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
+	EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
+	EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
 
+	recordScalar("#sent", numSent);
+	recordScalar("#received", numReceived);
 
-	recordScalar("#total sent", numSent);
-    recordScalar("#total received", numReceived);
-
-    EV << "Number of Prophet message sent, total:    " << sentStats.getCount() << endl;
-    sentStats.recordAs("Total sent");
-
-    EV << "Number of Prophet message received, total:    " << receivedStats.getCount() << endl;
-	receivedStats.recordAs("Total received");
-//    hopCountStats.recordAs("hop count");
+	hopCountStats.recordAs("hop count");
+//    // This function is called by OMNeT++ at the end of the simulation.
+//    EV << "Sent:     " << numSent << endl;
+//    EV << "Received: " << numReceived << endl;
+////    EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
+////    EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
+////    EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
+////    EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
+//
+//
+//	recordScalar("#total sent", numSent);
+//    recordScalar("#total received", numReceived);
+//
+////    EV << "Number of Prophet message sent, total:    " << sentStats.getCount() << endl;
+////    sentStats.recordAs("Total sent");
+////
+////    EV << "Number of Prophet message received, total:    " << receivedStats.getCount() << endl;
+////	receivedStats.recordAs("Total received");
+////    hopCountStats.recordAs("hop count");
 }
 
 /*******************************************************************
@@ -727,6 +799,11 @@ cObject *const ProphetV2::setDownControlInfo(cMessage *const pMsg, const LAddres
 cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
 {
 	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
+}
+
+const LAddress::L3Type ProphetV2::getMyNetwAddress()
+{
+	return myNetwAddr;
 }
 
 ProphetV2::~ProphetV2()

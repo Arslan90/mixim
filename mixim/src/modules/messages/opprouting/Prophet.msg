@@ -41,4 +41,5 @@ packet Prophet extends NetwPkt {
     predictions preds = std::map<LAddress::L3Type, double>();
 //    preds predictions = std::map<LAddress::L3Type, double>();
     bndlMeta bndlmeta = std::list<Prophet_Struct::bndl_meta>();
+    int hopCount = 0;
 }

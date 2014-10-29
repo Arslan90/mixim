@@ -85,7 +85,7 @@ public:
     virtual void finish();
 
     /** my function to force something*/
-    void enForceExecution(short controlKind);
+    void enForceExecution(short controlKind, int addr = 0);
 
 protected:
     /**

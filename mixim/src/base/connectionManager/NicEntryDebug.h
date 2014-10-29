@@ -146,7 +146,7 @@ class NicEntryDebug: public NicEntry
      * @brief Function used to send a notification from Mac1609_4 layer to Prophet Layer, the current Nic
      * can detect if this node is connected, disconnected or has a new neighbor
      */
-    void prepareControlMsg(short controlKind);
+    void prepareControlMsg(short controlKind, int destAddr = 0);
 };
 
 #endif

@@ -26,6 +26,7 @@
 #include "ChannelAccess.h"
 #include "FindModule.h"
 #include "BaseLayer.h"
+#include "BaseNetwLayer.h"
 //#include <../../modules/mac/opprouting/Mac1609_4_opp.h>
 //#include "../../modules/netw/opprouting/ProphetV2.h"
 
@@ -56,13 +57,22 @@ void NicEntryDebug::connectTo(NicEntry* other) {
 	nicEV<<"connecting nic #"<<nicId<< " and #"<<other->nicId<<endl;
 
 	NicEntryDebug* otherNic = (NicEntryDebug*) other;
+//	cModule* netwModule =
 
 	cGate *localoutgate = requestOutGate();
 	localoutgate->connectTo(otherNic->requestInGate());
 	outConns[other] = localoutgate->getPathStartGate();
+
+	cModule* otherNode = other->nicPtr->getParentModule();
+	int destAddr =0;
+	if (otherNode->findSubmodule("netw")!=-1){
+		cModule* module = otherNode->getSubmodule("netw");
+		BaseNetwLayer *netw = check_and_cast<BaseNetwLayer*>(module);
+		destAddr = netw->getMyNetwAddr();
+	}
 	// for each new neighbor, we have to start a new prophet information exchange
-	// ProphetV2::NEWLY_CONNECTED = 24510
-	prepareControlMsg(24510);
+	// ProphetV2::NEW_NEIGHBOR = 24510
+	prepareControlMsg(24510, destAddr);
 }
 
 
@@ -261,7 +271,7 @@ cGate* NicEntryDebug::requestOutGate(void) {
 	return hostGate;
 }
 
-void NicEntryDebug::prepareControlMsg(short controlKind)
+void NicEntryDebug::prepareControlMsg(short controlKind, int destAddr)
 {
 	if (nicPtr->findSubmodule("mac1609_4_opp")!=-1){
 		cModule* module = nicPtr->getSubmodule("mac1609_4_opp");
@@ -271,7 +281,7 @@ void NicEntryDebug::prepareControlMsg(short controlKind)
 //		}
 		if (module !=NULL){
 			BaseLayer *mac = check_and_cast<BaseLayer*>(module);
-			mac->enForceExecution(controlKind);
+			mac->enForceExecution(controlKind, destAddr);
 //			mac->sendControlUp(msg);
 //			mac->neighborhoodNotifier(controlKind);
 		}

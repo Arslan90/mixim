@@ -37,52 +37,48 @@ class NetwPkt;
  * @ingroup baseModules
  * @author Daniel Willkomm
  **/
-class MIXIM_API BaseNetwLayer : public BaseLayer
+class BaseNetwLayer : public BaseLayer
 {
 public:
-	/** @brief Message kinds used by this layer.*/
-	enum BaseNetwMessageKinds {
-		/** @brief Stores the id on which classes extending BaseNetw should
+    /** @brief Message kinds used by this layer.*/
+    enum BaseNetwMessageKinds{ /** @brief Stores the id on which classes extending BaseNetw should
 		 * continue their own message kinds.*/
-		LAST_BASE_NETW_MESSAGE_KIND = 24000,
-	};
-	/** @brief Control message kinds used by this layer.*/
-	enum BaseNetwControlKinds {
-		/** @brief Stores the id on which classes extending BaseNetw should
+    LAST_BASE_NETW_MESSAGE_KIND = 24000};
+    /** @brief Control message kinds used by this layer.*/
+    enum BaseNetwControlKinds{ /** @brief Stores the id on which classes extending BaseNetw should
 		 * continue their own control kinds.*/
-		LAST_BASE_NETW_CONTROL_KIND = 24500,
-	};
-
+    LAST_BASE_NETW_CONTROL_KIND = 24500};
 protected:
     /**
      * @brief Length of the NetwPkt header
      * Read from omnetpp.ini
      **/
     int headerLength;
-
     /** @brief Pointer to the arp module*/
-    ArpInterface* arp;
-
+    ArpInterface *arp;
     /** @brief cached variable of my networ address */
     LAddress::L3Type myNetwAddr;
-
     /** @brief Enables debugging of this module.*/
     bool coreDebug;
-
 public:
     //Module_Class_Members(BaseNetwLayer,BaseLayer,0);
-    BaseNetwLayer() 
-      : BaseLayer()
-      , arp(NULL)
-    {}
+    BaseNetwLayer()
+    :BaseLayer(), arp(NULL)
+    {
+    }
 
-    BaseNetwLayer(unsigned stacksize) 
-      : BaseLayer(stacksize)
-      , arp(NULL)
-    {}
+    BaseNetwLayer(unsigned  stacksize)
+    :BaseLayer(stacksize), arp(NULL)
+    {
+    }
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
+
+    LAddress::L3Type getMyNetwAddr() const
+    {
+        return myNetwAddr;
+    }
 
   protected:
     /**
