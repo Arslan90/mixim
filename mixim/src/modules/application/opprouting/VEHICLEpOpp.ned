@@ -20,5 +20,9 @@ simple VEHICLEpOpp extends BaseWaveApplLayer
         int offsetX=  default(4000); // valor extra para el axis X
 		int offsetY= default(5000); // valor extra para el axis Y
 		int maxY= default(41947); // valor maximo de la map.
+		
+		bool dtnTestMode = default(false); // wheter we are testing DTN
+		int dtnTestCycle @unit("s") = default(5s); // cycle of periodic sending dtnMessage
+		bool dtnSynchronized = default(false);
            
 }

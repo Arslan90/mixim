@@ -44,7 +44,8 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 			BROADCAST_VPA_WMS = 30,								//identified VPA beacon
 			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
 			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
-			LAST_TEST_APPL_MESSAGE_KIND = 60					//I do not..
+			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
+			DTN_TEST_MODE = 70									// Added by Arslan HAMZA CHERIF
 	    };
 
 
@@ -58,12 +59,31 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int messageSequence;//sequence of the VPA message number sent
 		  double CW; //Contention Window value.
 		  double T; //Timer to send periodic VPA WMS Broadcast. NOTE:This value must be de the same for VPA/vehicles beacons.
+		  /*
+		   * bool variable for enabling dtnTestMode
+		   */
+		  bool dtnTestMode;
+		  /*
+		   * bool variable for enabling silentMode for VPA, VPA are only receiving messages
+		   */
+		  bool silentMode;
+		  int dtnMsgSent;
+		  int dtnMsgReceived;
+
+		  double avgDelay;
+		  double totalDelay;
+
+		  cOutVector delays;
+		  cDoubleHistogram delayStats;
+
+
 		  void sendVPApBroadcast(int messageSequenced);//send numerated broadcast.
 		  void handleLowerMsg(cMessage* msg);
 		  void handleSelfMsg(cMessage* msg);
 		  //Adding my own prepareWSM messages.
 		  virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0);
 
+		  virtual void finish();
 };
 
 #endif /* VPApOpp_H_ */

@@ -122,10 +122,10 @@ protected:
 
 public:
 	InterpolatorBase():
-		comp(), continueOutOfRange(true), outOfRangeVal(mapped_type()) {}
+		continueOutOfRange(true), outOfRangeVal(mapped_type()) {}
 
 	InterpolatorBase(mapped_cref_type oorv):
-		comp(), continueOutOfRange(false), outOfRangeVal(oorv) {}
+		continueOutOfRange(false), outOfRangeVal(oorv) {}
 
 	virtual ~InterpolatorBase() {}
 
@@ -268,11 +268,11 @@ public:
 			return base_class_type::outOfRangeVal;
 		}
 		if(upperBound == first) {
-			return this->asInterpolated(upperBound->second, true);
+			return asInterpolated(upperBound->second, true);
 		}
 
 		upperBound--;
-		return this->asInterpolated(upperBound->second, false, !(upperBound->first == pos));
+		return asInterpolated(upperBound->second, false, !(upperBound->first == pos));
 	}
 
 	/** @brief Represents the interpolator a stepping function. */
@@ -339,22 +339,22 @@ public:
 			return base_class_type::outOfRangeVal;
 		}
 		if(upperBound == first){
-			return this->asInterpolated(upperBound->second, true);
+			return asInterpolated(upperBound->second, true);
 		}
 
 		const_iterator left = upperBound;
 		--left;
 
 		if(left->first == pos)
-			return this->asInterpolated(left->second, false, false);
+			return asInterpolated(left->second, false, false);
 
 		const_iterator right = upperBound;
 
 		if(right == last) {
-			return this->asInterpolated(left->second, true);
+			return asInterpolated(left->second, true);
 		}
 
-		return this->asInterpolated( ((pos - left->first < right->first - pos) ? left : right)->second, false);
+		return asInterpolated( ((pos - left->first < right->first - pos) ? left : right)->second, false);
 	}
 };
 
@@ -430,17 +430,17 @@ public:
 			return base_class_type::outOfRangeVal;
 		}
 		if(upperBound == first){
-			return this->asInterpolated(upperBound->second, true);
+			return asInterpolated(upperBound->second, true);
 		}
 
 		const_iterator right = upperBound;
 		const_iterator left = --upperBound;
 
 		if(left->first == pos)
-			return this->asInterpolated(left->second, false, false);
+			return asInterpolated(left->second, false, false);
 
 		if(right == last){
-			return this->asInterpolated(left->second, true);
+			return asInterpolated(left->second, true);
 		}
 
 		return interpolated(linearInterpolation(pos, left->first, right->first, left->second, right->second));
@@ -572,7 +572,6 @@ public:
 
 		jumpToBegin();
 	}
-	virtual ~ConstInterpolateableIterator() {}
 
 	bool operator==(const ConstInterpolateableIterator& other) {
 		return position == other.position && right == other.right;
@@ -741,7 +740,6 @@ public:
 	InterpolateableIterator(container_type& cont, const interpolator_type& intpl):
 		base_class_type(cont.begin(), cont.end(), intpl), cont(cont) {}
 
-	virtual ~InterpolateableIterator() {}
 	/**
 	 * @brief: Changes (and adds if necessary) the value for the entry at the
 	 * current position of the iterator to the passed value
@@ -800,8 +798,7 @@ protected:
 	interpolator_type interpolate;
 public:
 
-	InterpolateableMap():
-		interpolate() {}
+	InterpolateableMap() {}
 
 	InterpolateableMap(mapped_cref_type oorv):
 		interpolate(oorv) {}

@@ -1116,7 +1116,8 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 	if (numRead != 4) return;
 
 	Coord p = traci2omnet(TraCICoord(px, py));
-	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
+	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f) with vehicule id : %d ", px, py, p.x, p.y, atoi(objectId.c_str()));
+//	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
 
 	double angle = traci2omnetAngle(angle_traci);
 

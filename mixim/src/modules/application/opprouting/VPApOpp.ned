@@ -13,4 +13,6 @@ simple VPApOpp extends BaseWaveApplLayer
         @class(VPApOpp); //MERDEEEE!!!!  J'ai trouve! Fait attention de lier bien le fichie .ned avec l'application correct.!! 
         double timeT @unit("s") = default(5s);
         double epicenterValue @unit("m") = default(20m);
+        bool dtnTestMode = default(false); // wheter we are testing DTN
+        bool silentMode = default(false); // turn VPA in silent mode
 }

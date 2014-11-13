@@ -38,20 +38,53 @@ void VPApOpp::initialize(int stage) {
         messageSequence = 0; //First message sequence.
     	CW= 0; //Contention Window value.
 
+    	/*
+    	 * Section created by me for initializing dtnTestMode & silentMode booleans
+    	 */
+
+    	delayStats.setName("delayStats");
+//    	delayStats.setRangeAutoUpper(0, 10, 1.5);
+    	delays.setName("delays");
+
+    	dtnTestMode = par("dtnTestMode").boolValue();
+    	silentMode = par("silentMode").boolValue();
+
+    	/*
+    	 * End of section
+    	 */
+
 		//Borrar automaticamente el directorio nic cuando se cree el primer VPA.
 		if (myId== 8)
 			system("rm  nic/*.txt");
 
-    	//Schedule the next first VPA TX
 		sendBeaconEvt = new cMessage("beacon evt", SEND_BEACON_EVT);
-		scheduleAt(simTime() + 1, sendBeaconEvt);
+		if (dtnTestMode){
+			dtnMsgSent = 0;
+			dtnMsgReceived = 0;
+			avgDelay = 0;
+			totalDelay = 0;
+			/*
+			 * we are in dtnTestMode
+			 */
+			if (silentMode){
+				/*
+				 * we are in silentMode, VPA will not send any messages, it only receive
+				 */
 
-		/*NOTE: The VPAs can have overlap zones and vehicles may lost their updates due to
-		 * the hidden node problem. But if I add a CW the  VPAS will contend with the
-		 * vehicles for the TX/RX resource allocation. Maybe if the problem is so big
-		 * I'll give a lower CW for the VPAs.
-		 * BUT!, Base on the testing I've made with 802.11/802.11p, 80211p start to loss packets with ten
-		 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
+			}else {
+				//Schedule the next first VPA TX
+
+				scheduleAt(simTime() + 1, sendBeaconEvt);
+
+				/*NOTE: The VPAs can have overlap zones and vehicles may lost their updates due to
+				 * the hidden node problem. But if I add a CW the  VPAS will contend with the
+				 * vehicles for the TX/RX resource allocation. Maybe if the problem is so big
+				 * I'll give a lower CW for the VPAs.
+				 * BUT!, Base on the testing I've made with 802.11/802.11p, 80211p start to loss packets with ten
+				 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
+			}
+		}
+
 	}
 }
 
@@ -59,6 +92,11 @@ void VPApOpp::initialize(int stage) {
 //handle self-Messages
 void VPApOpp::handleSelfMsg(cMessage* msg) {
 	switch (msg->getKind()) {
+		case DTN_TEST_MODE:
+			if (dtnTestMode){
+				dtnMsgSent++;
+			}
+			break;
 		case SEND_BEACON_EVT: {
 			DBG << "logs, VPA self MESSAGE" << endl;
 
@@ -86,8 +124,18 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 	WaveShortMessage*  wsm =  dynamic_cast<WaveShortMessage*>(netw->decapsulate());
 	if (wsm != NULL) {
 		EV << "logs, Receiving packet " << wsm->getName() <<endl;
-	delete(msg);
 	}
+	if (wsm->getKind()==DTN_TEST_MODE){
+		dtnMsgReceived++;
+		simtime_t time = (simTime()-wsm->getTimestamp());
+		totalDelay = totalDelay + time.dbl();
+		avgDelay = totalDelay / dtnMsgReceived;
+
+		delays.record(avgDelay);
+		delayStats.collect(avgDelay);
+	}
+
+	delete(msg);
 }
 
 
@@ -148,5 +196,21 @@ void VPApOpp::onData(WaveShortMessage* wsm) {
 
 VPApOpp::~VPApOpp() {
 }
+
+void VPApOpp::finish()
+{
+	// Added by Arslan HAMZA CHERIF
+		recordScalar("dtnSent", dtnMsgSent);
+		recordScalar("dtnReceived", dtnMsgReceived);
+
+		EV << "Delay, min:    " << delayStats.getMin() << endl;
+		EV << "Delay, max:    " << delayStats.getMax() << endl;
+		EV << "Delay, mean:   " << delayStats.getMean() << endl;
+		EV << "Delay, stddev: " << delayStats.getStddev() << endl;
+
+		delayStats.recordAs("delayScalar");
+}
+
+
 
 

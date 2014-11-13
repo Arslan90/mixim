@@ -72,10 +72,27 @@ void VEHICLEpOpp::initialize(int stage) {
 		delayTimer = new cMessage( "delay-timer", SEND_BROADCAST_TIMER );
 		everySecond = new cMessage( "everySecond", DO_THINGS_EVERY_SECOND );
 
+		// added by me for testing
+		dtnTestMode = par("dtnTestMode").boolValue();
+		dtnSynchronized = par("dtnSynchronized").boolValue();
+		if (dtnTestMode){
+			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
+			dtnTestCycle = par("dtnTestCycle");
+			dtnMsgSent = 0;
+			dtnMsgReceived = 0;
+
+		}
 	}
 	else if(stage==1) {
 	        scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
 	        scheduleAt(simTime() + 1, everySecond); //Scheduling the self message.
+
+	        // added by me for testing
+	        if (dtnTestMode){
+	        	double tmp;
+	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
+	        	scheduleAt(simTime() + tmp, dtnTestMsg);
+	        }
 	}
 }
 
@@ -85,6 +102,14 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
 
     switch(msg->getKind())
     {
+    // added by me
+    case DTN_TEST_MODE:
+    	if (dtnTestMode){
+    		sendDtnMessage();
+    		// Finally reschedule message
+    		scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
+    	}
+    	break;
     case SEND_BROADCAST_TIMER:
     	if (modeDissemination and junctionRange) { //Vehicle send WMS beacon when in mode Dissemination & near enough to junction.
     		EV << "logs, VEH Sending PACKET. " << endl;
@@ -158,6 +183,11 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
 
     switch(wsm->getKind())
     {
+    case DTN_TEST_MODE:
+		if (dtnTestMode){
+			dtnMsgReceived++;
+		}
+		break;
 //When receiving VPA Broadcast
 	case BROADCAST_VPA_WMS:
 
@@ -425,6 +455,50 @@ void VEHICLEpOpp::WMS() {
 
 
 
+void VEHICLEpOpp::sendDtnMessage()
+{
+	int addr = vpaDestAddr();
+//	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
+	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
+
+
+//	char numstr[6]; // Numbered Message
+//	sprintf(numstr, "%d+%d", messageSequenceVPA,messageSequence); // convert INT to STRING. VPAId+SequenceNumber
+//	char* result = numstr; //concatenate in VPAiD,messageSequence
+
+	//Sending message
+	t_channel channel = dataOnSch ? type_SCH : type_CCH;
+	//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
+	cModule *netw = this->getParentModule()->getSubmodule("netw");
+	int netwAddr = myApplAddr();
+	if (netw!=NULL){
+		netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
+	}
+	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA[0] with address "<< addr <<endl;
+	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
+	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,intrand(INT32_MAX)));
+	dtnMsgSent++;
+}
+
+int VEHICLEpOpp::vpaDestAddr()
+{
+	int vpaDestAddr = -2;
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = systemModule->par("numeroNodes");
+	cModule *vpa = systemModule->getSubmodule("VPA", numberVPA-1);
+	if (vpa!=NULL){
+		cModule *netw = vpa->getSubmodule("netw");
+		if (netw!=NULL){
+			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+			vpaDestAddr = baseNetw->getMyNetwAddr();
+		}
+	}
+	return vpaDestAddr;
+}
+
 void VEHICLEpOpp::sendMessage() {
 	//This is just to track the current Vehicle Position Tracking,
 	//and just Something that I need at this moment in my repport.
@@ -459,7 +533,12 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 		case type_SCH: wsm->setChannelNumber(Channels::SCH1); break; //will be rewritten at Mac1609_4 to actual Service Channel. This is just so no controlInfo is needed
 		case type_CCH: wsm->setChannelNumber(Channels::CCH); break;
 	}
-	wsm->setKind(BROADCAST_VEH_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
+	if (DTN_TEST_MODE){
+		wsm->setKind(DTN_TEST_MODE);
+	}else {
+		wsm->setKind(BROADCAST_VEH_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
+	}
+
 	wsm->setPsid(0);
 	wsm->setPriority(priority);
 	wsm->setWsmVersion(1);
@@ -480,6 +559,10 @@ void VEHICLEpOpp::finish() {
 	 * COOL! Crear de datos finales por cada vehiculo al termino de la simulacion.
 	 */
 	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
+
+	// Added by Arslan HAMZA CHERIF
+	recordScalar("dtnSent", dtnMsgSent);
+	recordScalar("dtnReceived", dtnMsgReceived);
 }
 
 ////////////////// TESTING AREA /////////////    ////////////////// TESTING AREA /////////////

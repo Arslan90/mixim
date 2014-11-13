@@ -121,6 +121,7 @@ private:
 //    cOutVector sentVector;
 //    cLongHistogram receivedStats;
 //    cOutVector receivedVector;
+
     cLongHistogram hopCountStats;
     cOutVector hopCountVector;
 

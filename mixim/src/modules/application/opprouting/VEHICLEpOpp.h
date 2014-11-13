@@ -30,6 +30,7 @@
 #include <math.h> // for euclidian distance
 #include <cstring> // for spliting strings
 #include <NetwPkt_m.h>
+#include "BaseNetwLayer.h"
 
 /**
  * Small IVC Demo using 11p
@@ -49,7 +50,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 			BROADCAST_VPA_WMS = 30,								//identified VPA beacon
 			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
 			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
-			LAST_TEST_APPL_MESSAGE_KIND = 60					//I do not..
+			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
+			DTN_TEST_MODE = 70									// Added by Arslan HAMZA CHERIF
 	    };
 
 	protected:
@@ -94,6 +96,20 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		simtime_t vehTimeIn; //Time the vehicle enter into the simulation
 		simtime_t vehTimeOut; //Time the vehicle get out of the simulation
 		int vehRx; //Vehicle total Receptions.
+
+		// Variables added by me
+		/*
+		 * bool variable for enabling dtnTestMode
+		 */
+		bool dtnTestMode;
+		cMessage *dtnTestMsg;
+		int dtnTestCycle;
+		int dtnMsgSent;
+		int dtnMsgReceived;
+		bool dtnSynchronized;
+
+		void sendDtnMessage();
+		int vpaDestAddr();
 
 		//AND My functions
 		void inJunction(); //Check if vehicleID is or not in junction area.
