@@ -81,6 +81,18 @@ void NicEntryDebug::disconnectFrom(NicEntry* other) {
 
 	NicEntryDebug* otherNic = (NicEntryDebug*) other;
 
+	cModule* otherNode = other->nicPtr->getParentModule();
+
+	int destAddr =0;
+	if (otherNode->findSubmodule("netw")!=-1){
+		cModule* module = otherNode->getSubmodule("netw");
+		BaseNetwLayer *netw = check_and_cast<BaseNetwLayer*>(module);
+		destAddr = netw->getMyNetwAddr();
+	}
+	// for each neighbor, we have to send a control message when disconnecting
+	// ProphetV2::NEW_NEIGHBOR_GONE = 24530
+	prepareControlMsg(24530, destAddr);
+
 	//search the connection in the outConns list
 	GateList::iterator p = outConns.find(other);
 	//no need to check whether entry is valid; is already check by ConnectionManager isConnected

@@ -74,6 +74,18 @@ void ProphetV2::initialize(int stage)
 	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
 	    hopCountVector.setName("HopCount");
 
+
+	    nbrPredsVector.setName("Number of predictions");
+	    predsMean.setName("Mean of predictions");
+	    predsMax.setName("Maximum of predictions");
+	    predsMin.setName("Minimum of predictions");
+	    predsVariance.setName("Variance of predictions");
+
+	    nbrContacts =0;
+	    contactDurMean = 0.0;
+	    contacts = std::map<LAddress::L3Type,double>();
+	    contactDurVector.setName("Evolution of contact duration mean");
+
 //	    sentStats.setName("Sent Prophet message");
 //	    sentStats.setRangeAutoUpper(0);
 //	    sentVector.setName("Statistics for sent Prophet Message");
@@ -164,7 +176,8 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 
 void ProphetV2::ageDeliveryPreds()
 {
-	double timeDiff = (simTime().dbl()-lastAgeUpdate)/secondsInTimeUnit;
+	double time = simTime().dbl();
+	double timeDiff = (time-lastAgeUpdate)/secondsInTimeUnit;
 	if (timeDiff==0){
 		return;
 	}else {
@@ -180,6 +193,7 @@ void ProphetV2::update(Prophet *prophetPkt)
 {
 	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
 	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
+	recordPredsStats();
 }
 
 cMessage* ProphetV2::decapsMsg(NetwPkt *msg)
@@ -377,11 +391,30 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					}
 					LAddress::L3Type destAddr = addr;
 					executeInitiatorRole(RIB,NULL,destAddr);
+					contacts.insert(std::pair<LAddress::L3Type, double>(destAddr, simTime().dbl()));
 				}
 			}
 			break;
 		case NO_NEIGHBOR_AND_DISCONNECTED:
 			canITransmit = false;
+			break;
+		case NEW_NEIGHBOR_GONE:
+			{
+				string tmp = msg->getName();
+				int addr = 0;
+				if (tmp!=""){
+					std::istringstream iss(tmp);
+					iss >> addr;
+				}
+				LAddress::L3Type destAddr = addr;
+				double duration = simTime().dbl() - (contacts.find(destAddr)->second);
+				nbrContacts++;
+				if (nbrContacts!=0){
+					contactDurMean = (contactDurMean + duration) / double (nbrContacts);
+				}
+				contacts.erase(destAddr);
+				contactDurVector.record(contactDurMean);
+			}
 			break;
 	}
 }
@@ -454,6 +487,8 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 //			ribPkt->setKind(RIB);
 //			ribPkt->setSrcAddr(myNetwAddr);
 //			ribPkt->setDestAddr(LAddress::L3BROADCAST);
+
+			// aging of predictions that will be sent
 			// creating a copy of preds
 			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
 			tmp.insert(preds.begin(),preds.end());
@@ -804,6 +839,62 @@ cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress:
 const LAddress::L3Type ProphetV2::getMyNetwAddress()
 {
 	return myNetwAddr;
+}
+
+void ProphetV2::recordPredsStats()
+{
+	// nbPreds = preds.size()-1, because P(X,X) is counted as a prediction for every node X
+	int nbPreds = this->preds.size()-1;
+	nbrPredsVector.record(nbPreds);
+
+	double min = DBL_MAX, max = DBL_MIN, mean = 0, sum = 0, variance = 0, varianceSum = 0;
+
+	for (predsIterator it=preds.begin(); it!=preds.end();it++){
+		if (it->first != myNetwAddr){
+			// Minimum value
+			if (it->second < min){
+				min = it->second;
+			}
+
+			// Maximum value
+			if (it->second > max){
+				max = it->second;
+			}
+
+			// Summing values
+			sum+=it->second;
+		}
+	}
+
+	// Calculating mean and variance
+	if (nbPreds <=1){
+		// Calculating mean
+		mean = 0;
+
+		// Calculating variance
+		variance = 0;
+	} else {
+		// Calculating mean
+		mean = sum / double (nbPreds);
+
+		// Calculating variance
+		for (predsIterator it=preds.begin(); it!=preds.end();it++){
+			if (it->first != myNetwAddr){
+				varianceSum += pow((it->second - mean),2);
+			}
+		}
+		variance = varianceSum / double (nbPreds);
+	}
+
+	// recording values
+	predsMin.record(min);
+	predsMax.record(max);
+	predsMean.record(mean);
+	predsVariance.record(variance);
+
+//	std::pair<LAddress::L3Type, double> predsMin = std::min_element(preds.begin(),preds.end());
+//	std::pair<LAddress::L3Type, double> predsMax = std::max_element(preds.begin(),preds.end());
+
 }
 
 ProphetV2::~ProphetV2()

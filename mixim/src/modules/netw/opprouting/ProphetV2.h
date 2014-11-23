@@ -78,6 +78,7 @@ public:
 		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
 		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
+		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
 	};
 protected:
 
@@ -124,6 +125,20 @@ private:
 
     cLongHistogram hopCountStats;
     cOutVector hopCountVector;
+
+    cOutVector nbrPredsVector;
+    cOutVector predsMean;
+    cOutVector predsMax;
+    cOutVector predsMin;
+    cOutVector predsVariance;
+
+    double contactDurMean;
+
+    long nbrContacts;
+
+    cOutVector contactDurVector;
+
+    std::map<LAddress::L3Type, double> contacts;
 
 	/** delivery predictability initialization constant*/
 	double PEncMax;
@@ -219,6 +234,11 @@ private:
 	 * Function that store bundles according to the current Queuing Strategy
 	 */
 	void storeBundle(WaveShortMessage *msg);
+
+	/*
+	 * Function for collecting data about predictions
+	 */
+	void recordPredsStats();
 
 	/** @brief Handle messages from upper layer */
 	virtual void handleUpperMsg(cMessage* msg);
