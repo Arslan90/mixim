@@ -82,9 +82,13 @@ void ProphetV2::initialize(int stage)
 	    predsVariance.setName("Variance of predictions");
 
 	    nbrContacts =0;
-	    contactDurMean = 0.0;
+	    sumOfContactDur = 0.0;
 	    contacts = std::map<LAddress::L3Type,double>();
 	    contactDurVector.setName("Evolution of contact duration mean");
+
+	    nbrRecontacts = 0;
+	    sumOfInterContactDur = 0.0;
+	    intercontactDurVector.setName("Evolution of intercontact duration mean");
 
 //	    sentStats.setName("Sent Prophet message");
 //	    sentStats.setRangeAutoUpper(0);
@@ -390,7 +394,21 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 						iss >> addr;
 					}
 					LAddress::L3Type destAddr = addr;
+
+					/** Intercontacts duration stats 			*/
+					std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(destAddr);
+					if (it != lastEncouterTime.end()){
+						double duration = simTime().dbl() - it->second;
+						nbrRecontacts++;
+						sumOfInterContactDur+=duration;
+						if (nbrRecontacts!=0){
+							intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
+						}
+					}
+
 					executeInitiatorRole(RIB,NULL,destAddr);
+
+					/** Contacts duration stats				 */
 					contacts.insert(std::pair<LAddress::L3Type, double>(destAddr, simTime().dbl()));
 				}
 			}
@@ -407,13 +425,15 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					iss >> addr;
 				}
 				LAddress::L3Type destAddr = addr;
+
+				/** Contacts duration stats				 */
 				double duration = simTime().dbl() - (contacts.find(destAddr)->second);
 				nbrContacts++;
-				if (nbrContacts!=0){
-					contactDurMean = (contactDurMean + duration) / double (nbrContacts);
-				}
+				sumOfContactDur+=duration;
 				contacts.erase(destAddr);
-				contactDurVector.record(contactDurMean);
+				if (nbrContacts!=0){
+					contactDurVector.record(sumOfContactDur/ double (nbrContacts));
+				}
 			}
 			break;
 	}
@@ -791,6 +811,9 @@ void ProphetV2::finish()
 
 	recordScalar("#sent", numSent);
 	recordScalar("#received", numReceived);
+
+	recordScalar("# of Contacts", nbrContacts);
+	recordScalar("# of intercontacts", nbrRecontacts);
 
 	hopCountStats.recordAs("hop count");
 //    // This function is called by OMNeT++ at the end of the simulation.

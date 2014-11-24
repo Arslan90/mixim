@@ -132,13 +132,21 @@ private:
     cOutVector predsMin;
     cOutVector predsVariance;
 
-    double contactDurMean;
+    double sumOfContactDur;
 
-    long nbrContacts;
+    int nbrContacts;
 
     cOutVector contactDurVector;
 
     std::map<LAddress::L3Type, double> contacts;
+
+    double sumOfInterContactDur;
+
+    int nbrRecontacts;
+
+    cOutVector intercontactDurVector;
+
+
 
 	/** delivery predictability initialization constant*/
 	double PEncMax;
