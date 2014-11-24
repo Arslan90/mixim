@@ -491,6 +491,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			// aging of predictions that will be sent
 			// creating a copy of preds
 			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
+			ageDeliveryPreds();
 			tmp.insert(preds.begin(),preds.end());
 //			ribPkt->setPreds(tmp);
 //			ribPkt = prepareProphet(RIB, myNetwAddr, LAddress::L3BROADCAST, NULL, &tmp);
@@ -674,6 +675,7 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 
 	// step 2 : check if we have any bundle that can be offered to @encouterdNode
 
+	ageDeliveryPreds();
 	predsIterator itCurrentNode;
 	for (predsIterator itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
 		itCurrentNode = preds.find(itEncouterdNode->first);
