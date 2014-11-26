@@ -1,0 +1,5 @@
+1 - Generation of Trips :
+./randomTrips.py -n petitprophet.net.xml -o petitprophet.trips.xml -b 0 -e 3600 -p 5 -s 0
+2 - Generation of routes :
+duarouter -n petitprophet.net.xml -t petitprophet.trips.xml -o petitprophet.rou.xml --ignore-errors
+

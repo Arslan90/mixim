@@ -146,7 +146,32 @@ private:
 
     cOutVector intercontactDurVector;
 
+    /**
+     * Contact between 2 nodes, where the initiator role had received packets of kind Bundle
+     */
+    int nbrSuccessfulContact;
 
+    int nbrFailedContactBeforeRIB;
+    int nbrFailedContactAtRIB;
+    int nbrFailedContactAtBundle_Offer;
+    int nbrFailedContactAtBundle_Response;
+
+    /**
+     * Map for the state of the initator role during contact
+     */
+    std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
+
+    typedef std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator contactStateIterator;
+
+
+    int RIBInitRole;
+    int RIBListRole;
+    int Bundle_OfferListRole;
+    int Bundle_OfferInitRole;
+    int Bundle_ResponseInitRole;
+    int Bundle_ResponseListRole;
+    int BundleInitRole;
+    int BundleListRole;
 
 	/** delivery predictability initialization constant*/
 	double PEncMax;

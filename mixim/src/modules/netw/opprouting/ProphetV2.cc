@@ -90,6 +90,22 @@ void ProphetV2::initialize(int stage)
 	    sumOfInterContactDur = 0.0;
 	    intercontactDurVector.setName("Evolution of intercontact duration mean");
 
+	    nbrSuccessfulContact = 0;
+        nbrFailedContactBeforeRIB = 0;
+        nbrFailedContactAtRIB= 0;
+        nbrFailedContactAtBundle_Offer = 0;
+        nbrFailedContactAtBundle_Response = 0;
+        contactState = std::map<LAddress::L3Type, Prophetv2MessageKinds>();
+
+        RIBInitRole= 0;
+        RIBListRole= 0;
+        Bundle_OfferListRole= 0;
+        Bundle_OfferInitRole= 0;
+        Bundle_ResponseInitRole= 0;
+        Bundle_ResponseListRole= 0;
+        BundleInitRole= 0;
+        BundleListRole= 0;
+
 //	    sentStats.setName("Sent Prophet message");
 //	    sentStats.setRangeAutoUpper(0);
 //	    sentVector.setName("Statistics for sent Prophet Message");
@@ -434,6 +450,30 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 				if (nbrContacts!=0){
 					contactDurVector.record(sumOfContactDur/ double (nbrContacts));
 				}
+
+				contactStateIterator it;
+				it = contactState.find(destAddr);
+				if (it != contactState.end()){
+					switch (it->second) {
+					case RIB:
+						nbrFailedContactAtRIB++;
+						break;
+					case Bundle_Offer:
+						nbrFailedContactAtBundle_Offer++;
+						break;
+					case Bundle_Response:
+						nbrFailedContactAtBundle_Response++;
+						break;
+					case Bundle:
+						nbrSuccessfulContact++;
+						break;
+					default:
+						nbrFailedContactBeforeRIB++;
+						break;
+					}
+					contactState.erase(destAddr);
+				}
+
 			}
 			break;
 	}
@@ -492,6 +532,8 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 
 void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
+	contactStateIterator it;
+
 	switch (kind) {
 		case HELLO:
 			break;
@@ -526,12 +568,27 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			numSent++;
 			ribPkt->setHopCount(ribPkt->getHopCount()+1);
 
+			it = contactState.find(destAddr);
+			if (it != contactState.end()){
+				contactState.erase(destAddr);
+			}
+
+			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(destAddr,RIB));
+			RIBInitRole++;
+
 		}
 			break;
 		case Bundle_Offer:
 			/*
 			 * nothing to do for now
 			 */
+			it = contactState.find(prophetPkt->getSrcAddr());
+			if (it != contactState.end()){
+				contactState.erase(prophetPkt->getSrcAddr());
+			}
+
+			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(prophetPkt->getSrcAddr(),Bundle_Offer));
+			Bundle_OfferInitRole++;
 			break;
 		case Bundle_Response:
 		{
@@ -542,9 +599,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 * step 1 : check if offered bundles are already stored in this node,
 			 * in that case delete them from the offered list 
 			 */ 
-			for (std::list<Prophet_Struct::bndl_meta>::iterator it = bundleToAcceptMeta.begin(); it !=bundleToAcceptMeta.end(); ++it) {
-				if (exist(*it)){
-					it = bundleToAcceptMeta.erase(it);
+			for (std::list<Prophet_Struct::bndl_meta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
+				if (exist(*it2)){
+					it2 = bundleToAcceptMeta.erase(it2);
 				}
 			}
 			
@@ -565,6 +622,14 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 */
 			numSent++;
 			responsePkt->setHopCount(responsePkt->getHopCount()+1);
+
+			it = contactState.find(prophetPkt->getSrcAddr());
+			if (it != contactState.end()){
+				contactState.erase(prophetPkt->getSrcAddr());
+			}
+
+			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(prophetPkt->getSrcAddr(),Bundle_Response));
+			Bundle_ResponseInitRole++;
 		}
 			break;
 		case Bundle:
@@ -572,9 +637,18 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
 			WaveShortMessage *wsm = tmp->dup();
 			storeBundle(wsm);
+			int addr = prophetPkt->getSrcAddr();
 			if ((tmp->getRecipientAddress()==LAddress::L3BROADCAST)||(tmp->getRecipientAddress()==myNetwAddr)){
 				sendUp(prophetPkt);
 			}
+
+			it = contactState.find(prophetPkt->getSrcAddr());
+			if (it != contactState.end()){
+				contactState.erase(prophetPkt->getSrcAddr());
+			}
+
+			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(addr,Bundle));
+			BundleInitRole++;
 		}
 			break;
 		default:
@@ -595,17 +669,20 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		case RIB:
 		{
 			update(prophetPkt);
+			RIBListRole++;
 		}
 			break;
 		case Bundle_Offer:
 		{
 			defineBundleOffer(prophetPkt);
+			Bundle_OfferListRole++;
 		}
 			break;
 		case Bundle_Response:
 			/*
 			 * nothing to do for now
 			 */
+			Bundle_ResponseListRole++;
 			break;
 		case Bundle:
 		{
@@ -634,6 +711,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 					}
 				}
 			}
+			BundleListRole++;
 		}
 			break;
 		default:
@@ -813,7 +891,25 @@ void ProphetV2::finish()
 	recordScalar("#received", numReceived);
 
 	recordScalar("# of Contacts", nbrContacts);
-	recordScalar("# of intercontacts", nbrRecontacts);
+	recordScalar("# of InterContacts", nbrRecontacts);
+
+	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
+	recordScalar("# failed contacts at RIB", nbrFailedContactAtRIB);
+	recordScalar("# failed contacts at Bundle_Offer", nbrFailedContactAtBundle_Offer);
+	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
+	recordScalar("# successful contacts", nbrSuccessfulContact);
+
+
+	recordScalar("# RIB Initiator Role", RIBInitRole);
+	recordScalar("# Bundle_Offer Initiator Role", Bundle_OfferInitRole);
+	recordScalar("# Bundle_Response Initiator Role", Bundle_ResponseInitRole);
+	recordScalar("# Bundle Initiator Role", BundleInitRole);
+
+	recordScalar("# RIB Listener Role", RIBListRole);
+    recordScalar("# Bundle_Offer Listener Role", Bundle_OfferListRole);
+    recordScalar("# Bundle_Response Listener Role", Bundle_ResponseListRole);
+	recordScalar("# Bundle Listener Role", BundleListRole);
+
 
 	hopCountStats.recordAs("hop count");
 //    // This function is called by OMNeT++ at the end of the simulation.
