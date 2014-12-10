@@ -2,4 +2,6 @@
 ./generateTurnDefs.py -c connection.xml -t turndef.xml
 2 - Génération des routes via JTRRouter
 jtrrouter --flow-files=flow.xml --turn-ratio-files=turndef.xml --net-file=petitprophet.net.xml -s end,B0R --output-file=petitprophet.rou.xml -b 0 -e 600 --max-edges-factor 10
-
+3 - Rajout des circuits suivants au fichier petitprophet.rou.xml
+   <route id="virtual_loop0" color="1,1,0" edges="start B0 B1 E2 A1R D2R B1 B2 B3 B4 end"/>
+   <route id="virtual_loop1" color="1,1,0" edges="B4R B3R B2R B1R D2 A1 E2R B1R B0R "/>
