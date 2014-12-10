@@ -1,0 +1,45 @@
+Loading net-file from 'petitprophet.net.xml'... 
+ done (19ms).
+Loading done.
+Simulation started with time: 0.00
+Warning: Teleporting vehicle '0_0'; collision, lane='E1R_0', time=165.80.
+Warning: Vehicle '0_0' ends teleporting on edge 'B1R', simulation time 165.80.
+Warning: Teleporting vehicle '0_23'; collision, lane='C1R_0', time=262.60.
+Warning: Vehicle '0_23' ends teleporting on edge 'C1', simulation time 265.40.
+Warning: Teleporting vehicle '1_7'; collision, lane='E1_0', time=310.00.
+Warning: Vehicle '1_7' ends teleporting on edge 'C2', simulation time 310.00.
+Warning: Teleporting vehicle '0_42'; collision, lane='B1R_0', time=380.60.
+Warning: Vehicle '0_42' ends teleporting on edge 'B1', simulation time 380.60.
+Warning: Teleporting vehicle '0_42'; collision, lane='E1_0', time=383.00.
+Warning: Vehicle '0_42' ends teleporting on edge 'C2', simulation time 383.00.
+Warning: Teleporting vehicle '0_32'; collision, lane='C2_0', time=383.20.
+Warning: Vehicle '0_32' ends teleporting on edge 'C3', simulation time 383.20.
+Warning: Teleporting vehicle '1_24'; collision, lane='F2R_0', time=419.00.
+Warning: Vehicle '1_24' ends teleporting on edge 'B3', simulation time 419.00.
+Warning: Teleporting vehicle '0_24'; collision, lane='B3R_0', time=498.20.
+Warning: Vehicle '0_24' ends teleporting on edge 'B2R', simulation time 498.20.
+Warning: Teleporting vehicle '1_9'; collision, lane='F2R_0', time=535.00.
+Warning: Vehicle '1_9' ends teleporting on edge 'B3', simulation time 554.00.
+Warning: Teleporting vehicle '1_9'; collision, lane='B3R_0', time=557.00.
+Warning: Vehicle '1_9' ends teleporting on edge 'B2R', simulation time 558.20.
+Warning: Teleporting vehicle '1_9'; collision, lane='E2_0', time=560.20.
+Warning: Vehicle '1_9' ends teleporting on edge 'E2R', simulation time 560.20.
+Warning: Teleporting vehicle '1_9'; collision, lane='E2_0', time=563.60.
+Warning: Vehicle '1_9' ends teleporting on edge 'E2R', simulation time 563.60.
+Warning: Teleporting vehicle '1_9'; collision, lane='E2_0', time=569.00.
+Warning: Vehicle '1_9' ends teleporting on edge 'E2R', simulation time 569.00.
+Warning: Teleporting vehicle '1_9'; collision, lane='E2_0', time=573.00.
+Warning: Vehicle '1_9' ends teleporting on edge 'E2R', simulation time 573.00.
+Warning: Teleporting vehicle '1_9'; collision, lane='C2_0', time=581.20.
+Warning: Vehicle '1_9' ends teleporting on edge 'F1R', simulation time 587.60.
+Simulation End: The final simulation step has been reached.
+Performance: 
+ Duration: 946 ms
+ Real time factor: 1.05708e+06
+ UPS: 211644.820296
+Vehicles: 
+ Emitted: 120
+ Running: 26
+ Waiting: 0
+
+Simulation ended at time: 1000.00

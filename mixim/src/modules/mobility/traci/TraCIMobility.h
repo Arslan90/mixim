@@ -153,6 +153,22 @@ class TraCIMobility : public BaseMobility
 
 		/* ARTURO jusqu'ici mes functions qui travaillent très très bien.  ok I'm doing progress ...  ;)*/
 
+		// My Function
+		void commandChangeRouteById(std::string routeId) {
+				getManager()->commandChangeRouteById(getExternalId(), routeId);
+		}
+		std::list<std::string> commandGetRouteIds() {
+			return getManager()->commandGetRouteIds();
+		}
+
+		std::string commandGetRouteId() {
+			return getManager()->commandGetRouteId(getExternalId());
+		}
+
+		std::list<std::string> commandGetEdgesOfRoute(std::string routeId) {
+			return getManager()->commandGetEdgesOfRoute(routeId);
+		}
+
 
 	protected:
 		bool debug; /**< whether to emit debug messages */

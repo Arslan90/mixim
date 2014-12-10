@@ -40,5 +40,12 @@ simple TraCIScenarioManager
         int margin = default(25);  // margin to add to all received vehicle positions
         string roiRoads = default("");  // which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty
         string roiRects = default("");  // which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty
+        
+        // My Variables
+        bool automated = default(false); // automatic creation of loop vehicles
+        int totalVehicles = default(0);
+		int loopVehiclesInPourcentage= default (0);
+		string prefixForLoopRoute = default("virtual_loop");
+        
 }
 

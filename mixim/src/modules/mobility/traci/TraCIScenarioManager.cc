@@ -65,6 +65,38 @@ void TraCIScenarioManager::initialize(int stage) {
 	std::string roiRoads_s = par("roiRoads");
 	std::string roiRects_s = par("roiRects");
 
+	// section related to the creation of automatic loop vehicles
+	automated = par("automated");
+	MYDEBUG << "The creation of loop vehicles is automated" << endl;
+
+	totalVehicles = par("totalVehicles");
+	if (totalVehicles < 0){
+		error("Total number of vehicles can't be negative");
+	} else if (totalVehicles == 0) {
+		MYDEBUG << "Total number of vehicles equal to zero (0), please check the total number of vehicles" << endl;
+	}
+
+	loopVehiclesInPourcentage = par("loopVehiclesInPourcentage");
+	if (loopVehiclesInPourcentage < 0){
+		error("The number of loop vehicles can't be negative");
+	}
+
+	if (loopVehiclesInPourcentage > 0){
+		stepForVehiclesLoop = std::ceil( 100.00 / (double) loopVehiclesInPourcentage );
+	}else {
+		stepForVehiclesLoop = 0 ;
+	}
+
+	if (stepForVehiclesLoop == 0){
+		MYDEBUG << "The step for vehicles loop equal to zero (0), please check parameters" << endl;
+	}
+
+	prefixForLoopRoute = par("prefixForLoopRoute").stdstringValue();
+
+	allVehiclesId = std::vector<std::string>();
+
+	// end of this section
+
 	// parse roiRoads
 	roiRoads.clear();
 	std::istringstream roiRoads_i(roiRoads_s);
@@ -640,6 +672,37 @@ std::list<std::string> TraCIScenarioManager::commandGetSingleVehicleRoutes(std::
 	return res;
 }
 
+std::list<std::string> TraCIScenarioManager::commandGetEdgesOfRoute(std::string routeId) {
+	std::list<std::string> res;
+
+	std::string objectId = "";
+	uint8_t variableType = TYPE_STRINGLIST;
+	//Variable 	VehicleTypeID
+	TraCIBuffer buf = queryTraCI(CMD_GET_ROUTE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_EDGES) << routeId );
+
+	// read additional CMD_GET_VEHICLE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_ROUTE_VARIABLE);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == VAR_EDGES);
+	std::string polyId_r; buf >> polyId_r;
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == TYPE_STRINGLIST);
+	uint32_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		std::string id; buf >> id;
+		res.push_back(id);
+	}
+
+	ASSERT(buf.eof());
+	return res;
+}
+
 
 
 
@@ -1148,6 +1211,99 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 		}
 	}
 
+}
+
+void TraCIScenarioManager::commandChangeRouteById(std::string nodeId, std::string routeId)
+{
+	uint8_t variableId = VAR_ROUTE_ID;
+	uint8_t variableType = TYPE_STRING;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << routeId);
+
+//	uint8_t variableId = VAR_SPEED;
+//	uint8_t variableType = TYPE_DOUBLE;
+//	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << speed);
+
+	ASSERT(buf.eof());
+}
+
+bool TraCIScenarioManager::isALoopVehicle(std::string vehicleId)
+{
+	bool isALoopVehicle = false;
+	if (stepForVehiclesLoop > 0){
+		int nbrLoopVehicles = allVehiclesId.size() / stepForVehiclesLoop;
+		if (nbrLoopVehicles >= 1){
+			for (int i = 1; i <= nbrLoopVehicles; i++){
+				if (allVehiclesId[i*stepForVehiclesLoop-1].compare(vehicleId) == 0){
+					isALoopVehicle = true;
+					break;
+				}
+			}
+		}
+	}
+	return isALoopVehicle;
+}
+
+std::list<std::string> TraCIScenarioManager::commandGetRouteIds()
+{
+	std::list<std::string> res;
+
+	std::string objectId = "";
+	TraCIBuffer buf = queryTraCI(CMD_GET_ROUTE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(ID_LIST) << objectId);
+
+	// read additional CMD_GET_ROUTE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_ROUTE_VARIABLE);
+
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == ID_LIST);
+
+	std::string polyId_r; buf >> polyId_r;
+
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == TYPE_STRINGLIST);
+
+	uint32_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		std::string id; buf >> id;
+		res.push_back(id);
+	}
+
+	ASSERT(buf.eof());
+	return res;
+}
+
+std::string TraCIScenarioManager::commandGetRouteId(std::string nodeId)
+{
+	std::string res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_ROUTE_ID) << nodeId);
+
+	// read additional CMD_GET_VEHICLE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_VEHICLE_VARIABLE);
+
+	uint8_t varId; buf >> varId; //ubyte
+	ASSERT(varId == VAR_ROUTE_ID);
+
+	std::string polyId_r; buf >> polyId_r; //string
+	ASSERT(polyId_r == nodeId);
+
+	uint8_t resType_r; buf >> resType_r;  //ubyte
+	ASSERT(resType_r == TYPE_STRING);
+	buf >> res; //return response
+
+	ASSERT(buf.eof());
+	return res;
 }
 
 void TraCIScenarioManager::processSubcriptionResult(TraCIBuffer& buf) {

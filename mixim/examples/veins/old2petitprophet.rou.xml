@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<!-- generated on Tue Nov 25 19:40:55 2014 by SUMO jtrrouter Version 0.13.1
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/jtrrouterConfiguration.xsd">
+
+    <input>
+        <net-file value="petitprophet.net.xml"/>
+        <flow-files value="flow.xml"/>
+        <turn-ratio-files value="turndef.xml"/>
+    </input>
+
+    <output>
+        <output-file value="petitprophet.rou.xml"/>
+    </output>
+
+    <processing>
+        <max-edges-factor value="10"/>
+        <sink-edges value="end,B0R"/>
+    </processing>
+
+    <time>
+        <begin value="0"/>
+        <end value="600"/>
+    </time>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/routes_file.xsd">
+   <vType id="type1" accel="0.8" decel="4.5" sigma="0" length="5" maxSpeed="70" vClass="bus"/>
+   
+   <route id="route0" color="1,1,0" edges="start B0 B1 B2 B3 B4 end"/>
+   <route id="virtual_loop0" color="1,1,0" edges="start B0 B1 E2 A1R D2R B1 B2 B3 B4 end"/>
+   <route id="virtual_loop5" color="1,1,0" edges="start B0 B1 E1 C1R D1R B1 B2 B3 B4 end"/>
+
+   <vehicle id="0" type="type1" route="route0" depart="0" color="1,0,1"/>
+   <vehicle id="1" type="type1" route="route0" depart="50" color="1,1,0"/>
+   <vehicle id="2" type="type1" route="route0" depart="100" color="1,1,1"/>
+   <vehicle id="3" type="type1" route="route0" depart="150" color="0,1,0"/>
+   <vehicle id="4" type="type1" route="route0" depart="200" color="0,0,1"/>
+   <vehicle id="5" type="type1" route="route0" depart="250" color="0,0,1"/>
+   <vehicle id="6" type="type1" route="route0" depart="300" color="0,0,1"/>
+   <vehicle id="7" type="type1" route="route0" depart="350" color="0,0,1"/>
+   <vehicle id="8" type="type1" route="route0" depart="400" color="0,0,1"/>
+</routes>

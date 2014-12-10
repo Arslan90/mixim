@@ -900,15 +900,15 @@ void ProphetV2::finish()
 	recordScalar("# successful contacts", nbrSuccessfulContact);
 
 
-	recordScalar("# RIB Initiator Role", RIBInitRole);
-	recordScalar("# Bundle_Offer Initiator Role", Bundle_OfferInitRole);
-	recordScalar("# Bundle_Response Initiator Role", Bundle_ResponseInitRole);
-	recordScalar("# Bundle Initiator Role", BundleInitRole);
-
-	recordScalar("# RIB Listener Role", RIBListRole);
-    recordScalar("# Bundle_Offer Listener Role", Bundle_OfferListRole);
-    recordScalar("# Bundle_Response Listener Role", Bundle_ResponseListRole);
-	recordScalar("# Bundle Listener Role", BundleListRole);
+//	recordScalar("# RIB Initiator Role", RIBInitRole);
+//	recordScalar("# Bundle_Offer Initiator Role", Bundle_OfferInitRole);
+//	recordScalar("# Bundle_Response Initiator Role", Bundle_ResponseInitRole);
+//	recordScalar("# Bundle Initiator Role", BundleInitRole);
+//
+//	recordScalar("# RIB Listener Role", RIBListRole);
+//  recordScalar("# Bundle_Offer Listener Role", Bundle_OfferListRole);
+//  recordScalar("# Bundle_Response Listener Role", Bundle_ResponseListRole);
+//	recordScalar("# Bundle Listener Role", BundleListRole);
 
 
 	hopCountStats.recordAs("hop count");

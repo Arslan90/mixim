@@ -111,6 +111,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		void sendDtnMessage();
 		int vpaDestAddr();
 
+		void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
 		//AND My functions
 		void inJunction(); //Check if vehicleID is or not in junction area.
 		//void splitMessagesReceived(std::string n); //Split the string: const char* "VPAId+sequenceNumber"
@@ -138,6 +140,12 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		//void handlePositionUpdate();
 		virtual void finish(); //Create final statistics for every vehicle
 
+		// My variables
+		bool loopVehicle;
+		std::string currentRouteId;
+		std::list<std::string> currentRoute;
+		bool reroutedToLoopRoute;
+		std::string edgeForLooping;
 
 	protected:
 		virtual void onBeacon(WaveShortMessage* wsm);

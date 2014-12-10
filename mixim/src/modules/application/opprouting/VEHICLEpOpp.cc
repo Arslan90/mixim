@@ -82,6 +82,20 @@ void VEHICLEpOpp::initialize(int stage) {
 			dtnMsgReceived = 0;
 
 		}
+
+//		// My variables
+//		vehicleIdAsInt = par("vehicleIdAsInt");
+//		if (vehicleIdAsInt){
+//			vehicleId = atoi(traci->getExternalId().c_str());
+//			int modulo = traci->getManager()->getStepForVehiclesLoop();
+//			if (modulo != 0){
+//				loopVehicle ( ( (vehicleId-1) % modulo) == 0  )
+//			}
+//		}else {
+//			vehicleId = -1;
+//			loopVehicle = false;
+//		}
+
 	}
 	else if(stage==1) {
 	        scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
@@ -93,6 +107,18 @@ void VEHICLEpOpp::initialize(int stage) {
 	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
 	        	scheduleAt(simTime() + tmp, dtnTestMsg);
 	        }
+
+	        traci->getManager()->addVehicleID(traci->getExternalId());
+			loopVehicle = false;
+			loopVehicle = traci->getManager()->isALoopVehicle(traci->getExternalId());
+
+			currentRoute = traci->commandGetSingleVehicleRoutes();
+			currentRouteId = traci->commandGetRouteId();
+
+			EV << "My current route id is : " << currentRouteId << endl;
+
+			reroutedToLoopRoute = false;
+			edgeForLooping ="";
 	}
 }
 
@@ -497,6 +523,140 @@ int VEHICLEpOpp::vpaDestAddr()
 		}
 	}
 	return vpaDestAddr;
+}
+
+void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+	if (signalID == mobilityStateChangedSignal) {
+
+//		std::string currentEdgeId = traci->getRoadId();
+//		EV << "my current road id is :" << currentEdgeId << endl;
+
+//		std::list<std::string> route, reverseadRoute;
+//
+//		route = traci->commandGetSingleVehicleRoutes();
+//
+//		std::string tmp;
+//		std::list<std::string>::iterator it, it2;
+//
+//		for (it  = route.begin();  it  != route.end(); it++) {
+//			tmp+= *it + " ";
+//		}
+//		EV << "my current route is defined like this : "<< tmp << endl;
+
+//		reverseadRoute = route;
+//		reverseadRoute.reverse();
+//
+//		std::string firstEdgeOfLoop;
+//		for (it  = route.begin();  it  != route.end(); it++) {
+//			for (it2  = reverseadRoute.begin();  it2  != reverseadRoute.end(); it2++) {
+//				if (*it == *it2){
+//					// we just find the recurrent edge
+//					firstEdgeOfLoop = *it;
+//					break;
+//				}
+//			}
+//		}
+//
+//		if (currentEdgeId == "B1"){
+//			// we have to reroute this vehicule
+//			traci->commandChangeRouteById("")
+//		}
+//		if (currentEdgeId == ":6_13"){
+//			// we have to reroute this vehicule
+//			traci->commandChangeRoute("B1R",9999);
+//		}
+//
+//		if (traci->getRoadId() == "B1"){
+//			traci->commandChangeRouteById("virtual_loop");
+//		}
+
+		if (loopVehicle){
+			if (!reroutedToLoopRoute){
+				// list of all avaibales routes
+				std::list<std::string> routes = traci->commandGetRouteIds();
+				std::vector<std::string> allRoutes;
+				for (std::list<std::string>::iterator it = routes.begin(); it != routes.end(); it++){
+					EV << *it << endl;
+					allRoutes.push_back(*it);
+				}
+
+				// detecting loop routes that are compatible with my actual route
+				std::string startingEdge = currentRoute.front();
+				std::string startingEdgeLoopRoute;
+				std::list<std::string>edgesLoopRoute;
+
+				std::vector<std::string> compatibleLoopRoutes = std::vector<std::string>();
+				for (unsigned int i = 0 ; i < allRoutes.size(); i++){
+					// check if this route is a loop route
+					if (allRoutes[i].find(traci->getManager()->getPrefixForLoopRoute()) == 0){
+
+						edgesLoopRoute = traci->commandGetEdgesOfRoute(allRoutes[i]);
+						startingEdgeLoopRoute = edgesLoopRoute.front();
+
+						// check if this route is compatible with my actual route (same starting edge)
+						if (startingEdge.compare(startingEdgeLoopRoute) == 0){
+							compatibleLoopRoutes.push_back(allRoutes[i]);
+						}
+					}
+				}
+
+				// selecting randomly a compatible loop route
+				if (compatibleLoopRoutes.size()>0){
+					currentRouteId = compatibleLoopRoutes[intrand(compatibleLoopRoutes.size())];
+					currentRoute = traci->commandGetEdgesOfRoute(currentRouteId);
+
+//				std::list<std::string> reverseadRoute = currentRoute;
+//				reverseadRoute.reverse();
+
+//				std::list<std::string> reverseadRoute;
+//				for (std::list<std::string>::iterator it = currentRoute.begin(); it != currentRoute.end(); it++) {
+//					std::string tmp = *it;
+//					EV << *it << endl;
+//					reverseadRoute.push_front(*it);
+//				}
+
+
+				// detecting the edge for infinite looping
+
+					std::vector<std::string> tmpVector = std::vector<std::string>(currentRoute.begin(),currentRoute.end());
+					for (unsigned int i = 0; i < tmpVector.size()-1; ++i) {
+						for (unsigned int j = i+1; j < tmpVector.size(); ++j) {
+							if (tmpVector[i]==tmpVector[j]){
+								std::string tmp1 = tmpVector[i];
+								std::string tmp2 = tmpVector[j];
+								edgeForLooping = tmp1;
+								break;
+							}
+						}
+					}
+
+//				for (std::list<std::string>::iterator it = currentRoute.begin(); it != currentRoute.end(); it++) {
+//					if (*it == currentRoute.back()){
+//						break;
+//					}
+//					for (std::list<std::string>::iterator it2 = it+1; it2 != currentRoute.end(); it2++) {
+//						if (*it==*it2){
+//							std::string tmp1 = *it;
+//							std::string tmp2 = *it2;
+//							EV << *it2 << endl;
+//							edgeForLooping = *it;
+//							break;
+//						}
+//					}
+//				}
+
+				// rerouting and setting boolean
+				traci->commandChangeRouteById(currentRouteId);
+				reroutedToLoopRoute = true;
+				}
+			} else {
+				if (traci->getRoadId() == edgeForLooping){
+					traci->commandChangeRouteById(currentRouteId);
+				}
+			}
+		}
+	}
 }
 
 void VEHICLEpOpp::sendMessage() {

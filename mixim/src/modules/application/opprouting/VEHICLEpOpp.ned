@@ -24,5 +24,8 @@ simple VEHICLEpOpp extends BaseWaveApplLayer
 		bool dtnTestMode = default(false); // wheter we are testing DTN
 		int dtnTestCycle @unit("s") = default(5s); // cycle of periodic sending dtnMessage
 		bool dtnSynchronized = default(false);
+		
+		// my functions
+		bool vehicleIdAsInt = default(false);
            
 }

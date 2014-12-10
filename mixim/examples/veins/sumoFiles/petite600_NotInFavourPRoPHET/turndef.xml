@@ -1,0 +1,200 @@
+<turn-defs>
+	<fromEdge id="A1">
+		<toEdge id="A1R" probability="33.3333333333"/>
+		<toEdge id="A2" probability="33.3333333333"/>
+		<toEdge id="E2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="A1R">
+		<toEdge id="A1" probability="50.0"/>
+		<toEdge id="D2R" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="A2">
+		<toEdge id="A2R" probability="33.3333333333"/>
+		<toEdge id="A3" probability="33.3333333333"/>
+		<toEdge id="F2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="A2R">
+		<toEdge id="A1R" probability="33.3333333333"/>
+		<toEdge id="A2" probability="33.3333333333"/>
+		<toEdge id="E2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="A3">
+		<toEdge id="A3R" probability="50.0"/>
+		<toEdge id="G2" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="A3R">
+		<toEdge id="A2R" probability="33.3333333333"/>
+		<toEdge id="A3" probability="33.3333333333"/>
+		<toEdge id="F2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="B0">
+		<toEdge id="B0R" probability="25.0"/>
+		<toEdge id="B1" probability="25.0"/>
+		<toEdge id="D1" probability="25.0"/>
+		<toEdge id="D2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B0R">
+		<toEdge id="B0" probability="100.0"/>
+	</fromEdge>
+	<fromEdge id="B1">
+		<toEdge id="B1R" probability="25.0"/>
+		<toEdge id="B2" probability="25.0"/>
+		<toEdge id="E1" probability="25.0"/>
+		<toEdge id="E2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B1R">
+		<toEdge id="B0R" probability="25.0"/>
+		<toEdge id="B1" probability="25.0"/>
+		<toEdge id="D1" probability="25.0"/>
+		<toEdge id="D2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B2">
+		<toEdge id="B2R" probability="25.0"/>
+		<toEdge id="B3" probability="25.0"/>
+		<toEdge id="F1" probability="25.0"/>
+		<toEdge id="F2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B2R">
+		<toEdge id="B1R" probability="25.0"/>
+		<toEdge id="B2" probability="25.0"/>
+		<toEdge id="E1" probability="25.0"/>
+		<toEdge id="E2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B3">
+		<toEdge id="B3R" probability="25.0"/>
+		<toEdge id="B4" probability="25.0"/>
+		<toEdge id="G1R" probability="25.0"/>
+		<toEdge id="G2R" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B3R">
+		<toEdge id="B2R" probability="25.0"/>
+		<toEdge id="B3" probability="25.0"/>
+		<toEdge id="F1" probability="25.0"/>
+		<toEdge id="F2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="B4">
+		<toEdge id="B4R" probability="50.0"/>
+		<toEdge id="end" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="B4R">
+		<toEdge id="B3R" probability="25.0"/>
+		<toEdge id="B4" probability="25.0"/>
+		<toEdge id="G1R" probability="25.0"/>
+		<toEdge id="G2R" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="C1">
+		<toEdge id="C1R" probability="33.3333333333"/>
+		<toEdge id="C2" probability="33.3333333333"/>
+		<toEdge id="E1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="C1R">
+		<toEdge id="C1" probability="50.0"/>
+		<toEdge id="D1R" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="C2">
+		<toEdge id="C2R" probability="33.3333333333"/>
+		<toEdge id="C3" probability="33.3333333333"/>
+		<toEdge id="F1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="C2R">
+		<toEdge id="C1R" probability="33.3333333333"/>
+		<toEdge id="C2" probability="33.3333333333"/>
+		<toEdge id="E1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="C3">
+		<toEdge id="C3R" probability="50.0"/>
+		<toEdge id="G1" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="C3R">
+		<toEdge id="C2R" probability="33.3333333333"/>
+		<toEdge id="C3" probability="33.3333333333"/>
+		<toEdge id="F1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="D1">
+		<toEdge id="C1" probability="50.0"/>
+		<toEdge id="D1R" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="D1R">
+		<toEdge id="B0R" probability="25.0"/>
+		<toEdge id="B1" probability="25.0"/>
+		<toEdge id="D1" probability="25.0"/>
+		<toEdge id="D2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="D2">
+		<toEdge id="A1" probability="50.0"/>
+		<toEdge id="D2R" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="D2R">
+		<toEdge id="B0R" probability="25.0"/>
+		<toEdge id="B1" probability="25.0"/>
+		<toEdge id="D1" probability="25.0"/>
+		<toEdge id="D2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="E1">
+		<toEdge id="C1R" probability="33.3333333333"/>
+		<toEdge id="C2" probability="33.3333333333"/>
+		<toEdge id="E1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="E1R">
+		<toEdge id="B1R" probability="25.0"/>
+		<toEdge id="B2" probability="25.0"/>
+		<toEdge id="E1" probability="25.0"/>
+		<toEdge id="E2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="E2">
+		<toEdge id="A1R" probability="33.3333333333"/>
+		<toEdge id="A2" probability="33.3333333333"/>
+		<toEdge id="E2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="E2R">
+		<toEdge id="B1R" probability="25.0"/>
+		<toEdge id="B2" probability="25.0"/>
+		<toEdge id="E1" probability="25.0"/>
+		<toEdge id="E2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="F1">
+		<toEdge id="C2R" probability="33.3333333333"/>
+		<toEdge id="C3" probability="33.3333333333"/>
+		<toEdge id="F1R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="F1R">
+		<toEdge id="B2R" probability="25.0"/>
+		<toEdge id="B3" probability="25.0"/>
+		<toEdge id="F1" probability="25.0"/>
+		<toEdge id="F2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="F2">
+		<toEdge id="A2R" probability="33.3333333333"/>
+		<toEdge id="A3" probability="33.3333333333"/>
+		<toEdge id="F2R" probability="33.3333333333"/>
+	</fromEdge>
+	<fromEdge id="F2R">
+		<toEdge id="B2R" probability="25.0"/>
+		<toEdge id="B3" probability="25.0"/>
+		<toEdge id="F1" probability="25.0"/>
+		<toEdge id="F2" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="G1">
+		<toEdge id="B3R" probability="25.0"/>
+		<toEdge id="B4" probability="25.0"/>
+		<toEdge id="G1R" probability="25.0"/>
+		<toEdge id="G2R" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="G1R">
+		<toEdge id="C3R" probability="50.0"/>
+		<toEdge id="G1" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="G2">
+		<toEdge id="B3R" probability="25.0"/>
+		<toEdge id="B4" probability="25.0"/>
+		<toEdge id="G1R" probability="25.0"/>
+		<toEdge id="G2R" probability="25.0"/>
+	</fromEdge>
+	<fromEdge id="G2R">
+		<toEdge id="A3R" probability="50.0"/>
+		<toEdge id="G2" probability="50.0"/>
+	</fromEdge>
+	<fromEdge id="start">
+		<toEdge id="B0" probability="100.0"/>
+	</fromEdge>
+</turn-defs>

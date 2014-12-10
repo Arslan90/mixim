@@ -98,6 +98,19 @@ void TraCIScenarioManagerLaunchd::init_traci() {
 	}
 
 	TraCIScenarioManager::init_traci();
+
+//	//Testing Arslan
+//
+//	TraCICoord coord1;
+//	Coord coord2, coord3;
+//
+//	coord2 = Coord(100,100,0);
+//	coord1 = omnet2traci(coord2);
+//
+//	EV << "For A Omnet Coordinate (100,100) the corresponding Traci Coordinate is " << "(" << coord1.x <<","<< coord1.y <<")"<< endl;
+//
+//	coord3 = traci2omnet(coord1);
+//	EV << "For A Traci Coordinate " << "(" << coord1.x <<","<< coord1.y <<")" << " the corresponding Traci Coordinate is " << "(" << coord3.x <<","<< coord3.y <<")"<< endl;
 }
 
 

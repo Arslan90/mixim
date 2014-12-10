@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<!-- generated on Tue Nov 25 19:08:13 2014 by SUMO jtrrouter Version 0.13.1
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/jtrrouterConfiguration.xsd">
+
+    <input>
+        <net-file value="petitprophet.net.xml"/>
+        <flow-files value="flow.xml"/>
+        <turn-ratio-files value="turndef.xml"/>
+    </input>
+
+    <output>
+        <output-file value="petitprophet.rou.xml"/>
+    </output>
+
+    <processing>
+        <max-edges-factor value="10"/>
+        <sink-edges value="end,B0R"/>
+    </processing>
+
+    <time>
+        <begin value="0"/>
+        <end value="600"/>
+    </time>
+
+</configuration>
+-->
+
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/routes_file.xsd">
+    <vehicle id="0_0" depart="0.00">
+        <route edges="start B0 D1 C1 C2 C3 C3R F1R B2R E1 E1R B1R D1 C1 C2 C3 C3R C2R E1R B2 F1 C2R C2 C2R C2 F1R F2 F2R B3 G1R C3R C2R C1R D1R B0R"/>
+    </vehicle>
+    <vehicle id="1_0" depart="0.00">
+        <route edges="B4R G2R A3R F2R B3 B3R B2R B2 F2 A2R A1R A1 A2 A2R E2R B1R D1 D1R D1 D1R D2 D2R B1 B2 F1 C2R E1R B1R D1 C1 C1R C1 C2 F1R B2R B1R D2 A1 A2 A2R A2 A2R A1R A1 A1R D2R B1 B2 B2R E1 C2 C3 C3R C3 G1 G1R C3R C3 G1 B3R B3 B3R F2 A3 G2 B4 B4R G1R C3R F1R F1 F1R B3 B4 B4R G1R C3R C3 G1 G2R A3R F2R B2R E1 C1R D1R B1 B2 B2R B2 F1 F1R F2 A2R E2R B2 F1 C3 G1 B4 B4R G1R G1 G1R C3R F1R F1 F1R F2 A3 A3R F2R F2 A3 G2 B3R B3 G2R A3R A3 A3R A3 G2 B3R B3 G2R A3R A2R E2R E2 A2 F2R B3 G2R G2 B4 end"/>
+    </vehicle>
+    <vehicle id="0_1" depart="100.00">
+        <route edges="start B0 B0R"/>
+    </vehicle>
+    <vehicle id="1_1" depart="100.00">
+        <route edges="B4R B3R B3 B4 end"/>
+    </vehicle>
+    <vehicle id="0_2" depart="200.00">
+        <route edges="start B0 B1 E2 A1R D2R B0R"/>
+    </vehicle>
+    <vehicle id="1_2" depart="200.00">
+        <route edges="B4R G2R A3R A2R A1R A1 A1R D2R B1 B2 F2 A3 A3R A2R E2R B1R D2 D2R D2 A1 A1R D2R B0R"/>
+    </vehicle>
+    <vehicle id="0_3" depart="300.00">
+        <route edges="start B0 D1 D1R B0R"/>
+    </vehicle>
+    <vehicle id="1_3" depart="300.00">
+        <route edges="B4R B4 B4R G1R C3R C3 G1 G1R G1 B3R F2 A3 A3R A3 A3R A3 A3R A3 G2 G2R A3R F2R B2R B1R B1 B2 B3 B4 end"/>
+    </vehicle>
+    <vehicle id="0_4" depart="400.00">
+        <route edges="start B0 B1 E2 A2 A2R A1R D2R B0R"/>
+    </vehicle>
+    <vehicle id="1_4" depart="400.00">
+        <route edges="B4R B3R B2R E2 A1R A1 A1R A1 E2R E1 C2 C3 C3R F1R F2 A3 A3R A3 G2 B4 B4R B3R B3 G1R C3R F1R F2 A3 A3R F2R F1 C2R C2 F1R F2 F2R F2 A2R A2 A3 A3R A2R A2 F2R F1 F1R B2R E2 A2 A3 A3R F2R F2 F2R F1 C2R E1R E2 E2R E1 C1R C1 E1R E2 A1R A1 E2R B2 B2R E2 E2R B1R B0R"/>
+    </vehicle>
+</routes>

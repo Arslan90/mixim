@@ -29,10 +29,6 @@
 -->
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/routes_file.xsd">
-   
-   <route id="virtual_loop0" color="1,1,0" edges="start B0 B1 E2 A1R D2R B1 B2 B3 B4 end"/>
-   <route id="virtual_loop1" color="1,1,0" edges="B4R B3R B2R B1R D2 A1 E2R B1R B0R "/>
-   
     <vehicle id="0_0" depart="0.00">
         <route edges="start B0 D1 C1 C2 C3 C3R F1R B2R E1 E1R B1R D1 C1 C2 C3 C3R C2R E1R B2 F1 C2R C2 C2R C2 F1R F2 F2R B3 G1R C3R C2R C1R D1R B0R"/>
     </vehicle>

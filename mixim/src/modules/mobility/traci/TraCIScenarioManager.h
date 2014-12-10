@@ -78,105 +78,177 @@ class TraCIScenarioManager : public cSimpleModule
         double cmdGetLaneLength(std::string laneId);
         //ARTURO  END MIS FUNCTIONS
 
+        // My Functions
+        void commandChangeRouteById(std::string nodeId, std::string routeId);
+        std::list<std::string> commandGetRouteIds();
+        std::string commandGetRouteId(std::string nodeId);
+        std::list<std::string> commandGetEdgesOfRoute(std::string routeId);
 
-		const std::map<std::string, cModule*>& getManagedHosts() {
+        int getStepForVehiclesLoop() const
+		{
+			return stepForVehiclesLoop;
+		}
+
+		int getLoopVehicles() const
+		{
+			return loopVehiclesInPourcentage;
+		}
+
+		std::string getPrefixForLoopRoute() const
+		{
+			return prefixForLoopRoute;
+		}
+
+		int getTotalVehicles() const
+		{
+			return totalVehicles;
+		}
+
+		bool isAutomated() const
+		{
+			return automated;
+		}
+
+		void setPrefixForLoopRoute(std::string prefixForLoopRoute)
+		{
+			this->prefixForLoopRoute = prefixForLoopRoute;
+		}
+
+		const std::map<std::string,cModule*> & getManagedHosts()
+		{
 			return hosts;
 		}
 
-	protected:
-		/**
+		void addVehicleID(std::string vehicleId)
+		{
+			allVehiclesId.push_back(vehicleId);
+		}
+
+		bool isALoopVehicle(std::string vehicleId);
+protected:
+    /**
 		 * Coord equivalent for storing TraCI coordinates
 		 */
-		struct TraCICoord {
-			TraCICoord() : x(0), y(0) {}
-			TraCICoord(double x, double y) : x(x), y(y) {}
-			double x;
-			double y;
-		};
+    struct TraCICoord
+    {
+        TraCICoord()
+        :x(0), y(0)
+        {
+        }
 
-		/**
+        TraCICoord(double x, double y)
+        :x(x), y(y)
+        {
+        }
+
+        double x;
+        double y;
+    };
+    /**
 		 * Byte-buffer that stores values in TraCI byte-order
 		 */
-		class TraCIBuffer {
-			public:
-				TraCIBuffer() : buf() {
-					buf_index = 0;
-				}
+    class TraCIBuffer
+    {
+    public:
+        TraCIBuffer()
+        :buf()
+        {
+            buf_index = 0;
+        }
 
-				TraCIBuffer(std::string buf) : buf(buf) {
-					buf_index = 0;
-				}
+        TraCIBuffer(std::string buf)
+        :buf(buf)
+        {
+            buf_index = 0;
+        }
 
-				template<typename T> T read() {
-					T buf_to_return;
-					unsigned char *p_buf_to_return = reinterpret_cast<unsigned char*>(&buf_to_return);
+        template<typename T> T read()
+        {
+            T buf_to_return;
+            unsigned char *p_buf_to_return = reinterpret_cast<unsigned char*>(&buf_to_return);
+            if(isBigEndian()){
+                for(size_t i = 0;i < sizeof (buf_to_return);++i){
+                    if(eof())
+                        throw cRuntimeError("Attempted to read past end of byte buffer");
 
-					if (isBigEndian()) {
-						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
-							if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");
-							p_buf_to_return[i] = buf[buf_index++];
-						}
-					} else {
-						for (size_t i=0; i<sizeof(buf_to_return); ++i) {
-							if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");
-							p_buf_to_return[sizeof(buf_to_return)-1-i] = buf[buf_index++];
-						}
-					}
+                    p_buf_to_return[i] = buf[buf_index++];
+                }
+            }
+            else{
+                for(size_t i = 0;i < sizeof (buf_to_return);++i){
+                    if(eof())
+                        throw cRuntimeError("Attempted to read past end of byte buffer");
 
-					return buf_to_return;
-				}
+                    p_buf_to_return[sizeof (buf_to_return) - 1 - i] = buf[buf_index++];
+                }
+            }
 
-				template<typename T> void write(T inv) {
-					unsigned char *p_buf_to_send = reinterpret_cast<unsigned char*>(&inv);
+            return buf_to_return;
+        }
 
-					if (isBigEndian()) {
-						for (size_t i=0; i<sizeof(inv); ++i) {
-							buf += p_buf_to_send[i];
-						}
-					} else {
-						for (size_t i=0; i<sizeof(inv); ++i) {
-							buf += p_buf_to_send[sizeof(inv)-1-i];
-						}
-					}
-				}
+        template<typename T> void write(T inv)
+        {
+            unsigned char *p_buf_to_send = reinterpret_cast<unsigned char*>(&inv);
+            if(isBigEndian()){
+                for(size_t i = 0;i < sizeof (inv);++i){
+                    buf += p_buf_to_send[i];
+                }
+            }
+            else{
+                for(size_t i = 0;i < sizeof (inv);++i){
+                    buf += p_buf_to_send[sizeof (inv) - 1 - i];
+                }
+            }
 
-				template<typename T> T read(T& out) {
-					out = read<T>();
-					return out;
-				}
+        }
 
-				template<typename T> TraCIBuffer& operator >>(T& out) {
-					out = read<T>();
-					return *this;
-				}
+        template<typename T> T read(T & out)
+        {
+            out = read<T>();
+            return out;
+        }
 
-				template<typename T> TraCIBuffer& operator <<(const T& inv) {
-					write(inv);
-					return *this;
-				}
+        template<typename T> TraCIBuffer & operator >>(T & out)
+        {
+            out = read<T>();
+            return *this;
+        }
 
-				bool eof() const {
-					return buf_index == buf.length();
-				}
+        template<typename T> TraCIBuffer & operator <<(const T & inv)
+        {
+            write(inv);
+            return *this;
+        }
 
-				void set(std::string buf) {
-					this->buf = buf;
-					buf_index = 0;
-				}
+        bool eof() const
+        {
+            return buf_index == buf.length();
+        }
 
-				void clear() {
-					set("");
-				}
+        void set(std::string buf)
+        {
+            this->buf = buf;
+            buf_index = 0;
+        }
 
-				std::string str() const {
-					return buf;
-				}
+        void clear()
+        {
+            set("");
+        }
 
-				std::string hexStr() const {
-					std::stringstream ss;
-					for (std::string::const_iterator i = buf.begin() + buf_index; i != buf.end(); ++i) {
-						if (i != buf.begin()) ss << " ";
-						ss << std::hex << std::setw(2) << std::setfill('0') << (int)(uint8_t)*i;
+        std::string str() const
+        {
+            return buf;
+        }
+
+        std::string hexStr() const
+        {
+            std::stringstream ss;
+            for(std::string::const_iterator i = buf.begin() + buf_index;i != buf.end();++i){
+                if(i != buf.begin())
+                    ss << " ";
+
+                ss << std::hex << std::setw(2) << std::setfill('0') << (int)(((uint8_t)((*i))));
 					}
 					return ss.str();
 				}
@@ -285,6 +357,21 @@ class TraCIScenarioManager : public cSimpleModule
 		void processSimSubscription(std::string objectId, TraCIBuffer& buf);
 		void processVehicleSubscription(std::string objectId, TraCIBuffer& buf);
 		void processSubcriptionResult(TraCIBuffer& buf);
+
+
+		// My Variables
+
+		/*
+		 * Boolean for the automated creation of loop vehicles
+		 */
+		bool automated;
+
+		int totalVehicles;
+		int loopVehiclesInPourcentage;
+		std::string prefixForLoopRoute;
+		int stepForVehiclesLoop;
+
+		std::vector<std::string> allVehiclesId;
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
