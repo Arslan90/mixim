@@ -49,10 +49,11 @@ void ProphetV2::initialize(int stage)
 		 */
 		lastAgeUpdate = 0;
 
-		preds = std::map<LAddress::L3Type,double>();
-		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
+//		preds = std::map<LAddress::L3Type,double>();
 
-		lastEncouterTime = std::map<LAddress::L3Type,double>();
+
+
+//		lastEncouterTime = std::map<LAddress::L3Type,double>();
 
 		int tmp = par("storageSize");
 		if (tmp>=0){
@@ -61,14 +62,13 @@ void ProphetV2::initialize(int stage)
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
 		bundles = std::list<WaveShortMessage*>();
+		noInsert = 0;
 
 		/*
 		 * Collecting data & metrics
 		 */
-	    numSent = 0;
-	    numReceived = 0;
-	    WATCH(numSent);
-	    WATCH(numReceived);
+	    nbrL3Sent = 0;
+	    nbrL3Received = 0;
 
 	    hopCountStats.setName("hopCountStats");
 	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
@@ -97,23 +97,19 @@ void ProphetV2::initialize(int stage)
         nbrFailedContactAtBundle_Response = 0;
         contactState = std::map<LAddress::L3Type, Prophetv2MessageKinds>();
 
-        RIBInitRole= 0;
-        RIBListRole= 0;
-        Bundle_OfferListRole= 0;
-        Bundle_OfferInitRole= 0;
-        Bundle_ResponseInitRole= 0;
-        Bundle_ResponseListRole= 0;
-        BundleInitRole= 0;
-        BundleListRole= 0;
 
-//	    sentStats.setName("Sent Prophet message");
-//	    sentStats.setRangeAutoUpper(0);
-//	    sentVector.setName("Statistics for sent Prophet Message");
-//	    receivedStats.setName("Received Prophet message");
-//	    sentStats.setRangeAutoUpper(0);
-//	    receivedVector.setName("Statistics for received Prophet Message");
+	}
+	else if (stage==1){
+		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
 	}
 }
+
+/*******************************************************************
+**
+** 							Methods related to predictions
+**
+********************************************************************/
+
 void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 {
 	double PEnc,lastEncTime, predsForB;
@@ -125,6 +121,11 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 	predsIterator it= preds.find(BAdress);
 	predsIterator it2= lastEncouterTime.find(BAdress);
 	if (it==preds.end()){
+		int size = preds.size();
+		if (!( size < 80)){
+			EV << "Anormal size : " << it->first << endl;
+		}
+
 		/*
 		 * if iterator is equal map.end(), it means that there is no entry for BAdress in preds
 		 * so lastEncTime equal 0
@@ -134,6 +135,10 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 		PEnc = PEncMax;
 
 	}else {
+		if (!(it->first < 80)){
+			EV << "Anormal Key : " << it->first << endl;
+		}
+
 		/*
 		 * if iterator is not equal map.end(), it means that there is an entry for BAdress in preds
 		 */
@@ -157,9 +162,33 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 		}
 	}
 	predsForB = predsForB + (1-predsForB)*PEnc;
-	preds.insert(std::pair<LAddress::L3Type,double>(BAdress,predsForB));
-	lastEncouterTime.insert(std::pair<LAddress::L3Type,double>(BAdress,encTime));
+	preds[BAdress] = predsForB;
+	lastEncouterTime[BAdress] = encTime;
 
+
+//	preds.insert(std::pair<LAddress::L3Type,double>(BAdress,predsForB));
+//	lastEncouterTime.insert(std::pair<LAddress::L3Type,double>(BAdress,encTime));
+
+//	std::pair<std::map<LAddress::L3Type,double>::iterator, bool> result;
+//	result = preds.insert(std::pair<LAddress::L3Type,double>(BAdress,predsForB));
+//	if (result.second == false){
+//		noInsert++;
+//		WATCH(noInsert);
+//		EV << "Impossible to insert (K,V) : " << "(" << BAdress << "," << predsForB << ")" << endl;
+//		EV << "Actual pair (K,V) : " << "(" << result.first->first << "," << result.first->second << ")" << endl;
+//	}else {
+//		EV << "Inserted pair (K,V) : " << "(" << result.first->first << "," << result.first->second << ")" << endl;
+//	}
+//	std::pair<std::map<LAddress::L3Type,double>::iterator, bool> result2;
+//	result2 = lastEncouterTime.insert(std::pair<LAddress::L3Type,double>(BAdress,encTime));
+//	if (result2.second == false){
+//		noInsert++;
+//		WATCH(noInsert);
+//		EV << "Impossible to insert (K,V) : " << "(" << BAdress << "," << encTime << ")" << endl;
+//		EV << "Actual pair (K,V) : " << "(" << result2.first->first << "," << result2.first->second << ")" << endl;
+//	}else {
+//		EV << "Inserted pair (K,V) : " << "(" << result2.first->first << "," << result2.first->second << ")" << endl;
+//	}
 }
 
 
@@ -174,6 +203,11 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 	 */
 	ageDeliveryPreds();
 	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
+
+		if (!(it->first < 80)){
+			EV << "Anormal Key : " << it->first << endl;
+		}
+
 		if (it->first==myNetwAddr)
 			continue;
 
@@ -190,7 +224,9 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 		if (predsForC<(predsForB*BpredsForC*Beta)){
 			predsForC = predsForB*BpredsForC*Beta;
 		}
-		preds.insert(std::pair<LAddress::L3Type,double>(CAdress,predsForC));
+
+		preds[CAdress] = predsForC;
+//		preds.insert(std::pair<LAddress::L3Type,double>(CAdress,predsForC));
 	}
 }
 
@@ -202,7 +238,12 @@ void ProphetV2::ageDeliveryPreds()
 		return;
 	}else {
 		double mult = std::pow(GAMMA, timeDiff);
+		int size = preds.size();
+		EV << " Actual size of map : " << size << endl;
 		for (predsIterator it=preds.begin();it!=preds.end();it++){
+			if (!(it->first < 80)){
+				EV << "Anormal Key : " << it->first << endl;
+			}
 			it->second = it->second * mult;
 		}
 		lastAgeUpdate = simTime().dbl();
@@ -216,14 +257,11 @@ void ProphetV2::update(Prophet *prophetPkt)
 	recordPredsStats();
 }
 
-cMessage* ProphetV2::decapsMsg(NetwPkt *msg)
-{
-    cMessage *m = msg->decapsulate();
-//    setUpControlInfo(m, msg->getSrcAddr());
-    // delete the netw packet
-//    delete msg;
-    return m;
-}
+/*******************************************************************
+**
+** 							Core methods
+**
+********************************************************************/
 
 NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 {
@@ -265,26 +303,23 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 	//encapsulate the application packet
 	pkt->encapsulate(appPkt);
 	coreEV <<" pkt encapsulated\n";
-//	canITransmit();
 	return pkt;
 }
 
 void ProphetV2::handleLowerMsg(cMessage* msg)
 {
 
-//    receivedVector.record(numReceived);
-//    receivedStats.collect(numReceived);
-//	NetwPkt *m = static_cast<NetwPkt *>(msg);
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
-    NetwPkt *netwpckt = check_and_cast<NetwPkt *>(m->decapsulate());
-    Prophet *prophetPkt0 = check_and_cast<Prophet *>(netwpckt);
+
+    Prophet *prophetPkt = check_and_cast<Prophet *>(m->decapsulate());
+    delete(m);
 
     int hopcount;
 
-    if ((prophetPkt0->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt0->getDestAddr()==myNetwAddr)){
+    if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
 
-		switch (netwpckt->getKind()) {
+		switch (prophetPkt->getKind()) {
 			case HELLO:
 				break;
 			case ERROR:
@@ -293,13 +328,13 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				break;
 			case RIB:
 				{
-					 // collecting data
-						numReceived++;
-						hopcount = prophetPkt0->getHopCount();
-						hopCountVector.record(hopcount);
-						hopCountStats.collect(hopcount);
+					// collecting data
+					updatingL3Received();
+					hopcount = prophetPkt->getHopCount();
+					hopCountVector.record(hopcount);
+					hopCountStats.collect(hopcount);
 
-					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
+
 					// first step : updating preds
 					executeListenerRole(RIB,prophetPkt);
 					// second step : starting of Bundle_Offer phase
@@ -309,12 +344,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 			case Bundle_Offer:
 				{
 					// collecting data
-										numReceived++;
-										hopcount = prophetPkt0->getHopCount();
-										hopCountVector.record(hopcount);
-										hopCountStats.collect(hopcount);
+					updatingL3Received();
+					hopcount = prophetPkt->getHopCount();
+					hopCountVector.record(hopcount);
+					hopCountStats.collect(hopcount);
 
-					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
 					executeInitiatorRole(Bundle_Offer,prophetPkt);
 					executeInitiatorRole(Bundle_Response,prophetPkt);
 				}
@@ -322,12 +356,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 			case Bundle_Response:
 				{
 					// collecting data
-										numReceived++;
-										hopcount = prophetPkt0->getHopCount();
-										hopCountVector.record(hopcount);
-										hopCountStats.collect(hopcount);
+					updatingL3Received();
+					hopcount = prophetPkt->getHopCount();
+					hopCountVector.record(hopcount);
+					hopCountStats.collect(hopcount);
 
-					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
 					executeListenerRole(Bundle_Response,prophetPkt);
 					executeListenerRole(Bundle,prophetPkt);
 				}
@@ -335,53 +368,18 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 			case Bundle:
 				{
 					// collecting data
-										numReceived++;
-										hopcount = prophetPkt0->getHopCount();
-										hopCountVector.record(hopcount);
-										hopCountStats.collect(hopcount);
+					updatingL3Received();
+					hopcount = prophetPkt->getHopCount();
+					hopCountVector.record(hopcount);
+					hopCountStats.collect(hopcount);
 
-					Prophet *prophetPkt = check_and_cast<Prophet *>(netwpckt);
 					executeInitiatorRole(Bundle,prophetPkt);
 				}
 				break;
 			default:
-	//			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
-	//			WaveShortMessage *wsm = tmp->dup();
-	//			if (LAddress::isL3Broadcast(m->getDestAddr())){
-	//				storeBundle(wsm);
-	//			}
-	//			sendUp(netwpckt);
 				break;
 		}
-	//    if (netwpckt->getKind()==RIB){
-	//    	updateDeliveryPredsFor(netwpckt->getSrcAddr());
-	//    }else {
-	//    	WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(netwpckt->getEncapsulatedPacket());
-	//		WaveShortMessage *wsm = tmp->dup();
-	//		if (LAddress::isL3Broadcast(m->getDestAddr())){
-	//			storeBundle(wsm);
-	//		}
-	//		sendUp(netwpckt);
-	//    	//    WaveShortMessage *tmp = static_cast<WaveShortMessage*>(decapsMsg(m));
-	//    	//    WaveShortMessage *dup = tmp->dup();
-	//    	//    if (LAddress::isL3Broadcast(m->getDestAddr())||(m->getDestAddr()==myNetwAddr)){
-	//    	//    	sendUp(decapsMsg(m));
-	//    	//    }
-	//
-	//    	//    WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(m->getEncapsulatedPacket());
-	//    	//    cMessage *tmp =decapsMsg(m);
-	//    	//    WaveShortMessage *copy = wsm->dup();
-	//    	//	if (LAddress::isL3Broadcast(m->getDestAddr())){
-	//    	//		storeBundle(copy);
-	//    	//	}
-	//    	//    sendUp(tmp);
-	//
-	//    	//    sendUp(msg);
-	//
-	//    }
-    } else {
-    	delete(msg);
-	}
+    }
 }
 
 void ProphetV2::handleUpperMsg(cMessage* msg)
@@ -403,29 +401,18 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 		case NEW_NEIGHBOR:
 			{
 				if (canITransmit){
-					string tmp = msg->getName();
-					int addr = 0;
-					if (tmp!=""){
-						std::istringstream iss(tmp);
-						iss >> addr;
-					}
-					LAddress::L3Type destAddr = addr;
+					double time = simTime().dbl();
 
-					/** Intercontacts duration stats 			*/
-					std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(destAddr);
-					if (it != lastEncouterTime.end()){
-						double duration = simTime().dbl() - it->second;
-						nbrRecontacts++;
-						sumOfInterContactDur+=duration;
-						if (nbrRecontacts!=0){
-							intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
-						}
-					}
+					LAddress::L3Type addr = getAddressFromName(msg->getName());
 
-					executeInitiatorRole(RIB,NULL,destAddr);
+					/** Repeated contacts stats			*/
+					recordRecontactStats(addr,time);
 
-					/** Contacts duration stats				 */
-					contacts.insert(std::pair<LAddress::L3Type, double>(destAddr, simTime().dbl()));
+					/** Contacts duration stats				*/
+					recordBeginContactStats(addr,time);
+
+					/** Starting IEP Phase					*/
+					executeInitiatorRole(RIB,NULL,addr);
 				}
 			}
 			break;
@@ -434,46 +421,12 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 			break;
 		case NEW_NEIGHBOR_GONE:
 			{
-				string tmp = msg->getName();
-				int addr = 0;
-				if (tmp!=""){
-					std::istringstream iss(tmp);
-					iss >> addr;
-				}
-				LAddress::L3Type destAddr = addr;
+				double time = simTime().dbl();
+
+				LAddress::L3Type addr = getAddressFromName(msg->getName());
 
 				/** Contacts duration stats				 */
-				double duration = simTime().dbl() - (contacts.find(destAddr)->second);
-				nbrContacts++;
-				sumOfContactDur+=duration;
-				contacts.erase(destAddr);
-				if (nbrContacts!=0){
-					contactDurVector.record(sumOfContactDur/ double (nbrContacts));
-				}
-
-				contactStateIterator it;
-				it = contactState.find(destAddr);
-				if (it != contactState.end()){
-					switch (it->second) {
-					case RIB:
-						nbrFailedContactAtRIB++;
-						break;
-					case Bundle_Offer:
-						nbrFailedContactAtBundle_Offer++;
-						break;
-					case Bundle_Response:
-						nbrFailedContactAtBundle_Response++;
-						break;
-					case Bundle:
-						nbrSuccessfulContact++;
-						break;
-					default:
-						nbrFailedContactBeforeRIB++;
-						break;
-					}
-					contactState.erase(destAddr);
-				}
-
+				recordEndContactStats(addr,time);
 			}
 			break;
 	}
@@ -532,8 +485,6 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 
 void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
-	contactStateIterator it;
-
 	switch (kind) {
 		case HELLO:
 			break;
@@ -545,50 +496,35 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		{
 			Prophet *ribPkt = new Prophet();
 
-//			ribPkt->setBitLength(headerLength);
-//			ribPkt->setKind(RIB);
-//			ribPkt->setSrcAddr(myNetwAddr);
-//			ribPkt->setDestAddr(LAddress::L3BROADCAST);
-
 			// aging of predictions that will be sent
 			// creating a copy of preds
 			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
 			ageDeliveryPreds();
 			tmp.insert(preds.begin(),preds.end());
-//			ribPkt->setPreds(tmp);
-//			ribPkt = prepareProphet(RIB, myNetwAddr, LAddress::L3BROADCAST, NULL, &tmp);
 			ribPkt = prepareProphet(RIB, myNetwAddr, destAddr, NULL, &tmp);
 			ribPkt->setBitLength(headerLength);
 //			sendDown(ribPkt);
 //			uniform(0.001,1);
 			sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+
 			/*
 			 * Collecting data
 			 */
-			numSent++;
+			updatingL3Sent();
 			ribPkt->setHopCount(ribPkt->getHopCount()+1);
-
-			it = contactState.find(destAddr);
-			if (it != contactState.end()){
-				contactState.erase(destAddr);
-			}
-
-			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(destAddr,RIB));
-			RIBInitRole++;
-
+			updatingContactState(destAddr,RIB);
 		}
 			break;
 		case Bundle_Offer:
 			/*
 			 * nothing to do for now
 			 */
-			it = contactState.find(prophetPkt->getSrcAddr());
-			if (it != contactState.end()){
-				contactState.erase(prophetPkt->getSrcAddr());
-			}
 
-			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(prophetPkt->getSrcAddr(),Bundle_Offer));
-			Bundle_OfferInitRole++;
+
+			/*
+			 * Collecting data
+			 */
+			updatingContactState(prophetPkt->getSrcAddr(),Bundle_Offer);
 			break;
 		case Bundle_Response:
 		{
@@ -612,24 +548,13 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			Prophet *responsePkt = new Prophet();
 			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
 			responsePkt->setBitLength(headerLength);
-//			responsePkt->setKind(Bundle_Response);
-//			responsePkt->setSrcAddr(myNetwAddr);
-//			responsePkt->setDestAddr(prophetPkt->getSrcAddr());
-//			responsePkt->setBndlmeta(bundleToAcceptMeta);
 			sendDown(responsePkt);
 			/*
 			 * Collecting data
 			 */
-			numSent++;
+			updatingL3Sent();
 			responsePkt->setHopCount(responsePkt->getHopCount()+1);
-
-			it = contactState.find(prophetPkt->getSrcAddr());
-			if (it != contactState.end()){
-				contactState.erase(prophetPkt->getSrcAddr());
-			}
-
-			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(prophetPkt->getSrcAddr(),Bundle_Response));
-			Bundle_ResponseInitRole++;
+			updatingContactState(prophetPkt->getSrcAddr(),Bundle_Response);
 		}
 			break;
 		case Bundle:
@@ -642,13 +567,10 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				sendUp(prophetPkt);
 			}
 
-			it = contactState.find(prophetPkt->getSrcAddr());
-			if (it != contactState.end()){
-				contactState.erase(prophetPkt->getSrcAddr());
-			}
-
-			contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(addr,Bundle));
-			BundleInitRole++;
+			/*
+			 * Collecting data
+			 */
+			updatingContactState(prophetPkt->getSrcAddr(),Bundle);
 		}
 			break;
 		default:
@@ -669,20 +591,17 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		case RIB:
 		{
 			update(prophetPkt);
-			RIBListRole++;
 		}
 			break;
 		case Bundle_Offer:
 		{
 			defineBundleOffer(prophetPkt);
-			Bundle_OfferListRole++;
 		}
 			break;
 		case Bundle_Response:
 			/*
 			 * nothing to do for now
 			 */
-			Bundle_ResponseListRole++;
 			break;
 		case Bundle:
 		{
@@ -696,22 +615,17 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 						Prophet *bundlePkt = new Prophet();
 						bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
 						bundlePkt->setBitLength(headerLength);
-//						bundlePkt->setKind(Bundle);
-//						bundlePkt->setSrcAddr(myNetwAddr);
-//						bundlePkt->setDestAddr(prophetPkt->getSrcAddr());
-//						bundlePkt->encapsulate((it3->second)->dup());
 						if (canITransmit){
 							sendDown(bundlePkt);
 							/*
 							 * Collecting data
 							 */
-							numSent++;
+							updatingL3Sent();
 							bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
 						}
 					}
 				}
 			}
-			BundleListRole++;
 		}
 			break;
 		default:
@@ -723,9 +637,6 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 
 Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<Prophet_Struct::bndl_meta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
-
-//    sentVector.record(numSent);
-//    sentStats.collect(numSent);
 
 	Prophet *prophetMsg = new Prophet();
 	prophetMsg->setKind(kind);
@@ -838,15 +749,11 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 	Prophet *offerPkt = new Prophet();
 	offerPkt->setBitLength(headerLength);
 	offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,encounterdNode,&bundleToOfferMeta);
-//	offerPkt->setKind(Bundle_Offer);
-//	offerPkt->setSrcAddr(myNetwAddr);
-//	offerPkt->setDestAddr(encounterdNode);
-//	offerPkt->setBndlmeta(bundleToOfferMeta);
 	sendDown(offerPkt);
 	/*
 	 * Collecting data
 	 */
-	numSent++;
+	updatingL3Sent();
 	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 }
 
@@ -878,17 +785,27 @@ bool ProphetV2::exist(Prophet_Struct::bndl_meta bndlMeta)
 	return found;
 }
 
+LAddress::L3Type ProphetV2::getAddressFromName(const char *name)
+{
+	int addr = 0;
+	if (strcmp(name,"")!=0){
+		std::istringstream iss(name);
+		iss >> addr;
+	}
+	return addr;
+}
+
 void ProphetV2::finish()
 {
-	EV << "Sent:     " << numSent << endl;
-	EV << "Received: " << numReceived << endl;
+	EV << "Sent:     " << nbrL3Sent << endl;
+	EV << "Received: " << nbrL3Received << endl;
 	EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
 	EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
 	EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
 	EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
 
-	recordScalar("#sent", numSent);
-	recordScalar("#received", numReceived);
+	recordScalar("# L3sent", nbrL3Sent);
+	recordScalar("# L3received", nbrL3Received);
 
 	recordScalar("# of Contacts", nbrContacts);
 	recordScalar("# of InterContacts", nbrRecontacts);
@@ -934,39 +851,22 @@ void ProphetV2::finish()
 
 /*******************************************************************
 **
-** 							Unused functions
+** 							Methods for collecting  datas & stats
 **
 ********************************************************************/
-void ProphetV2::handleSelfMsg(cMessage* msg)
-{
-
-}
-
-void ProphetV2::handleUpperControl(cMessage* msg)
-{
-
-}
-
-cObject *const ProphetV2::setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr)
-{
-	return BaseNetwLayer::setDownControlInfo(pMsg, pDestAddr);
-}
-
-cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
-{
-	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
-}
-
-const LAddress::L3Type ProphetV2::getMyNetwAddress()
-{
-	return myNetwAddr;
-}
 
 void ProphetV2::recordPredsStats()
 {
 	// nbPreds = preds.size()-1, because P(X,X) is counted as a prediction for every node X
 	int nbPreds = this->preds.size()-1;
 	nbrPredsVector.record(nbPreds);
+
+	if (!(nbPreds < 80)){
+		EV << "Actual number of predictions : " << nbPreds << endl;
+		for (predsIterator it=preds.begin(); it!=preds.end();it++){
+			EV << "(key,value) : " << "(" << it->first <<"," << it->second << ")" << endl;
+		}
+	}
 
 	double min = DBL_MAX, max = DBL_MIN, mean = 0, sum = 0, variance = 0, varianceSum = 0;
 
@@ -1016,6 +916,95 @@ void ProphetV2::recordPredsStats()
 //	std::pair<LAddress::L3Type, double> predsMin = std::min_element(preds.begin(),preds.end());
 //	std::pair<LAddress::L3Type, double> predsMax = std::max_element(preds.begin(),preds.end());
 
+}
+
+void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
+{
+	// updating nbr contacts
+	nbrContacts++;
+	// saving the starting time of the contact
+	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
+}
+
+void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
+{
+	sumOfContactDur+=time - contacts.find(addr)->second;
+	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
+
+	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
+	if (it != contactState.end()){
+		switch (it->second) {
+		case RIB:
+			nbrFailedContactAtRIB++;
+			break;
+		case Bundle_Offer:
+			nbrFailedContactAtBundle_Offer++;
+			break;
+		case Bundle_Response:
+			nbrFailedContactAtBundle_Response++;
+			break;
+		case Bundle:
+			nbrSuccessfulContact++;
+			break;
+		default:
+			nbrFailedContactBeforeRIB++;
+			break;
+		}
+
+		contacts.erase(addr);
+		contactState.erase(addr);
+	}
+}
+
+void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
+{
+	std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(addr);
+	if (it != lastEncouterTime.end()){
+		// updating nbr repeated contacts nodes
+		nbrRecontacts++;
+		// updating vector stats for recontacted nodes
+		sumOfInterContactDur+=time - it->second;
+		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
+	}
+
+}
+
+void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind)
+{
+	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
+	if (it != contactState.end()){
+		contactState.erase(addr);
+	}
+	contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(addr,kind));
+
+}
+
+
+
+
+/*******************************************************************
+**
+** 							Unused functions
+**
+********************************************************************/
+void ProphetV2::handleSelfMsg(cMessage* msg)
+{
+
+}
+
+void ProphetV2::handleUpperControl(cMessage* msg)
+{
+
+}
+
+cObject *const ProphetV2::setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr)
+{
+	return BaseNetwLayer::setDownControlInfo(pMsg, pDestAddr);
+}
+
+cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
+{
+	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
 }
 
 ProphetV2::~ProphetV2()

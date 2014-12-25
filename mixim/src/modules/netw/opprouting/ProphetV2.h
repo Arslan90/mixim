@@ -116,62 +116,7 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
-    long numSent;
-    long numReceived;
-//    cLongHistogram sentStats;
-//    cOutVector sentVector;
-//    cLongHistogram receivedStats;
-//    cOutVector receivedVector;
 
-    cLongHistogram hopCountStats;
-    cOutVector hopCountVector;
-
-    cOutVector nbrPredsVector;
-    cOutVector predsMean;
-    cOutVector predsMax;
-    cOutVector predsMin;
-    cOutVector predsVariance;
-
-    double sumOfContactDur;
-
-    int nbrContacts;
-
-    cOutVector contactDurVector;
-
-    std::map<LAddress::L3Type, double> contacts;
-
-    double sumOfInterContactDur;
-
-    int nbrRecontacts;
-
-    cOutVector intercontactDurVector;
-
-    /**
-     * Contact between 2 nodes, where the initiator role had received packets of kind Bundle
-     */
-    int nbrSuccessfulContact;
-
-    int nbrFailedContactBeforeRIB;
-    int nbrFailedContactAtRIB;
-    int nbrFailedContactAtBundle_Offer;
-    int nbrFailedContactAtBundle_Response;
-
-    /**
-     * Map for the state of the initator role during contact
-     */
-    std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
-
-    typedef std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator contactStateIterator;
-
-
-    int RIBInitRole;
-    int RIBListRole;
-    int Bundle_OfferListRole;
-    int Bundle_OfferInitRole;
-    int Bundle_ResponseInitRole;
-    int Bundle_ResponseListRole;
-    int BundleInitRole;
-    int BundleListRole;
 
 	/** delivery predictability initialization constant*/
 	double PEncMax;
@@ -217,6 +162,62 @@ private:
 
 	/** Boolean to verify if the transmission is possible */
 	bool canITransmit;
+
+	int noInsert;
+
+	/*******************************************************************
+	** 							Metrics variables section
+	********************************************************************/
+	long nbrL3Sent;
+	long nbrL3Received;
+//    cLongHistogram sentStats;
+//    cOutVector sentVector;
+//    cLongHistogram receivedStats;
+//    cOutVector receivedVector;
+
+	cLongHistogram hopCountStats;
+	cOutVector hopCountVector;
+
+	cOutVector nbrPredsVector;
+	cOutVector predsMean;
+	cOutVector predsMax;
+	cOutVector predsMin;
+	cOutVector predsVariance;
+
+	double sumOfContactDur;
+
+	int nbrContacts;
+
+	cOutVector contactDurVector;
+
+	std::map<LAddress::L3Type, double> contacts;
+
+	double sumOfInterContactDur;
+
+	int nbrRecontacts;
+
+	cOutVector intercontactDurVector;
+
+	/**
+	 * Contact between 2 nodes, where the initiator role had received packets of kind Bundle
+	 */
+	int nbrSuccessfulContact;
+
+	int nbrFailedContactBeforeRIB;
+	int nbrFailedContactAtRIB;
+	int nbrFailedContactAtBundle_Offer;
+	int nbrFailedContactAtBundle_Response;
+
+	/**
+	 * Map for the state of the initator role during contact
+	 */
+	std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
+
+
+	/*******************************************************************
+	** 							end of metrics variables section
+	********************************************************************/
+
 /*******************************************************************
 **
 ** 							Methods section
@@ -269,9 +270,9 @@ private:
 	void storeBundle(WaveShortMessage *msg);
 
 	/*
-	 * Function for collecting data about predictions
+	 * Convert a string to L3Address
 	 */
-	void recordPredsStats();
+	LAddress::L3Type getAddressFromName(const char * name);
 
 	/** @brief Handle messages from upper layer */
 	virtual void handleUpperMsg(cMessage* msg);
@@ -288,17 +289,46 @@ private:
 	/** @brief Handle control messages from lower layer */
 	virtual void handleUpperControl(cMessage* msg);
 
-	/** @brief decapsulate higher layer message from NetwPkt */
-	virtual cMessage* decapsMsg(NetwPkt*);
-
 	/** @brief Encapsulate higher layer packet into an NetwPkt */
 	virtual NetwPkt* encapsMsg(cPacket*);
 
 	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
 
 	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
+
+	/*******************************************************************
+	** 							Metrics methods section
+	********************************************************************/
+
+	/*
+	 * Function for collecting data about predictions
+	 */
+	void recordPredsStats();
+
+	void updatingL3Sent(){
+		nbrL3Sent++;
+	};
+
+	void updatingL3Received(){
+		nbrL3Received++;
+	}
+
+	void recordBeginContactStats(LAddress::L3Type addr, double time);
+
+	void recordEndContactStats(LAddress::L3Type addr, double time);
+
+	void recordRecontactStats(LAddress::L3Type addr, double time);
+
+	void updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind);
+
+
+	/*******************************************************************
+	** 							End of metrics methods section
+	********************************************************************/
 public:
-	const LAddress::L3Type getMyNetwAddress();
+	const LAddress::L3Type getMyNetwAddress(){
+		return myNetwAddr;
+	}
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();
