@@ -38,6 +38,9 @@ void VPApOpp::initialize(int stage) {
         messageSequence = 0; //First message sequence.
     	CW= 0; //Contention Window value.
 
+    	receivedBundles = std::map<int, WaveShortMessage* >();
+    	receivedBundles.clear();
+
     	/*
     	 * Section created by me for initializing dtnTestMode & silentMode booleans
     	 */
@@ -45,6 +48,10 @@ void VPApOpp::initialize(int stage) {
     	delayStats.setName("delayStats");
 //    	delayStats.setRangeAutoUpper(0, 10, 1.5);
     	delays.setName("delays");
+
+	    hopCountStats.setName("hopCountStats");
+	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
+	    hopCountVector.setName("HopCount");
 
     	dtnTestMode = par("dtnTestMode").boolValue();
     	silentMode = par("silentMode").boolValue();
@@ -59,8 +66,9 @@ void VPApOpp::initialize(int stage) {
 
 		sendBeaconEvt = new cMessage("beacon evt", SEND_BEACON_EVT);
 		if (dtnTestMode){
-			dtnMsgSent = 0;
-			dtnMsgReceived = 0;
+			nbrBundleSent = 0;
+			nbrBundleReceived = 0;
+			nbrUniqueBundleReceived = 0;
 			avgDelay = 0;
 			totalDelay = 0;
 			/*
@@ -94,7 +102,7 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 	switch (msg->getKind()) {
 		case DTN_TEST_MODE:
 			if (dtnTestMode){
-				dtnMsgSent++;
+				nbrBundleSent++;
 			}
 			break;
 		case SEND_BEACON_EVT: {
@@ -126,13 +134,22 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 		EV << "logs, Receiving packet " << wsm->getName() <<endl;
 	}
 	if (wsm->getKind()==DTN_TEST_MODE){
-		dtnMsgReceived++;
+		nbrBundleReceived++;
+
+		if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
+			receivedBundles.insert(std::pair<int ,WaveShortMessage*>(wsm->getSerial(), wsm));
+			nbrUniqueBundleReceived++;
+		}
+
 		simtime_t time = (simTime()-wsm->getTimestamp());
 		totalDelay = totalDelay + time.dbl();
-		avgDelay = totalDelay / dtnMsgReceived;
+		avgDelay = totalDelay / nbrBundleReceived;
 
 		delays.record(avgDelay);
 		delayStats.collect(avgDelay);
+
+		hopCountVector.record(wsm->getHopCount());
+		hopCountStats.collect(wsm->getHopCount());
 	}
 
 	delete(msg);
@@ -200,15 +217,23 @@ VPApOpp::~VPApOpp() {
 void VPApOpp::finish()
 {
 	// Added by Arslan HAMZA CHERIF
-		recordScalar("dtnSent", dtnMsgSent);
-		recordScalar("dtnReceived", dtnMsgReceived);
+		recordScalar("# Bundle Sent", nbrBundleSent);
+		recordScalar("# Bundle Received", nbrBundleReceived);
+		recordScalar("# Unique Bundle Received", nbrUniqueBundleReceived);
 
-		EV << "Delay, min:    " << delayStats.getMin() << endl;
-		EV << "Delay, max:    " << delayStats.getMax() << endl;
-		EV << "Delay, mean:   " << delayStats.getMean() << endl;
-		EV << "Delay, stddev: " << delayStats.getStddev() << endl;
+//		EV << "Delay, min:    " << delayStats.getMin() << endl;
+//		EV << "Delay, max:    " << delayStats.getMax() << endl;
+//		EV << "Delay, mean:   " << delayStats.getMean() << endl;
+//		EV << "Delay, stddev: " << delayStats.getStddev() << endl;
 
 		delayStats.recordAs("delayScalar");
+
+//		EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
+//		EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
+//		EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
+//		EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
+
+		hopCountStats.recordAs("hop count");
 }
 
 

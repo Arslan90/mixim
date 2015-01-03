@@ -49,4 +49,7 @@ packet WaveShortMessage {
 	int serial = 0;
 	Coord senderPos;
 	simtime_t timestamp = 0;
+	
+	// Added by Arslan HAMZA CHERIF
+	int hopCount = 0;
 }

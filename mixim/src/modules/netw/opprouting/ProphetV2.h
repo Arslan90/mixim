@@ -175,9 +175,6 @@ private:
 //    cLongHistogram receivedStats;
 //    cOutVector receivedVector;
 
-	cLongHistogram hopCountStats;
-	cOutVector hopCountVector;
-
 	cOutVector nbrPredsVector;
 	cOutVector predsMean;
 	cOutVector predsMax;

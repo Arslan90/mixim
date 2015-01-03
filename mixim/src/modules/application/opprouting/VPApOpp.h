@@ -67,14 +67,20 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		   * bool variable for enabling silentMode for VPA, VPA are only receiving messages
 		   */
 		  bool silentMode;
-		  int dtnMsgSent;
-		  int dtnMsgReceived;
+		  int nbrBundleSent;
+		  int nbrBundleReceived;
+		  int nbrUniqueBundleReceived;
 
 		  double avgDelay;
 		  double totalDelay;
 
 		  cOutVector delays;
 		  cDoubleHistogram delayStats;
+
+		cLongHistogram hopCountStats;
+		cOutVector hopCountVector;
+
+		std::map<int ,WaveShortMessage*> receivedBundles;
 
 
 		  void sendVPApBroadcast(int messageSequenced);//send numerated broadcast.

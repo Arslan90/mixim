@@ -70,11 +70,6 @@ void ProphetV2::initialize(int stage)
 	    nbrL3Sent = 0;
 	    nbrL3Received = 0;
 
-	    hopCountStats.setName("hopCountStats");
-	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
-	    hopCountVector.setName("HopCount");
-
-
 	    nbrPredsVector.setName("Number of predictions");
 	    predsMean.setName("Mean of predictions");
 	    predsMax.setName("Maximum of predictions");
@@ -233,7 +228,8 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 void ProphetV2::ageDeliveryPreds()
 {
 	double time = simTime().dbl();
-	double timeDiff = (time-lastAgeUpdate)/secondsInTimeUnit;
+//	double timeDiff = (time-lastAgeUpdate)/secondsInTimeUnit;
+	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
 	if (timeDiff==0){
 		return;
 	}else {
@@ -330,10 +326,6 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				{
 					// collecting data
 					updatingL3Received();
-					hopcount = prophetPkt->getHopCount();
-					hopCountVector.record(hopcount);
-					hopCountStats.collect(hopcount);
-
 
 					// first step : updating preds
 					executeListenerRole(RIB,prophetPkt);
@@ -345,9 +337,6 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				{
 					// collecting data
 					updatingL3Received();
-					hopcount = prophetPkt->getHopCount();
-					hopCountVector.record(hopcount);
-					hopCountStats.collect(hopcount);
 
 					executeInitiatorRole(Bundle_Offer,prophetPkt);
 					executeInitiatorRole(Bundle_Response,prophetPkt);
@@ -357,9 +346,6 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				{
 					// collecting data
 					updatingL3Received();
-					hopcount = prophetPkt->getHopCount();
-					hopCountVector.record(hopcount);
-					hopCountStats.collect(hopcount);
 
 					executeListenerRole(Bundle_Response,prophetPkt);
 					executeListenerRole(Bundle,prophetPkt);
@@ -369,9 +355,6 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				{
 					// collecting data
 					updatingL3Received();
-					hopcount = prophetPkt->getHopCount();
-					hopCountVector.record(hopcount);
-					hopCountStats.collect(hopcount);
 
 					executeInitiatorRole(Bundle,prophetPkt);
 				}
@@ -559,12 +542,18 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle:
 		{
-			WaveShortMessage *tmp = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
-			WaveShortMessage *wsm = tmp->dup();
-			storeBundle(wsm);
-			int addr = prophetPkt->getSrcAddr();
-			if ((tmp->getRecipientAddress()==LAddress::L3BROADCAST)||(tmp->getRecipientAddress()==myNetwAddr)){
+			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+
+			// Updating hopCount for WSM Message
+			wsm->setHopCount(wsm->getHopCount()+1);
+
+			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
+			if ((recipientAddr==LAddress::L3BROADCAST)||(recipientAddr==myNetwAddr)){
+				storeBundle(wsm->dup());
 				sendUp(prophetPkt);
+			}else {
+				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
+				storeBundle(wsm);
 			}
 
 			/*
@@ -797,12 +786,8 @@ LAddress::L3Type ProphetV2::getAddressFromName(const char *name)
 
 void ProphetV2::finish()
 {
-	EV << "Sent:     " << nbrL3Sent << endl;
-	EV << "Received: " << nbrL3Received << endl;
-	EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
-	EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
-	EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
-	EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
+//	EV << "Sent:     " << nbrL3Sent << endl;
+//	EV << "Received: " << nbrL3Received << endl;
 
 	recordScalar("# L3sent", nbrL3Sent);
 	recordScalar("# L3received", nbrL3Received);
@@ -816,37 +801,6 @@ void ProphetV2::finish()
 	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
 	recordScalar("# successful contacts", nbrSuccessfulContact);
 
-
-//	recordScalar("# RIB Initiator Role", RIBInitRole);
-//	recordScalar("# Bundle_Offer Initiator Role", Bundle_OfferInitRole);
-//	recordScalar("# Bundle_Response Initiator Role", Bundle_ResponseInitRole);
-//	recordScalar("# Bundle Initiator Role", BundleInitRole);
-//
-//	recordScalar("# RIB Listener Role", RIBListRole);
-//  recordScalar("# Bundle_Offer Listener Role", Bundle_OfferListRole);
-//  recordScalar("# Bundle_Response Listener Role", Bundle_ResponseListRole);
-//	recordScalar("# Bundle Listener Role", BundleListRole);
-
-
-	hopCountStats.recordAs("hop count");
-//    // This function is called by OMNeT++ at the end of the simulation.
-//    EV << "Sent:     " << numSent << endl;
-//    EV << "Received: " << numReceived << endl;
-////    EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
-////    EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
-////    EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
-////    EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
-//
-//
-//	recordScalar("#total sent", numSent);
-//    recordScalar("#total received", numReceived);
-//
-////    EV << "Number of Prophet message sent, total:    " << sentStats.getCount() << endl;
-////    sentStats.recordAs("Total sent");
-////
-////    EV << "Number of Prophet message received, total:    " << receivedStats.getCount() << endl;
-////	receivedStats.recordAs("Total received");
-////    hopCountStats.recordAs("hop count");
 }
 
 /*******************************************************************

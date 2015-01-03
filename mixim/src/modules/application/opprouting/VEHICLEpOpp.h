@@ -104,8 +104,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		bool dtnTestMode;
 		cMessage *dtnTestMsg;
 		int dtnTestCycle;
-		int dtnMsgSent;
-		int dtnMsgReceived;
+		int nbrBundleSent;
+		int nbrBundleReceived;
 		bool dtnSynchronized;
 
 		void sendDtnMessage();
@@ -147,10 +147,15 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		bool reroutedToLoopRoute;
 		std::string edgeForLooping;
 
+		int netwAddr;
+		int nbrMsgSent;
+
 	protected:
 		virtual void onBeacon(WaveShortMessage* wsm);
 		virtual void onData(WaveShortMessage* wsm);
 		void sendMessage();
+		int generateUniqueSerial(const int netwAddr, const int nbrMsgSent);
+
 
 };
 

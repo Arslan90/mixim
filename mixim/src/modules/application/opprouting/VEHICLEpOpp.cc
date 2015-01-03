@@ -78,8 +78,8 @@ void VEHICLEpOpp::initialize(int stage) {
 		if (dtnTestMode){
 			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
 			dtnTestCycle = par("dtnTestCycle");
-			dtnMsgSent = 0;
-			dtnMsgReceived = 0;
+			nbrBundleSent = 0;
+			nbrBundleReceived = 0;
 
 		}
 
@@ -120,6 +120,13 @@ void VEHICLEpOpp::initialize(int stage) {
 			reroutedToLoopRoute = false;
 			edgeForLooping ="";
 	}
+	else if(stage==2) {
+		cModule *netw = this->getParentModule()->getSubmodule("netw");
+		if (netw!=NULL){
+			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
+		}
+		nbrMsgSent = 0;
+	}
 }
 
 //SELF-MESSAGES
@@ -134,12 +141,14 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     		sendDtnMessage();
     		// Finally reschedule message
     		scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
+    		nbrMsgSent++;
     	}
     	break;
     case SEND_BROADCAST_TIMER:
     	if (modeDissemination and junctionRange) { //Vehicle send WMS beacon when in mode Dissemination & near enough to junction.
     		EV << "logs, VEH Sending PACKET. " << endl;
     		sendMessage();//Finally send the message.
+    		nbrMsgSent++;
     	}
 
         //Re-schedule the self-message.
@@ -211,7 +220,7 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
     {
     case DTN_TEST_MODE:
 		if (dtnTestMode){
-			dtnMsgReceived++;
+			nbrBundleReceived++;
 		}
 		break;
 //When receiving VPA Broadcast
@@ -495,15 +504,11 @@ void VEHICLEpOpp::sendDtnMessage()
 	//Sending message
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 	//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
-	cModule *netw = this->getParentModule()->getSubmodule("netw");
-	int netwAddr = myApplAddr();
-	if (netw!=NULL){
-		netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
-	}
+
 	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA[0] with address "<< addr <<endl;
 	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
-	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,intrand(INT32_MAX)));
-	dtnMsgSent++;
+	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(netwAddr,nbrMsgSent)));
+	nbrBundleSent++;
 }
 
 int VEHICLEpOpp::vpaDestAddr()
@@ -677,7 +682,7 @@ void VEHICLEpOpp::sendMessage() {
 	//Sending message
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 //	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
-	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,intrand(INT32_MAX)));
+	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(netwAddr,nbrMsgSent)));
 
 }
 
@@ -721,8 +726,8 @@ void VEHICLEpOpp::finish() {
 	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
 
 	// Added by Arslan HAMZA CHERIF
-	recordScalar("dtnSent", dtnMsgSent);
-	recordScalar("dtnReceived", dtnMsgReceived);
+	recordScalar("# Bundle Sent", nbrBundleSent);
+	recordScalar("# Bundle Received", nbrBundleReceived);
 }
 
 ////////////////// TESTING AREA /////////////    ////////////////// TESTING AREA /////////////
@@ -830,6 +835,18 @@ void VEHICLEpOpp::onBeacon(WaveShortMessage* wsm) {
 }
 void VEHICLEpOpp::onData(WaveShortMessage* wsm) {
 }
+
+int VEHICLEpOpp::generateUniqueSerial(const int netwAddr, const int nbrMsgSent)
+{
+	// we do it using the Cantor Pairing Function which is defined like this
+	// F(x,y) = ((x+y)*(x+y+1))/2 + y
+	int x,y;
+	x = netwAddr;
+	y = nbrMsgSent;
+	return (((x+y)*(x+y+1))/2 + y);
+}
+
+
 
 /*
     // TRACI GET SUMO DATA
