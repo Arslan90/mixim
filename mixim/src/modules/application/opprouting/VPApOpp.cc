@@ -70,8 +70,11 @@ void VPApOpp::initialize(int stage) {
 			nbrBundleReceived = 0;
 			nbrUniqueBundleReceived = 0;
 			nbrUniqueBundleReceivedBefore300 = 0;
+			uniqueBundleReceivedBefore300Vect.setName("uniqueBundleReceivedBefore300Vect");
 			nbrUniqueBundleReceivedBet300_900 = 0;
+			uniqueBundleReceivedBet300_900Vect.setName("uniqueBundleReceivedBet300_900Vect");
 			nbrUniqueBundleReceivedBet900_1800 = 0;
+			uniqueBundleReceivedBet900_1800Vect.setName("uniqueBundleReceivedBet900_1800Vect");
 			avgDelay = 0;
 			totalDelay = 0;
 			/*
