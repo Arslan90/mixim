@@ -70,6 +70,12 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int nbrBundleSent;
 		  int nbrBundleReceived;
 		  int nbrUniqueBundleReceived;
+		  int nbrUniqueBundleReceivedBefore300;
+		  int nbrUniqueBundleReceivedBet300_900;
+		  int nbrUniqueBundleReceivedBet900_1800;
+		  cOutVector uniqueBundleReceivedBefore300Vect;
+          cOutVector uniqueBundleReceivedBet300_900Vect;
+          cOutVector uniqueBundleReceivedBet900_1800Vect;
 
 		  double avgDelay;
 		  double totalDelay;

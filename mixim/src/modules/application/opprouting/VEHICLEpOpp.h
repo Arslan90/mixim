@@ -104,6 +104,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		bool dtnTestMode;
 		cMessage *dtnTestMsg;
 		int dtnTestCycle;
+		int dtnTestMaxTime;
 		int nbrBundleSent;
 		int nbrBundleReceived;
 		bool dtnSynchronized;

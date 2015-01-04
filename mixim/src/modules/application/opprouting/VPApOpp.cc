@@ -69,6 +69,9 @@ void VPApOpp::initialize(int stage) {
 			nbrBundleSent = 0;
 			nbrBundleReceived = 0;
 			nbrUniqueBundleReceived = 0;
+			nbrUniqueBundleReceivedBefore300 = 0;
+			nbrUniqueBundleReceivedBet300_900 = 0;
+			nbrUniqueBundleReceivedBet900_1800 = 0;
 			avgDelay = 0;
 			totalDelay = 0;
 			/*
@@ -135,13 +138,24 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 	}
 	if (wsm->getKind()==DTN_TEST_MODE){
 		nbrBundleReceived++;
+		simtime_t time = (simTime()-wsm->getTimestamp());
 
 		if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
 			receivedBundles.insert(std::pair<int ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
+			if (time.dbl() <= 300){
+				nbrUniqueBundleReceivedBefore300++;
+				uniqueBundleReceivedBefore300Vect.record(nbrUniqueBundleReceivedBefore300);
+			}else if ((time.dbl() > 300) && (time.dbl() <= 900)) {
+				nbrUniqueBundleReceivedBet300_900++;
+				uniqueBundleReceivedBet300_900Vect.record(nbrUniqueBundleReceivedBet300_900);
+			}else if ((time.dbl() > 900) && (time.dbl() <= 900)) {
+				nbrUniqueBundleReceivedBet900_1800++;
+				uniqueBundleReceivedBet900_1800Vect.record(nbrUniqueBundleReceivedBet900_1800);
+			}
 		}
 
-		simtime_t time = (simTime()-wsm->getTimestamp());
+
 		totalDelay = totalDelay + time.dbl();
 		avgDelay = totalDelay / nbrBundleReceived;
 

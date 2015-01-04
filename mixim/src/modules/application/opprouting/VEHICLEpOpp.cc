@@ -78,6 +78,7 @@ void VEHICLEpOpp::initialize(int stage) {
 		if (dtnTestMode){
 			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
 			dtnTestCycle = par("dtnTestCycle");
+			dtnTestMaxTime = par("dtnTestMaxTime");
 			nbrBundleSent = 0;
 			nbrBundleReceived = 0;
 
@@ -105,7 +106,9 @@ void VEHICLEpOpp::initialize(int stage) {
 	        if (dtnTestMode){
 	        	double tmp;
 	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
-	        	scheduleAt(simTime() + tmp, dtnTestMsg);
+	        	if (simTime() + tmp <dtnTestMaxTime){
+	        		scheduleAt(simTime() + tmp, dtnTestMsg);
+	        	}
 	        }
 
 	        traci->getManager()->addVehicleID(traci->getExternalId());
@@ -140,8 +143,10 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     	if (dtnTestMode){
     		sendDtnMessage();
     		// Finally reschedule message
-    		scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
-    		nbrMsgSent++;
+    		if (simTime() + dtnTestCycle < dtnTestMaxTime){
+    			scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
+				nbrMsgSent++;
+			}
     	}
     	break;
     case SEND_BROADCAST_TIMER:
