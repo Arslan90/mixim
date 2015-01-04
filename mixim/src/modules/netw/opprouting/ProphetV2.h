@@ -118,8 +118,12 @@ protected:
 private:
 
 
-	/** delivery predictability initialization constant*/
+	/** delivery predictability max value */
 	double PEncMax;
+	/** delivery predictability initialization constant*/
+	double PFirstContact;
+	/** delivery predictability min value */
+	double PMinThreshold;
 	/** typical interconnection time in seconds*/
 	double I_TYP;
 	/** delivery predictability transitivity scaling constant default value */

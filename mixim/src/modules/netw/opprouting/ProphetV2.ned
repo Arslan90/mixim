@@ -24,11 +24,14 @@ simple ProphetV2 extends BaseNetwLayer
     parameters:
     	@class(ProphetV2);
     	
-    	double PEncMax=default(0.5);
+    	double PEncMax=default(0.7);
+    	double PFirstContact=default(0.5);
+    	double PMinThreshold=default(0.0);
 //    	double I_TYP @unit("s")=default(1800s);
 		double I_TYP =default(1800);
     	double Beta=default(0.9);
-    	double GAMMA=default(0.999885791);
+//    	double GAMMA=default(0.999885791);
+    	double GAMMA=default(0.999);
 //    	int secondsInTimeUnit @unit("s")=default(30s);
     	int secondsInTimeUnit =default(30);
     	int fwdStrategy =default(7);

@@ -32,6 +32,8 @@ void ProphetV2::initialize(int stage)
 		 * Initialization of ProphetV2 parameters
 		 */
 		PEncMax = par("PEncMax").doubleValue();
+		PFirstContact = par("PFirstContact").doubleValue();
+		PMinThreshold = par("PMinThreshold").doubleValue();
 		I_TYP = par("I_TYP").doubleValue();
 		Beta = par("Beta").doubleValue();
 		GAMMA = par("GAMMA").doubleValue();
@@ -116,23 +118,15 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 	predsIterator it= preds.find(BAdress);
 	predsIterator it2= lastEncouterTime.find(BAdress);
 	if (it==preds.end()){
-		int size = preds.size();
-		if (!( size < 80)){
-			EV << "Anormal size : " << it->first << endl;
-		}
 
 		/*
 		 * if iterator is equal map.end(), it means that there is no entry for BAdress in preds
 		 * so lastEncTime equal 0
 		 */
-		predsForB = 0;
+		predsForB = PFirstContact;
 		lastEncTime = 0;
-		PEnc = PEncMax;
 
 	}else {
-		if (!(it->first < 80)){
-			EV << "Anormal Key : " << it->first << endl;
-		}
 
 		/*
 		 * if iterator is not equal map.end(), it means that there is an entry for BAdress in preds
@@ -143,7 +137,7 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 		}else {
 			lastEncTime = it2->second;
 		}
-		;
+
 		if (simTime().dbl()-lastEncTime<I_TYP){
 			/*
 			 * if the node has been encountered recently then don't use PEncMax
@@ -155,8 +149,8 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 			 */
 			PEnc = PEncMax;
 		}
+		predsForB = predsForB + (1-predsForB)*PEnc;
 	}
-	predsForB = predsForB + (1-predsForB)*PEnc;
 	preds[BAdress] = predsForB;
 	lastEncouterTime[BAdress] = encTime;
 
@@ -199,16 +193,16 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 	ageDeliveryPreds();
 	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
 
-		if (!(it->first < 80)){
-			EV << "Anormal Key : " << it->first << endl;
-		}
-
 		if (it->first==myNetwAddr)
 			continue;
 
 		CAdress = it->first;
 		tmp_it= preds.find(CAdress);
-		predsForC=tmp_it->second;
+		if (tmp_it == preds.end()){
+			predsForC = 0;
+		} else {
+			predsForC=tmp_it->second;
+		}
 
 		tmp_it= Bpreds.find(CAdress);
 		BpredsForC=tmp_it->second;
@@ -227,6 +221,7 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 
 void ProphetV2::ageDeliveryPreds()
 {
+	predsIterator it2;
 	double time = simTime().dbl();
 //	double timeDiff = (time-lastAgeUpdate)/secondsInTimeUnit;
 	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
@@ -234,13 +229,15 @@ void ProphetV2::ageDeliveryPreds()
 		return;
 	}else {
 		double mult = std::pow(GAMMA, timeDiff);
-		int size = preds.size();
-		EV << " Actual size of map : " << size << endl;
 		for (predsIterator it=preds.begin();it!=preds.end();it++){
-			if (!(it->first < 80)){
-				EV << "Anormal Key : " << it->first << endl;
-			}
 			it->second = it->second * mult;
+
+
+			if (it->second < PMinThreshold){
+				it2 = it;
+				it++;
+				preds.erase(it2);
+			}
 		}
 		lastAgeUpdate = simTime().dbl();
 	}
