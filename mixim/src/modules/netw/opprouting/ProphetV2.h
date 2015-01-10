@@ -69,6 +69,7 @@ public:
 		RIB   = 0xA1,
 		Bundle_Offer = 0xA4,
 		Bundle_Response = 0xA5,
+		Bundle_Ack = 0xD0,
 		Bundle = 0xFF,
 	};
 	/**
@@ -140,6 +141,28 @@ private:
 	 * delivery predictions. Should be tweaked for the scenario.*/
 	int secondsInTimeUnit;
 
+	/**
+	 * Boolean for the activation of PRoPHET ACK mecanism
+	 */
+	bool withAck;
+
+	/**
+	 * Map structures for ACKs
+	 */
+	std::list<Prophet_Struct::bndl_meta> acks;
+
+	/**
+ 	 * Specific map with K as serial of WSM &
+	 * V as a bndl_meta struct.
+	 * This structure simplify the search of ACKs
+	 */
+	std::map<int,Prophet_Struct::bndl_meta> acksIndex;
+
+	/**
+	 * Size of acks structure
+	 */
+	int ackStructureSize;
+
 	/** delivery predictabilities */
 	std::map<LAddress::L3Type, double> preds;
 	//std::map<DTNHost, double> preds;
@@ -166,8 +189,6 @@ private:
 
 	/** Boolean to verify if the transmission is possible */
 	bool canITransmit;
-
-	int noInsert;
 
 	/*******************************************************************
 	** 							Metrics variables section
