@@ -57,7 +57,7 @@ void ProphetV2::initialize(int stage)
 
 //		lastEncouterTime = std::map<LAddress::L3Type,double>();
 
-		int bundlesStructureSize = par("storageSize");
+		bundlesStructureSize = par("storageSize");
 		if (bundlesStructureSize<0){
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
@@ -66,7 +66,7 @@ void ProphetV2::initialize(int stage)
 
 		withAck = par("withAck");
 		ackStructureSize = par("ackSize");
-		if (ackStructureSize<0){
+		if (ackStructureSize<=0){
 			opp_error("Size of the structure that store acks can not be negative");
 		}
 		acks = std::list<Prophet_Struct::bndl_meta>();
@@ -605,7 +605,17 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			Prophet *ackPkt = new Prophet();
 
 			std::list<Prophet_Struct::bndl_meta> acksMeta = std::list<Prophet_Struct::bndl_meta>();
-			acksMeta.insert(acks.begin(),acks.begin(),acks.end());
+			for (std::list<Prophet_Struct::bndl_meta>::iterator ackIt = acks.begin(); ackIt !=acks.end(); ++ackIt) {
+				Prophet_Struct::bndl_meta meta;
+				meta.recipientAddress = ackIt->recipientAddress;
+				meta.senderAddress = ackIt->senderAddress;
+				meta.serial = ackIt->serial;
+				meta.timestamp = ackIt->timestamp;
+				meta.bFlags = ackIt->bFlags;
+				acksMeta.push_back(meta);
+			}
+
+
 			ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, destAddr, &acksMeta);
 			ackPkt->setBitLength(headerLength);
 			sendDown(ackPkt);
@@ -730,14 +740,10 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 								innerMap.erase(meta.serial);
 								bundles.remove(wsm);
 							}
-
 						}
-
 					}
 				}
-
 			}
-
 		}
 			break;
 		case Bundle:
@@ -963,6 +969,9 @@ void ProphetV2::finish()
 	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
 	recordScalar("# successful contacts", nbrSuccessfulContact);
 
+	if (withAck){
+		recordScalar("# ACKs", acks.size());
+	}
 }
 
 /*******************************************************************

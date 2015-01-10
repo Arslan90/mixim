@@ -39,5 +39,5 @@ simple ProphetV2 extends BaseNetwLayer
     	int storageSize = default(1000);
     	
     	bool withAck = default(false);
-    	int ackSize = default(10000);
+    	int ackSize = default(1000);
 }
