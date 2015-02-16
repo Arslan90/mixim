@@ -69,8 +69,8 @@ void ProphetV2::initialize(int stage)
 		if (ackStructureSize<=0){
 			opp_error("Size of the structure that store acks can not be negative");
 		}
-		acks = std::list<Prophet_Struct::bndl_meta>();
-		acksIndex = std::map<int,Prophet_Struct::bndl_meta>();
+		acks = std::list<BundleMeta*>();
+		acksIndex = std::map<int,BundleMeta*>();
 
 		/*
 		 * Collecting data & metrics
@@ -518,17 +518,19 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 * nothing to do for now
 			 */
 			if (withAck){
-				std::list<Prophet_Struct::bndl_meta> bundleToAcceptMeta;
+				std::list<BundleMeta*> bundleToAcceptMeta;
 				bundleToAcceptMeta = prophetPkt->getBndlmeta();
-				for (std::list<Prophet_Struct::bndl_meta>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
-					Prophet_Struct::bndl_meta meta;
-					meta.recipientAddress = ackIt->recipientAddress;
-					meta.senderAddress = ackIt->senderAddress;
-					meta.serial = ackIt->serial;
-					meta.timestamp = ackIt->timestamp;
-					meta.bFlags = ackIt->bFlags;
+				for (std::list<BundleMeta*>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
+//					Prophet_Struct::bndl_meta meta;
+//					meta.recipientAddress = ackIt->recipientAddress;
+//					meta.senderAddress = ackIt->senderAddress;
+//					meta.serial = ackIt->serial;
+//					meta.timestamp = ackIt->timestamp;
+//					meta.bFlags = ackIt->bFlags;
 
-					if (meta.bFlags==Prophet_Enum::PRoPHET_ACK) {
+					*ackIt->getFlags();
+
+					if (&*ackIt->getFlags()==Prophet_Enum::PRoPHET_ACK) {
 						if (acksIndex.find(meta.serial)==acksIndex.end()){
 
 							/*

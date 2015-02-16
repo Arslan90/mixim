@@ -38,6 +38,7 @@
 #include "cmodule.h"
 #include "Mac80211Pkt_m.h"
 #include "Prophet_m.h"
+#include "BundleMeta.h"
 //#include "../../messages/WaveShortMessage_m.h"
 //#include "../../utility/opprouting/Prophet_Enum.h"
 //#include "../../messages/opprouting/Prophet_m.h"
@@ -149,14 +150,14 @@ private:
 	/**
 	 * Map structures for ACKs
 	 */
-	std::list<Prophet_Struct::bndl_meta> acks;
+	std::list<BundleMeta*> acks;
 
 	/**
  	 * Specific map with K as serial of WSM &
 	 * V as a bndl_meta struct.
 	 * This structure simplify the search of ACKs
 	 */
-	std::map<int,Prophet_Struct::bndl_meta> acksIndex;
+	std::map<int,BundleMeta*> acksIndex;
 
 	/**
 	 * Size of acks structure
@@ -267,7 +268,7 @@ private:
 
 	/** Function for preparing Prophet message */
 	Prophet* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
-			std::list<Prophet_Struct::bndl_meta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
+				std::list<BundleMeta*>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
 
 	/**
 	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
@@ -284,7 +285,7 @@ private:
 	 * @brief Function that check if the WaveShortMessage identified by
 	 * @param bndlMeta is currently stored in this node
 	 */
-	bool exist(Prophet_Struct::bndl_meta bndlMeta);
+	bool exist(BundleMeta* bndlMeta);
 
 	/*
 	 * Function that store bundles according to the current Queuing Strategy

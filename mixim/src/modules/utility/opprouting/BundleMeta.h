@@ -1,0 +1,61 @@
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+// 
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program.  If not, see http://www.gnu.org/licenses/.
+// 
+
+#ifndef BUNDLEMETA_H_
+#define BUNDLEMETA_H_
+
+#include "Prophet_Enum.h"
+#include "WaveShortMessage_m.h"
+
+class BundleMeta {
+private:
+	int senderAddress;
+	int recipientAddress;
+	int serial;
+	simtime_t timestamp;
+	Prophet_Enum::bndlFlags bFlags;
+public:
+	BundleMeta(BundleMeta* bndl_meta);
+	BundleMeta(BundleMeta* bndl_meta, Prophet_Enum::bndlFlags flag);
+	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag);
+	virtual ~BundleMeta();
+
+    Prophet_Enum::bndlFlags getFlags() const
+    {
+        return bFlags;
+    }
+
+    int getRecipientAddress() const
+    {
+        return recipientAddress;
+    }
+
+    int getSenderAddress() const
+    {
+        return senderAddress;
+    }
+
+    int getSerial() const
+    {
+        return serial;
+    }
+
+    simtime_t getTimestamp() const
+    {
+        return timestamp;
+    }
+};
+
+#endif /* BUNDLEMETA_H_ */
