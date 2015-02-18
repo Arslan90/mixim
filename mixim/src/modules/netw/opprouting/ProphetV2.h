@@ -150,19 +150,19 @@ private:
 	/**
 	 * Map structures for ACKs
 	 */
-	std::list<BundleMeta*> acks;
+	std::list<BundleMeta> acks;
 
 	/**
  	 * Specific map with K as serial of WSM &
 	 * V as a bndl_meta struct.
 	 * This structure simplify the search of ACKs
 	 */
-	std::map<int,BundleMeta*> acksIndex;
+	std::map<int,BundleMeta> acksIndex;
 
 	/**
 	 * Size of acks structure
 	 */
-	int ackStructureSize;
+	unsigned int ackStructureSize;
 
 	/** delivery predictabilities */
 	std::map<LAddress::L3Type, double> preds;
@@ -268,7 +268,7 @@ private:
 
 	/** Function for preparing Prophet message */
 	Prophet* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
-				std::list<BundleMeta*>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
+				std::list<BundleMeta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
 
 	/**
 	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
@@ -285,7 +285,13 @@ private:
 	 * @brief Function that check if the WaveShortMessage identified by
 	 * @param bndlMeta is currently stored in this node
 	 */
-	bool exist(BundleMeta* bndlMeta);
+	bool exist(BundleMeta bndlMeta);
+
+	/**
+	 * @brief Function that check if the WaveShortMessage identified by
+	 * @param bndlMeta is currently stored in this node then deleted it
+	 */
+	bool existAndErase(BundleMeta bndlMeta);
 
 	/*
 	 * Function that store bundles according to the current Queuing Strategy

@@ -44,6 +44,10 @@ BundleMeta::BundleMeta(WaveShortMessage *wsm, Prophet_Enum::bndlFlags flag)
 	bFlags = flag;
 }
 
+BundleMeta::BundleMeta()
+{
+}
+
 BundleMeta::~BundleMeta() {
 	// TODO Auto-generated destructor stub
 }

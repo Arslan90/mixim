@@ -27,6 +27,7 @@ private:
 	simtime_t timestamp;
 	Prophet_Enum::bndlFlags bFlags;
 public:
+	BundleMeta();
 	BundleMeta(BundleMeta* bndl_meta);
 	BundleMeta(BundleMeta* bndl_meta, Prophet_Enum::bndlFlags flag);
 	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag);

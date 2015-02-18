@@ -19,17 +19,20 @@ cplusplus {{
 #include <map>
 #include "SimpleAddress.h"
 #include "Prophet_Enum.h"
-#include "Prophet_Struct.h"
+// #include "Prophet_Struct.h"
+#include "BundleMeta.h"
 //typedef Prophet_Struct::preds preds;
 typedef std::map<LAddress::L3Type, double> predictions;
-typedef std::list<Prophet_Struct::bndl_meta> bndlMeta;
+//typedef std::list<Prophet_Struct::bndl_meta> bndlMeta;
+typedef std::list<BundleMeta> bndlMeta;
 }}
 packet NetwPkt;
 
 enum t_result_field;
 class noncobject predictions;
 //class noncobject preds;
-struct bndl_meta;
+//struct bndl_meta;
+class noncobject BundleMeta;
 class noncobject bndlMeta;
 //
 // TODO generated message class
@@ -40,6 +43,7 @@ packet Prophet extends NetwPkt {
     int tlv_Flags;
     predictions preds = std::map<LAddress::L3Type, double>();
 //    preds predictions = std::map<LAddress::L3Type, double>();
-    bndlMeta bndlmeta = std::list<Prophet_Struct::bndl_meta>();
+//    bndlMeta bndlmeta = std::list<Prophet_Struct::bndl_meta>();
+    bndlMeta bndlmeta = std::list<BundleMeta>();
     int hopCount = 0;
 }
