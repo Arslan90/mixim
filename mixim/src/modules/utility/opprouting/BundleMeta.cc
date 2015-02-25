@@ -17,36 +17,36 @@
 
 
 
-BundleMeta::BundleMeta(BundleMeta *bndl_meta)
-{
-	senderAddress = bndl_meta->getSenderAddress();
-	recipientAddress = bndl_meta->getRecipientAddress();
-	serial = bndl_meta->getSerial();
-	timestamp = bndl_meta->getTimestamp();
-	bFlags = bndl_meta->getFlags();
-}
+//BundleMeta::BundleMeta(BundleMeta *bndl_meta)
+//{
+//	senderAddress = bndl_meta->getSenderAddress();
+//	recipientAddress = bndl_meta->getRecipientAddress();
+//	serial = bndl_meta->getSerial();
+//	timestamp = bndl_meta->getTimestamp();
+//	bFlags = bndl_meta->getFlags();
+//}
+//
+//BundleMeta::BundleMeta(BundleMeta *bndl_meta, Prophet_Enum::bndlFlags flag)
+//{
+//	senderAddress = bndl_meta->getSenderAddress();
+//	recipientAddress = bndl_meta->getRecipientAddress();
+//	serial = bndl_meta->getSerial();
+//	timestamp = bndl_meta->getTimestamp();
+//	bFlags = flag;
+//}
+//
+//BundleMeta::BundleMeta(WaveShortMessage *wsm, Prophet_Enum::bndlFlags flag)
+//{
+//	senderAddress = wsm->getSenderAddress();
+//	recipientAddress = wsm->getRecipientAddress();
+//	serial = wsm->getSerial();
+//	timestamp = wsm->getTimestamp();
+//	bFlags = flag;
+//}
 
-BundleMeta::BundleMeta(BundleMeta *bndl_meta, Prophet_Enum::bndlFlags flag)
-{
-	senderAddress = bndl_meta->getSenderAddress();
-	recipientAddress = bndl_meta->getRecipientAddress();
-	serial = bndl_meta->getSerial();
-	timestamp = bndl_meta->getTimestamp();
-	bFlags = flag;
-}
-
-BundleMeta::BundleMeta(WaveShortMessage *wsm, Prophet_Enum::bndlFlags flag)
-{
-	senderAddress = wsm->getSenderAddress();
-	recipientAddress = wsm->getRecipientAddress();
-	serial = wsm->getSerial();
-	timestamp = wsm->getTimestamp();
-	bFlags = flag;
-}
-
-BundleMeta::BundleMeta()
-{
-}
+//BundleMeta::BundleMeta()
+//{
+//}
 
 BundleMeta::~BundleMeta() {
 	// TODO Auto-generated destructor stub

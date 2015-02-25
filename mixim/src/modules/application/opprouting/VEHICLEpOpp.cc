@@ -84,6 +84,9 @@ void VEHICLEpOpp::initialize(int stage) {
 
 		}
 
+		isNetwAddrInit = false;
+		nbrMsgSent = 0;
+
 //		// My variables
 //		vehicleIdAsInt = par("vehicleIdAsInt");
 //		if (vehicleIdAsInt){
@@ -106,9 +109,11 @@ void VEHICLEpOpp::initialize(int stage) {
 	        if (dtnTestMode){
 	        	double tmp;
 	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
+//	        	tmp =  (dtnSynchronized)? 0 : dblrand() * double(dtnTestCycle) ;
 	        	if (simTime() + tmp <dtnTestMaxTime){
 	        		scheduleAt(simTime() + tmp, dtnTestMsg);
 	        	}
+//	        	scheduleAt(simTime(), dtnTestMsg);
 	        }
 
 	        traci->getManager()->addVehicleID(traci->getExternalId());
@@ -127,8 +132,8 @@ void VEHICLEpOpp::initialize(int stage) {
 		cModule *netw = this->getParentModule()->getSubmodule("netw");
 		if (netw!=NULL){
 			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
+			isNetwAddrInit = true;
 		}
-		nbrMsgSent = 0;
 	}
 }
 
@@ -498,6 +503,7 @@ void VEHICLEpOpp::WMS() {
 void VEHICLEpOpp::sendDtnMessage()
 {
 	int addr = vpaDestAddr();
+//	int myAddr = isNetwAddrInit ? netwAddr : myId;
 //	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
 
@@ -512,7 +518,8 @@ void VEHICLEpOpp::sendDtnMessage()
 
 	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA[0] with address "<< addr <<endl;
 	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
-	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(netwAddr,nbrMsgSent)));
+	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(myId,nbrMsgSent)));
+//	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,0));
 	nbrBundleSent++;
 }
 
@@ -675,6 +682,8 @@ void VEHICLEpOpp::sendMessage() {
 	Coord vehPos = traci->getCurrentPosition();
 	double axeY= maxY - vehPos.y;
 
+//	int myAddr = isNetwAddrInit ? netwAddr : myId;
+
 	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
 
@@ -687,7 +696,7 @@ void VEHICLEpOpp::sendMessage() {
 	//Sending message
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 //	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
-	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(netwAddr,nbrMsgSent)));
+	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(myId,nbrMsgSent)));
 
 }
 

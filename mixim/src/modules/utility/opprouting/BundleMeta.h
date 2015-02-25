@@ -27,10 +27,15 @@ private:
 	simtime_t timestamp;
 	Prophet_Enum::bndlFlags bFlags;
 public:
-	BundleMeta();
-	BundleMeta(BundleMeta* bndl_meta);
-	BundleMeta(BundleMeta* bndl_meta, Prophet_Enum::bndlFlags flag);
-	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag);
+//	BundleMeta();
+//	BundleMeta(BundleMeta* bndl_meta);
+//	BundleMeta(BundleMeta* bndl_meta, Prophet_Enum::bndlFlags flag);
+//	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag);
+
+	BundleMeta(): senderAddress(-1), recipientAddress(-1), serial(0), timestamp(0), bFlags(Prophet_Enum::Bndl_Accepted) {}
+	BundleMeta(BundleMeta* mt): senderAddress(mt->getSenderAddress()), recipientAddress(mt->getRecipientAddress()), serial(mt->getSerial()), timestamp(mt->getTimestamp()), bFlags(mt->getFlags()) {}
+	BundleMeta(BundleMeta* mt, Prophet_Enum::bndlFlags flag): senderAddress(mt->getSenderAddress()), recipientAddress(mt->getRecipientAddress()), serial(mt->getSerial()), timestamp(mt->getTimestamp()), bFlags(flag) {}
+	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag): senderAddress(wsm->getSenderAddress()), recipientAddress(wsm->getRecipientAddress()), serial(wsm->getSerial()), timestamp(wsm->getTimestamp()), bFlags(flag) {};
 	virtual ~BundleMeta();
 
     Prophet_Enum::bndlFlags getFlags() const

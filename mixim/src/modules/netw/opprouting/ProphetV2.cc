@@ -312,7 +312,7 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
 
     Prophet *prophetPkt = check_and_cast<Prophet *>(m->decapsulate());
-    delete(m);
+
 
     int hopcount;
 
@@ -367,10 +367,14 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 					// collecting data
 					updatingL3Received();
 
+					/*
+					 * Note : this phase is responsible of triggering the executeInitiatorRole(Bundle_Ack,prophetPkt);
+					 */
 					executeInitiatorRole(Bundle,prophetPkt);
-					if (withAck){
-						executeInitiatorRole(Bundle_Ack,prophetPkt);
-					}
+
+//					if (withAck){
+//						executeInitiatorRole(Bundle_Ack,prophetPkt);
+//					}
 				}
 				break;
 			default:
@@ -378,6 +382,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				break;
 		}
     }
+//    cancelAndDelete(prophetPkt);
+    delete(prophetPkt);
+//    delete(m);
+    delete(msg);
+
 }
 
 void ProphetV2::handleUpperMsg(cMessage* msg)
@@ -428,6 +437,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 			}
 			break;
 	}
+	delete msg;
 }
 
 void ProphetV2::storeBundle(WaveShortMessage *msg)
@@ -591,7 +601,15 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			/*
 			 * Collecting data
 			 */
-			updatingContactState(prophetPkt->getSrcAddr(),Bundle_Offer);
+
+			// destAddr is  the current sender of prophet packet
+
+			if (destAddr == 0) {
+				coreEV << "destAddr equal 0 (null) in Bundle_Offer of Initiator Role. destAddr will be recalculated";
+				destAddr = prophetPkt->getSrcAddr();
+			}
+
+			updatingContactState(destAddr,Bundle_Offer);
 			break;
 		case Bundle_Response:
 		{
@@ -612,8 +630,15 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 * step 2 : sending the response
 			 */
 			
+			// destAddr is  the sender of prophet packet received in Bundle_Offer
+
+			if (destAddr == 0) {
+				coreEV << "destAddr equal 0 (null) in Bundle_Response of Initiator Role. destAddr will be recalculated";
+				destAddr = prophetPkt->getSrcAddr();
+			}
+
 			Prophet *responsePkt = new Prophet();
-			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
+			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,destAddr, &bundleToAcceptMeta);
 			responsePkt->setBitLength(headerLength);
 			sendDown(responsePkt);
 			/*
@@ -621,7 +646,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 */
 			updatingL3Sent();
 			responsePkt->setHopCount(responsePkt->getHopCount()+1);
-			updatingContactState(prophetPkt->getSrcAddr(),Bundle_Response);
+			updatingContactState(destAddr,Bundle_Response);
 		}
 			break;
 		case Bundle_Ack:{
@@ -639,7 +664,24 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 //				acksMeta.push_back(meta);
 //			}
 
-			std::list<BundleMeta> acksMeta (acks.begin(),acks.end());
+			/*
+			 * No need to send all acks because it's already done in Bundle_Offer, send only ack of the received bundle
+			 */
+//			std::list<BundleMeta> acksMeta (acks.begin(),acks.end());
+
+			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+			std::list<BundleMeta> acksMeta;
+			if (acksIndex.find(wsm->getSerial())!= acksIndex.end()){
+				acksMeta.push_back(acksIndex.find(wsm->getSerial())->second);
+			}
+
+
+			// destAddr is  the sender of prophet packet received in Bundle (the final recipient of WSMessage)
+
+			if (destAddr == 0) {
+				coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
+				destAddr = prophetPkt->getSrcAddr();
+			}
 
 			ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, destAddr, &acksMeta);
 			ackPkt->setBitLength(headerLength);
@@ -660,9 +702,15 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
 			if ((recipientAddr==LAddress::L3BROADCAST)||(recipientAddr==myNetwAddr)){
 				storeBundle(wsm->dup());
-				sendUp(prophetPkt);
+//				sendUp(prophetPkt);
+//				Prophet *toSentUp = prophetPkt->dup();
+//				sendUp(toSentUp);
+				sendUp(prophetPkt->dup());
 
 				if (withAck){
+					/*
+					 * Step 1 : Creating the ACK
+					 */
 					if (acksIndex.find(wsm->getSerial())==acksIndex.end()){
 						BundleMeta meta (wsm,Prophet_Enum::PRoPHET_ACK);
 //						Prophet_Struct::bndl_meta meta;
@@ -681,6 +729,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
 						acks.push_back(meta);
 					}
+					
+					/*
+					 * Step 2 : Sending the ACK
+					 */
+					executeInitiatorRole(Bundle_Ack,prophetPkt);
 				}
 			}else {
 				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
@@ -775,6 +828,13 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			break;
 		case Bundle:
 		{
+			// destAddr is  the sender of prophet packet received in Bundle_Response
+
+			if (destAddr == 0) {
+				coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
+				destAddr = prophetPkt->getSrcAddr();
+			}
+
 			std::list<BundleMeta> bundleToSendMeta;
 			bundleToSendMeta = prophetPkt->getBndlmeta();
 			for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
@@ -783,7 +843,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 					innerIndexIterator it3 = it2->second.find(it->getSerial());
 					if (it3!=it2->second.end()){
 						Prophet *bundlePkt = new Prophet();
-						bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
+						bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
 						bundlePkt->setBitLength(headerLength);
 						if (canITransmit){
 							bundlePkt->setHopCount(bundlePkt->getHopCount()+1);

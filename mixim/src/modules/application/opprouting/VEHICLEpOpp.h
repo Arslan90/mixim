@@ -150,6 +150,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 
 		int netwAddr;
 		int nbrMsgSent;
+		bool isNetwAddrInit;
 
 	protected:
 		virtual void onBeacon(WaveShortMessage* wsm);
