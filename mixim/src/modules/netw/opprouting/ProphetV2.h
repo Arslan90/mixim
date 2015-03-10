@@ -236,6 +236,12 @@ private:
 	 */
 	std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
 
+	int deletedBundlesWithAck;
+
+	int demandedAckedBundle;
+
+	int notCorrectlyDeleted;
+
 
 	/*******************************************************************
 	** 							end of metrics variables section

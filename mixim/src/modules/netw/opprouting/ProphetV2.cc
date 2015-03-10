@@ -100,6 +100,16 @@ void ProphetV2::initialize(int stage)
         nbrFailedContactAtBundle_Response = 0;
         contactState = std::map<LAddress::L3Type, Prophetv2MessageKinds>();
 
+        deletedBundlesWithAck = 0;
+
+        demandedAckedBundle = 0;
+
+        notCorrectlyDeleted = 0;
+
+//        if (withAck){
+//
+//        }
+
 
 	}
 	else if (stage==1){
@@ -558,7 +568,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 							 * 2 step : Deleting the bundle from the storage
 							 */
 
-							existAndErase(*ackIt);
+							if (existAndErase(*ackIt)) {
+								deletedBundlesWithAck++;
+							}
 						}
 					}
 //					if (ackIt->getFlags()==Prophet_Enum::PRoPHET_ACK) {
@@ -623,6 +635,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			for (std::list<BundleMeta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
 				if (exist(*it2)){
 					it2 = bundleToAcceptMeta.erase(it2);
+				}
+				if(withAck){
+					if (acksIndex.find(it2->getSerial())!=acksIndex.end()){
+						it2 = bundleToAcceptMeta.erase(it2);
+						demandedAckedBundle++;
+					}
 				}
 			}
 			
@@ -809,19 +827,23 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 					 * 2 step : Deleting the bundle from the storage
 					 */
 
-					if (exist(meta)){
-
-						bundlesIndexIterator it = bundlesIndex.find(meta.getRecipientAddress());
-						if (it != bundlesIndex.end()){
-							innerIndexMap innerMap(it->second);
-							innerIndexIterator it2 = innerMap.find(meta.getSerial());
-							if (it2 !=innerMap.end()){
-								WaveShortMessage* wsm = it2->second;
-								innerMap.erase(meta.getSerial());
-								bundles.remove(wsm);
-							}
-						}
+					if (existAndErase(*ackIt)) {
+						deletedBundlesWithAck++;
 					}
+
+//					if (exist(meta)){
+//
+//						bundlesIndexIterator it = bundlesIndex.find(meta.getRecipientAddress());
+//						if (it != bundlesIndex.end()){
+//							innerIndexMap innerMap(it->second);
+//							innerIndexIterator it2 = innerMap.find(meta.getSerial());
+//							if (it2 !=innerMap.end()){
+//								WaveShortMessage* wsm = it2->second;
+//								innerMap.erase(meta.getSerial());
+//								bundles.remove(wsm);
+//							}
+//						}
+//					}
 				}
 			}
 		}
@@ -909,6 +931,15 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 //			meta.serial = it2->second->getSerial();
 //			meta.timestamp = it2->second->getTimestamp();
 //			meta.bFlags = Prophet_Enum::Bndl_Accepted;
+
+
+			if (withAck){
+				if (acksIndex.find(it2->second->getSerial())!=acksIndex.end()){
+					existAndErase(meta);
+					notCorrectlyDeleted++;
+					continue;
+				}
+			}
 			bundleToOfferMeta.push_back(meta);
 		}
 	}
@@ -971,6 +1002,13 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 //					meta.serial = it3->second->getSerial();
 //					meta.timestamp = it3->second->getTimestamp();
 //					meta.bFlags = Prophet_Enum::Bndl_Accepted;
+					if (withAck){
+						if (acksIndex.find(it3->second->getSerial())!=acksIndex.end()){
+							existAndErase(meta);
+							notCorrectlyDeleted++;
+							continue;
+						}
+					}
 					bundleToOfferMeta.push_back(meta);
 				}
 			}
@@ -1076,6 +1114,10 @@ void ProphetV2::finish()
 
 	if (withAck){
 		recordScalar("# ACKs", acks.size());
+		recordScalar("# DeletedBundles", deletedBundlesWithAck);
+		recordScalar("# DemandedAckedBundles", demandedAckedBundle);
+		recordScalar("# NotCorrectlyDeleted", notCorrectlyDeleted);
+		recordScalar("# Bundles", bundles.size());
 	}
 }
 
