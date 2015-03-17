@@ -242,6 +242,8 @@ private:
 
 	int notCorrectlyDeleted;
 
+	int bundlesReceived;
+
 
 	/*******************************************************************
 	** 							end of metrics variables section
@@ -279,7 +281,7 @@ private:
 	/**
 	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
 	 */
-	void defineBundleOffer(Prophet *prophetPkt);
+	std::list<BundleMeta> defineBundleOffer(Prophet *prophetPkt);
 
 	/**
 	 * @brief Function that check if the WaveShortMessage identified by
@@ -303,6 +305,8 @@ private:
 	 * Function that store bundles according to the current Queuing Strategy
 	 */
 	void storeBundle(WaveShortMessage *msg);
+
+	void storeACK(BundleMeta meta);
 
 	/*
 	 * Convert a string to L3Address

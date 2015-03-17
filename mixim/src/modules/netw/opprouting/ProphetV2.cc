@@ -106,10 +106,7 @@ void ProphetV2::initialize(int stage)
 
         notCorrectlyDeleted = 0;
 
-//        if (withAck){
-//
-//        }
-
+        bundlesReceived = 0;
 
 	}
 	else if (stage==1){
@@ -169,31 +166,6 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 	}
 	preds[BAdress] = predsForB;
 	lastEncouterTime[BAdress] = encTime;
-
-
-//	preds.insert(std::pair<LAddress::L3Type,double>(BAdress,predsForB));
-//	lastEncouterTime.insert(std::pair<LAddress::L3Type,double>(BAdress,encTime));
-
-//	std::pair<std::map<LAddress::L3Type,double>::iterator, bool> result;
-//	result = preds.insert(std::pair<LAddress::L3Type,double>(BAdress,predsForB));
-//	if (result.second == false){
-//		noInsert++;
-//		WATCH(noInsert);
-//		EV << "Impossible to insert (K,V) : " << "(" << BAdress << "," << predsForB << ")" << endl;
-//		EV << "Actual pair (K,V) : " << "(" << result.first->first << "," << result.first->second << ")" << endl;
-//	}else {
-//		EV << "Inserted pair (K,V) : " << "(" << result.first->first << "," << result.first->second << ")" << endl;
-//	}
-//	std::pair<std::map<LAddress::L3Type,double>::iterator, bool> result2;
-//	result2 = lastEncouterTime.insert(std::pair<LAddress::L3Type,double>(BAdress,encTime));
-//	if (result2.second == false){
-//		noInsert++;
-//		WATCH(noInsert);
-//		EV << "Impossible to insert (K,V) : " << "(" << BAdress << "," << encTime << ")" << endl;
-//		EV << "Actual pair (K,V) : " << "(" << result2.first->first << "," << result2.first->second << ")" << endl;
-//	}else {
-//		EV << "Inserted pair (K,V) : " << "(" << result2.first->first << "," << result2.first->second << ")" << endl;
-//	}
 }
 
 
@@ -501,6 +473,24 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 	}
 }
 
+void ProphetV2::storeACK(BundleMeta meta)
+{
+	if (acksIndex.find(meta.getSerial())==acksIndex.end()){
+		if (acks.size()==ackStructureSize){
+			int serial = acks.front().getSerial();
+			acksIndex.erase(serial);
+			acks.pop_front();
+		}
+
+		acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
+		acks.push_back(meta);
+
+		if (existAndErase(meta)) {
+			deletedBundlesWithAck++;
+		}
+	}
+}
+
 void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
 	switch (kind) {
@@ -534,86 +524,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		}
 			break;
 		case Bundle_Offer:
-			/*
-			 * nothing to do for now
-			 */
-			if (withAck){
-				std::list<BundleMeta> bundleToAcceptMeta;
-				bundleToAcceptMeta = prophetPkt->getBndlmeta();
-				for (std::list<BundleMeta>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
-//					Prophet_Struct::bndl_meta meta;
-//					meta.recipientAddress = ackIt->recipientAddress;
-//					meta.senderAddress = ackIt->senderAddress;
-//					meta.serial = ackIt->serial;
-//					meta.timestamp = ackIt->timestamp;
-//					meta.bFlags = ackIt->bFlags;
-
-
-					if (ackIt->getFlags() == Prophet_Enum::PRoPHET_ACK){
-						if (acksIndex.find(ackIt->getSerial())==acksIndex.end()){
-							/*
-							 * 1 step : Adding ack to ack list
-							 */
-
-							if (acks.size()==ackStructureSize){
-								int serial = acks.front().getSerial();
-								acksIndex.erase(serial);
-								acks.pop_front();
-							}
-
-							acksIndex.insert(std::pair<int, BundleMeta>(ackIt->getSerial(),*ackIt));
-							acks.push_back(*ackIt);
-
-							/*
-							 * 2 step : Deleting the bundle from the storage
-							 */
-
-							if (existAndErase(*ackIt)) {
-								deletedBundlesWithAck++;
-							}
-						}
-					}
-//					if (ackIt->getFlags()==Prophet_Enum::PRoPHET_ACK) {
-//						if (acksIndex.find(meta.serial)==acksIndex.end()){
-//
-//							/*
-//							 * 1 step : Adding ack to ack list
-//							 */
-//
-//							if (acks.size()==ackStructureSize){
-//								int serial = acks.front().serial;
-//								acksIndex.erase(serial);
-//								acks.pop_front();
-//							}
-//
-//							acksIndex.insert(std::pair<int, Prophet_Struct::bndl_meta>(meta.serial,meta));
-//							acks.push_back(meta);
-//
-//							/*
-//							 * 2 step : Deleting the bundle from the storage
-//							 */
-//
-//							if (exist(meta)){
-//								bundlesIndexIterator it = bundlesIndex.find(meta.recipientAddress);
-//								if (it != bundlesIndex.end()){
-//									innerIndexMap innerMap(it->second);
-//									innerIndexIterator it2 = innerMap.find(meta.serial);
-//									if (it2 !=innerMap.end()){
-//										WaveShortMessage* wsm = it2->second;
-//										innerMap.erase(meta.serial);
-//										bundles.remove(wsm);
-//									}
-//								}
-//							}
-//						}
-//					}
-				}
-			}
-
-			/*
-			 * Collecting data
-			 */
-
+		{
 			// destAddr is  the current sender of prophet packet
 
 			if (destAddr == 0) {
@@ -621,32 +532,115 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				destAddr = prophetPkt->getSrcAddr();
 			}
 
-			updatingContactState(destAddr,Bundle_Offer);
+			std::list<BundleMeta> bundleToAcceptMeta;
+			bundleToAcceptMeta = prophetPkt->getBndlmeta();
+
+			if (bundleToAcceptMeta.size()==0){
+				/*
+				 * Nothing to do, we have to stop the exchange
+				 */
+				updatingContactState(destAddr,Bundle);
+			}else {
+
+				for (std::list<BundleMeta>::iterator it = bundleToAcceptMeta.begin(); it !=bundleToAcceptMeta.end(); ++it) {
+					if (it->getFlags() == Prophet_Enum::Bndl_Accepted){
+						/*
+						 * step 1 : check if offered bundles are already stored in this node,
+						 * in that case delete them from the offered list
+						 */
+						if (exist(*it)){
+							it = bundleToAcceptMeta.erase(it);
+						}
+
+						/*
+						 * step 2 : check if offered bundles are already acked,
+						 * in that case delete them from the offered list
+						 */
+						if (withAck){
+							if (acksIndex.find(it->getSerial()) != acksIndex.end()){
+								it = bundleToAcceptMeta.erase(it);
+								demandedAckedBundle++;
+							}
+						}
+					}
+					if (it->getFlags() == Prophet_Enum::PRoPHET_ACK){
+						/*
+						 * step 3 : check if BundleMeta is ACK,
+						 * in that case add it and delete the corresponding bundle from storage
+						 */
+						storeACK(*it);
+						}
+				}
+				/*
+				 * Collecting data
+				 */
+				updatingContactState(destAddr,Bundle_Offer);
+			}
+
+
+//				if (withAck){
+//					std::list<BundleMeta> bundleToAcceptMeta;
+//					bundleToAcceptMeta = prophetPkt->getBndlmeta();
+//					for (std::list<BundleMeta>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
+//
+//						if (ackIt->getFlags() == Prophet_Enum::PRoPHET_ACK){
+//
+//							if (acksIndex.find(ackIt->getSerial())==acksIndex.end()){
+//								/*
+//								 * 1 step : Adding ack to ack list
+//								 */
+//
+//								if (acks.size()==ackStructureSize){
+//									int serial = acks.front().getSerial();
+//									acksIndex.erase(serial);
+//									acks.pop_front();
+//								}
+//
+//								acksIndex.insert(std::pair<int, BundleMeta>(ackIt->getSerial(),*ackIt));
+//								acks.push_back(*ackIt);
+//
+//								/*
+//								 * 2 step : Deleting the bundle from the storage
+//								 */
+//
+//								if (existAndErase(*ackIt)) {
+//									deletedBundlesWithAck++;
+//								}
+//							}
+//						}
+//					}
+//				}
+
+
+		}
+
 			break;
 		case Bundle_Response:
 		{
-			std::list<BundleMeta> bundleToAcceptMeta;
-			bundleToAcceptMeta = prophetPkt->getBndlmeta();
-			
-			/*
-			 * step 1 : check if offered bundles are already stored in this node,
-			 * in that case delete them from the offered list 
-			 */ 
-			for (std::list<BundleMeta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
-				if (exist(*it2)){
-					it2 = bundleToAcceptMeta.erase(it2);
-				}
-				if(withAck){
-					if (acksIndex.find(it2->getSerial())!=acksIndex.end()){
-						it2 = bundleToAcceptMeta.erase(it2);
-						demandedAckedBundle++;
-					}
-				}
-			}
-			
-			/*
-			 * step 2 : sending the response
-			 */
+//			std::list<BundleMeta> bundleToAcceptMeta;
+//			bundleToAcceptMeta = prophetPkt->getBndlmeta();
+//
+//
+//
+//			/*
+//			 * step 1 : check if offered bundles are already stored in this node,
+//			 * in that case delete them from the offered list
+//			 */
+//			for (std::list<BundleMeta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
+//				if (exist(*it2)){
+//					it2 = bundleToAcceptMeta.erase(it2);
+//				}
+//				if(withAck){
+//					if (acksIndex.find(it2->getSerial())!=acksIndex.end()){
+//						it2 = bundleToAcceptMeta.erase(it2);
+//						demandedAckedBundle++;
+//					}
+//				}
+//			}
+//
+//			/*
+//			 * step 2 : sending the response
+//			 */
 			
 			// destAddr is  the sender of prophet packet received in Bundle_Offer
 
@@ -655,20 +649,44 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				destAddr = prophetPkt->getSrcAddr();
 			}
 
-			Prophet *responsePkt = new Prophet();
-			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,destAddr, &bundleToAcceptMeta);
-			responsePkt->setBitLength(headerLength);
-			sendDown(responsePkt);
-			/*
-			 * Collecting data
-			 */
-			updatingL3Sent();
-			responsePkt->setHopCount(responsePkt->getHopCount()+1);
-			updatingContactState(destAddr,Bundle_Response);
+			std::list<BundleMeta> bundleToAcceptMeta;
+			bundleToAcceptMeta = prophetPkt->getBndlmeta();
+
+			if (bundleToAcceptMeta.size() == 0){
+				/*
+				 * Nothing to do, we have to stop the exchange
+				 */
+				updatingContactState(destAddr,Bundle);
+			}else{
+
+				/*
+				 * step 1 : sending the response
+				 */
+
+				Prophet *responsePkt = new Prophet();
+				responsePkt = prepareProphet(Bundle_Response,myNetwAddr,destAddr, &bundleToAcceptMeta);
+				responsePkt->setBitLength(headerLength);
+				sendDown(responsePkt);
+
+				/*
+				 * Collecting data
+				 */
+				updatingL3Sent();
+				responsePkt->setHopCount(responsePkt->getHopCount()+1);
+				updatingContactState(destAddr,Bundle_Response);
+			}
 		}
 			break;
 		case Bundle_Ack:{
+
 			Prophet *ackPkt = new Prophet();
+			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+
+			/*
+			 * Step 1 : Creating the ACK
+			 */
+			BundleMeta meta (wsm,Prophet_Enum::PRoPHET_ACK);
+			storeACK(meta);
 
 //			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
 //			for (std::list<BundleMeta>::iterator ackIt = acks.begin(); ackIt !=acks.end(); ++ackIt) {
@@ -687,10 +705,13 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 */
 //			std::list<BundleMeta> acksMeta (acks.begin(),acks.end());
 
-			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+			/*
+			 * Step 2 : Sending the ACK
+			 */
+
 			std::list<BundleMeta> acksMeta;
-			if (acksIndex.find(wsm->getSerial())!= acksIndex.end()){
-				acksMeta.push_back(acksIndex.find(wsm->getSerial())->second);
+			if (acksIndex.find(meta.getSerial())!= acksIndex.end()){
+				acksMeta.push_back(meta);
 			}
 
 
@@ -712,52 +733,54 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle:
 		{
-			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+			bool shouldAbort = false;
+			WaveShortMessage *wsm;
 
-			// Updating hopCount for WSM Message
-			wsm->setHopCount(wsm->getHopCount()+1);
-
-			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
-			if ((recipientAddr==LAddress::L3BROADCAST)||(recipientAddr==myNetwAddr)){
-				storeBundle(wsm->dup());
-//				sendUp(prophetPkt);
-//				Prophet *toSentUp = prophetPkt->dup();
-//				sendUp(toSentUp);
-				sendUp(prophetPkt->dup());
-
-				if (withAck){
-					/*
-					 * Step 1 : Creating the ACK
-					 */
-					if (acksIndex.find(wsm->getSerial())==acksIndex.end()){
-						BundleMeta meta (wsm,Prophet_Enum::PRoPHET_ACK);
-//						Prophet_Struct::bndl_meta meta;
-//						meta.senderAddress = wsm->getSenderAddress();
-//						meta.recipientAddress = wsm->getRecipientAddress();
-//						meta.serial = wsm->getSerial();
-//						meta.timestamp = wsm->getTimestamp();
-//						meta.bFlags = Prophet_Enum::PRoPHET_ACK;
-
-						if (acks.size()==ackStructureSize){
-							int serial = acks.front().getSerial();
-							acksIndex.erase(serial);
-							acks.pop_front();
-						}
-
-						acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
-						acks.push_back(meta);
-					}
-					
-					/*
-					 * Step 2 : Sending the ACK
-					 */
-					executeInitiatorRole(Bundle_Ack,prophetPkt);
-				}
+			if (prophetPkt->getEncapsulatedPacket() == NULL){
+				shouldAbort = true;
 			}else {
-				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
-				storeBundle(wsm);
+
+				bundlesReceived++;
+
+				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+
+				if (bundlesIndex.find(wsm->getSerial())!=bundlesIndex.end()){
+					shouldAbort = true;
+				}
+
+				if ((withAck)&&(acksIndex.find(wsm->getSerial())!=acksIndex.end())){
+					shouldAbort = true;
+				}
 			}
 
+			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
+
+			if (!shouldAbort){
+				// Updating hopCount for WSM Message
+				wsm->setHopCount(wsm->getHopCount()+1);
+
+
+//				if ((recipientAddr==LAddress::L3BROADCAST)||(recipientAddr==myNetwAddr)){
+//					if (recipientAddr != myNetwAddr){
+//						storeBundle(wsm->dup());
+//					}
+//					sendUp(prophetPkt);
+//					Prophet *toSentUp = prophetPkt->dup();
+//					sendUp(toSentUp);
+				if (recipientAddr == myNetwAddr){
+					sendUp(prophetPkt->dup());
+					if (withAck){
+						executeInitiatorRole(Bundle_Ack,prophetPkt);
+					}
+				}else {
+					wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
+					storeBundle(wsm);
+				}
+			}
+
+			if ((shouldAbort)&&(recipientAddr == myNetwAddr)){
+				sendUp(prophetPkt->dup());
+			}
 			/*
 			 * Collecting data
 			 */
@@ -786,13 +809,59 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			break;
 		case Bundle_Offer:
 		{
-			defineBundleOffer(prophetPkt);
+			/*
+			 * Step 1 : Calculating Bundle to Offer
+			 */
+			std::list<BundleMeta> bundleToOfferMeta = defineBundleOffer(prophetPkt);
+			int size = bundleToOfferMeta.size();
+
+			/*
+			 * Step 2 : Sending the ProphetPckt
+			 */
+
+			// destAddr is  the sender of prophet packet received in RIB
+
+			if (destAddr == 0) {
+				coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
+				destAddr = prophetPkt->getSrcAddr();
+			}
+
+
+			Prophet *offerPkt = new Prophet();
+			offerPkt->setBitLength(headerLength);
+			offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,destAddr,&bundleToOfferMeta);
+			sendDown(offerPkt);
+			/*
+			 * Collecting data
+			 */
+			updatingL3Sent();
+			offerPkt->setHopCount(offerPkt->getHopCount()+1);
 		}
 			break;
 		case Bundle_Response:
-			/*
-			 * nothing to do for now
-			 */
+		{
+			if (withAck){
+				// destAddr is  the sender of prophet packet received in BundleResp
+
+				if (destAddr == 0) {
+					coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
+					destAddr = prophetPkt->getSrcAddr();
+				}
+
+				/*
+				 * 1 step : Check if demanded bundle in bundleResp is currently acked, delete it if it's the case
+				 */
+
+				std::list<BundleMeta> bundleToSendMeta;
+				bundleToSendMeta = prophetPkt->getBndlmeta();
+				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
+					if (acksIndex.find(it->getSerial()) != acksIndex.end()){
+						it = bundleToSendMeta.erase(it);
+					}
+				}
+
+			}
+		}
 			break;
 		case Bundle_Ack:
 		{
@@ -801,50 +870,31 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 
 			for (std::list<BundleMeta>::iterator ackIt = acksMeta.begin(); ackIt !=acksMeta.end(); ++ackIt) {
 				BundleMeta meta = *ackIt;
-//				Prophet_Struct::bndl_meta meta;
-//				meta.recipientAddress = ackIt->recipientAddress;
-//				meta.senderAddress = ackIt->senderAddress;
-//				meta.serial = ackIt->serial;
-//				meta.timestamp = ackIt->timestamp;
-//				meta.bFlags = ackIt->bFlags;
+				storeACK(meta);
 
-				if (acksIndex.find(meta.getSerial())==acksIndex.end()){
-
-					/*
-					 * 1 step : Adding ack to ack list
-					 */
-
-					if (acks.size()==ackStructureSize){
-						int serial = acks.front().getSerial();
-						acksIndex.erase(serial);
-						acks.pop_front();
-					}
-
-					acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
-					acks.push_back(meta);
-
-					/*
-					 * 2 step : Deleting the bundle from the storage
-					 */
-
-					if (existAndErase(*ackIt)) {
-						deletedBundlesWithAck++;
-					}
-
-//					if (exist(meta)){
+//				if (acksIndex.find(meta.getSerial())==acksIndex.end()){
 //
-//						bundlesIndexIterator it = bundlesIndex.find(meta.getRecipientAddress());
-//						if (it != bundlesIndex.end()){
-//							innerIndexMap innerMap(it->second);
-//							innerIndexIterator it2 = innerMap.find(meta.getSerial());
-//							if (it2 !=innerMap.end()){
-//								WaveShortMessage* wsm = it2->second;
-//								innerMap.erase(meta.getSerial());
-//								bundles.remove(wsm);
-//							}
-//						}
+//					/*
+//					 * 1 step : Adding ack to ack list
+//					 */
+//
+//					if (acks.size()==ackStructureSize){
+//						int serial = acks.front().getSerial();
+//						acksIndex.erase(serial);
+//						acks.pop_front();
 //					}
-				}
+//
+//					acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
+//					acks.push_back(meta);
+//
+//					/*
+//					 * 2 step : Deleting the bundle from the storage
+//					 */
+//
+//					if (existAndErase(*ackIt)) {
+//						deletedBundlesWithAck++;
+//					}
+//				}
 			}
 		}
 			break;
@@ -857,24 +907,49 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				destAddr = prophetPkt->getSrcAddr();
 			}
 
+
 			std::list<BundleMeta> bundleToSendMeta;
 			bundleToSendMeta = prophetPkt->getBndlmeta();
-			for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
-				bundlesIndexIterator it2 = bundlesIndex.find(it->getRecipientAddress());
-				if (it2!=bundlesIndex.end()){
-					innerIndexIterator it3 = it2->second.find(it->getSerial());
-					if (it3!=it2->second.end()){
-						Prophet *bundlePkt = new Prophet();
-						bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
-						bundlePkt->setBitLength(headerLength);
-						if (canITransmit){
-							bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
-							sendDown(bundlePkt);
 
-							/*
-							 * Collecting data
-							 */
-							updatingL3Sent();
+
+
+			if (bundleToSendMeta.size() == 0){
+				/*
+				 * No Bundle to transmit, send a prophet msg with NULL pointer instead of an encapsulated bundle
+				 */
+				Prophet *bundlePkt = new Prophet();
+				bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,NULL);
+				bundlePkt->setBitLength(headerLength);
+				if (canITransmit){
+					bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
+					sendDown(bundlePkt);
+
+					/*
+					 * Collecting data
+					 */
+					updatingL3Sent();
+				}
+			}else{
+				/*
+				 * 1 step : Send the corresponding bundle
+				 */
+				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
+					bundlesIndexIterator it2 = bundlesIndex.find(it->getRecipientAddress());
+					if (it2!=bundlesIndex.end()){
+						innerIndexIterator it3 = it2->second.find(it->getSerial());
+						if (it3!=it2->second.end()){
+							Prophet *bundlePkt = new Prophet();
+							bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
+							bundlePkt->setBitLength(headerLength);
+							if (canITransmit){
+								bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
+								sendDown(bundlePkt);
+
+								/*
+								 * Collecting data
+								 */
+								updatingL3Sent();
+							}
 						}
 					}
 				}
@@ -909,7 +984,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 }
 
 
-void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
+std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
@@ -924,14 +999,7 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 		innerIndexMap innerMap(it->second);
 		innerIndexIterator it2;
 		for (it2 = innerMap.begin(); it2 !=innerMap.end(); ++it2){
-//			bundleToOffer.push_back(it2->second);
 			BundleMeta meta (it2->second, Prophet_Enum::Bndl_Accepted);
-//			meta.senderAddress = it2->second->getSenderAddress();
-//			meta.recipientAddress = it2->second->getRecipientAddress();
-//			meta.serial = it2->second->getSerial();
-//			meta.timestamp = it2->second->getTimestamp();
-//			meta.bFlags = Prophet_Enum::Bndl_Accepted;
-
 
 			if (withAck){
 				if (acksIndex.find(it2->second->getSerial())!=acksIndex.end()){
@@ -994,14 +1062,8 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 				innerIndexMap innerMap(it2->second);
 				innerIndexIterator it3;
 				for (it3 = innerMap.begin(); it3 !=innerMap.end(); ++it3){
-//					bundleToOffer.push_back(it3->second);
 					BundleMeta meta (it3->second, Prophet_Enum::Bndl_Accepted);
-//					Prophet_Struct::bndl_meta meta;
-//					meta.senderAddress = it3->second->getSenderAddress();
-//					meta.recipientAddress = it3->second->getRecipientAddress();
-//					meta.serial = it3->second->getSerial();
-//					meta.timestamp = it3->second->getTimestamp();
-//					meta.bFlags = Prophet_Enum::Bndl_Accepted;
+
 					if (withAck){
 						if (acksIndex.find(it3->second->getSerial())!=acksIndex.end()){
 							existAndErase(meta);
@@ -1014,30 +1076,32 @@ void ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 			}
 	}
 
+	// step 3 : check if we have any ack that must be transmitted
+
 	if (withAck){
 		for (std::list<BundleMeta>::iterator it = acks.begin(); it !=acks.end(); ++it) {
-//			Prophet_Struct::bndl_meta meta;
-//			meta.senderAddress = it->senderAddress;
-//			meta.recipientAddress = it->recipientAddress;
-//			meta.serial = it->serial;
-//			meta.timestamp = it->timestamp;
-//			meta.bFlags = it->bFlags;
+			if (existAndErase(*it)){
+				notCorrectlyDeleted++;
+				continue;
+			}
 			bundleToOfferMeta.push_back(*it);
 		}
 	}
 
 
-	// step 3 : sending the ProphetPckt
+//	// step 3 : sending the ProphetPckt
+//
+//	Prophet *offerPkt = new Prophet();
+//	offerPkt->setBitLength(headerLength);
+//	offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,encounterdNode,&bundleToOfferMeta);
+//	sendDown(offerPkt);
+//	/*
+//	 * Collecting data
+//	 */
+//	updatingL3Sent();
+//	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 
-	Prophet *offerPkt = new Prophet();
-	offerPkt->setBitLength(headerLength);
-	offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,encounterdNode,&bundleToOfferMeta);
-	sendDown(offerPkt);
-	/*
-	 * Collecting data
-	 */
-	updatingL3Sent();
-	offerPkt->setHopCount(offerPkt->getHopCount()+1);
+	return bundleToOfferMeta;
 }
 
 bool ProphetV2::exist(WaveShortMessage *msg)
@@ -1111,6 +1175,8 @@ void ProphetV2::finish()
 	recordScalar("# failed contacts at Bundle_Offer", nbrFailedContactAtBundle_Offer);
 	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
 	recordScalar("# successful contacts", nbrSuccessfulContact);
+
+	recordScalar("# BundlesAtL3", bundlesReceived);
 
 	if (withAck){
 		recordScalar("# ACKs", acks.size());
