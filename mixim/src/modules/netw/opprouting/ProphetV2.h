@@ -39,6 +39,8 @@
 #include "Mac80211Pkt_m.h"
 #include "Prophet_m.h"
 #include "BundleMeta.h"
+#include "SimpleContactStats.h"
+#include "ClassifiedContactStats.h"
 //#include "../../messages/WaveShortMessage_m.h"
 //#include "../../utility/opprouting/Prophet_Enum.h"
 //#include "../../messages/opprouting/Prophet_m.h"
@@ -82,6 +84,7 @@ public:
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
 		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
 	};
+
 protected:
 
 	/**
@@ -214,6 +217,14 @@ private:
 	cOutVector contactDurVector;
 
 	std::map<LAddress::L3Type, double> contacts;
+
+	std::map<LAddress::L3Type, SimpleContactStats> simpleContacts;
+
+	ClassifiedContactStats global;
+
+	ClassifiedContactStats successful;
+
+	ClassifiedContactStats failed;
 
 	double sumOfInterContactDur;
 
@@ -360,6 +371,14 @@ private:
 
 	void updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind);
 
+	void recordBeginSimplContactStats(LAddress::L3Type addr, double time);
+
+	void recordEndSimpleContactStats(LAddress::L3Type addr, double time);
+
+	void classify(SimpleContactStats newContact);
+
+	void classifyRemaining();
+
 
 	/*******************************************************************
 	** 							End of metrics methods section
@@ -368,6 +387,9 @@ public:
 	const LAddress::L3Type getMyNetwAddress(){
 		return myNetwAddr;
 	}
+
+	SimpleContactStats getSimpleContactStats(LAddress::L3Type addr);
+
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();

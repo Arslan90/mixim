@@ -293,8 +293,19 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
 
+    double macArrival = m->getArrivalTime().dbl();
+    double macSent = m->getSendingTime().dbl();
+
     Prophet *prophetPkt = check_and_cast<Prophet *>(m->decapsulate());
 
+    double prophetArrival = prophetPkt->getArrivalTime().dbl();
+	double prophetSent = prophetPkt->getSendingTime().dbl();
+
+	double timeT = simTime().dbl();
+	double createTime = prophetPkt->getCreationTime().dbl();
+
+    SimpleContactStats contact = getSimpleContactStats(prophetPkt->getDestAddr());
+    contact.setL3Received();
 
     int hopcount;
 
@@ -400,6 +411,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					/** Contacts duration stats				*/
 					recordBeginContactStats(addr,time);
 
+					recordBeginSimplContactStats(addr,time);
+
 					/** Starting IEP Phase					*/
 					executeInitiatorRole(RIB,NULL,addr);
 				}
@@ -416,6 +429,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 				/** Contacts duration stats				 */
 				recordEndContactStats(addr,time);
+
+				recordEndSimpleContactStats(addr,time);
 			}
 			break;
 	}
@@ -493,6 +508,18 @@ void ProphetV2::storeACK(BundleMeta meta)
 
 void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
+
+	// if destAddr equals 0 then destAddr is  the sender of the previously received prophet packet
+
+	if (destAddr == 0) {
+		coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
+		destAddr = prophetPkt->getSrcAddr();
+	}
+
+	SimpleContactStats contact;
+	contact = getSimpleContactStats(destAddr);
+	contact.setState(kind);
+
 	switch (kind) {
 		case HELLO:
 			break;
@@ -519,19 +546,14 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 * Collecting data
 			 */
 			updatingL3Sent();
-			ribPkt->setHopCount(ribPkt->getHopCount()+1);
 			updatingContactState(destAddr,RIB);
+
+			contact.setL3Sent();
+			contact.setPredictionsSent(tmp.size());
 		}
 			break;
 		case Bundle_Offer:
 		{
-			// destAddr is  the current sender of prophet packet
-
-			if (destAddr == 0) {
-				coreEV << "destAddr equal 0 (null) in Bundle_Offer of Initiator Role. destAddr will be recalculated";
-				destAddr = prophetPkt->getSrcAddr();
-			}
-
 			std::list<BundleMeta> bundleToAcceptMeta;
 			bundleToAcceptMeta = prophetPkt->getBndlmeta();
 
@@ -540,6 +562,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * Nothing to do, we have to stop the exchange
 				 */
 				updatingContactState(destAddr,Bundle);
+				contact.setSuccessfulContact(true);
 			}else {
 
 				for (std::list<BundleMeta>::iterator it = bundleToAcceptMeta.begin(); it !=bundleToAcceptMeta.end(); ++it) {
@@ -569,6 +592,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 * in that case add it and delete the corresponding bundle from storage
 						 */
 						storeACK(*it);
+						contact.setAckReceived();
 						}
 				}
 				/*
@@ -641,13 +665,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 //			/*
 //			 * step 2 : sending the response
 //			 */
-			
-			// destAddr is  the sender of prophet packet received in Bundle_Offer
-
-			if (destAddr == 0) {
-				coreEV << "destAddr equal 0 (null) in Bundle_Response of Initiator Role. destAddr will be recalculated";
-				destAddr = prophetPkt->getSrcAddr();
-			}
 
 			std::list<BundleMeta> bundleToAcceptMeta;
 			bundleToAcceptMeta = prophetPkt->getBndlmeta();
@@ -657,6 +674,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * Nothing to do, we have to stop the exchange
 				 */
 				updatingContactState(destAddr,Bundle);
+				contact.setSuccessfulContact(true);
 			}else{
 
 				/*
@@ -672,8 +690,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * Collecting data
 				 */
 				updatingL3Sent();
-				responsePkt->setHopCount(responsePkt->getHopCount()+1);
 				updatingContactState(destAddr,Bundle_Response);
+
+				contact.setL3Sent();
 			}
 		}
 			break;
@@ -714,14 +733,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				acksMeta.push_back(meta);
 			}
 
-
-			// destAddr is  the sender of prophet packet received in Bundle (the final recipient of WSMessage)
-
-			if (destAddr == 0) {
-				coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
-				destAddr = prophetPkt->getSrcAddr();
-			}
-
 			ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, destAddr, &acksMeta);
 			ackPkt->setBitLength(headerLength);
 			sendDown(ackPkt);
@@ -729,10 +740,18 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 * Collecting data
 			 */
 			updatingL3Sent();
+
+			contact.setL3Sent();
+			contact.setAckSent();
+			contact.setSuccessfulContact(true);
 		}
 			break;
 		case Bundle:
 		{
+			if (!withAck){
+				contact.setSuccessfulContact(true);
+			}
+
 			bool shouldAbort = false;
 			WaveShortMessage *wsm;
 
@@ -741,6 +760,8 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			}else {
 
 				bundlesReceived++;
+
+				contact.setBundleReceived();
 
 				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
 
@@ -795,6 +816,16 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 
 void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
 {
+	// if destAddr equals 0 then destAddr is  the sender of the previously received prophet packet
+
+	if (destAddr == 0) {
+		coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
+		destAddr = prophetPkt->getSrcAddr();
+	}
+
+	SimpleContactStats contact;
+	contact = getSimpleContactStats(destAddr);
+
 	switch (kind) {
 		case HELLO:
 			break;
@@ -805,6 +836,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		case RIB:
 		{
 			update(prophetPkt);
+			contact.setPredictionsReceived(prophetPkt->getPreds().size());
 		}
 			break;
 		case Bundle_Offer:
@@ -813,19 +845,10 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			 * Step 1 : Calculating Bundle to Offer
 			 */
 			std::list<BundleMeta> bundleToOfferMeta = defineBundleOffer(prophetPkt);
-			int size = bundleToOfferMeta.size();
 
 			/*
 			 * Step 2 : Sending the ProphetPckt
 			 */
-
-			// destAddr is  the sender of prophet packet received in RIB
-
-			if (destAddr == 0) {
-				coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
-				destAddr = prophetPkt->getSrcAddr();
-			}
-
 
 			Prophet *offerPkt = new Prophet();
 			offerPkt->setBitLength(headerLength);
@@ -835,18 +858,12 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			 * Collecting data
 			 */
 			updatingL3Sent();
-			offerPkt->setHopCount(offerPkt->getHopCount()+1);
+			contact.setL3Sent();
 		}
 			break;
 		case Bundle_Response:
 		{
 			if (withAck){
-				// destAddr is  the sender of prophet packet received in BundleResp
-
-				if (destAddr == 0) {
-					coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
-					destAddr = prophetPkt->getSrcAddr();
-				}
 
 				/*
 				 * 1 step : Check if demanded bundle in bundleResp is currently acked, delete it if it's the case
@@ -871,6 +888,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			for (std::list<BundleMeta>::iterator ackIt = acksMeta.begin(); ackIt !=acksMeta.end(); ++ackIt) {
 				BundleMeta meta = *ackIt;
 				storeACK(meta);
+				contact.setAckReceived();
 
 //				if (acksIndex.find(meta.getSerial())==acksIndex.end()){
 //
@@ -900,18 +918,8 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			break;
 		case Bundle:
 		{
-			// destAddr is  the sender of prophet packet received in Bundle_Response
-
-			if (destAddr == 0) {
-				coreEV << "destAddr equal 0 (null) in Bundle of Listener Role. destAddr will be recalculated";
-				destAddr = prophetPkt->getSrcAddr();
-			}
-
-
 			std::list<BundleMeta> bundleToSendMeta;
 			bundleToSendMeta = prophetPkt->getBndlmeta();
-
-
 
 			if (bundleToSendMeta.size() == 0){
 				/*
@@ -921,13 +929,13 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,NULL);
 				bundlePkt->setBitLength(headerLength);
 				if (canITransmit){
-					bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
 					sendDown(bundlePkt);
 
 					/*
 					 * Collecting data
 					 */
 					updatingL3Sent();
+					contact.setL3Sent();
 				}
 			}else{
 				/*
@@ -942,13 +950,14 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
 							bundlePkt->setBitLength(headerLength);
 							if (canITransmit){
-								bundlePkt->setHopCount(bundlePkt->getHopCount()+1);
 								sendDown(bundlePkt);
 
 								/*
 								 * Collecting data
 								 */
 								updatingL3Sent();
+								contact.setL3Sent();
+								contact.setBundleSent();
 							}
 						}
 					}
@@ -986,6 +995,8 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 
 std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
+	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getSrcAddr());
+
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
 	std::vector<std::pair<LAddress::L3Type, double>	> sortedPreds;
@@ -1085,6 +1096,7 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 				continue;
 			}
 			bundleToOfferMeta.push_back(*it);
+			contact.setAckSent();
 		}
 	}
 
@@ -1185,6 +1197,11 @@ void ProphetV2::finish()
 		recordScalar("# NotCorrectlyDeleted", notCorrectlyDeleted);
 		recordScalar("# Bundles", bundles.size());
 	}
+
+	classifyRemaining();
+	global.getDurationStats().recordAs(global.getName().c_str());
+	successful.getDurationStats().recordAs(successful.getName().c_str());
+	failed.getDurationStats().recordAs(failed.getName().c_str());
 }
 
 /*******************************************************************
@@ -1262,6 +1279,8 @@ void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
 	nbrContacts++;
 	// saving the starting time of the contact
 	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
+
+//	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr, SimpleContactStats(time)));
 }
 
 void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
@@ -1292,6 +1311,8 @@ void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 		contacts.erase(addr);
 		contactState.erase(addr);
 	}
+
+
 }
 
 void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
@@ -1304,7 +1325,6 @@ void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
 		sumOfInterContactDur+=time - it->second;
 		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
 	}
-
 }
 
 void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind)
@@ -1317,7 +1337,61 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 
 }
 
+void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
+{
+	bool repeated = false;
+	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
+	if ((it != simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
+		classify(it->second);
+		repeated = true;
+		simpleContacts.erase(addr);
+	}
+	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
 
+}
+
+void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
+{
+	SimpleContactStats contact = getSimpleContactStats(addr);
+	contact.setDuration(time - contact.getStartTime());
+}
+
+void ProphetV2::classify(SimpleContactStats newContact)
+{
+	global.update(newContact);
+
+	if (newContact.isSuccessfulContact()){
+		successful.update(newContact);
+	}else{
+		failed.update(newContact);
+	}
+}
+
+void ProphetV2::classifyRemaining()
+{
+	for(std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
+		classify(it->second);
+	}
+}
+
+SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr)
+{
+	SimpleContactStats contact = NULL;
+	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
+
+	if (lastEncouterTime.find(addr)!=lastEncouterTime.end()){
+		if (it == simpleContacts.end()){
+			opp_error("recording end of simple contact that doesn't exist");
+		}
+	}else{
+		recordBeginSimplContactStats(addr,simTime().dbl());
+	}
+
+//	if ((it == simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
+//		opp_error("recording end of simple contact that doesn't exist");
+//	}
+	return contact;
+}
 
 
 /*******************************************************************
