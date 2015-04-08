@@ -108,6 +108,10 @@ void ProphetV2::initialize(int stage)
 
         bundlesReceived = 0;
 
+        global = ClassifiedContactStats("Global");
+        successful = ClassifiedContactStats("Successful");
+        failed = ClassifiedContactStats("Failed");
+
 	}
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
@@ -518,10 +522,16 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 
 	SimpleContactStats contact;
 
-	ASSERT(prophetPkt->getCreationTime().dbl());
-	double time = (prophetPkt->getCreationTime()).dbl();
-	contact = getSimpleContactStats(destAddr, time);
-	contact.setState(kind);
+//	ASSERT(prophetPkt->getCreationTime().dbl());
+//	double time = (prophetPkt->getCreationTime()).dbl();
+	if (prophetPkt!=NULL){
+		contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
+		contact.setState(kind);
+	}else {
+		contact = getSimpleContactStats(destAddr, simTime().dbl());
+		contact.setState(kind);
+	}
+
 
 	switch (kind) {
 		case HELLO:
@@ -751,9 +761,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle:
 		{
-			if (!withAck){
-				contact.setSuccessfulContact(true);
-			}
+//			if (!withAck){
+//				contact.setSuccessfulContact(true);
+//			}
+
+			contact.setSuccessfulContact(true);
 
 			bool shouldAbort = false;
 			WaveShortMessage *wsm;
@@ -1390,9 +1402,14 @@ void ProphetV2::classify(SimpleContactStats newContact)
 
 void ProphetV2::classifyRemaining()
 {
-//	for(std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
-//		classify(it->second);
-//	}
+	for(std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
+		for (std::list<SimpleContactStats>::iterator it2 = it->second.begin(); it2 !=it->second.end(); it2++){
+			if (it2->getEndTime()==std::numeric_limits<double>::max()){
+				it2->setEndTime(simTime().dbl());
+			}
+			classify(*it2);
+		}
+	}
 }
 
 SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
@@ -1411,25 +1428,36 @@ SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, doubl
 		/* return the contactStats that belong to the given creationTime*/
 
 		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
-			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
-				if (it2== --it->second.rend()){
-					opp_error("recording end of simple contact that doesn't exist");
-				}else{
-					contact = SimpleContactStats();
-					it->second.push_front(contact);
-					break;
+			if (std::distance(it2,it->second.rend())==1){
+				// check if it is the last element of the list
+//				opp_error("recording end of simple contact that doesn't exist");
+
+				if (it2->getStartTime()!=-std::numeric_limits<double>::max()){
+					contact = *it2;
+				}else {
+					if (it2->getStartTime()>creationTime){
+						opp_error("recording of simple contact that doesn't exist");
+					}else if (creationTime<it2->getEndTime()){
+						contact = *it2;
+					}else{
+						contact = SimpleContactStats();
+						it->second.push_front(contact);
+					}
 				}
+				break;
+			}
+
+			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
+				contact = SimpleContactStats();
+				it->second.push_front(contact);
+				break;
 			}else {
 				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
 						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
 					contact = *it2;
 					break;
 				}else {
-					if (it2== --it->second.rend()){
-						opp_error("recording end of simple contact that doesn't exist2");
-					}else {
-						continue;
-					}
+					continue;
 				}
 			}
 		}

@@ -25,7 +25,6 @@ class SimpleContactStats: public ContactStats {
 private:
 	double startTime;
 	double endTime;
-	double duration;
 	bool successfulContact;
 	bool repeatedContact;
 	int state;
@@ -58,6 +57,12 @@ public:
 
 	double getDuration() const
     {
+		double duration;
+        if ((startTime!=-std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max())){
+        	duration = endTime - startTime;
+        }else {
+        	duration = 0;
+        }
         return duration;
     }
 
@@ -74,11 +79,6 @@ public:
     bool isSuccessfulContact() const
     {
         return successfulContact;
-    }
-
-    void setDuration(double duration)
-    {
-        this->duration = duration;
     }
 
     void setStartTime(double startTime)
