@@ -17,6 +17,7 @@
 #define SIMPLECONTACTSTATS_H_
 
 #include "ContactStats.h"
+#include "limits"
 //#include "Prophetv2Kinds.h"
 
 

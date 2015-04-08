@@ -18,8 +18,8 @@
 SimpleContactStats::SimpleContactStats() {
 	// TODO Auto-generated constructor stub
 	ContactStats();
-	this->startTime = -1;
-	this->endTime = -1;
+	this->startTime = -std::numeric_limits<double>::max();
+	this->endTime = std::numeric_limits<double>::max();
 	this->state = -1;
 	this->successfulContact = false;
 	this->repeatedContact = false;

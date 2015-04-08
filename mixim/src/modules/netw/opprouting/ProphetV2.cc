@@ -304,7 +304,7 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 	double timeT = simTime().dbl();
 	double createTime = prophetPkt->getCreationTime().dbl();
 
-    SimpleContactStats contact = getSimpleContactStats(prophetPkt->getDestAddr());
+	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getDestAddr(),prophetPkt->getCreationTime().dbl());
     contact.setL3Received();
 
     int hopcount;
@@ -517,7 +517,10 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 	}
 
 	SimpleContactStats contact;
-	contact = getSimpleContactStats(destAddr);
+
+	ASSERT(prophetPkt->getCreationTime().dbl());
+	double time = (prophetPkt->getCreationTime()).dbl();
+	contact = getSimpleContactStats(destAddr, time);
 	contact.setState(kind);
 
 	switch (kind) {
@@ -824,7 +827,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 	}
 
 	SimpleContactStats contact;
-	contact = getSimpleContactStats(destAddr);
+	contact = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
 
 	switch (kind) {
 		case HELLO:
@@ -995,7 +998,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 
 std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
-	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getSrcAddr());
+	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
 
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
@@ -1339,21 +1342,39 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 
 void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
 {
-	bool repeated = false;
-	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
-	if ((it != simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
-		classify(it->second);
-		repeated = true;
-		simpleContacts.erase(addr);
+//	bool repeated = false;
+//	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
+//	if ((it != simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
+//		classify(it->second);
+//		repeated = true;
+//		simpleContacts.erase(addr);
+//	}
+//	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
+	SimpleContactStats contact;
+	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	if (it == simpleContacts.end()){
+		contact = getSimpleContactStats(addr,time);
+	}else {
+		contact = it->second.front();
 	}
-	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
 
+	contact.setStartTime(time);
 }
 
 void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 {
-	SimpleContactStats contact = getSimpleContactStats(addr);
-	contact.setDuration(time - contact.getStartTime());
+	SimpleContactStats contact;
+	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	if (it == simpleContacts.end()){
+		opp_error("recording end of simple contact that doesn't IMPOSSIBLE");
+	}else {
+		contact = it->second.front();
+	}
+
+	contact.setEndTime(time);
+
+//	SimpleContactStats contact = getSimpleContactStats(addr);
+//	contact.setDuration(time - contact.getStartTime());
 }
 
 void ProphetV2::classify(SimpleContactStats newContact)
@@ -1369,23 +1390,82 @@ void ProphetV2::classify(SimpleContactStats newContact)
 
 void ProphetV2::classifyRemaining()
 {
-	for(std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
-		classify(it->second);
-	}
+//	for(std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
+//		classify(it->second);
+//	}
 }
 
-SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr)
+SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
 {
 	SimpleContactStats contact = NULL;
-	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
+	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
 
-	if (lastEncouterTime.find(addr)!=lastEncouterTime.end()){
-		if (it == simpleContacts.end()){
-			opp_error("recording end of simple contact that doesn't exist");
-		}
+	if (it == simpleContacts.end()){
+		contact = SimpleContactStats();
+		std::list<SimpleContactStats> list = std::list<SimpleContactStats>();
+		list.push_front(contact);
+		simpleContacts.insert(std::pair<LAddress::L3Type, std::list<SimpleContactStats> >(addr,list));
+//		it->second = std::list<SimpleContactStats>();
+//		it->second.push_front(contact);
 	}else{
-		recordBeginSimplContactStats(addr,simTime().dbl());
+		/* return the contactStats that belong to the given creationTime*/
+
+		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
+			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
+				if (it2== --it->second.rend()){
+					opp_error("recording end of simple contact that doesn't exist");
+				}else{
+					contact = SimpleContactStats();
+					it->second.push_front(contact);
+					break;
+				}
+			}else {
+				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
+						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
+					contact = *it2;
+					break;
+				}else {
+					if (it2== --it->second.rend()){
+						opp_error("recording end of simple contact that doesn't exist2");
+					}else {
+						continue;
+					}
+				}
+			}
+		}
 	}
+
+
+
+
+
+
+
+
+
+
+
+//			if ((it2->getEndTime()==-1)){
+//				if (it2->getStartTime()==-1){
+//					contact = *it2;
+//					break;
+//				}else if (it2->getStartTime()>creationTime){
+//					opp_error("recording end of simple contact that doesn't exist");
+//					break;
+//				}
+//			}else if ((it2->getStartTime()<creationTime)&&(it2->getEndTime()>creationTime)){
+//				contact = *it2;
+//			}
+//		}
+//	}
+//
+//	if (lastEncouterTime.find(addr)!=lastEncouterTime.end()){
+//		if (it == simpleContacts.end()){
+//			opp_error("recording end of simple contact that doesn't exist");
+//		}
+//	}else{
+//		recordBeginSimplContactStats(addr,simTime().dbl());
+//	}
 
 //	if ((it == simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
 //		opp_error("recording end of simple contact that doesn't exist");

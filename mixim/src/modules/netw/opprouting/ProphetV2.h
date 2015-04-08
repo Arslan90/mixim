@@ -41,6 +41,7 @@
 #include "BundleMeta.h"
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
+#include "simtime.h"
 //#include "../../messages/WaveShortMessage_m.h"
 //#include "../../utility/opprouting/Prophet_Enum.h"
 //#include "../../messages/opprouting/Prophet_m.h"
@@ -218,7 +219,7 @@ private:
 
 	std::map<LAddress::L3Type, double> contacts;
 
-	std::map<LAddress::L3Type, SimpleContactStats> simpleContacts;
+	std::map<LAddress::L3Type, std::list<SimpleContactStats> > simpleContacts;
 
 	ClassifiedContactStats global;
 
@@ -388,7 +389,7 @@ public:
 		return myNetwAddr;
 	}
 
-	SimpleContactStats getSimpleContactStats(LAddress::L3Type addr);
+	SimpleContactStats getSimpleContactStats(LAddress::L3Type addr, double creationTime);
 
 	virtual void initialize(int stage);
 	virtual void finish();
