@@ -18,7 +18,7 @@
 SimpleContactStats::SimpleContactStats() {
 	// TODO Auto-generated constructor stub
 	ContactStats();
-	this->startTime = -std::numeric_limits<double>::max();
+	this->startTime = std::numeric_limits<double>::max()-1;
 	this->endTime = std::numeric_limits<double>::max();
 	this->state = -1;
 	this->successfulContact = false;
@@ -68,4 +68,33 @@ SimpleContactStats::SimpleContactStats(double startingTime, bool repeatedContact
 SimpleContactStats::~SimpleContactStats() {
 	// TODO Auto-generated destructor stub
 }
+
+bool SimpleContactStats::operator ==(const SimpleContactStats & b) const
+{
+	return (this->startTime==b.getStartTime());
+}
+
+bool SimpleContactStats::operator <(const SimpleContactStats & b) const
+{
+	return this->startTime<b.getStartTime();
+}
+
+bool SimpleContactStats::operator >(const SimpleContactStats & b) const
+{
+	return this->startTime>b.getStartTime();
+}
+
+bool SimpleContactStats::operator <=(const SimpleContactStats & b) const
+{
+	return !(this->operator >(b));
+}
+
+bool SimpleContactStats::operator >=(const SimpleContactStats & b) const
+{
+	return !(this->operator <(b));
+}
+
+
+
+
 

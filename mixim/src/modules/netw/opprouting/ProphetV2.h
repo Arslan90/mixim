@@ -41,6 +41,7 @@
 #include "BundleMeta.h"
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
+#include "iterator"
 //#include "limits"
 //#include "../../messages/WaveShortMessage_m.h"
 //#include "../../utility/opprouting/Prophet_Enum.h"
@@ -219,7 +220,7 @@ private:
 
 	std::map<LAddress::L3Type, double> contacts;
 
-	std::map<LAddress::L3Type, std::list<SimpleContactStats> > simpleContacts;
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
 
 	ClassifiedContactStats global;
 

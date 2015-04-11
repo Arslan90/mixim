@@ -41,7 +41,7 @@ public:
         return endTime;
     }
 
-    void setEndTime(double endTime)
+    void setEndTime(const double endTime)
     {
         this->endTime = endTime;
     }
@@ -96,6 +96,13 @@ public:
         this->successfulContact = successfulContact;
     }
 
+    bool operator==(const SimpleContactStats& b) const;
+    bool operator<(const SimpleContactStats& b) const;
+    bool operator>(const SimpleContactStats& b) const;
+    bool operator<=(const SimpleContactStats& b) const;
+	bool operator>=(const SimpleContactStats& b) const;
+//    bool operator!=(const SimpleContactStats& b);
+//    bool operator!=(const SimpleContactStats& b);
 };
 
 #endif /* SIMPLECONTACTSTATS_H_ */

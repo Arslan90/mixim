@@ -1363,27 +1363,48 @@ void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
 //	}
 //	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
 	SimpleContactStats contact;
-	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-	if (it == simpleContacts.end()){
-		contact = getSimpleContactStats(addr,time);
-	}else {
-		contact = it->second.front();
-	}
+//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+//	if (it == simpleContacts.end()){
+//		contact = getSimpleContactStats(addr,time);
+//	}else {
+//		contact = it->second.front();
+//	}
+	contact = getSimpleContactStats(addr,time);
 
-	contact.setStartTime(time);
+
+	int x;
+
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	if (it != simpleContacts.end()){
+		x = it->second.size();
+		it->second.erase(contact);
+		contact.setStartTime(time);
+		x = it->second.size();
+		it->second.insert(contact);
+		x = it->second.size();
+	}
 }
 
 void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 {
 	SimpleContactStats contact;
-	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-	if (it == simpleContacts.end()){
-		opp_error("recording end of simple contact that doesn't IMPOSSIBLE");
-	}else {
-		contact = it->second.front();
+//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+//	if (it == simpleContacts.end()){
+//		opp_error("recording end of simple contact that doesn't IMPOSSIBLE");
+//	}else {
+//		contact = it->second.front();
+//	}
+
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::set<SimpleContactStats>::iterator it2;
+	if (it != simpleContacts.end()){
+		it2= it->second.end();
+		it2--;
+		contact = *it2;
+		contact.setEndTime(time);
 	}
 
-	contact.setEndTime(time);
+
 
 //	SimpleContactStats contact = getSimpleContactStats(addr);
 //	contact.setDuration(time - contact.getStartTime());
@@ -1402,10 +1423,12 @@ void ProphetV2::classify(SimpleContactStats newContact)
 
 void ProphetV2::classifyRemaining()
 {
-	for(std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
-		for (std::list<SimpleContactStats>::iterator it2 = it->second.begin(); it2 !=it->second.end(); it2++){
+	for(std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
+		for (std::set<SimpleContactStats>::iterator it2 = it->second.begin(); it2 !=it->second.end(); it2++){
 			if (it2->getEndTime()==std::numeric_limits<double>::max()){
-				it2->setEndTime(simTime().dbl());
+				double t = simTime().dbl();
+				SimpleContactStats tmp = *it2;
+				tmp.setEndTime(t);
 			}
 			classify(*it2);
 		}
@@ -1415,63 +1438,134 @@ void ProphetV2::classifyRemaining()
 SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
 {
 	SimpleContactStats contact = NULL;
-	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
 
-	if (it == simpleContacts.end()){
+	SimpleContactStats tempContact2, tempContact3;
+	int x;
+
+	if (it==simpleContacts.end()){
+		x = it->second.size();
 		contact = SimpleContactStats();
-		std::list<SimpleContactStats> list = std::list<SimpleContactStats>();
-		list.push_front(contact);
-		simpleContacts.insert(std::pair<LAddress::L3Type, std::list<SimpleContactStats> >(addr,list));
-//		it->second = std::list<SimpleContactStats>();
-//		it->second.push_front(contact);
+		std::set<SimpleContactStats> mySet;
+		mySet.insert(contact);
+		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
 	}else{
-		/* return the contactStats that belong to the given creationTime*/
-
-		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
-			if (std::distance(it2,it->second.rend())==1){
-				// check if it is the last element of the list
-//				opp_error("recording end of simple contact that doesn't exist");
-
-				if (it2->getStartTime()!=-std::numeric_limits<double>::max()){
-					contact = *it2;
-				}else {
-					if (it2->getStartTime()>creationTime){
-						opp_error("recording of simple contact that doesn't exist");
-					}else if (creationTime<it2->getEndTime()){
+		SimpleContactStats tempContact = SimpleContactStats(creationTime);
+		std::set<SimpleContactStats>::iterator it2 = it->second.lower_bound(tempContact);
+		std::set<SimpleContactStats>::iterator it3 = it2;
+		x = it->second.size();
+		tempContact2 = *it2;
+		if (it2 != it->second.end()){
+			if ((it2 == it->second.begin())||(it2->getStartTime() == creationTime)){
+				contact = *it2;
+			}else {
+				it3--;
+				tempContact3 = *it3;
+				if (it3->getEndTime() != std::numeric_limits<double>::max()){
+					if ((creationTime-it3->getEndTime()) > 1.0){
 						contact = *it2;
-					}else{
-						contact = SimpleContactStats();
-						it->second.push_front(contact);
+					}else if ((creationTime-it3->getEndTime()) <= 1.0){
+						contact = *it3;
 					}
 				}
-				break;
+//				if ((it2->getStartTime() == std::numeric_limits<double>::max()-1) &&
+//						(creationTime-it3->getEndTime()>1.0)){
+//					contact = *it2;
+//				}else if (creationTime-it3->getEndTime()<=1){
+//					contact = *it3;
+//				}
 			}
-
-			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
-				contact = SimpleContactStats();
-				it->second.push_front(contact);
-				break;
-			}else {
-				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
-						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
-					contact = *it2;
-					break;
-				}else {
-					continue;
-				}
-			}
+		}else {
+			contact = SimpleContactStats();
+			std::set<SimpleContactStats> mySet;
+			mySet.insert(contact);
+			simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
+//			opp_error("recording end of simple contact that doesn't exist");
 		}
 	}
 
+	if (contact == NULL){
+		opp_error("recording end of simple contact that doesn't exist");
+	}
+
+//		if (it2 == it->second.begin()){
+//			if (it2->getStartTime() == std::numeric_limits<double>::max()-1){
+//				contact = *it2;
+//			}else {
+//				contact = *it2;
+//				contact = NULL;
+////				opp_error("recording end of simple contact that doesn't exist");
+//			}
+//		}else {
+//			std::set<SimpleContactStats>::iterator it3 = it2;
+//			it3--;
+//			contact = *it3;
+//		}
+//	}
+//		if (it2->getStartTime() == creationTime){
+//			contact = *it2;
+//		} else {
+//			std:set<SimpleContactStats>::iterator it3 = it2;
+//			bool valid
+//			if (it3 != it->second.begin()){
+//				it3--;
+//			}
+//
+////			std::reverse_iterator<SimpleContactStats> revIt(*it2);
+//			if (revIt !=it->second.rend()){
+//				contact = revIt;
+//			}else{
+//				opp_error("recording end of simple contact that doesn't exist");
+//			}
+//		}
+//	}
 
 
-
-
-
-
-
-
-
+//	if (it == simpleContacts.end()){
+//		contact = SimpleContactStats();
+//		std::list<SimpleContactStats> list = std::list<SimpleContactStats>();
+//		list.push_front(contact);
+//		simpleContacts.insert(std::pair<LAddress::L3Type, std::list<SimpleContactStats> >(addr,list));
+////		it->second = std::list<SimpleContactStats>();
+////		it->second.push_front(contact);
+//	}else{
+//		/* return the contactStats that belong to the given creationTime*/
+//
+//		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
+//			if (std::distance(it2,it->second.rend())==1){
+//				// check if it is the last element of the list
+////				opp_error("recording end of simple contact that doesn't exist");
+//
+//				if (it2->getStartTime()!=-std::numeric_limits<double>::max()){
+//					contact = *it2;
+//				}else {
+//					if (it2->getStartTime()>creationTime){
+//						opp_error("recording of simple contact that doesn't exist");
+//					}else if (creationTime<it2->getEndTime()){
+//						contact = *it2;
+//					}else{
+//						contact = SimpleContactStats();
+//						it->second.push_front(contact);
+//					}
+//				}
+//				break;
+//			}
+//
+//			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
+//				contact = SimpleContactStats();
+//				it->second.push_front(contact);
+//				break;
+//			}else {
+//				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
+//						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
+//					contact = *it2;
+//					break;
+//				}else {
+//					continue;
+//				}
+//			}
+//		}
+//	}
 
 //			if ((it2->getEndTime()==-1)){
 //				if (it2->getStartTime()==-1){
