@@ -18,7 +18,7 @@
 SimpleContactStats::SimpleContactStats() {
 	// TODO Auto-generated constructor stub
 	ContactStats();
-	this->startTime = std::numeric_limits<double>::max()-1;
+	this->startTime = std::numeric_limits<double>::max();
 	this->endTime = std::numeric_limits<double>::max();
 	this->state = -1;
 	this->successfulContact = false;
@@ -29,7 +29,7 @@ SimpleContactStats::SimpleContactStats(double startingTime)
 {
 	ContactStats();
 	this->startTime = startingTime;
-	this->endTime = -1;
+	this->endTime = std::numeric_limits<double>::max();
 	this->state = -1;
 	this->successfulContact = false;
 	this->repeatedContact = false;
@@ -39,7 +39,7 @@ SimpleContactStats::SimpleContactStats(double startingTime, int startingState)
 {
 	ContactStats();
 	this->startTime = startingTime;
-	this->endTime = -1;
+	this->endTime = std::numeric_limits<double>::max();
 	this->state = startingState;
 	this->successfulContact = false;
 	this->repeatedContact = false;
@@ -49,17 +49,17 @@ SimpleContactStats::SimpleContactStats(double startingTime, bool repeatedContact
 {
 	ContactStats();
 	this->startTime = startingTime;
-	this->endTime = -1;
+	this->endTime = std::numeric_limits<double>::max();
 	this->state = -1;
 	this->successfulContact = false;
-	this->repeatedContact = false;
+	this->repeatedContact = repeatedContact;
 }
 
 SimpleContactStats::SimpleContactStats(double startingTime, bool repeatedContact, int startingState)
 {
 	ContactStats();
 	this->startTime = startingTime;
-	this->endTime = -1;
+	this->endTime = std::numeric_limits<double>::max();
 	this->state = startingState;
 	this->successfulContact = false;
 	this->repeatedContact = repeatedContact;
@@ -87,6 +87,11 @@ bool SimpleContactStats::operator >(const SimpleContactStats & b) const
 bool SimpleContactStats::operator <=(const SimpleContactStats & b) const
 {
 	return !(this->operator >(b));
+}
+
+bool SimpleContactStats::isFinished()
+{
+	return ((startTime!=std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max()));
 }
 
 bool SimpleContactStats::operator >=(const SimpleContactStats & b) const

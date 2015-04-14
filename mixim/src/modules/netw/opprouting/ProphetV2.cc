@@ -108,9 +108,16 @@ void ProphetV2::initialize(int stage)
 
         bundlesReceived = 0;
 
-        global = ClassifiedContactStats("Global");
-        successful = ClassifiedContactStats("Successful");
-        failed = ClassifiedContactStats("Failed");
+        global = ClassifiedContactStats("Global",false);
+        successful = ClassifiedContactStats("Successful",false);
+        failed = ClassifiedContactStats("Failed",false);
+        ribFail = ClassifiedContactStats("RIBFail",false);
+        failedAtBundleOffer = ClassifiedContactStats("failedAtBundleOffer",false);
+        responseFail = ClassifiedContactStats("ResponseFail",false);
+        failedAtBundle = ClassifiedContactStats("failedAtBundle",false);
+        failedAtBundleAck = ClassifiedContactStats("failedAtBundleAck",false);
+
+        nbrSimpleContactStats = 0;
 
 	}
 	else if (stage==1){
@@ -293,7 +300,7 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 
 void ProphetV2::handleLowerMsg(cMessage* msg)
 {
-
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
     coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
 
@@ -308,8 +315,7 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 	double timeT = simTime().dbl();
 	double createTime = prophetPkt->getCreationTime().dbl();
 
-	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getDestAddr(),prophetPkt->getCreationTime().dbl());
-    contact.setL3Received();
+
 
     int hopcount;
 
@@ -379,6 +385,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				break;
 		}
     }
+    pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
+    SimpleContactStats contact = pair.first;
+    contact.setL3Received();
+    updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
+
 //    cancelAndDelete(prophetPkt);
     delete(prophetPkt);
 //    delete(m);
@@ -520,15 +531,19 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		destAddr = prophetPkt->getSrcAddr();
 	}
 
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	SimpleContactStats contact;
+//	contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
 
 //	ASSERT(prophetPkt->getCreationTime().dbl());
 //	double time = (prophetPkt->getCreationTime()).dbl();
 	if (prophetPkt!=NULL){
-		contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
+		pair = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
+		contact = pair.first;
 		contact.setState(kind);
 	}else {
-		contact = getSimpleContactStats(destAddr, simTime().dbl());
+		pair = getSimpleContactStats(destAddr, simTime().dbl());
+		contact = pair.first;
 		contact.setState(kind);
 	}
 
@@ -827,6 +842,8 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			opp_error("Unknown Prophetv2MessageKinds when calling executeInitiatorRole()");
 			break;
 	}
+
+	updateSimpleContactStats(destAddr,contact,pair.second);
 }
 
 void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
@@ -837,9 +854,14 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
 		destAddr = prophetPkt->getSrcAddr();
 	}
-
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	SimpleContactStats contact;
-	contact = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
+	if (kind == RIB){
+		contact = getLastSimpleContactStats(destAddr);
+	}else {
+		pair = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
+		contact = pair.first;
+	}
 
 	switch (kind) {
 		case HELLO:
@@ -984,6 +1006,16 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			opp_error("Unknown Prophetv2MessageKinds when calling executeListenerRole()");
 		break;
 	}
+
+	if (kind == RIB){
+		std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(destAddr);
+		std::set<SimpleContactStats>::iterator it2;
+		it2 = it->second.end();
+		it2--;
+		updateSimpleContactStats(destAddr,contact,it2);
+	}else {
+		updateSimpleContactStats(destAddr,contact,pair.second);
+	}
 }
 
 
@@ -1010,7 +1042,9 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 
 std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
-	SimpleContactStats contact = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
+	pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
+	SimpleContactStats contact = pair.first;
 
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
@@ -1128,6 +1162,7 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 //	updatingL3Sent();
 //	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 
+	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 	return bundleToOfferMeta;
 }
 
@@ -1213,10 +1248,10 @@ void ProphetV2::finish()
 		recordScalar("# Bundles", bundles.size());
 	}
 
+	recordScalar("# nbrSimpleContactStats", nbrSimpleContactStats);
 	classifyRemaining();
-	global.getDurationStats().recordAs(global.getName().c_str());
-	successful.getDurationStats().recordAs(successful.getName().c_str());
-	failed.getDurationStats().recordAs(failed.getName().c_str());
+	recordAllClassifier();
+
 }
 
 /*******************************************************************
@@ -1369,20 +1404,21 @@ void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
 //	}else {
 //		contact = it->second.front();
 //	}
-	contact = getSimpleContactStats(addr,time);
-
-
-	int x;
-
-	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-	if (it != simpleContacts.end()){
-		x = it->second.size();
-		it->second.erase(contact);
-		contact.setStartTime(time);
-		x = it->second.size();
-		it->second.insert(contact);
-		x = it->second.size();
-	}
+//	contact = getSimpleContactStats(addr,time);
+//
+//
+//	int x;
+//
+//	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+//	if (it != simpleContacts.end()){
+//		x = it->second.size();
+//		it->second.erase(contact);
+//		contact.setStartTime(time);
+//		x = it->second.size();
+//		it->second.insert(contact);
+//		x = it->second.size();
+//	}
+	contact = getLastSimpleContactStats(addr, time);
 }
 
 void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
@@ -1402,6 +1438,7 @@ void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 		it2--;
 		contact = *it2;
 		contact.setEndTime(time);
+		updateSimpleContactStats(addr,contact,it2);
 	}
 
 
@@ -1418,6 +1455,25 @@ void ProphetV2::classify(SimpleContactStats newContact)
 		successful.update(newContact);
 	}else{
 		failed.update(newContact);
+		switch (newContact.getState()) {
+			case RIB:
+				ribFail.update(newContact);
+				break;
+//			case Bundle_Offer:
+//				failedAtBundleOffer.update(newContact);
+//				break;
+			case Bundle_Response:
+				responseFail.update(newContact);
+				break;
+//			case Bundle:
+//				failedAtBundle.update(newContact);
+//				break;
+//			case Bundle_Ack:
+//				failedAtBundleAck.update(newContact);
+//				break;
+			default:
+				break;
+		}
 	}
 }
 
@@ -1425,65 +1481,110 @@ void ProphetV2::classifyRemaining()
 {
 	for(std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
 		for (std::set<SimpleContactStats>::iterator it2 = it->second.begin(); it2 !=it->second.end(); it2++){
-			if (it2->getEndTime()==std::numeric_limits<double>::max()){
-				double t = simTime().dbl();
-				SimpleContactStats tmp = *it2;
-				tmp.setEndTime(t);
-			}
-			classify(*it2);
+			SimpleContactStats tmp = *it2;
+//			if (it2->getEndTime()==std::numeric_limits<double>::max()){
+//				double t = simTime().dbl();
+//				tmp.setEndTime(t);
+//			}
+			classify(tmp);
 		}
 	}
 }
 
-SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
+std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
 {
+
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	SimpleContactStats contact = NULL;
+	SimpleContactStats contact2;
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::set<SimpleContactStats>::iterator it2, it3;
 
-	SimpleContactStats tempContact2, tempContact3;
-	int x;
-
-	if (it==simpleContacts.end()){
-		x = it->second.size();
-		contact = SimpleContactStats();
-		std::set<SimpleContactStats> mySet;
-		mySet.insert(contact);
-		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-	}else{
-		SimpleContactStats tempContact = SimpleContactStats(creationTime);
-		std::set<SimpleContactStats>::iterator it2 = it->second.lower_bound(tempContact);
-		std::set<SimpleContactStats>::iterator it3 = it2;
-		x = it->second.size();
-		tempContact2 = *it2;
-		if (it2 != it->second.end()){
-			if ((it2 == it->second.begin())||(it2->getStartTime() == creationTime)){
+	if (it == simpleContacts.end()){
+		opp_error("no simplecontactstats to return, error");
+	}else {
+		if (it->second.size() == 1){
+			it2 = it->second.begin();
+			contact = *it2;
+			pair.first = contact;
+			pair.second = it2;
+		}else if (it->second.size() > 1){
+			it2 = it->second.lower_bound(creationTime);
+			if (it2 == it->second.end()){
+				it2--;
 				contact = *it2;
+				pair.first = contact;
+				pair.second = it2;
 			}else {
-				it3--;
-				tempContact3 = *it3;
-				if (it3->getEndTime() != std::numeric_limits<double>::max()){
-					if ((creationTime-it3->getEndTime()) > 1.0){
-						contact = *it2;
-					}else if ((creationTime-it3->getEndTime()) <= 1.0){
+				if (it2->getStartTime() == creationTime){
+					contact = *it2;
+					pair.first = contact;
+					pair.second = it2;
+				}else if ( (it2->getStartTime() - creationTime) <= 1){
+					contact = *it2;
+					pair.first = contact;
+					pair.second = it2;
+				}else {
+					it3 = it2;
+					it3--;
+					if ( (creationTime - it3->getStartTime()) < 1){
 						contact = *it3;
+						pair.first = contact;
+						pair.second = it2;
+					}else {
+						contact = *it2;
+						pair.first = contact;
+						pair.second = it2;
 					}
 				}
-//				if ((it2->getStartTime() == std::numeric_limits<double>::max()-1) &&
-//						(creationTime-it3->getEndTime()>1.0)){
-//					contact = *it2;
-//				}else if (creationTime-it3->getEndTime()<=1){
-//					contact = *it3;
-//				}
 			}
-		}else {
-			contact = SimpleContactStats();
-			std::set<SimpleContactStats> mySet;
-			mySet.insert(contact);
-			simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-//			opp_error("recording end of simple contact that doesn't exist");
 		}
 	}
-
+//
+//	SimpleContactStats tempContact2, tempContact3;
+//	int x;
+//
+//	if (it==simpleContacts.end()){
+//		x = it->second.size();
+//		contact = SimpleContactStats();
+//		std::set<SimpleContactStats> mySet;
+//		mySet.insert(contact);
+//		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
+//	}else{
+//		SimpleContactStats tempContact = SimpleContactStats(creationTime);
+//		std::set<SimpleContactStats>::iterator it2 = it->second.lower_bound(tempContact);
+//		std::set<SimpleContactStats>::iterator it3 = it2;
+//		x = it->second.size();
+//		tempContact2 = *it2;
+//		if (it2 != it->second.end()){
+//			if ((it2 == it->second.begin())||(it2->getStartTime() == creationTime)){
+//				contact = *it2;
+//			}else {
+//				it3--;
+//				tempContact3 = *it3;
+//				if (it3->getEndTime() != std::numeric_limits<double>::max()){
+//					if ((creationTime-it3->getEndTime()) > 1.0){
+//						contact = *it2;
+//					}else if ((creationTime-it3->getEndTime()) <= 1.0){
+//						contact = *it3;
+//					}
+//				}
+////				if ((it2->getStartTime() == std::numeric_limits<double>::max()-1) &&
+////						(creationTime-it3->getEndTime()>1.0)){
+////					contact = *it2;
+////				}else if (creationTime-it3->getEndTime()<=1){
+////					contact = *it3;
+////				}
+//			}
+//		}else {
+//			contact = SimpleContactStats();
+//			std::set<SimpleContactStats> mySet;
+//			mySet.insert(contact);
+//			simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
+////			opp_error("recording end of simple contact that doesn't exist");
+//		}
+//	}
+//
 	if (contact == NULL){
 		opp_error("recording end of simple contact that doesn't exist");
 	}
@@ -1592,9 +1693,140 @@ SimpleContactStats ProphetV2::getSimpleContactStats(LAddress::L3Type addr, doubl
 //	if ((it == simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
 //		opp_error("recording end of simple contact that doesn't exist");
 //	}
+
+	return pair;
+}
+
+SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr, double time)
+{
+	SimpleContactStats contact = NULL;
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::set<SimpleContactStats> mySet;
+	std::set<SimpleContactStats>::iterator it2;
+
+
+	if (it == simpleContacts.end()){
+		contact = SimpleContactStats(time);
+		mySet.insert(contact);
+
+		nbrSimpleContactStats++;
+	}else{
+		mySet = it->second;
+
+		it2 = it->second.end();
+		it2--;
+
+		if (it2->getStartTime() == (std::numeric_limits<double>::max())){
+			contact = *it2;
+			contact.setStartTime(time);
+			mySet.erase(it2);
+			mySet.insert(contact);
+		}else {
+			contact = SimpleContactStats(time,true);
+			mySet.insert(contact);
+
+			nbrSimpleContactStats++;
+		}
+	}
+
+	simpleContacts[addr] = mySet;
+//	simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
+
 	return contact;
 }
 
+SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr)
+{
+	SimpleContactStats contact = NULL;
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::set<SimpleContactStats> mySet;
+	std::set<SimpleContactStats>::iterator it2;
+
+	if (it == simpleContacts.end()){
+		contact = SimpleContactStats();
+		mySet.insert(contact);
+		simpleContacts[addr] = mySet;
+
+		nbrSimpleContactStats++;
+	}else{
+		mySet = it->second;
+
+		it2 = it->second.end();
+		it2--;
+
+		if (it2->getEndTime() == (std::numeric_limits<double>::max())){
+			contact = *it2;
+		}else {
+			contact = SimpleContactStats();
+			contact.setRepeatedContact(true);
+			mySet.insert(contact);
+			simpleContacts[addr] = mySet;
+
+			nbrSimpleContactStats++;
+		}
+	}
+
+
+	return contact;
+}
+
+void ProphetV2::updateSimpleContactStats(LAddress::L3Type addr, SimpleContactStats newContact, std::set<SimpleContactStats>::iterator iterator)
+{
+	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
+	std::set<SimpleContactStats> mySet;
+	std::set<SimpleContactStats>::iterator it2;
+	if (it != simpleContacts.end() ){
+		it2 = it->second.find(newContact);
+		if (it2 != it->second.end() ){
+			it->second.erase(newContact);
+		}
+		mySet = it->second;
+		mySet.insert(newContact);
+		simpleContacts.erase(addr);
+		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
+//		simpleContacts[addr] = mySet;
+	}
+}
+
+void ProphetV2::recordClassifier(ClassifiedContactStats classifier)
+{
+	classifier.getDurationStats().recordAs(classifier.getName().c_str());
+
+	recordScalar(string(classifier.getName()+": # nbrContact").c_str(),classifier.getNbrContacts());
+	recordScalar(string(classifier.getName()+": # nbrToDiscard").c_str(),classifier.getNbrToDiscard());
+
+	if (classifier.getNbrContacts()>0){
+		double repeatedPourcentage = (double (classifier.getNbrRepeated()) / double (classifier.getNbrContacts())) * 100;
+		recordScalar(string(classifier.getName()+": % repeated").c_str(), repeatedPourcentage);
+	}
+
+	recordScalar(string(classifier.getName()+": # L3Sent").c_str(),classifier.getL3Sent());
+	recordScalar(string(classifier.getName()+": # L3Received").c_str(),classifier.getL3Received());
+
+	recordScalar(string(classifier.getName()+": # BundleSent").c_str(),classifier.getBundleSent());
+	recordScalar(string(classifier.getName()+": # BundleReceived").c_str(),classifier.getBundleReceived());
+
+	recordScalar(string(classifier.getName()+": # AckSent").c_str(),classifier.getAckSent());
+	recordScalar(string(classifier.getName()+": # AckReceived").c_str(),classifier.getAckReceived());
+
+	recordScalar(string(classifier.getName()+": # PredictionsSent").c_str(),classifier.getPredictionsSent());
+	recordScalar(string(classifier.getName()+": # PredictionsReceived").c_str(),classifier.getPredictionsReceived());
+
+}
+
+void ProphetV2::recordAllClassifier()
+{
+	recordClassifier(global);
+	recordClassifier(successful);
+	recordClassifier(failed);
+	recordClassifier(ribFail);
+//	recordClassifier(failedAtBundleOffer);
+	recordClassifier(responseFail);
+//	recordClassifier(failedAtBundle);
+//	if (withAck){
+//		recordClassifier(failedAtBundleAck);
+//	}
+}
 
 /*******************************************************************
 **

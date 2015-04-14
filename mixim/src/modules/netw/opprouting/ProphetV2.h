@@ -228,6 +228,16 @@ private:
 
 	ClassifiedContactStats failed;
 
+	ClassifiedContactStats ribFail;
+
+	ClassifiedContactStats failedAtBundleOffer;
+
+	ClassifiedContactStats responseFail;
+
+	ClassifiedContactStats failedAtBundle;
+
+	ClassifiedContactStats failedAtBundleAck;
+
 	double sumOfInterContactDur;
 
 	int nbrRecontacts;
@@ -256,6 +266,9 @@ private:
 	int notCorrectlyDeleted;
 
 	int bundlesReceived;
+
+
+	int nbrSimpleContactStats;
 
 
 	/*******************************************************************
@@ -381,6 +394,10 @@ private:
 
 	void classifyRemaining();
 
+	void recordClassifier(ClassifiedContactStats classifier);
+
+	void recordAllClassifier();
+
 
 	/*******************************************************************
 	** 							End of metrics methods section
@@ -390,7 +407,13 @@ public:
 		return myNetwAddr;
 	}
 
-	SimpleContactStats getSimpleContactStats(LAddress::L3Type addr, double creationTime);
+	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > getSimpleContactStats(LAddress::L3Type addr, double creationTime);
+
+	SimpleContactStats getLastSimpleContactStats(LAddress::L3Type addr, double time);
+
+	SimpleContactStats getLastSimpleContactStats(LAddress::L3Type addr);
+
+	void updateSimpleContactStats(LAddress::L3Type addr, SimpleContactStats newContact, std::set<SimpleContactStats>::iterator iterator);
 
 	virtual void initialize(int stage);
 	virtual void finish();

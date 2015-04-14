@@ -20,20 +20,46 @@
 //#include "ContactStats.h"
 #include "chistogram.h"
 #include "string"
+#include "csimulation.h"
 
 using namespace std;
 
 class ClassifiedContactStats: public ContactStats {
 private:
+	bool discardUnfinished;
 	string name;
 	int nbrContacts;
+	int nbrRepeated;
+	int nbrToDiscard;
 	cDoubleHistogram durationStats;
 public:
 	ClassifiedContactStats();
-	ClassifiedContactStats(string name);
+	ClassifiedContactStats(string name, bool discardUnfinished);
 	ClassifiedContactStats(string name, SimpleContactStats firstContact);
 	void update(SimpleContactStats newContact);
+	void finish();
 	virtual ~ClassifiedContactStats();
+    int getNbrToDiscard() const;
+    void setNbrToDiscard(int nbrToDiscard);
+    int getNbrRepeated() const
+    {
+        return nbrRepeated;
+    }
+
+    void setNbrRepeated(int nbrRepeated)
+    {
+        this->nbrRepeated = nbrRepeated;
+    }
+
+	bool isDiscardUnfinished() const
+    {
+        return discardUnfinished;
+    }
+
+    void setDiscardUnfinished(bool discardUnfinished)
+    {
+        this->discardUnfinished = discardUnfinished;
+    }
 
 	cDoubleHistogram getDurationStats() const
     {

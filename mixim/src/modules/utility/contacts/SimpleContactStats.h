@@ -34,6 +34,7 @@ public:
 	SimpleContactStats(double startingTime, int startingState);
 	SimpleContactStats(double startingTime, bool repeatedContact);
 	SimpleContactStats(double startingTime, bool repeatedContact, int startingState);
+	bool isFinished();
 	virtual ~SimpleContactStats();
 
 	double getEndTime() const
@@ -58,10 +59,10 @@ public:
 	double getDuration() const
     {
 		double duration;
-        if ((startTime!=-std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max())){
+        if ((startTime!=std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max())){
         	duration = endTime - startTime;
         }else {
-        	duration = 0;
+        	duration = -1;
         }
         return duration;
     }
@@ -81,7 +82,7 @@ public:
         return successfulContact;
     }
 
-    void setStartTime(double startTime)
+    void setStartTime(const double startTime)
     {
         this->startTime = startTime;
     }

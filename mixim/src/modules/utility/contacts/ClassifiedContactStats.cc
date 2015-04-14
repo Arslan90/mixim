@@ -18,14 +18,22 @@
 ClassifiedContactStats::ClassifiedContactStats() {
 	// TODO Auto-generated constructor stub
 	ContactStats();
+	discardUnfinished = false;
+	nbrContacts = 0;
+	nbrRepeated = 0;
+	nbrToDiscard = 0;
 	durationStats.setName("contacts duration stats");
 }
 
-ClassifiedContactStats::ClassifiedContactStats(string name) {
+ClassifiedContactStats::ClassifiedContactStats(string name, bool discardUnfinished) {
 	// TODO Auto-generated constructor stub
 	ContactStats();
 	this->name = name;
 	string tmp = name + "contacts duration stats";
+	this->discardUnfinished = discardUnfinished;
+	nbrContacts = 0;
+	nbrRepeated = 0;
+	nbrToDiscard = 0;
 	durationStats.setName(tmp.c_str());
 }
 
@@ -34,23 +42,71 @@ ClassifiedContactStats::ClassifiedContactStats(string name, SimpleContactStats f
 	ContactStats();
 	this->name = name;
 	string tmp = name + "contacts duration stats";
+	discardUnfinished = false;
+	nbrContacts = 0;
+	nbrRepeated = 0;
+	nbrToDiscard = 0;
 	durationStats.setName(tmp.c_str());
 	update(firstContact);
 }
 
 void ClassifiedContactStats::update(SimpleContactStats newContact)
 {
-	this->nbrContacts++;
-	this->L3Sent+=newContact.getL3Sent();
-	this->L3Received+=newContact.getL3Received();
-	this->ackSent+=newContact.getAckSent();
-	this->ackReceived+=newContact.getAckReceived();
-	this->bundleSent+=newContact.getBundleSent();
-	this->bundleReceived+=newContact.getAckReceived();
-	this->predictionsSent+=newContact.getPredictionsSent();
-	this->predictionsReceived+=newContact.getPredictionsReceived();
+	bool haveToUpdate = false;
+	double duration;
 
-	this->durationStats.collect(newContact.getDuration());
+	if (discardUnfinished){
+		if (newContact.isFinished()){
+			haveToUpdate = true;
+			duration = newContact.getDuration();
+		}
+	}else{
+		haveToUpdate = true;
+		if (newContact.isFinished()){
+			duration = newContact.getDuration();
+		}else{
+			nbrToDiscard++;
+			if (newContact.getStartTime()==std::numeric_limits<double>::max()){
+				duration = 0;
+			}else {
+				duration = simTime().dbl() - newContact.getStartTime();
+			}
+		}
+	}
+
+	if (haveToUpdate){
+		this->nbrContacts++;
+		if (newContact.isRepeatedContact()){
+			this->nbrRepeated++;
+		}
+
+		this->L3Sent+=newContact.getL3Sent();
+		this->L3Received+=newContact.getL3Received();
+		this->ackSent+=newContact.getAckSent();
+		this->ackReceived+=newContact.getAckReceived();
+		this->bundleSent+=newContact.getBundleSent();
+		this->bundleReceived+=newContact.getBundleReceived();
+		this->predictionsSent+=newContact.getPredictionsSent();
+		this->predictionsReceived+=newContact.getPredictionsReceived();
+
+		this->durationStats.collect(duration);
+	}
+}
+
+void ClassifiedContactStats::finish()
+{
+//	recordScalar("adaz",  this->L3Sent);
+	this->durationStats.recordAs(this->name.c_str());
+}
+
+int ClassifiedContactStats::getNbrToDiscard() const
+{
+    return nbrToDiscard;
+}
+
+void ClassifiedContactStats::setNbrToDiscard(int nbrToDiscard)
+{
+    this->nbrToDiscard = nbrToDiscard;
 }
 
 ClassifiedContactStats::~ClassifiedContactStats() {
