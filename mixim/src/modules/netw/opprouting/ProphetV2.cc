@@ -384,12 +384,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				opp_error("Unknown Prophetv2MessageKinds when calling HandleLowerMsg()");
 				break;
 		}
-    }
     pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
     SimpleContactStats contact = pair.first;
     contact.setL3Received();
     updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
-
+    }
 //    cancelAndDelete(prophetPkt);
     delete(prophetPkt);
 //    delete(m);
@@ -895,7 +894,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			 * Collecting data
 			 */
 			updatingL3Sent();
-			contact.setL3Sent();
+//			contact.setL3Sent();
 		}
 			break;
 		case Bundle_Response:
@@ -1014,7 +1013,9 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		it2--;
 		updateSimpleContactStats(destAddr,contact,it2);
 	}else {
-		updateSimpleContactStats(destAddr,contact,pair.second);
+		if (kind != Bundle_Offer){
+			updateSimpleContactStats(destAddr,contact,pair.second);
+		}
 	}
 }
 
@@ -1162,6 +1163,7 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 //	updatingL3Sent();
 //	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 
+	contact.setL3Sent();
 	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 	return bundleToOfferMeta;
 }
