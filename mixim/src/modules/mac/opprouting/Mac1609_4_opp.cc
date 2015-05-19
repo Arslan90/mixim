@@ -130,8 +130,10 @@ void Mac1609_4_opp::attachAndSend(cMessage* msg, ChannelSelectorState channel, t
 	pkt->setControlInfo(addInfo);
 	pkt->addBitLength(headerLength);
 	pkt->encapsulate(dynamic_cast<NetwPkt*>(msg->dup()));
+//	pkt->encapsulate(dynamic_cast<NetwPkt*>(msg));
 	DBG << "Mac Sending down a SCH Packet with priority :" << priority << std::endl;
 	sendDown(pkt);
+//	delete(msg);
 }
 
 void Mac1609_4_opp::handleUpperControl(cMessage* msg) {
