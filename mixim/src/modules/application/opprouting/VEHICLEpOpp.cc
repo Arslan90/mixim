@@ -712,7 +712,7 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 		case type_SCH: wsm->setChannelNumber(Channels::SCH1); break; //will be rewritten at Mac1609_4 to actual Service Channel. This is just so no controlInfo is needed
 		case type_CCH: wsm->setChannelNumber(Channels::CCH); break;
 	}
-	if (DTN_TEST_MODE){
+	if (dtnTestMode){
 		wsm->setKind(DTN_TEST_MODE);
 	}else {
 		wsm->setKind(BROADCAST_VEH_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
@@ -742,6 +742,14 @@ void VEHICLEpOpp::finish() {
 	// Added by Arslan HAMZA CHERIF
 	recordScalar("# Bundle Sent", nbrBundleSent);
 	recordScalar("# Bundle Received", nbrBundleReceived);
+
+	// cancelling selfmessage
+	BaseWaveApplLayer::finish();
+	cancelAndDelete(delayTimer);
+	cancelAndDelete(everySecond);
+	if (dtnTestMode){
+		cancelAndDelete(dtnTestMsg);
+	}
 }
 
 ////////////////// TESTING AREA /////////////    ////////////////// TESTING AREA /////////////

@@ -251,6 +251,9 @@ void VPApOpp::finish()
 //		EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
 
 		hopCountStats.recordAs("hop count");
+
+	// cancelling selfmessage
+	BaseWaveApplLayer::finish();
 }
 
 
