@@ -133,7 +133,6 @@ void Mac1609_4_opp::attachAndSend(cMessage* msg, ChannelSelectorState channel, t
 //	pkt->encapsulate(dynamic_cast<NetwPkt*>(msg));
 	DBG << "Mac Sending down a SCH Packet with priority :" << priority << std::endl;
 	sendDown(pkt);
-//	delete(msg);
 }
 
 void Mac1609_4_opp::handleUpperControl(cMessage* msg) {
@@ -186,13 +185,13 @@ void Mac1609_4_opp::handleUpperMsg(cMessage* msg) {
 				    << " the message will be sent with CCH channel"<< std::endl;
 		if ((csState == CCH) && (cchQueue.empty())) {
 						//Send this CCH packet right away
-						cchQueue.push(m);
-						attachAndSend(m,CCH, type_CCH, frequency[Channels::CCH]);
+						cchQueue.push(msg);
+						attachAndSend(msg,CCH, type_CCH, frequency[Channels::CCH]);
 
 		}
 		else {
 			//Queue this packet because CCH is not active or Queue is not empty
-			cchQueue.push(m);
+			cchQueue.push(msg);
 		}
 	}
 }
