@@ -502,7 +502,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case RIB:
 		{
-			Prophet *ribPkt = new Prophet();
+			Prophet *ribPkt;// = new Prophet();
 
 			// aging of predictions that will be sent
 			// creating a copy of preds
@@ -663,7 +663,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * step 1 : sending the response
 				 */
 
-				Prophet *responsePkt = new Prophet();
+				Prophet *responsePkt;// = new Prophet();
 				responsePkt = prepareProphet(Bundle_Response,myNetwAddr,destAddr, &bundleToAcceptMeta);
 				responsePkt->setBitLength(headerLength);
 				sendDown(responsePkt);
@@ -679,7 +679,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle_Ack:{
 
-			Prophet *ackPkt = new Prophet();
+			Prophet *ackPkt;// = new Prophet();
 			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
 
 			/*
@@ -827,9 +827,9 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			}
 
 
-			Prophet *offerPkt = new Prophet();
-			offerPkt->setBitLength(headerLength);
+			Prophet *offerPkt;// = new Prophet();
 			offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,destAddr,&bundleToOfferMeta);
+			offerPkt->setBitLength(headerLength);
 			sendDown(offerPkt);
 			/*
 			 * Collecting data
@@ -917,7 +917,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				/*
 				 * No Bundle to transmit, send a prophet msg with NULL pointer instead of an encapsulated bundle
 				 */
-				Prophet *bundlePkt = new Prophet();
+				Prophet *bundlePkt;// = new Prophet();
 				bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,NULL);
 				bundlePkt->setBitLength(headerLength);
 				if (canITransmit){
@@ -938,7 +938,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 					if (it2!=bundlesIndex.end()){
 						innerIndexIterator it3 = it2->second.find(it->getSerial());
 						if (it3!=it2->second.end()){
-							Prophet *bundlePkt = new Prophet();
+							Prophet *bundlePkt;// = new Prophet();
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
 							bundlePkt->setBitLength(headerLength);
 							if (canITransmit){
@@ -949,6 +949,13 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 								 * Collecting data
 								 */
 								updatingL3Sent();
+//<<<<<<< OURS
+//=======
+//								contact.setL3Sent();
+//								contact.setBundleSent();
+							}else if (!canITransmit){
+								delete bundlePkt;
+//>>>>>>> THEIRS
 							}
 						}
 					}
