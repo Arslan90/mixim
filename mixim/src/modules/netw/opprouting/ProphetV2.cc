@@ -1192,6 +1192,16 @@ void ProphetV2::finish()
 		recordScalar("# NotCorrectlyDeleted", notCorrectlyDeleted);
 		recordScalar("# Bundles", bundles.size());
 	}
+
+//	while (!acks.empty()) {
+//		delete &acks.front();
+//		acks.pop_front();
+//	}
+
+	while (!bundles.empty()){
+		delete bundles.front();
+		bundles.pop_front();
+	}
 }
 
 /*******************************************************************

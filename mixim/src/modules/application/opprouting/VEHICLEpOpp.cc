@@ -373,6 +373,7 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
         break;
     }
     delete msg; //finally delete the message
+    delete wsm;
 }
 
 
