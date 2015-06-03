@@ -23,6 +23,7 @@ Define_Module(VEHICLEpOpp);
 const simsignalwrap_t VEHICLEpOpp::mobilityStateChangedSignal = simsignalwrap_t(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
 
 void VEHICLEpOpp::initialize(int stage) {
+
 	BaseWaveApplLayer::initialize(stage);
 	if (stage == 0) {
 		//TRACI STUFF
@@ -84,8 +85,7 @@ void VEHICLEpOpp::initialize(int stage) {
 
 		}
 
-		isNetwAddrInit = false;
-		nbrMsgSent = 0;
+
 
 //		// My variables
 //		vehicleIdAsInt = par("vehicleIdAsInt");
@@ -101,7 +101,30 @@ void VEHICLEpOpp::initialize(int stage) {
 //		}
 
 	}
-	else if(stage==1) {
+	if(stage==1){
+		isNetwAddrInit = false;
+		nbrMsgSent = 0;
+
+		traci->getManager()->addVehicleID(traci->getExternalId());
+		loopVehicle = false;
+		loopVehicle = traci->getManager()->isALoopVehicle(traci->getExternalId());
+
+		currentRoute = traci->commandGetSingleVehicleRoutes();
+		currentRouteId = traci->commandGetRouteId();
+
+		EV << "My current route id is : " << currentRouteId << endl;
+
+		reroutedToLoopRoute = false;
+		edgeForLooping ="";
+	}
+	if(stage==2) {
+		cModule *netw = this->getParentModule()->getSubmodule("netw");
+		if (netw!=NULL){
+			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
+			isNetwAddrInit = true;
+		}
+
+
 	        scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
 	        scheduleAt(simTime() + 1, everySecond); //Scheduling the self message.
 
@@ -116,25 +139,15 @@ void VEHICLEpOpp::initialize(int stage) {
 //	        	scheduleAt(simTime(), dtnTestMsg);
 	        }
 
-	        traci->getManager()->addVehicleID(traci->getExternalId());
-			loopVehicle = false;
-			loopVehicle = traci->getManager()->isALoopVehicle(traci->getExternalId());
 
-			currentRoute = traci->commandGetSingleVehicleRoutes();
-			currentRouteId = traci->commandGetRouteId();
-
-			EV << "My current route id is : " << currentRouteId << endl;
-
-			reroutedToLoopRoute = false;
-			edgeForLooping ="";
 	}
-	else if(stage==2) {
-		cModule *netw = this->getParentModule()->getSubmodule("netw");
-		if (netw!=NULL){
-			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
-			isNetwAddrInit = true;
-		}
-	}
+//	else if(stage==2) {
+//		cModule *netw = this->getParentModule()->getSubmodule("netw");
+//		if (netw!=NULL){
+//			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
+//			isNetwAddrInit = true;
+//		}
+//	}
 }
 
 //SELF-MESSAGES
@@ -519,9 +532,13 @@ void VEHICLEpOpp::sendDtnMessage()
 
 	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA[0] with address "<< addr <<endl;
 	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
-	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(myId,nbrMsgSent)));
+	if (isNetwAddrInit){
+	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(netwAddr,nbrMsgSent)));
 //	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,0));
 	nbrBundleSent++;
+	}else {
+		opp_error("netw adress not ye initialized");
+	}
 }
 
 int VEHICLEpOpp::vpaDestAddr()
@@ -697,7 +714,12 @@ void VEHICLEpOpp::sendMessage() {
 	//Sending message
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 //	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
-	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(myId,nbrMsgSent)));
+	if (isNetwAddrInit){
+		sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(netwAddr,nbrMsgSent)));
+	}else{
+		opp_error("netw adress not ye initialized");
+	}
+
 
 }
 
@@ -723,7 +745,7 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 	wsm->setPriority(priority);
 	wsm->setWsmVersion(1);
 	wsm->setTimestamp(simTime());
-	wsm->setSenderAddress(myId);
+	wsm->setSenderAddress(netwAddr);
 	wsm->setRecipientAddress(rcvId);
 	wsm->setSenderPos(curPosition);
 	wsm->setSerial(serial);

@@ -365,9 +365,9 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 		}
     }
 //    cancelAndDelete(prophetPkt);
-    delete(prophetPkt);
+    delete prophetPkt;
 //    delete(m);
-    delete(msg);
+    delete msg;
 
 }
 
@@ -685,7 +685,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			/*
 			 * Step 1 : Creating the ACK
 			 */
-			BundleMeta meta (wsm,Prophet_Enum::PRoPHET_ACK);
+			BundleMeta meta = new BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
 			storeACK(meta);
 
 //			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
@@ -735,8 +735,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		{
 			bool shouldAbort = false;
 			WaveShortMessage *wsm;
+			cPacket *tmp;
 
-			if (prophetPkt->getEncapsulatedPacket() == NULL){
+			tmp = prophetPkt->getEncapsulatedPacket();
+
+			if ( tmp == NULL){
 				shouldAbort = true;
 			}else {
 
@@ -752,6 +755,8 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 					shouldAbort = true;
 				}
 			}
+
+//			delete tmp;
 
 			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
 
@@ -985,6 +990,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	}
 	if (msg!=NULL){
 		prophetMsg->encapsulate(msg);
+//		delete msg;
 	}
 
 	return prophetMsg;
@@ -1150,6 +1156,14 @@ bool ProphetV2::existAndErase(BundleMeta bndlMeta)
 			WaveShortMessage* wsm = it2->second;
 			innerMap.erase(bndlMeta.getSerial());
 			bundles.remove(wsm);
+			if (innerMap.empty()){
+				bundlesIndex.erase(bndlMeta.getRecipientAddress());
+			}else {
+				bundlesIndex[bndlMeta.getRecipientAddress()] = innerMap;
+			}
+			if (wsm->getOwner()==this){
+				delete wsm;
+			}
 			found = true;
 		}
 	}
