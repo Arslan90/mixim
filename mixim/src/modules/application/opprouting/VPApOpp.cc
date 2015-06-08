@@ -170,6 +170,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 	}
 
 	delete(msg);
+	delete wsm;
 }
 
 

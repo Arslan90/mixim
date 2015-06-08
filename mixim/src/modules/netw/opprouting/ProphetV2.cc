@@ -390,9 +390,9 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
     updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
     }
 //    cancelAndDelete(prophetPkt);
-    delete(prophetPkt);
+    delete prophetPkt;
 //    delete(m);
-    delete(msg);
+    delete msg;
 
 }
 
@@ -600,6 +600,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 */
 						if (exist(*it)){
 							it = bundleToAcceptMeta.erase(it);
+							if (it == bundleToAcceptMeta.end()){
+								break;
+							}
 						}
 
 						/*
@@ -607,9 +610,15 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 * in that case delete them from the offered list
 						 */
 						if (withAck){
+							if (it == bundleToAcceptMeta.end()){
+								opp_warning("possible access to a no unitialized variable");
+							}
 							if (acksIndex.find(it->getSerial()) != acksIndex.end()){
 								it = bundleToAcceptMeta.erase(it);
 								demandedAckedBundle++;
+								if (it == bundleToAcceptMeta.end()){
+									break;
+								}
 							}
 						}
 					}
@@ -731,7 +740,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			/*
 			 * Step 1 : Creating the ACK
 			 */
-			BundleMeta meta (wsm,Prophet_Enum::PRoPHET_ACK);
+			BundleMeta meta = new BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
 			storeACK(meta);
 
 //			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
@@ -910,6 +919,9 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
 					if (acksIndex.find(it->getSerial()) != acksIndex.end()){
 						it = bundleToSendMeta.erase(it);
+						if (it == bundleToSendMeta.end()){
+							break;
+						}
 					}
 				}
 
@@ -1209,6 +1221,14 @@ bool ProphetV2::existAndErase(BundleMeta bndlMeta)
 			WaveShortMessage* wsm = it2->second;
 			innerMap.erase(bndlMeta.getSerial());
 			bundles.remove(wsm);
+			if (innerMap.empty()){
+				bundlesIndex.erase(bndlMeta.getRecipientAddress());
+			}else {
+				bundlesIndex[bndlMeta.getRecipientAddress()] = innerMap;
+			}
+			if (wsm->getOwner()==this){
+				delete wsm;
+			}
 			found = true;
 		}
 	}
@@ -1256,6 +1276,10 @@ void ProphetV2::finish()
 	classifyRemaining();
 	recordAllClassifier();
 
+	while (!bundles.empty()){
+		delete bundles.front();
+		bundles.pop_front();
+	}
 }
 
 /*******************************************************************

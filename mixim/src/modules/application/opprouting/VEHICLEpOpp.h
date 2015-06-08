@@ -37,6 +37,11 @@
  */
 class VEHICLEpOpp : public BaseWaveApplLayer {
 	public:
+
+	 	virtual int numInitStages() const {
+	    	return 3;
+	    }
+
 		virtual void initialize(int stage);
 		//bool junctionRange; // True if vehicle position <=  epicenterRange
 		void entra(int currentNumBackoffs, int currentCW, int myNicId); //REceive information from the MAC layer.
