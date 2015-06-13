@@ -550,6 +550,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 */
 						if (exist(*it)){
 							it = bundleToAcceptMeta.erase(it);
+							if (it == bundleToAcceptMeta.end()){
+								break;
+							}
 						}
 
 						/*
@@ -560,6 +563,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 							if (acksIndex.find(it->getSerial()) != acksIndex.end()){
 								it = bundleToAcceptMeta.erase(it);
 								demandedAckedBundle++;
+								if (it == bundleToAcceptMeta.end()){
+									break;
+								}						
 							}
 						}
 					}
@@ -685,7 +691,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			/*
 			 * Step 1 : Creating the ACK
 			 */
-			BundleMeta meta = new BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
+			BundleMeta meta = BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
 			storeACK(meta);
 
 //			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
@@ -711,8 +717,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 
 			std::list<BundleMeta> acksMeta;
 			if (acksIndex.find(meta.getSerial())!= acksIndex.end()){
-				acksMeta.push_back(meta);
+				BundleMeta copy;
+				copy = meta;
+				acksMeta.push_back(copy);
 			}
+
+//			std::list<BundleMeta> acksMetaCopy (acksMeta);
 
 
 			// destAddr is  the sender of prophet packet received in Bundle (the final recipient of WSMessage)
@@ -735,17 +745,14 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		{
 			bool shouldAbort = false;
 			WaveShortMessage *wsm;
-			cPacket *tmp;
 
-			tmp = prophetPkt->getEncapsulatedPacket();
+			wsm = dynamic_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
 
-			if ( tmp == NULL){
-				shouldAbort = true;
-			}else {
+			if ( wsm != NULL){
 
 				bundlesReceived++;
 
-				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
+				wsm = check_and_cast<WaveShortMessage*>(wsm);
 
 				if (bundlesIndex.find(wsm->getSerial())!=bundlesIndex.end()){
 					shouldAbort = true;
@@ -754,37 +761,24 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				if ((withAck)&&(acksIndex.find(wsm->getSerial())!=acksIndex.end())){
 					shouldAbort = true;
 				}
-			}
+
 
 //			delete tmp;
 
-			LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
+				LAddress::L3Type recipientAddr = wsm->getRecipientAddress();
 
-			if (!shouldAbort){
-				// Updating hopCount for WSM Message
-				wsm->setHopCount(wsm->getHopCount()+1);
-
-
-//				if ((recipientAddr==LAddress::L3BROADCAST)||(recipientAddr==myNetwAddr)){
-//					if (recipientAddr != myNetwAddr){
-//						storeBundle(wsm->dup());
-//					}
-//					sendUp(prophetPkt);
-//					Prophet *toSentUp = prophetPkt->dup();
-//					sendUp(toSentUp);
 				if (recipientAddr == myNetwAddr){
 					sendUp(prophetPkt->dup());
 					if (withAck){
 						executeInitiatorRole(Bundle_Ack,prophetPkt);
 					}
 				}else {
-					wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
-					storeBundle(wsm);
+					if (!shouldAbort){
+						wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
+						wsm->setHopCount(wsm->getHopCount()+1);
+						storeBundle(wsm);
+					}
 				}
-			}
-
-			if ((shouldAbort)&&(recipientAddr == myNetwAddr)){
-				sendUp(prophetPkt->dup());
 			}
 			/*
 			 * Collecting data
@@ -862,6 +856,9 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
 					if (acksIndex.find(it->getSerial()) != acksIndex.end()){
 						it = bundleToSendMeta.erase(it);
+						if (it == bundleToSendMeta.end()){
+							break;
+						}
 					}
 				}
 
