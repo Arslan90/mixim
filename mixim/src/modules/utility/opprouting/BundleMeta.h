@@ -33,10 +33,19 @@ public:
 //	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag);
 
 	BundleMeta(): senderAddress(-1), recipientAddress(-1), serial(0), timestamp(0), bFlags(Prophet_Enum::Bndl_Accepted) {}
-	BundleMeta(BundleMeta* mt): senderAddress(mt->getSenderAddress()), recipientAddress(mt->getRecipientAddress()), serial(mt->getSerial()), timestamp(mt->getTimestamp()), bFlags(mt->getFlags()) {}
-	BundleMeta(BundleMeta* mt, Prophet_Enum::bndlFlags flag): senderAddress(mt->getSenderAddress()), recipientAddress(mt->getRecipientAddress()), serial(mt->getSerial()), timestamp(mt->getTimestamp()), bFlags(flag) {}
+	BundleMeta(const BundleMeta &mt ): senderAddress(mt.getSenderAddress()), recipientAddress(mt.getRecipientAddress()), serial(mt.getSerial()), timestamp(mt.getTimestamp()), bFlags(mt.getFlags()) {}
+	BundleMeta(const BundleMeta &mt, Prophet_Enum::bndlFlags flag): senderAddress(mt.getSenderAddress()), recipientAddress(mt.getRecipientAddress()), serial(mt.getSerial()), timestamp(mt.getTimestamp()), bFlags(flag) {}
 	BundleMeta(WaveShortMessage* wsm, Prophet_Enum::bndlFlags flag): senderAddress(wsm->getSenderAddress()), recipientAddress(wsm->getRecipientAddress()), serial(wsm->getSerial()), timestamp(wsm->getTimestamp()), bFlags(flag) {};
 	virtual ~BundleMeta();
+
+	BundleMeta& operator=( const BundleMeta& other ) {
+	      senderAddress = other.getSenderAddress();
+	      recipientAddress = other.getRecipientAddress();
+	      serial = other.getSerial();
+	      timestamp = other.getTimestamp();
+	      bFlags = other.getFlags();
+	      return *this;
+	 }
 
     Prophet_Enum::bndlFlags getFlags() const
     {
