@@ -372,6 +372,7 @@ protected:
 		int stepForVehiclesLoop;
 
 		std::vector<std::string> allVehiclesId;
+		cOutVector nbrVehicleVector;
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);

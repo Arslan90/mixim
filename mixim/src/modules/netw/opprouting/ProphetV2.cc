@@ -1838,6 +1838,14 @@ void ProphetV2::recordClassifier(ClassifiedContactStats classifier)
 	recordScalar(string(classifier.getName()+": # PredictionsSent").c_str(),classifier.getPredictionsSent());
 	recordScalar(string(classifier.getName()+": # PredictionsReceived").c_str(),classifier.getPredictionsReceived());
 
+	recordScalar(string(classifier.getName()+": # LQ5").c_str(),classifier.getNbrLq5());
+	recordScalar(string(classifier.getName()+": # G5LQ20").c_str(),classifier.getNbrG5Lq20());
+	recordScalar(string(classifier.getName()+": # G20LQ50").c_str(),classifier.getNbrG20Lq50());
+	recordScalar(string(classifier.getName()+": # G50LQ100").c_str(),classifier.getNbrG50Lq100());
+	recordScalar(string(classifier.getName()+": # G100LQ500").c_str(),classifier.getNbrG100Lq500());
+	recordScalar(string(classifier.getName()+": # G500LQ1800").c_str(),classifier.getNbrG500Lq1800());
+	recordScalar(string(classifier.getName()+": # G1800").c_str(),classifier.getNbrG1800());
+
 }
 
 void ProphetV2::recordAllClassifier()

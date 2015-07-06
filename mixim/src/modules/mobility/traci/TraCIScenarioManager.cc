@@ -95,6 +95,8 @@ void TraCIScenarioManager::initialize(int stage) {
 
 	allVehiclesId = std::vector<std::string>();
 
+	nbrVehicleVector.setName("Evolution of vehicle density");
+
 	// end of this section
 
 	// parse roiRoads
@@ -1061,6 +1063,12 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 			activeVehicleCount += count;
 
+			//Added by Arslan HAMZA CHERIF
+			if (count > 0){
+				nbrVehicleVector.record(activeVehicleCount);
+			}
+
+
 		} else if (variable1_resp == VAR_ARRIVED_VEHICLES_IDS) {
 			uint8_t varType; buf >> varType;
 			ASSERT(varType == TYPE_STRINGLIST);
@@ -1082,6 +1090,11 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 			if ((count > 0) && (count >= activeVehicleCount)) autoShutdownTriggered = true;
 			activeVehicleCount -= count;
+
+			//Added by Arslan HAMZA CHERIF
+			if (count > 0){
+				nbrVehicleVector.record(activeVehicleCount);
+			}
 
 		} else if (variable1_resp == VAR_TIME_STEP) {
 			uint8_t varType; buf >> varType;

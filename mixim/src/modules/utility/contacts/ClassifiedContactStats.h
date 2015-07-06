@@ -32,15 +32,68 @@ private:
 	int nbrRepeated;
 	int nbrToDiscard;
 	cDoubleHistogram durationStats;
+
+	/*
+	 * # of contacts of a duration lesser or equal(LQ) or greater (G) to X seconds (5s,20s,50s,100s,500s,1800s)
+	 */
+	int nbrLQ5;
+	int nbrG5LQ20;
+	int nbrG20LQ50;
+	int nbrG50LQ100;
+	int nbrG100LQ500;
+	int nbrG500LQ1800;
+	int nbrG1800;
+
 public:
 	ClassifiedContactStats();
 	ClassifiedContactStats(string name, bool discardUnfinished);
 	ClassifiedContactStats(string name, SimpleContactStats firstContact);
 	void update(SimpleContactStats newContact);
+	/*
+	 * Categorize the contact duration of a simple contact in order to estimate the CDF and the PDF
+	 * NOTE: automatically discard the contact with a incoherent contact duration,
+	 * the overall calcul must be done based on total contact minus discarded contact
+	 */
+	void categorizeContactDuration(double contactDuration);
 	void finish();
 	virtual ~ClassifiedContactStats();
     int getNbrToDiscard() const;
     void setNbrToDiscard(int nbrToDiscard);
+    int getNbrG100Lq500() const
+    {
+        return nbrG100LQ500;
+    }
+
+    int getNbrG1800() const
+    {
+        return nbrG1800;
+    }
+
+    int getNbrG20Lq50() const
+    {
+        return nbrG20LQ50;
+    }
+
+    int getNbrG500Lq1800() const
+    {
+        return nbrG500LQ1800;
+    }
+
+    int getNbrG50Lq100() const
+    {
+        return nbrG50LQ100;
+    }
+
+    int getNbrG5Lq20() const
+    {
+        return nbrG5LQ20;
+    }
+
+    int getNbrLq5() const
+    {
+        return nbrLQ5;
+    }
+
     int getNbrRepeated() const
     {
         return nbrRepeated;
@@ -51,7 +104,7 @@ public:
         this->nbrRepeated = nbrRepeated;
     }
 
-	bool isDiscardUnfinished() const
+    bool isDiscardUnfinished() const
     {
         return discardUnfinished;
     }
@@ -61,7 +114,7 @@ public:
         this->discardUnfinished = discardUnfinished;
     }
 
-	cDoubleHistogram getDurationStats() const
+    cDoubleHistogram getDurationStats() const
     {
         return durationStats;
     }
@@ -80,6 +133,7 @@ public:
     {
         this->nbrContacts = nbrContacts;
     }
+
 };
 
 #endif /* CLASSIFIEDCONTACTSTATS_H_ */

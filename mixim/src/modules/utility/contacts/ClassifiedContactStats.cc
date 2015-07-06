@@ -23,6 +23,14 @@ ClassifiedContactStats::ClassifiedContactStats() {
 	nbrRepeated = 0;
 	nbrToDiscard = 0;
 	durationStats.setName("contacts duration stats");
+
+	nbrLQ5 = 0;
+	nbrG5LQ20 = 0;
+	nbrG20LQ50 = 0;
+	nbrG50LQ100 = 0;
+	nbrG100LQ500 = 0;
+	nbrG500LQ1800 = 0;
+	nbrG1800 = 0;
 }
 
 ClassifiedContactStats::ClassifiedContactStats(string name, bool discardUnfinished) {
@@ -35,6 +43,14 @@ ClassifiedContactStats::ClassifiedContactStats(string name, bool discardUnfinish
 	nbrRepeated = 0;
 	nbrToDiscard = 0;
 	durationStats.setName(tmp.c_str());
+
+	nbrLQ5 = 0;
+	nbrG5LQ20 = 0;
+	nbrG20LQ50 = 0;
+	nbrG50LQ100 = 0;
+	nbrG100LQ500 = 0;
+	nbrG500LQ1800 = 0;
+	nbrG1800 = 0;
 }
 
 ClassifiedContactStats::ClassifiedContactStats(string name, SimpleContactStats firstContact) {
@@ -48,6 +64,14 @@ ClassifiedContactStats::ClassifiedContactStats(string name, SimpleContactStats f
 	nbrToDiscard = 0;
 	durationStats.setName(tmp.c_str());
 	update(firstContact);
+
+	nbrLQ5 = 0;
+	nbrG5LQ20 = 0;
+	nbrG20LQ50 = 0;
+	nbrG50LQ100 = 0;
+	nbrG100LQ500 = 0;
+	nbrG500LQ1800 = 0;
+	nbrG1800 = 0;
 }
 
 void ClassifiedContactStats::update(SimpleContactStats newContact)
@@ -59,11 +83,13 @@ void ClassifiedContactStats::update(SimpleContactStats newContact)
 		if (newContact.isFinished()){
 			haveToUpdate = true;
 			duration = newContact.getDuration();
+			categorizeContactDuration(duration);
 		}
 	}else{
 		haveToUpdate = true;
 		if (newContact.isFinished()){
 			duration = newContact.getDuration();
+			categorizeContactDuration(duration);
 		}else{
 			nbrToDiscard++;
 			if (newContact.getStartTime()==std::numeric_limits<double>::max()){
@@ -102,6 +128,29 @@ void ClassifiedContactStats::finish()
 int ClassifiedContactStats::getNbrToDiscard() const
 {
     return nbrToDiscard;
+}
+
+void ClassifiedContactStats::categorizeContactDuration(double contactDuration)
+{
+	if (contactDuration < 0 ){
+		opp_error("Contact duration is lesser than 0");
+	}
+
+	if (contactDuration <= 5 ){
+		nbrLQ5++;
+	}else if ((contactDuration > 5)&&(contactDuration <= 20)){
+		nbrG5LQ20++;
+	}else if ((contactDuration > 20)&&(contactDuration <= 50)){
+		nbrG20LQ50++;
+	}else if ((contactDuration > 50)&&(contactDuration <= 100)){
+		nbrG50LQ100++;
+	}else if ((contactDuration > 100)&&(contactDuration <= 500)){
+		nbrG100LQ500++;
+	}else if ((contactDuration > 500)&&(contactDuration <= 1800)){
+		nbrG500LQ1800++;
+	}else if (contactDuration > 1800){
+		nbrG1800++;
+	}
 }
 
 void ClassifiedContactStats::setNbrToDiscard(int nbrToDiscard)
