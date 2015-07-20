@@ -581,10 +581,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle_Offer:
 		{
-			std::list<BundleMeta> bundleToAcceptMeta;
-			bundleToAcceptMeta = prophetPkt->getBndlmeta();
+			std::list<BundleMeta> bndlMetaReceived;
+			std::list<BundleMeta> bndlMetaToAccept;
+			bndlMetaReceived = prophetPkt->getBndlmeta();
 
-			if (bundleToAcceptMeta.size()==0){
+			if (bndlMetaReceived.size()==0){
 				/*
 				 * Nothing to do, we have to stop the exchange
 				 */
@@ -592,17 +593,19 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				contact.setSuccessfulContact(true);
 			}else {
 
-				for (std::list<BundleMeta>::iterator it = bundleToAcceptMeta.begin(); it !=bundleToAcceptMeta.end(); ++it) {
+				for (std::list<BundleMeta>::iterator it = bndlMetaReceived.begin(); it !=bndlMetaReceived.end(); ++it) {
+					bool acceptBndlMeta = true;
 					if (it->getFlags() == Prophet_Enum::Bndl_Accepted){
 						/*
 						 * step 1 : check if offered bundles are already stored in this node,
 						 * in that case delete them from the offered list
 						 */
 						if (exist(*it)){
-							it = bundleToAcceptMeta.erase(it);
-							if (it == bundleToAcceptMeta.end()){
-								break;
-							}
+//							it = bndlMetaReceived.erase(it);
+//							if (it == bndlMetaReceived.end()){
+//								break;
+//							}
+							acceptBndlMeta = false;
 						}
 
 						/*
@@ -610,15 +613,17 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 * in that case delete them from the offered list
 						 */
 						if (withAck){
-							if (it == bundleToAcceptMeta.end()){
+							if (it == bndlMetaReceived.end()){
 								opp_warning("possible access to a no unitialized variable");
 							}
 							if (acksIndex.find(it->getSerial()) != acksIndex.end()){
-								it = bundleToAcceptMeta.erase(it);
+//								it = bndlMetaReceived.erase(it);
+//								demandedAckedBundle++;
+//								if (it == bndlMetaReceived.end()){
+//									break;
+//								}
 								demandedAckedBundle++;
-								if (it == bundleToAcceptMeta.end()){
-									break;
-								}
+								acceptBndlMeta = false;
 							}
 						}
 					}
@@ -629,79 +634,31 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 */
 						storeACK(*it);
 						contact.setAckReceived();
-						}
+						acceptBndlMeta = false;
+					}
+
+					if (acceptBndlMeta){
+						bndlMetaToAccept.push_back(*it);
+					}
 				}
+
+				/*
+				 * highly important: without doing this we don't transmit the filtered list to the next step
+				 * and so we will send bundle previously discarded
+				 */
+				prophetPkt->setBndlmeta(bndlMetaToAccept);
+
 				/*
 				 * Collecting data
 				 */
 				updatingContactState(destAddr,Bundle_Offer);
 			}
 
-
-//				if (withAck){
-//					std::list<BundleMeta> bundleToAcceptMeta;
-//					bundleToAcceptMeta = prophetPkt->getBndlmeta();
-//					for (std::list<BundleMeta>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
-//
-//						if (ackIt->getFlags() == Prophet_Enum::PRoPHET_ACK){
-//
-//							if (acksIndex.find(ackIt->getSerial())==acksIndex.end()){
-//								/*
-//								 * 1 step : Adding ack to ack list
-//								 */
-//
-//								if (acks.size()==ackStructureSize){
-//									int serial = acks.front().getSerial();
-//									acksIndex.erase(serial);
-//									acks.pop_front();
-//								}
-//
-//								acksIndex.insert(std::pair<int, BundleMeta>(ackIt->getSerial(),*ackIt));
-//								acks.push_back(*ackIt);
-//
-//								/*
-//								 * 2 step : Deleting the bundle from the storage
-//								 */
-//
-//								if (existAndErase(*ackIt)) {
-//									deletedBundlesWithAck++;
-//								}
-//							}
-//						}
-//					}
-//				}
-
-
 		}
 
 			break;
 		case Bundle_Response:
 		{
-//			std::list<BundleMeta> bundleToAcceptMeta;
-//			bundleToAcceptMeta = prophetPkt->getBndlmeta();
-//
-//
-//
-//			/*
-//			 * step 1 : check if offered bundles are already stored in this node,
-//			 * in that case delete them from the offered list
-//			 */
-//			for (std::list<BundleMeta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
-//				if (exist(*it2)){
-//					it2 = bundleToAcceptMeta.erase(it2);
-//				}
-//				if(withAck){
-//					if (acksIndex.find(it2->getSerial())!=acksIndex.end()){
-//						it2 = bundleToAcceptMeta.erase(it2);
-//						demandedAckedBundle++;
-//					}
-//				}
-//			}
-//
-//			/*
-//			 * step 2 : sending the response
-//			 */
-
 			std::list<BundleMeta> bundleToAcceptMeta;
 			bundleToAcceptMeta = prophetPkt->getBndlmeta();
 
@@ -733,6 +690,10 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		}
 			break;
 		case Bundle_Ack:{
+			/*
+			 * Note: No need to send all acks because it's already done in Bundle_Offer,
+			 * send only ack of the received bundle
+			 */
 
 			Prophet *ackPkt;// = new Prophet();
 			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
@@ -742,23 +703,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 */
 			BundleMeta meta = BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
 			storeACK(meta);
-
-//			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
-//			for (std::list<BundleMeta>::iterator ackIt = acks.begin(); ackIt !=acks.end(); ++ackIt) {
-//				BundleMeta meta = new BundleMeta()
-//				Prophet_Struct::bndl_meta meta;
-//				meta.recipientAddress = ackIt->recipientAddress;
-//				meta.senderAddress = ackIt->senderAddress;
-//				meta.serial = ackIt->serial;
-//				meta.timestamp = ackIt->timestamp;
-//				meta.bFlags = ackIt->bFlags;
-//				acksMeta.push_back(meta);
-//			}
-
-			/*
-			 * No need to send all acks because it's already done in Bundle_Offer, send only ack of the received bundle
-			 */
-//			std::list<BundleMeta> acksMeta (acks.begin(),acks.end());
 
 			/*
 			 * Step 2 : Sending the ACK
@@ -770,9 +714,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				copy = meta;
 				acksMeta.push_back(copy);
 			}
-
-//			std::list<BundleMeta> acksMetaCopy (acksMeta);
-
 
 			// destAddr is  the sender of prophet packet received in Bundle (the final recipient of WSMessage)
 
@@ -796,10 +737,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle:
 		{
-//			if (!withAck){
-//				contact.setSuccessfulContact(true);
-//			}
-
 			contact.setSuccessfulContact(true);
 
 			bool shouldAbort = false;
@@ -831,6 +768,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						executeInitiatorRole(Bundle_Ack,prophetPkt);
 					}
 				}else {
+					/*
+					 * Process to avoid storing twice the same msg
+					 */
 					if (!shouldAbort){
 						wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
 						wsm->setHopCount(wsm->getHopCount()+1);
@@ -912,16 +852,28 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				 * 1 step : Check if demanded bundle in bundleResp is currently acked, delete it if it's the case
 				 */
 
-				std::list<BundleMeta> bundleToSendMeta;
-				bundleToSendMeta = prophetPkt->getBndlmeta();
-				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
+				std::list<BundleMeta> bndlMetaReceived;
+				std::list<BundleMeta> bndlMetaToAccept;
+				bndlMetaReceived = prophetPkt->getBndlmeta();
+				for (std::list<BundleMeta>::iterator it = bndlMetaReceived.begin(); it !=bndlMetaReceived.end(); ++it) {
+					bool acceptBndlMeta = true;
 					if (acksIndex.find(it->getSerial()) != acksIndex.end()){
-						it = bundleToSendMeta.erase(it);
-						if (it == bundleToSendMeta.end()){
-							break;
-						}
+//						it = bundleToSendMeta.erase(it);
+//						if (it == bundleToSendMeta.end()){
+//							break;
+//						}
+						acceptBndlMeta = false;
+					}
+					if (acceptBndlMeta){
+						bndlMetaToAccept.push_back(*it);
 					}
 				}
+
+				/*
+				 * highly important: without doing this we don't transmit the filtered list to the next step
+				 * and so we will send bundle previously discarded
+				 */
+				prophetPkt->setBndlmeta(bndlMetaToAccept);
 
 			}
 		}
@@ -935,30 +887,6 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				BundleMeta meta = *ackIt;
 				storeACK(meta);
 				contact.setAckReceived();
-
-//				if (acksIndex.find(meta.getSerial())==acksIndex.end()){
-//
-//					/*
-//					 * 1 step : Adding ack to ack list
-//					 */
-//
-//					if (acks.size()==ackStructureSize){
-//						int serial = acks.front().getSerial();
-//						acksIndex.erase(serial);
-//						acks.pop_front();
-//					}
-//
-//					acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
-//					acks.push_back(meta);
-//
-//					/*
-//					 * 2 step : Deleting the bundle from the storage
-//					 */
-//
-//					if (existAndErase(*ackIt)) {
-//						deletedBundlesWithAck++;
-//					}
-//				}
 			}
 		}
 			break;
@@ -1162,19 +1090,6 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 		}
 	}
 
-
-//	// step 3 : sending the ProphetPckt
-//
-//	Prophet *offerPkt = new Prophet();
-//	offerPkt->setBitLength(headerLength);
-//	offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,encounterdNode,&bundleToOfferMeta);
-//	sendDown(offerPkt);
-//	/*
-//	 * Collecting data
-//	 */
-//	updatingL3Sent();
-//	offerPkt->setHopCount(offerPkt->getHopCount()+1);
-
 	contact.setL3Sent();
 	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 	return bundleToOfferMeta;
@@ -1344,9 +1259,6 @@ void ProphetV2::recordPredsStats()
 	predsMean.record(mean);
 	predsVariance.record(variance);
 
-//	std::pair<LAddress::L3Type, double> predsMin = std::min_element(preds.begin(),preds.end());
-//	std::pair<LAddress::L3Type, double> predsMax = std::max_element(preds.begin(),preds.end());
-
 }
 
 void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
@@ -1415,47 +1327,13 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 
 void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
 {
-//	bool repeated = false;
-//	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
-//	if ((it != simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
-//		classify(it->second);
-//		repeated = true;
-//		simpleContacts.erase(addr);
-//	}
-//	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
 	SimpleContactStats contact;
-//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it == simpleContacts.end()){
-//		contact = getSimpleContactStats(addr,time);
-//	}else {
-//		contact = it->second.front();
-//	}
-//	contact = getSimpleContactStats(addr,time);
-//
-//
-//	int x;
-//
-//	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it != simpleContacts.end()){
-//		x = it->second.size();
-//		it->second.erase(contact);
-//		contact.setStartTime(time);
-//		x = it->second.size();
-//		it->second.insert(contact);
-//		x = it->second.size();
-//	}
 	contact = getLastSimpleContactStats(addr, time);
 }
 
 void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 {
 	SimpleContactStats contact;
-//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it == simpleContacts.end()){
-//		opp_error("recording end of simple contact that doesn't IMPOSSIBLE");
-//	}else {
-//		contact = it->second.front();
-//	}
 
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
 	std::set<SimpleContactStats>::iterator it2;
@@ -1467,10 +1345,6 @@ void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 		updateSimpleContactStats(addr,contact,it2);
 	}
 
-
-
-//	SimpleContactStats contact = getSimpleContactStats(addr);
-//	contact.setDuration(time - contact.getStartTime());
 }
 
 void ProphetV2::classify(SimpleContactStats newContact)
@@ -1566,159 +1440,10 @@ std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > ProphetV2
 			}
 		}
 	}
-//
-//	SimpleContactStats tempContact2, tempContact3;
-//	int x;
-//
-//	if (it==simpleContacts.end()){
-//		x = it->second.size();
-//		contact = SimpleContactStats();
-//		std::set<SimpleContactStats> mySet;
-//		mySet.insert(contact);
-//		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-//	}else{
-//		SimpleContactStats tempContact = SimpleContactStats(creationTime);
-//		std::set<SimpleContactStats>::iterator it2 = it->second.lower_bound(tempContact);
-//		std::set<SimpleContactStats>::iterator it3 = it2;
-//		x = it->second.size();
-//		tempContact2 = *it2;
-//		if (it2 != it->second.end()){
-//			if ((it2 == it->second.begin())||(it2->getStartTime() == creationTime)){
-//				contact = *it2;
-//			}else {
-//				it3--;
-//				tempContact3 = *it3;
-//				if (it3->getEndTime() != std::numeric_limits<double>::max()){
-//					if ((creationTime-it3->getEndTime()) > 1.0){
-//						contact = *it2;
-//					}else if ((creationTime-it3->getEndTime()) <= 1.0){
-//						contact = *it3;
-//					}
-//				}
-////				if ((it2->getStartTime() == std::numeric_limits<double>::max()-1) &&
-////						(creationTime-it3->getEndTime()>1.0)){
-////					contact = *it2;
-////				}else if (creationTime-it3->getEndTime()<=1){
-////					contact = *it3;
-////				}
-//			}
-//		}else {
-//			contact = SimpleContactStats();
-//			std::set<SimpleContactStats> mySet;
-//			mySet.insert(contact);
-//			simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-////			opp_error("recording end of simple contact that doesn't exist");
-//		}
-//	}
-//
+
 	if (contact == NULL){
 		opp_error("recording end of simple contact that doesn't exist");
 	}
-
-//		if (it2 == it->second.begin()){
-//			if (it2->getStartTime() == std::numeric_limits<double>::max()-1){
-//				contact = *it2;
-//			}else {
-//				contact = *it2;
-//				contact = NULL;
-////				opp_error("recording end of simple contact that doesn't exist");
-//			}
-//		}else {
-//			std::set<SimpleContactStats>::iterator it3 = it2;
-//			it3--;
-//			contact = *it3;
-//		}
-//	}
-//		if (it2->getStartTime() == creationTime){
-//			contact = *it2;
-//		} else {
-//			std:set<SimpleContactStats>::iterator it3 = it2;
-//			bool valid
-//			if (it3 != it->second.begin()){
-//				it3--;
-//			}
-//
-////			std::reverse_iterator<SimpleContactStats> revIt(*it2);
-//			if (revIt !=it->second.rend()){
-//				contact = revIt;
-//			}else{
-//				opp_error("recording end of simple contact that doesn't exist");
-//			}
-//		}
-//	}
-
-
-//	if (it == simpleContacts.end()){
-//		contact = SimpleContactStats();
-//		std::list<SimpleContactStats> list = std::list<SimpleContactStats>();
-//		list.push_front(contact);
-//		simpleContacts.insert(std::pair<LAddress::L3Type, std::list<SimpleContactStats> >(addr,list));
-////		it->second = std::list<SimpleContactStats>();
-////		it->second.push_front(contact);
-//	}else{
-//		/* return the contactStats that belong to the given creationTime*/
-//
-//		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
-//			if (std::distance(it2,it->second.rend())==1){
-//				// check if it is the last element of the list
-////				opp_error("recording end of simple contact that doesn't exist");
-//
-//				if (it2->getStartTime()!=-std::numeric_limits<double>::max()){
-//					contact = *it2;
-//				}else {
-//					if (it2->getStartTime()>creationTime){
-//						opp_error("recording of simple contact that doesn't exist");
-//					}else if (creationTime<it2->getEndTime()){
-//						contact = *it2;
-//					}else{
-//						contact = SimpleContactStats();
-//						it->second.push_front(contact);
-//					}
-//				}
-//				break;
-//			}
-//
-//			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
-//				contact = SimpleContactStats();
-//				it->second.push_front(contact);
-//				break;
-//			}else {
-//				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
-//						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
-//					contact = *it2;
-//					break;
-//				}else {
-//					continue;
-//				}
-//			}
-//		}
-//	}
-
-//			if ((it2->getEndTime()==-1)){
-//				if (it2->getStartTime()==-1){
-//					contact = *it2;
-//					break;
-//				}else if (it2->getStartTime()>creationTime){
-//					opp_error("recording end of simple contact that doesn't exist");
-//					break;
-//				}
-//			}else if ((it2->getStartTime()<creationTime)&&(it2->getEndTime()>creationTime)){
-//				contact = *it2;
-//			}
-//		}
-//	}
-//
-//	if (lastEncouterTime.find(addr)!=lastEncouterTime.end()){
-//		if (it == simpleContacts.end()){
-//			opp_error("recording end of simple contact that doesn't exist");
-//		}
-//	}else{
-//		recordBeginSimplContactStats(addr,simTime().dbl());
-//	}
-
-//	if ((it == simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
-//		opp_error("recording end of simple contact that doesn't exist");
-//	}
 
 	return pair;
 }
