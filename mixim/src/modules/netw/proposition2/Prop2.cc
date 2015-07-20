@@ -13,20 +13,20 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "ProphetV2.h"
+#include "Prop2.h"
+
+#include "VPApOpp.h"
+#include "VEHICLEpOpp.h"
 
 
 
-Define_Module(ProphetV2);
+Define_Module(Prop2);
 
-void ProphetV2::initialize(int stage)
+void Prop2::initialize(int stage)
 {
 	BaseNetwLayer::initialize(stage);
 	if (stage==0){
-		/*
-		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
-		 */
-//		myNetwAddr = LAddress::L3Type( getId() );
+		DefineNodeClass();
 
 		/*
 		 * Initialization of ProphetV2 parameters
@@ -34,6 +34,7 @@ void ProphetV2::initialize(int stage)
 		PEncMax = par("PEncMax").doubleValue();
 		PFirstContact = par("PFirstContact").doubleValue();
 		PMinThreshold = par("PMinThreshold").doubleValue();
+		deltaThreshold = par("deltaThreshold").doubleValue();
 		I_TYP = par("I_TYP").doubleValue();
 		Beta = par("Beta").doubleValue();
 		GAMMA = par("GAMMA").doubleValue();
@@ -69,6 +70,12 @@ void ProphetV2::initialize(int stage)
 		if (ackStructureSize<=0){
 			opp_error("Size of the structure that store acks can not be negative");
 		}
+
+		historySize = par("historySize");
+		if (historySize<=0){
+			opp_error("Size of the structure that store history can not be negative");
+		}
+
 		acks = std::list<BundleMeta>();
 		acksIndex = std::map<int,BundleMeta>();
 
@@ -121,7 +128,26 @@ void ProphetV2::initialize(int stage)
 
 	}
 	else if (stage==1){
-		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
+		/*
+		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
+		 */
+//		myNetwAddr = LAddress::L3Type( getId() );
+//		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
+	}
+	else if (stage==2){
+		convergeCastTo = vpaDestAddr();
+		if (myClass == VPA){
+			canIAge = false;
+			if (myNetwAddr == convergeCastTo){
+				preds.insert(std::pair<LAddress::L3Type, double>(convergeCastTo,1));
+			}else {
+				preds.insert(std::pair<LAddress::L3Type, double>(convergeCastTo,0));
+			}
+		}else {
+			canIAge = true;
+			preds.insert(std::pair<LAddress::L3Type, double>(convergeCastTo,0));
+		}
+
 	}
 }
 
@@ -131,121 +157,111 @@ void ProphetV2::initialize(int stage)
 **
 ********************************************************************/
 
-void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
-{
-	double PEnc,lastEncTime, predsForB;
+void Prop2::updateDataWhenCCN(const LAddress::L3Type convergeCastAddr){
 	/*
-	 * before calculating predsForB, we must age preds.
+	 * before calculating preds, we must age preds.
 	 */
 	ageDeliveryPreds();
-	double encTime = simTime().dbl();
-	predsIterator it= preds.find(BAdress);
-	predsIterator it2= lastEncouterTime.find(BAdress);
-	if (it==preds.end()){
-
-		/*
-		 * if iterator is equal map.end(), it means that there is no entry for BAdress in preds
-		 * so lastEncTime equal 0
-		 */
-		predsForB = PFirstContact;
-		lastEncTime = 0;
-
-	}else {
-
-		/*
-		 * if iterator is not equal map.end(), it means that there is an entry for BAdress in preds
-		 */
-		predsForB = it->second;
-		if (it2==lastEncouterTime.end()){
-			lastEncTime = 0;
-		}else {
-			lastEncTime = it2->second;
-		}
-
-		if (simTime().dbl()-lastEncTime<I_TYP){
-			/*
-			 * if the node has been encountered recently then don't use PEncMax
-			 */
-			PEnc = PEncMax * (( simTime().dbl()-lastEncTime)/I_TYP);
-		}else {
-			/*
-			 * if the node has been encountered long ago then use PEncMax
-			 */
-			PEnc = PEncMax;
-		}
-		predsForB = predsForB + (1-predsForB)*PEnc;
+	predsIterator it= preds.find(convergeCastAddr);
+	// some basic test
+	if (it == preds.end()){
+		opp_error("even if no history of Preds, preds for ConvergeCast addr must be previously setted");
 	}
-	preds[BAdress] = predsForB;
-	lastEncouterTime[BAdress] = encTime;
+
+
+	historicPredsIterator it3 = historyOfPreds.find(convergeCastAddr);
+	std::vector<double> currentHistoricPreds;
+
+	// updating historic of preds
+	if (it3 != historyOfPreds.end()){
+		currentHistoricPreds = it3->second;
+	}
+	currentHistoricPreds.push_back(it->second);
+	currentHistoricPreds.push_back(1);
+
+	while (currentHistoricPreds.size()>historySize){
+		currentHistoricPreds.erase(currentHistoricPreds.begin());
+	}
+
+	// updating class
+	myClass = Vehicle_Type_I;
+
+	// refreshing all preds and other data
+	preds[convergeCastTo] = 1;
+	historyOfPreds[convergeCastTo] = currentHistoricPreds;
+	lastEncouterTime[convergeCastTo] = simTime().dbl();
 }
 
-
-void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<LAddress::L3Type,double> Bpreds)
+void Prop2::updateDataFor(const LAddress::L3Type convergeCastAddr, const nodeClass encounteredClass, std::map<LAddress::L3Type, std::vector<double> > historyOfPredsForB )
 {
-
-	double predsForB,predsForC,BpredsForC;
-	LAddress::L3Type CAdress;
-	predsIterator tmp_it;
+	double BpredsForCCN, myPredsForCCN;
+	nodeClass BClass = encounteredClass;
 	/*
-	 * before calculating transitive predictions, we must age preds.
+	 * before calculating preds, we must age preds.
 	 */
 	ageDeliveryPreds();
-	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
-
-		if (it->first==myNetwAddr)
-			continue;
-
-		CAdress = it->first;
-		tmp_it= preds.find(CAdress);
-		if (tmp_it == preds.end()){
-			predsForC = 0;
-		} else {
-			predsForC=tmp_it->second;
-		}
-
-		tmp_it= Bpreds.find(CAdress);
-		BpredsForC=tmp_it->second;
-
-		tmp_it= preds.find(BAdress);
-		predsForB=tmp_it->second;
-
-		if (predsForC<(predsForB*BpredsForC*Beta)){
-			predsForC = predsForB*BpredsForC*Beta;
-		}
-
-		preds[CAdress] = predsForC;
-//		preds.insert(std::pair<LAddress::L3Type,double>(CAdress,predsForC));
+	predsIterator it= preds.find(convergeCastAddr);
+	// some basic test
+	if (it == preds.end()){
+		opp_error("even if no history of Preds, preds for ConvergeCast addr must be previously setted");
 	}
+	myPredsForCCN = it->second;
+
+	if (myClass == Vehicle_Type_II){
+		std::vector<double> convergeCastToHistoricPreds;
+		historicPredsIterator it = historyOfPredsForB.find(convergeCastAddr);
+		if (it != historyOfPredsForB.end()){
+			convergeCastToHistoricPreds = it->second;
+			bool hasBEncouteredConvergeCastNode = false;
+
+			for (std::vector<double>::reverse_iterator it2 = convergeCastToHistoricPreds.rbegin(); it2 != convergeCastToHistoricPreds.rend(); ++it2){
+				if ( *it2 == 1 ){
+					hasBEncouteredConvergeCastNode = true;
+					break;
+				}
+			}
+
+			if ((hasBEncouteredConvergeCastNode) && (BClass == Vehicle_Type_I)){
+				// the last value matchs the actual predsForB
+				BpredsForCCN = convergeCastToHistoricPreds.back();
+				myPredsForCCN = Beta * myPredsForCCN + (1-Beta) * BpredsForCCN;
+			}
+		}
+	}
+
+	// refreshing all preds and other data
+	preds[convergeCastTo] = myPredsForCCN;
 }
 
-void ProphetV2::ageDeliveryPreds()
+void Prop2::ageDeliveryPreds()
 {
 	predsIterator it2;
 	double time = simTime().dbl();
-//	double timeDiff = (time-lastAgeUpdate)/secondsInTimeUnit;
-	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
-	if (timeDiff==0){
-		return;
-	}else {
-		double mult = std::pow(GAMMA, timeDiff);
-		for (predsIterator it=preds.begin();it!=preds.end();it++){
-			it->second = it->second * mult;
-
-
-			if (it->second < PMinThreshold){
-				it2 = it;
-				it++;
-				preds.erase(it2);
+	if (canIAge){
+		int  timeUnits = int (time-lastAgeUpdate)/secondsInTimeUnit;
+		if (timeUnits==0){
+			return;
+		}else {
+			double mult = std::pow(GAMMA, timeUnits);
+			for (predsIterator it=preds.begin();it!=preds.end();it++){
+				if (it->second < PMinThreshold){
+					preds[it->first] = 0;
+					if (myClass != VPA){
+						myClass = Vehicle_Type_II;
+					}
+				}else{
+					preds[it->first] = it->second * mult;
+				}
 			}
+			lastAgeUpdate = simTime().dbl();
 		}
-		lastAgeUpdate = simTime().dbl();
 	}
 }
 
-void ProphetV2::update(Prophet *prophetPkt)
+void Prop2::update(ccProphet *prophetPkt)
 {
-	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
-	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
+	nodeClass ndClass = static_cast<nodeClass>(prophetPkt->getNodeClass());
+	updateDataFor(convergeCastTo, ndClass ,prophetPkt->getHistoryOfPredictions());
 	recordPredsStats();
 }
 
@@ -255,7 +271,42 @@ void ProphetV2::update(Prophet *prophetPkt)
 **
 ********************************************************************/
 
-NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
+void Prop2::DefineNodeClass()
+{
+	cModule* parentModule = this->getParentModule();
+	if (parentModule->findSubmodule("appl")!=-1){
+		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
+		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
+
+		if (VPAModule != NULL){
+			myClass = VPA;
+		} else if (VehicleModule != NULL){
+			myClass = Vehicle_Type_II;
+		}
+	}
+}
+
+int Prop2::vpaDestAddr()
+{
+	int vpaDestAddr = -2;
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = systemModule->par("numeroNodes");
+	cModule *vpa = systemModule->getSubmodule("VPA", numberVPA-1);
+	if (vpa!=NULL){
+		cModule *netw = vpa->getSubmodule("netw");
+		if (netw!=NULL){
+			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+			vpaDestAddr = baseNetw->getMyNetwAddr();
+		}
+	}
+	return vpaDestAddr;
+}
+
+
+NetwPkt* Prop2::encapsMsg(cPacket *appPkt)
 {
 	LAddress::L2Type macAddr;
 	LAddress::L3Type netwAddr;
@@ -298,7 +349,7 @@ NetwPkt* ProphetV2::encapsMsg(cPacket *appPkt)
 	return pkt;
 }
 
-void ProphetV2::handleLowerMsg(cMessage* msg)
+void Prop2::handleLowerMsg(cMessage* msg)
 {
 	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
@@ -307,7 +358,7 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
     double macArrival = m->getArrivalTime().dbl();
     double macSent = m->getSendingTime().dbl();
 
-    Prophet *prophetPkt = check_and_cast<Prophet *>(m->decapsulate());
+    ccProphet *prophetPkt = check_and_cast<ccProphet *>(m->decapsulate());
 
     double prophetArrival = prophetPkt->getArrivalTime().dbl();
 	double prophetSent = prophetPkt->getSendingTime().dbl();
@@ -318,6 +369,12 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
 
     int hopcount;
+
+    bool forCCNNode = false;
+
+    if ((myClass == VPA)&&(convergeCastTo==myNetwAddr)&&(prophetPkt->getDestAddr()==myNetwAddr)){
+    	forCCNNode = true;
+    }
 
     if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
 
@@ -396,7 +453,7 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
 }
 
-void ProphetV2::handleUpperMsg(cMessage* msg)
+void Prop2::handleUpperMsg(cMessage* msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
@@ -406,7 +463,7 @@ void ProphetV2::handleUpperMsg(cMessage* msg)
 //	}
 }
 
-void ProphetV2::handleLowerControl(cMessage* msg)
+void Prop2::handleLowerControl(cMessage* msg)
 {
 	switch (msg->getKind()) {
 		case NEWLY_CONNECTED:
@@ -414,7 +471,6 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 			break;
 		case NEW_NEIGHBOR:
 			{
-				if (canITransmit){
 					double time = simTime().dbl();
 
 					LAddress::L3Type addr = getAddressFromName(msg->getName());
@@ -427,9 +483,23 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 					recordBeginSimplContactStats(addr,time);
 
-					/** Starting IEP Phase					*/
-					executeInitiatorRole(RIB,NULL,addr);
-				}
+					if (myClass != VPA){
+						if (addr == convergeCastTo){
+							// UpdatePreds&Class
+							updateDataWhenCCN(addr);
+							// send directly Bundles To Encountered Node
+							executeListenerRole(Bundle,NULL,addr);
+
+							canIAge = false;
+						}else {
+							// start normal exchange based on IEP
+							executeInitiatorRole(RIB,NULL,addr);
+						}
+					}else {
+						// nothing to do if VPA (for now)
+					}
+//					/** Starting IEP Phase					*/
+//					executeInitiatorRole(RIB,NULL,addr);
 			}
 			break;
 		case NO_NEIGHBOR_AND_DISCONNECTED:
@@ -445,13 +515,19 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 				recordEndContactStats(addr,time);
 
 				recordEndSimpleContactStats(addr,time);
+
+				if (myClass != VPA){
+					if (addr == convergeCastTo){
+						canIAge = true;
+					}
+				}
 			}
 			break;
 	}
 	delete msg;
 }
 
-void ProphetV2::storeBundle(WaveShortMessage *msg)
+void Prop2::storeBundle(WaveShortMessage *msg)
 {
 		// step 1 : check if the bundle is already stored
 	if (!exist(msg)){
@@ -502,7 +578,7 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 	}
 }
 
-void ProphetV2::storeACK(BundleMeta meta)
+void Prop2::storeACK(BundleMeta meta)
 {
 	if (acksIndex.find(meta.getSerial())==acksIndex.end()){
 		if (acks.size()==ackStructureSize){
@@ -520,7 +596,7 @@ void ProphetV2::storeACK(BundleMeta meta)
 	}
 }
 
-void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
+void Prop2::executeInitiatorRole(short  kind, ccProphet *prophetPkt, LAddress::L3Type destAddr)
 {
 
 	// if destAddr equals 0 then destAddr is  the sender of the previously received prophet packet
@@ -532,10 +608,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 
 	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	SimpleContactStats contact;
-//	contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
 
-//	ASSERT(prophetPkt->getCreationTime().dbl());
-//	double time = (prophetPkt->getCreationTime()).dbl();
 	if (prophetPkt!=NULL){
 		pair = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
 		contact = pair.first;
@@ -556,13 +629,22 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case RIB:
 		{
-			Prophet *ribPkt;// = new Prophet();
+			ccProphet *ribPkt;// = new Prophet();
 
 			// aging of predictions that will be sent
 			// creating a copy of preds
-			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
+			std::map<LAddress::L3Type, std::vector<double> > tmp = std::map<LAddress::L3Type, std::vector<double> >();
 			ageDeliveryPreds();
-			tmp.insert(preds.begin(),preds.end());
+			std::vector<double> history;
+			for (predsIterator it = preds.begin(); it != preds.end(); ++it){
+				historicPredsIterator it2 = historyOfPreds.find(it->first);
+				if (it2 != historyOfPreds.end()){
+					history = it2->second;
+				}
+				history.push_back(it->second);
+				tmp.insert(std::pair<LAddress::L3Type, std::vector<double> >(it->first,history));
+			}
+
 			ribPkt = prepareProphet(RIB, myNetwAddr, destAddr, NULL, &tmp);
 			ribPkt->setBitLength(headerLength);
 //			sendDown(ribPkt);
@@ -666,71 +748,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 */
 				updatingContactState(destAddr,Bundle_Offer);
 			}
-
-
-//				if (withAck){
-//					std::list<BundleMeta> bundleToAcceptMeta;
-//					bundleToAcceptMeta = prophetPkt->getBndlmeta();
-//					for (std::list<BundleMeta>::iterator ackIt = bundleToAcceptMeta.begin(); ackIt !=bundleToAcceptMeta.end(); ++ackIt) {
-//
-//						if (ackIt->getFlags() == Prophet_Enum::PRoPHET_ACK){
-//
-//							if (acksIndex.find(ackIt->getSerial())==acksIndex.end()){
-//								/*
-//								 * 1 step : Adding ack to ack list
-//								 */
-//
-//								if (acks.size()==ackStructureSize){
-//									int serial = acks.front().getSerial();
-//									acksIndex.erase(serial);
-//									acks.pop_front();
-//								}
-//
-//								acksIndex.insert(std::pair<int, BundleMeta>(ackIt->getSerial(),*ackIt));
-//								acks.push_back(*ackIt);
-//
-//								/*
-//								 * 2 step : Deleting the bundle from the storage
-//								 */
-//
-//								if (existAndErase(*ackIt)) {
-//									deletedBundlesWithAck++;
-//								}
-//							}
-//						}
-//					}
-//				}
-
-
 		}
 
 			break;
 		case Bundle_Response:
 		{
-//			std::list<BundleMeta> bundleToAcceptMeta;
-//			bundleToAcceptMeta = prophetPkt->getBndlmeta();
-//
-//
-//
-//			/*
-//			 * step 1 : check if offered bundles are already stored in this node,
-//			 * in that case delete them from the offered list
-//			 */
-//			for (std::list<BundleMeta>::iterator it2 = bundleToAcceptMeta.begin(); it2 !=bundleToAcceptMeta.end(); ++it2) {
-//				if (exist(*it2)){
-//					it2 = bundleToAcceptMeta.erase(it2);
-//				}
-//				if(withAck){
-//					if (acksIndex.find(it2->getSerial())!=acksIndex.end()){
-//						it2 = bundleToAcceptMeta.erase(it2);
-//						demandedAckedBundle++;
-//					}
-//				}
-//			}
-//
-//			/*
-//			 * step 2 : sending the response
-//			 */
 
 			std::list<BundleMeta> bundleToAcceptMeta;
 			bundleToAcceptMeta = prophetPkt->getBndlmeta();
@@ -747,7 +769,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * step 1 : sending the response
 				 */
 
-				Prophet *responsePkt;// = new Prophet();
+				ccProphet *responsePkt;// = new Prophet();
 				responsePkt = prepareProphet(Bundle_Response,myNetwAddr,destAddr, &bundleToAcceptMeta);
 				responsePkt->setBitLength(headerLength);
 				sendDown(responsePkt);
@@ -764,7 +786,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle_Ack:{
 
-			Prophet *ackPkt;// = new Prophet();
+			ccProphet *ackPkt;// = new Prophet();
 			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
 
 			/*
@@ -773,22 +795,9 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			BundleMeta meta = BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
 			storeACK(meta);
 
-//			std::list<BundleMeta> acksMeta = std::list<BundleMeta>();
-//			for (std::list<BundleMeta>::iterator ackIt = acks.begin(); ackIt !=acks.end(); ++ackIt) {
-//				BundleMeta meta = new BundleMeta()
-//				Prophet_Struct::bndl_meta meta;
-//				meta.recipientAddress = ackIt->recipientAddress;
-//				meta.senderAddress = ackIt->senderAddress;
-//				meta.serial = ackIt->serial;
-//				meta.timestamp = ackIt->timestamp;
-//				meta.bFlags = ackIt->bFlags;
-//				acksMeta.push_back(meta);
-//			}
-
 			/*
 			 * No need to send all acks because it's already done in Bundle_Offer, send only ack of the received bundle
 			 */
-//			std::list<BundleMeta> acksMeta (acks.begin(),acks.end());
 
 			/*
 			 * Step 2 : Sending the ACK
@@ -800,8 +809,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				copy = meta;
 				acksMeta.push_back(copy);
 			}
-
-//			std::list<BundleMeta> acksMetaCopy (acksMeta);
 
 
 			// destAddr is  the sender of prophet packet received in Bundle (the final recipient of WSMessage)
@@ -826,9 +833,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 		case Bundle:
 		{
-//			if (!withAck){
-//				contact.setSuccessfulContact(true);
-//			}
 
 			contact.setSuccessfulContact(true);
 
@@ -861,9 +865,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						executeInitiatorRole(Bundle_Ack,prophetPkt);
 					}
 				}else {
-					/*
-					 * Process to avoid storing twice the same msg
-					 */
 					if (!shouldAbort){
 						wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
 						wsm->setHopCount(wsm->getHopCount()+1);
@@ -885,7 +886,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 	updateSimpleContactStats(destAddr,contact,pair.second);
 }
 
-void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
+void Prop2::executeListenerRole(short  kind, ccProphet *prophetPkt, LAddress::L3Type destAddr)
 {
 	// if destAddr equals 0 then destAddr is  the sender of the previously received prophet packet
 
@@ -895,7 +896,14 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 	}
 	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	SimpleContactStats contact;
-	if (kind == RIB){
+
+	bool sendBndlToConvergeCastNode = false;
+
+	if ((kind == Bundle) && (destAddr == convergeCastTo)){
+		sendBndlToConvergeCastNode = true;
+	}
+
+	if ((kind == RIB) || sendBndlToConvergeCastNode ){
 		contact = getLastSimpleContactStats(destAddr);
 	}else {
 		pair = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
@@ -912,7 +920,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		case RIB:
 		{
 			update(prophetPkt);
-			contact.setPredictionsReceived(prophetPkt->getPreds().size());
+			contact.setPredictionsReceived(prophetPkt->getHistoryOfPredictions().size());
 		}
 			break;
 		case Bundle_Offer:
@@ -926,7 +934,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			 * Step 2 : Sending the ProphetPckt
 			 */
 
-			Prophet *offerPkt;// = new Prophet();
+			ccProphet *offerPkt;// = new Prophet();
 			offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,destAddr,&bundleToOfferMeta);
 			offerPkt->setBitLength(headerLength);
 			sendDown(offerPkt);
@@ -934,7 +942,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			 * Collecting data
 			 */
 			updatingL3Sent();
-//			contact.setL3Sent();
+			contact.setL3Sent();
 		}
 			break;
 		case Bundle_Response:
@@ -988,64 +996,33 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 				storeACK(meta);
 				contact.setAckReceived();
 
-//				if (acksIndex.find(meta.getSerial())==acksIndex.end()){
-//
-//					/*
-//					 * 1 step : Adding ack to ack list
-//					 */
-//
-//					if (acks.size()==ackStructureSize){
-//						int serial = acks.front().getSerial();
-//						acksIndex.erase(serial);
-//						acks.pop_front();
-//					}
-//
-//					acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
-//					acks.push_back(meta);
-//
-//					/*
-//					 * 2 step : Deleting the bundle from the storage
-//					 */
-//
-//					if (existAndErase(*ackIt)) {
-//						deletedBundlesWithAck++;
-//					}
-//				}
 			}
 		}
 			break;
 		case Bundle:
 		{
 			std::list<BundleMeta> bundleToSendMeta;
-			bundleToSendMeta = prophetPkt->getBndlmeta();
 
-			if (bundleToSendMeta.size() == 0){
-				/*
-				 * No Bundle to transmit, send a prophet msg with NULL pointer instead of an encapsulated bundle
-				 */
-				Prophet *bundlePkt;// = new Prophet();
-				bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,NULL);
-				bundlePkt->setBitLength(headerLength);
-				if (canITransmit){
-					sendDown(bundlePkt);
+			/*
+			 * 0 step : Check if we have encountered the convergeCast Node
+			 */
 
-					/*
-					 * Collecting data
-					 */
-					updatingL3Sent();
-					contact.setL3Sent();
-				}
-			}else{
+			if (prophetPkt == NULL){
+				// case where we have encountered convergeCastNode (CCN)
+
+				// if we called the function without a previous call of executeListenerRole() of type Bundle_Response
+				// we have normally called the function directly which match to an encouter of convergeCast Node
+
 				/*
 				 * 1 step : Send the corresponding bundle
 				 */
-				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
-					bundlesIndexIterator it2 = bundlesIndex.find(it->getRecipientAddress());
-					if (it2!=bundlesIndex.end()){
-						innerIndexIterator it3 = it2->second.find(it->getSerial());
-						if (it3!=it2->second.end()){
-							Prophet *bundlePkt;// = new Prophet();
-							bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
+
+				if (destAddr == convergeCastTo){
+					bundlesIndexIterator it4 = bundlesIndex.find(destAddr);
+					if (it4!=bundlesIndex.end()){
+						for (innerIndexIterator it5 = it4->second.begin(); it5 !=it4->second.end(); ++it5) {
+							ccProphet *bundlePkt;// = new Prophet();
+							bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it5->second)->dup());
 							bundlePkt->setBitLength(headerLength);
 							if (canITransmit){
 								sendDown(bundlePkt);
@@ -1058,6 +1035,57 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 								contact.setBundleSent();
 							}else if (!canITransmit){
 								delete bundlePkt;
+							}
+						}
+					}
+				}else {
+					opp_error("PRoPHET pkt point to null, but encoutered node don't match the convergecast Node");
+				}
+			}else {
+				// we haven't encountered the convergeCast Node so we start a normal exchange
+
+				bundleToSendMeta = prophetPkt->getBndlmeta();
+
+				if (bundleToSendMeta.size() == 0){
+					/*
+					 * No Bundle to transmit, send a prophet msg with NULL pointer instead of an encapsulated bundle
+					 */
+					ccProphet *bundlePkt;// = new Prophet();
+					bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,NULL);
+					bundlePkt->setBitLength(headerLength);
+					if (canITransmit){
+						sendDown(bundlePkt);
+
+						/*
+						 * Collecting data
+						 */
+						updatingL3Sent();
+						contact.setL3Sent();
+					}
+				}else{
+					/*
+					 * 1 step : Send the corresponding bundle
+					 */
+					for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
+						bundlesIndexIterator it2 = bundlesIndex.find(it->getRecipientAddress());
+						if (it2!=bundlesIndex.end()){
+							innerIndexIterator it3 = it2->second.find(it->getSerial());
+							if (it3!=it2->second.end()){
+								ccProphet *bundlePkt;// = new Prophet();
+								bundlePkt = prepareProphet(Bundle,myNetwAddr,destAddr,NULL,NULL,(it3->second)->dup());
+								bundlePkt->setBitLength(headerLength);
+								if (canITransmit){
+									sendDown(bundlePkt);
+
+									/*
+									 * Collecting data
+									 */
+									updatingL3Sent();
+									contact.setL3Sent();
+									contact.setBundleSent();
+								}else if (!canITransmit){
+									delete bundlePkt;
+								}
 							}
 						}
 					}
@@ -1084,18 +1112,19 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 }
 
 
-Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
+ccProphet *Prop2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,std::vector<double> > *histOfPreds, WaveShortMessage *msg)
 {
 
-	Prophet *prophetMsg = new Prophet();
+	ccProphet *prophetMsg = new ccProphet();
+	prophetMsg->setNodeClass(myClass);
 	prophetMsg->setKind(kind);
 	prophetMsg->setSrcAddr(srcAddr);
 	prophetMsg->setDestAddr(destAddr);
 	if (meta!=NULL){
 		prophetMsg->setBndlmeta(*meta);
 	}
-	if (preds!=NULL){
-		prophetMsg->setPreds(*preds);
+	if (histOfPreds!=NULL){
+		prophetMsg->setHistoryOfPredictions(*histOfPreds);
 	}
 	if (msg!=NULL){
 		prophetMsg->encapsulate(msg);
@@ -1105,7 +1134,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 }
 
 
-std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
+std::list<BundleMeta> Prop2::defineBundleOffer(ccProphet *prophetPkt)
 {
 	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
 	pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
@@ -1114,83 +1143,74 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
 	std::vector<std::pair<LAddress::L3Type, double>	> sortedPreds;
-//	std::list<WaveShortMessage*> bundleToOffer = std::list<WaveShortMessage*>();
 	std::list<BundleMeta> bundleToOfferMeta = std::list<BundleMeta>();
 
-	// step 1 : check if we have any bundle that are addressed to @encouterdNode
+	ageDeliveryPreds();
 
-	bundlesIndexIterator it = bundlesIndex.find(encounterdNode);
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2;
-		for (it2 = innerMap.begin(); it2 !=innerMap.end(); ++it2){
-			BundleMeta meta (it2->second, Prophet_Enum::Bndl_Accepted);
 
-			if (withAck){
-				if (acksIndex.find(it2->second->getSerial())!=acksIndex.end()){
-					existAndErase(meta);
-					notCorrectlyDeleted++;
-					continue;
+	std::vector<double> BHistoricPredsForCCN;
+	int nbrBEncounterOfCCN = 0;
+	bool hasBEncouteredConvergeCastNode = false, haveToOfferBundle = false;
+	double BpredsForCCN;
+	nodeClass BClass = static_cast<nodeClass>(prophetPkt->getNodeClass());
+
+	historicPredsIterator it = prophetPkt->getHistoryOfPredictions().find(convergeCastTo);
+	if (it != prophetPkt->getHistoryOfPredictions().end()){
+
+		// step 0 : gathering some basic and variables and data
+
+		BHistoricPredsForCCN = it->second;
+		for (std::vector<double>::reverse_iterator it2 = BHistoricPredsForCCN.rbegin(); it2 != BHistoricPredsForCCN.rend(); ++it2){
+			if ( *it2 == 1 ){
+				nbrBEncounterOfCCN++;
+				hasBEncouteredConvergeCastNode = true;
+			}
+		}
+		BpredsForCCN = BHistoricPredsForCCN.back();
+//		if (hasBEncouteredConvergeCastNode){
+//			BClass = Vehicle_Type_I;
+//		}else{
+//			BClass = Vehicle_Type_II;
+//		}
+
+		// step 1 : define situation where we have to to offer bundle to @encouterdNode based on myClass and BClass (3 type of exchange)
+		if (BClass == Vehicle_Type_I){
+			// in case where myClass equal Vehicle_Type_I or Vehicle_Type_II
+			if (( BpredsForCCN > 0 )&&( nbrBEncounterOfCCN > 1 )){
+				haveToOfferBundle = true;
+			}
+		} else if (BClass == Vehicle_Type_II){
+
+			if (myClass == Vehicle_Type_I){
+				// in case where myClass equals Vehicle_Type_I
+				haveToOfferBundle = true;
+			}else if (myClass == Vehicle_Type_II){
+				// in case where myClass equals Vehicle_Type_II
+				predsIterator predIt = preds.find(convergeCastTo);
+				double myPredForCCN;
+				if (predIt == preds.end()){
+					opp_error("Looking for predsForCCN that is not currently found");
+				}else{
+					myPredForCCN = predIt->second;
+				}
+				if (( BpredsForCCN > myPredForCCN ) ||
+						(( BpredsForCCN > 0 ) && ( std::fabs(myPredForCCN-BpredsForCCN) < deltaThreshold ))){
+					haveToOfferBundle = true;
 				}
 			}
-			bundleToOfferMeta.push_back(meta);
 		}
-	}
 
-	// step 2 : check if we have any bundle that can be offered to @encouterdNode
-
-	ageDeliveryPreds();
-	predsIterator itCurrentNode;
-	for (predsIterator itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
-		itCurrentNode = preds.find(itEncouterdNode->first);
-		if (itCurrentNode != preds.end()){
-			// the current node have a prediction for @it->first 
-			// the 2 nodes have a predictions for this destination
-			if (itEncouterdNode->second > itCurrentNode->second){
-				concernedPreds.insert(std::pair<LAddress::L3Type, double>(itEncouterdNode->first,itEncouterdNode->second));
-			}
-		}
-	}
-
-	switch (fwdStrategy) {
-		case FWD_GRTR:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTMX:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTHR:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRplus:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTMXplus:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRsort:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRmax:
-		{
-			sortedPreds = std::vector<std::pair<LAddress::L3Type, double> >(concernedPreds.begin(), concernedPreds.end());
-			std::sort(sortedPreds.begin(),sortedPreds.end(),fwdGRTRmax_CompObject);
-		}
-			break;
-		default:
-			break;
-	}
-
-	for (std::vector<std::pair<LAddress::L3Type, double> >::iterator it= sortedPreds.begin(); it != sortedPreds.end(); ++it){
-		bundlesIndexIterator it2 = bundlesIndex.find(it->first);
-			if (it2 != bundlesIndex.end()){
-				innerIndexMap innerMap(it2->second);
-				innerIndexIterator it3;
-				for (it3 = innerMap.begin(); it3 !=innerMap.end(); ++it3){
-					BundleMeta meta (it3->second, Prophet_Enum::Bndl_Accepted);
+		// step 2 : creating bndlMeta for concerned preds
+		if (haveToOfferBundle){
+			bundlesIndexIterator it3 = bundlesIndex.find(convergeCastTo);
+			if (it3 != bundlesIndex.end()){
+				innerIndexMap innerMap(it3->second);
+				innerIndexIterator it4;
+				for (it4 = innerMap.begin(); it4 !=innerMap.end(); ++it4){
+					BundleMeta meta (it4->second, Prophet_Enum::Bndl_Accepted);
 
 					if (withAck){
-						if (acksIndex.find(it3->second->getSerial())!=acksIndex.end()){
+						if (acksIndex.find(it4->second->getSerial())!=acksIndex.end()){
 							existAndErase(meta);
 							notCorrectlyDeleted++;
 							continue;
@@ -1199,40 +1219,29 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 					bundleToOfferMeta.push_back(meta);
 				}
 			}
-	}
-
-	// step 3 : check if we have any ack that must be transmitted
-
-	if (withAck){
-		for (std::list<BundleMeta>::iterator it = acks.begin(); it !=acks.end(); ++it) {
-			if (existAndErase(*it)){
-				notCorrectlyDeleted++;
-				continue;
-			}
-			bundleToOfferMeta.push_back(*it);
-			contact.setAckSent();
 		}
+
+		// step 3 : check if we have any ack that must be transmitted
+
+		if (withAck){
+			for (std::list<BundleMeta>::iterator it = acks.begin(); it !=acks.end(); ++it) {
+				if (existAndErase(*it)){
+					notCorrectlyDeleted++;
+					continue;
+				}
+				bundleToOfferMeta.push_back(*it);
+				contact.setAckSent();
+			}
+		}
+
 	}
-
-
-//	// step 3 : sending the ProphetPckt
-//
-//	Prophet *offerPkt = new Prophet();
-//	offerPkt->setBitLength(headerLength);
-//	offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,encounterdNode,&bundleToOfferMeta);
-//	sendDown(offerPkt);
-//	/*
-//	 * Collecting data
-//	 */
-//	updatingL3Sent();
-//	offerPkt->setHopCount(offerPkt->getHopCount()+1);
 
 	contact.setL3Sent();
 	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 	return bundleToOfferMeta;
 }
 
-bool ProphetV2::exist(WaveShortMessage *msg)
+bool Prop2::exist(WaveShortMessage *msg)
 {
 	bool found = false;
 	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
@@ -1246,7 +1255,7 @@ bool ProphetV2::exist(WaveShortMessage *msg)
 	return found;
 }
 
-bool ProphetV2::exist(BundleMeta bndlMeta)
+bool Prop2::exist(BundleMeta bndlMeta)
 {
 	bool found = false;
 	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
@@ -1260,7 +1269,7 @@ bool ProphetV2::exist(BundleMeta bndlMeta)
 	return found;
 }
 
-bool ProphetV2::existAndErase(BundleMeta bndlMeta)
+bool Prop2::existAndErase(BundleMeta bndlMeta)
 {
 	bool found = false;
 	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
@@ -1285,7 +1294,7 @@ bool ProphetV2::existAndErase(BundleMeta bndlMeta)
 	return found;
 }
 
-LAddress::L3Type ProphetV2::getAddressFromName(const char *name)
+LAddress::L3Type Prop2::getAddressFromName(const char *name)
 {
 	int addr = 0;
 	if (strcmp(name,"")!=0){
@@ -1295,7 +1304,7 @@ LAddress::L3Type ProphetV2::getAddressFromName(const char *name)
 	return addr;
 }
 
-void ProphetV2::finish()
+void Prop2::finish()
 {
 //	EV << "Sent:     " << nbrL3Sent << endl;
 //	EV << "Received: " << nbrL3Received << endl;
@@ -1338,18 +1347,10 @@ void ProphetV2::finish()
 **
 ********************************************************************/
 
-void ProphetV2::recordPredsStats()
+void Prop2::recordPredsStats()
 {
-	// nbPreds = preds.size()-1, because P(X,X) is counted as a prediction for every node X
-	int nbPreds = this->preds.size()-1;
+	int nbPreds = this->preds.size();
 	nbrPredsVector.record(nbPreds);
-
-	if (!(nbPreds < 80)){
-		EV << "Actual number of predictions : " << nbPreds << endl;
-		for (predsIterator it=preds.begin(); it!=preds.end();it++){
-			EV << "(key,value) : " << "(" << it->first <<"," << it->second << ")" << endl;
-		}
-	}
 
 	double min = DBL_MAX, max = DBL_MIN, mean = 0, sum = 0, variance = 0, varianceSum = 0;
 
@@ -1371,13 +1372,7 @@ void ProphetV2::recordPredsStats()
 	}
 
 	// Calculating mean and variance
-	if (nbPreds <=1){
-		// Calculating mean
-		mean = 0;
-
-		// Calculating variance
-		variance = 0;
-	} else {
+	if (nbPreds > 0){
 		// Calculating mean
 		mean = sum / double (nbPreds);
 
@@ -1388,7 +1383,6 @@ void ProphetV2::recordPredsStats()
 			}
 		}
 		variance = varianceSum / double (nbPreds);
-	}
 
 	// recording values
 	predsMin.record(min);
@@ -1396,12 +1390,14 @@ void ProphetV2::recordPredsStats()
 	predsMean.record(mean);
 	predsVariance.record(variance);
 
+	}
+
 //	std::pair<LAddress::L3Type, double> predsMin = std::min_element(preds.begin(),preds.end());
 //	std::pair<LAddress::L3Type, double> predsMax = std::max_element(preds.begin(),preds.end());
 
 }
 
-void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
+void Prop2::recordBeginContactStats(LAddress::L3Type addr, double time)
 {
 	// updating nbr contacts
 	nbrContacts++;
@@ -1411,7 +1407,7 @@ void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
 //	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr, SimpleContactStats(time)));
 }
 
-void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
+void Prop2::recordEndContactStats(LAddress::L3Type addr, double time)
 {
 	sumOfContactDur+=time - contacts.find(addr)->second;
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
@@ -1443,7 +1439,7 @@ void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 
 }
 
-void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
+void Prop2::recordRecontactStats(LAddress::L3Type addr, double time)
 {
 	std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(addr);
 	if (it != lastEncouterTime.end()){
@@ -1455,7 +1451,7 @@ void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
 	}
 }
 
-void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind)
+void Prop2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind)
 {
 	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
 	if (it != contactState.end()){
@@ -1465,50 +1461,15 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 
 }
 
-void ProphetV2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
+void Prop2::recordBeginSimplContactStats(LAddress::L3Type addr, double time)
 {
-//	bool repeated = false;
-//	std::map<LAddress::L3Type, SimpleContactStats>::iterator it = simpleContacts.find(addr);
-//	if ((it != simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
-//		classify(it->second);
-//		repeated = true;
-//		simpleContacts.erase(addr);
-//	}
-//	simpleContacts.insert(std::pair<LAddress::L3Type, SimpleContactStats>(addr,SimpleContactStats(time,repeated)));
 	SimpleContactStats contact;
-//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it == simpleContacts.end()){
-//		contact = getSimpleContactStats(addr,time);
-//	}else {
-//		contact = it->second.front();
-//	}
-//	contact = getSimpleContactStats(addr,time);
-//
-//
-//	int x;
-//
-//	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it != simpleContacts.end()){
-//		x = it->second.size();
-//		it->second.erase(contact);
-//		contact.setStartTime(time);
-//		x = it->second.size();
-//		it->second.insert(contact);
-//		x = it->second.size();
-//	}
 	contact = getLastSimpleContactStats(addr, time);
 }
 
-void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
+void Prop2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 {
 	SimpleContactStats contact;
-//	std::map<LAddress::L3Type, std::list<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
-//	if (it == simpleContacts.end()){
-//		opp_error("recording end of simple contact that doesn't IMPOSSIBLE");
-//	}else {
-//		contact = it->second.front();
-//	}
-
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
 	std::set<SimpleContactStats>::iterator it2;
 	if (it != simpleContacts.end()){
@@ -1518,14 +1479,9 @@ void ProphetV2::recordEndSimpleContactStats(LAddress::L3Type addr, double time)
 		contact.setEndTime(time);
 		updateSimpleContactStats(addr,contact,it2);
 	}
-
-
-
-//	SimpleContactStats contact = getSimpleContactStats(addr);
-//	contact.setDuration(time - contact.getStartTime());
 }
 
-void ProphetV2::classify(SimpleContactStats newContact)
+void Prop2::classify(SimpleContactStats newContact)
 {
 	global.update(newContact);
 
@@ -1555,7 +1511,7 @@ void ProphetV2::classify(SimpleContactStats newContact)
 	}
 }
 
-void ProphetV2::classifyRemaining()
+void Prop2::classifyRemaining()
 {
 	for(std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.begin(); it != simpleContacts.end(); it++){
 		for (std::set<SimpleContactStats>::iterator it2 = it->second.begin(); it2 !=it->second.end(); it2++){
@@ -1569,7 +1525,7 @@ void ProphetV2::classifyRemaining()
 	}
 }
 
-std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > ProphetV2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
+std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > Prop2::getSimpleContactStats(LAddress::L3Type addr, double creationTime)
 {
 
 	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
@@ -1618,164 +1574,15 @@ std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > ProphetV2
 			}
 		}
 	}
-//
-//	SimpleContactStats tempContact2, tempContact3;
-//	int x;
-//
-//	if (it==simpleContacts.end()){
-//		x = it->second.size();
-//		contact = SimpleContactStats();
-//		std::set<SimpleContactStats> mySet;
-//		mySet.insert(contact);
-//		simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-//	}else{
-//		SimpleContactStats tempContact = SimpleContactStats(creationTime);
-//		std::set<SimpleContactStats>::iterator it2 = it->second.lower_bound(tempContact);
-//		std::set<SimpleContactStats>::iterator it3 = it2;
-//		x = it->second.size();
-//		tempContact2 = *it2;
-//		if (it2 != it->second.end()){
-//			if ((it2 == it->second.begin())||(it2->getStartTime() == creationTime)){
-//				contact = *it2;
-//			}else {
-//				it3--;
-//				tempContact3 = *it3;
-//				if (it3->getEndTime() != std::numeric_limits<double>::max()){
-//					if ((creationTime-it3->getEndTime()) > 1.0){
-//						contact = *it2;
-//					}else if ((creationTime-it3->getEndTime()) <= 1.0){
-//						contact = *it3;
-//					}
-//				}
-////				if ((it2->getStartTime() == std::numeric_limits<double>::max()-1) &&
-////						(creationTime-it3->getEndTime()>1.0)){
-////					contact = *it2;
-////				}else if (creationTime-it3->getEndTime()<=1){
-////					contact = *it3;
-////				}
-//			}
-//		}else {
-//			contact = SimpleContactStats();
-//			std::set<SimpleContactStats> mySet;
-//			mySet.insert(contact);
-//			simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
-////			opp_error("recording end of simple contact that doesn't exist");
-//		}
-//	}
-//
+
 	if (contact == NULL){
 		opp_error("recording end of simple contact that doesn't exist");
 	}
 
-//		if (it2 == it->second.begin()){
-//			if (it2->getStartTime() == std::numeric_limits<double>::max()-1){
-//				contact = *it2;
-//			}else {
-//				contact = *it2;
-//				contact = NULL;
-////				opp_error("recording end of simple contact that doesn't exist");
-//			}
-//		}else {
-//			std::set<SimpleContactStats>::iterator it3 = it2;
-//			it3--;
-//			contact = *it3;
-//		}
-//	}
-//		if (it2->getStartTime() == creationTime){
-//			contact = *it2;
-//		} else {
-//			std:set<SimpleContactStats>::iterator it3 = it2;
-//			bool valid
-//			if (it3 != it->second.begin()){
-//				it3--;
-//			}
-//
-////			std::reverse_iterator<SimpleContactStats> revIt(*it2);
-//			if (revIt !=it->second.rend()){
-//				contact = revIt;
-//			}else{
-//				opp_error("recording end of simple contact that doesn't exist");
-//			}
-//		}
-//	}
-
-
-//	if (it == simpleContacts.end()){
-//		contact = SimpleContactStats();
-//		std::list<SimpleContactStats> list = std::list<SimpleContactStats>();
-//		list.push_front(contact);
-//		simpleContacts.insert(std::pair<LAddress::L3Type, std::list<SimpleContactStats> >(addr,list));
-////		it->second = std::list<SimpleContactStats>();
-////		it->second.push_front(contact);
-//	}else{
-//		/* return the contactStats that belong to the given creationTime*/
-//
-//		for (std::list<SimpleContactStats>::reverse_iterator it2 = it->second.rbegin(); it2!= it->second.rend(); it2++ ){
-//			if (std::distance(it2,it->second.rend())==1){
-//				// check if it is the last element of the list
-////				opp_error("recording end of simple contact that doesn't exist");
-//
-//				if (it2->getStartTime()!=-std::numeric_limits<double>::max()){
-//					contact = *it2;
-//				}else {
-//					if (it2->getStartTime()>creationTime){
-//						opp_error("recording of simple contact that doesn't exist");
-//					}else if (creationTime<it2->getEndTime()){
-//						contact = *it2;
-//					}else{
-//						contact = SimpleContactStats();
-//						it->second.push_front(contact);
-//					}
-//				}
-//				break;
-//			}
-//
-//			if ((it2->getEndTime()!=std::numeric_limits<double>::max())&&(creationTime<it2->getEndTime())){
-//				contact = SimpleContactStats();
-//				it->second.push_front(contact);
-//				break;
-//			}else {
-//				if ((it2->getStartTime()!=-std::numeric_limits<double>::max()) &&
-//						(it2->getStartTime()<creationTime) && (creationTime<it2->getEndTime())){
-//					contact = *it2;
-//					break;
-//				}else {
-//					continue;
-//				}
-//			}
-//		}
-//	}
-
-//			if ((it2->getEndTime()==-1)){
-//				if (it2->getStartTime()==-1){
-//					contact = *it2;
-//					break;
-//				}else if (it2->getStartTime()>creationTime){
-//					opp_error("recording end of simple contact that doesn't exist");
-//					break;
-//				}
-//			}else if ((it2->getStartTime()<creationTime)&&(it2->getEndTime()>creationTime)){
-//				contact = *it2;
-//			}
-//		}
-//	}
-//
-//	if (lastEncouterTime.find(addr)!=lastEncouterTime.end()){
-//		if (it == simpleContacts.end()){
-//			opp_error("recording end of simple contact that doesn't exist");
-//		}
-//	}else{
-//		recordBeginSimplContactStats(addr,simTime().dbl());
-//	}
-
-//	if ((it == simpleContacts.end())&&(lastEncouterTime.find(addr)!=lastEncouterTime.end())){
-//		opp_error("recording end of simple contact that doesn't exist");
-//	}
-
 	return pair;
 }
 
-SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr, double time)
+SimpleContactStats Prop2::getLastSimpleContactStats(LAddress::L3Type addr, double time)
 {
 	SimpleContactStats contact = NULL;
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
@@ -1808,12 +1615,11 @@ SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr, d
 	}
 
 	simpleContacts[addr] = mySet;
-//	simpleContacts.insert(std::pair<LAddress::L3Type, std::set<SimpleContactStats> >(addr,mySet));
 
 	return contact;
 }
 
-SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr)
+SimpleContactStats Prop2::getLastSimpleContactStats(LAddress::L3Type addr)
 {
 	SimpleContactStats contact = NULL;
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
@@ -1848,7 +1654,7 @@ SimpleContactStats ProphetV2::getLastSimpleContactStats(LAddress::L3Type addr)
 	return contact;
 }
 
-void ProphetV2::updateSimpleContactStats(LAddress::L3Type addr, SimpleContactStats newContact, std::set<SimpleContactStats>::iterator iterator)
+void Prop2::updateSimpleContactStats(LAddress::L3Type addr, SimpleContactStats newContact, std::set<SimpleContactStats>::iterator iterator)
 {
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(addr);
 	std::set<SimpleContactStats> mySet;
@@ -1866,7 +1672,7 @@ void ProphetV2::updateSimpleContactStats(LAddress::L3Type addr, SimpleContactSta
 	}
 }
 
-void ProphetV2::recordClassifier(ClassifiedContactStats classifier)
+void Prop2::recordClassifier(ClassifiedContactStats classifier)
 {
 	classifier.getDurationStats().recordAs(classifier.getName().c_str());
 
@@ -1900,7 +1706,7 @@ void ProphetV2::recordClassifier(ClassifiedContactStats classifier)
 
 }
 
-void ProphetV2::recordAllClassifier()
+void Prop2::recordAllClassifier()
 {
 	recordClassifier(global);
 	recordClassifier(successful);
@@ -1919,27 +1725,27 @@ void ProphetV2::recordAllClassifier()
 ** 							Unused functions
 **
 ********************************************************************/
-void ProphetV2::handleSelfMsg(cMessage* msg)
+void Prop2::handleSelfMsg(cMessage* msg)
 {
 
 }
 
-void ProphetV2::handleUpperControl(cMessage* msg)
+void Prop2::handleUpperControl(cMessage* msg)
 {
 
 }
 
-cObject *const ProphetV2::setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr)
+cObject *const Prop2::setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr)
 {
 	return BaseNetwLayer::setDownControlInfo(pMsg, pDestAddr);
 }
 
-cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
+cObject *const Prop2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
 {
 	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
 }
 
-ProphetV2::~ProphetV2()
+Prop2::~Prop2()
 {
 
 }
