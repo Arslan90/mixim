@@ -228,16 +228,22 @@ void ProphetV2::ageDeliveryPreds()
 		return;
 	}else {
 		double mult = std::pow(GAMMA, timeDiff);
+		std::vector<LAddress::L3Type> predsToDelete;
+
 		for (predsIterator it=preds.begin();it!=preds.end();it++){
 			it->second = it->second * mult;
 
 
 			if (it->second < PMinThreshold){
-				it2 = it;
-				it++;
-				preds.erase(it2);
+				predsToDelete.push_back(it->first);
 			}
 		}
+
+		for (std::vector<LAddress::L3Type>::iterator it2 = predsToDelete.begin(); it2 != predsToDelete.end(); it2++){
+			LAddress::L3Type tmp = *it2;
+			preds.erase(tmp);
+		}
+
 		lastAgeUpdate = simTime().dbl();
 	}
 }

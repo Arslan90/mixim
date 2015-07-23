@@ -332,7 +332,7 @@ bool BaseConnectionManager::unregisterNic(cModule* nicModule)
 
 	// find nicEntry
 	int nicID = nicModule->getId();
-	ccEV << " unregistering nic #" << nicID << endl;
+//	ccEV << " unregistering nic #" << nicID << endl;
 
 	//we assume that the module was previously registered with this CM
 	//TODO: maybe change this to an omnet-error instead of an assertion
@@ -351,7 +351,7 @@ bool BaseConnectionManager::unregisterNic(cModule* nicModule)
 	// disconnect from all NICs in these grid squares
 	GridCoord* c = gridUnion.next();
 	while(c != 0) {
-		ccEV << "Update cons in [" << c->info() << "]" << endl;
+//		ccEV << "Update cons in [" << c->info() << "]" << endl;
 		NicEntries& nmap = getCellEntries(*c);
 		for(NicEntries::iterator i = nmap.begin(); i != nmap.end(); ++i) {
 			NicEntries::mapped_type other = i->second;
