@@ -516,7 +516,9 @@ void VEHICLEpOpp::WMS() {
 
 void VEHICLEpOpp::sendDtnMessage()
 {
-	int addr = vpaDestAddr();
+//	int addr = vpaDestAddr();
+	whatSectorIm();
+	int addr = vpaDestAddr(currentSector);
 //	int myAddr = isNetwAddrInit ? netwAddr : myId;
 //	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
@@ -530,7 +532,7 @@ void VEHICLEpOpp::sendDtnMessage()
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 	//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
 
-	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA[0] with address "<< addr <<endl;
+	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA with address "<< addr <<endl;
 	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
 	if (isNetwAddrInit){
 	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(netwAddr,nbrMsgSent)));
@@ -879,6 +881,28 @@ void VEHICLEpOpp::readNicFiles() {
 void VEHICLEpOpp::onBeacon(WaveShortMessage* wsm) {
 }
 void VEHICLEpOpp::onData(WaveShortMessage* wsm) {
+}
+
+int VEHICLEpOpp::vpaDestAddr(int sectorID)
+{
+	int vpaDestAddr = -2;
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = systemModule->par("numeroNodes");
+	if ((sectorID < 0) || (sectorID > numberVPA)){
+		opp_error("error : sectorID out of bound");
+	}
+	cModule *vpa = systemModule->getSubmodule("VPA", sectorID);
+	if (vpa!=NULL){
+		cModule *netw = vpa->getSubmodule("netw");
+		if (netw!=NULL){
+			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+			vpaDestAddr = baseNetw->getMyNetwAddr();
+		}
+	}
+	return vpaDestAddr;
 }
 
 int VEHICLEpOpp::generateUniqueSerial(const int netwAddr, const int nbrMsgSent)

@@ -390,10 +390,10 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 				opp_error("Unknown Prophetv2MessageKinds when calling HandleLowerMsg()");
 				break;
 		}
-    pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
-    SimpleContactStats contact = pair.first;
-    contact.setL3Received();
-    updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
+//    pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
+//    SimpleContactStats contact = pair.first;
+//    contact.setL3Received();
+//    updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
     }
 //    cancelAndDelete(prophetPkt);
     delete prophetPkt;
@@ -431,7 +431,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					/** Contacts duration stats				*/
 					recordBeginContactStats(addr,time);
 
-					recordBeginSimplContactStats(addr,time);
+//					recordBeginSimplContactStats(addr,time);
 
 					/** Starting IEP Phase					*/
 					executeInitiatorRole(RIB,NULL,addr);
@@ -450,7 +450,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 				/** Contacts duration stats				 */
 				recordEndContactStats(addr,time);
 
-				recordEndSimpleContactStats(addr,time);
+//				recordEndSimpleContactStats(addr,time);
 			}
 			break;
 	}
@@ -536,21 +536,21 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 		destAddr = prophetPkt->getSrcAddr();
 	}
 
-	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
-	SimpleContactStats contact;
-//	contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
-
-//	ASSERT(prophetPkt->getCreationTime().dbl());
-//	double time = (prophetPkt->getCreationTime()).dbl();
-	if (prophetPkt!=NULL){
-		pair = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
-		contact = pair.first;
-		contact.setState(kind);
-	}else {
-		pair = getSimpleContactStats(destAddr, simTime().dbl());
-		contact = pair.first;
-		contact.setState(kind);
-	}
+//	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
+//	SimpleContactStats contact;
+////	contact = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
+//
+////	ASSERT(prophetPkt->getCreationTime().dbl());
+////	double time = (prophetPkt->getCreationTime()).dbl();
+//	if (prophetPkt!=NULL){
+//		pair = getSimpleContactStats(destAddr,prophetPkt->getCreationTime().dbl() );
+//		contact = pair.first;
+//		contact.setState(kind);
+//	}else {
+//		pair = getSimpleContactStats(destAddr, simTime().dbl());
+//		contact = pair.first;
+//		contact.setState(kind);
+//	}
 
 
 	switch (kind) {
@@ -581,8 +581,8 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			updatingL3Sent();
 			updatingContactState(destAddr,RIB);
 
-			contact.setL3Sent();
-			contact.setPredictionsSent(tmp.size());
+//			contact.setL3Sent();
+//			contact.setPredictionsSent(tmp.size());
 		}
 			break;
 		case Bundle_Offer:
@@ -596,7 +596,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * Nothing to do, we have to stop the exchange
 				 */
 				updatingContactState(destAddr,Bundle);
-				contact.setSuccessfulContact(true);
+//				contact.setSuccessfulContact(true);
 			}else {
 
 				for (std::list<BundleMeta>::iterator it = bndlMetaReceived.begin(); it !=bndlMetaReceived.end(); ++it) {
@@ -639,7 +639,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 						 * in that case add it and delete the corresponding bundle from storage
 						 */
 						storeACK(*it);
-						contact.setAckReceived();
+//						contact.setAckReceived();
 						acceptBndlMeta = false;
 					}
 
@@ -673,7 +673,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				 * Nothing to do, we have to stop the exchange
 				 */
 				updatingContactState(destAddr,Bundle);
-				contact.setSuccessfulContact(true);
+//				contact.setSuccessfulContact(true);
 			}else{
 
 				/*
@@ -691,7 +691,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 				updatingL3Sent();
 				updatingContactState(destAddr,Bundle_Response);
 
-				contact.setL3Sent();
+//				contact.setL3Sent();
 			}
 		}
 			break;
@@ -736,14 +736,14 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			 */
 			updatingL3Sent();
 
-			contact.setL3Sent();
-			contact.setAckSent();
-			contact.setSuccessfulContact(true);
+//			contact.setL3Sent();
+//			contact.setAckSent();
+//			contact.setSuccessfulContact(true);
 		}
 			break;
 		case Bundle:
 		{
-			contact.setSuccessfulContact(true);
+//			contact.setSuccessfulContact(true);
 
 			bool shouldAbort = false;
 			WaveShortMessage *wsm;
@@ -754,7 +754,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 
 				bundlesReceived++;
 
-				contact.setBundleReceived();
+//				contact.setBundleReceived();
 
 				wsm = check_and_cast<WaveShortMessage*>(wsm);
 
@@ -795,7 +795,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt, LAddress:
 			break;
 	}
 
-	updateSimpleContactStats(destAddr,contact,pair.second);
+//	updateSimpleContactStats(destAddr,contact,pair.second);
 }
 
 void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::L3Type destAddr)
@@ -806,14 +806,14 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
 		destAddr = prophetPkt->getSrcAddr();
 	}
-	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
-	SimpleContactStats contact;
-	if (kind == RIB){
-		contact = getLastSimpleContactStats(destAddr);
-	}else {
-		pair = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
-		contact = pair.first;
-	}
+//	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
+//	SimpleContactStats contact;
+//	if (kind == RIB){
+//		contact = getLastSimpleContactStats(destAddr);
+//	}else {
+//		pair = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
+//		contact = pair.first;
+//	}
 
 	switch (kind) {
 		case HELLO:
@@ -825,7 +825,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		case RIB:
 		{
 			update(prophetPkt);
-			contact.setPredictionsReceived(prophetPkt->getPreds().size());
+//			contact.setPredictionsReceived(prophetPkt->getPreds().size());
 		}
 			break;
 		case Bundle_Offer:
@@ -892,7 +892,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 			for (std::list<BundleMeta>::iterator ackIt = acksMeta.begin(); ackIt !=acksMeta.end(); ++ackIt) {
 				BundleMeta meta = *ackIt;
 				storeACK(meta);
-				contact.setAckReceived();
+//				contact.setAckReceived();
 			}
 		}
 			break;
@@ -915,7 +915,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 					 * Collecting data
 					 */
 					updatingL3Sent();
-					contact.setL3Sent();
+//					contact.setL3Sent();
 				}
 			}else{
 				/*
@@ -936,8 +936,8 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 								 * Collecting data
 								 */
 								updatingL3Sent();
-								contact.setL3Sent();
-								contact.setBundleSent();
+//								contact.setL3Sent();
+//								contact.setBundleSent();
 							}else if (!canITransmit){
 								delete bundlePkt;
 							}
@@ -952,17 +952,17 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt, LAddress::
 		break;
 	}
 
-	if (kind == RIB){
-		std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(destAddr);
-		std::set<SimpleContactStats>::iterator it2;
-		it2 = it->second.end();
-		it2--;
-		updateSimpleContactStats(destAddr,contact,it2);
-	}else {
-		if (kind != Bundle_Offer){
-			updateSimpleContactStats(destAddr,contact,pair.second);
-		}
-	}
+//	if (kind == RIB){
+//		std::map<LAddress::L3Type, std::set<SimpleContactStats> >::iterator it = simpleContacts.find(destAddr);
+//		std::set<SimpleContactStats>::iterator it2;
+//		it2 = it->second.end();
+//		it2--;
+//		updateSimpleContactStats(destAddr,contact,it2);
+//	}else {
+//		if (kind != Bundle_Offer){
+//			updateSimpleContactStats(destAddr,contact,pair.second);
+//		}
+//	}
 }
 
 
@@ -989,9 +989,9 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 
 std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
-	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
-	pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
-	SimpleContactStats contact = pair.first;
+//	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
+//	pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
+//	SimpleContactStats contact = pair.first;
 
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
@@ -1092,12 +1092,12 @@ std::list<BundleMeta> ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 				continue;
 			}
 			bundleToOfferMeta.push_back(*it);
-			contact.setAckSent();
+//			contact.setAckSent();
 		}
 	}
 
-	contact.setL3Sent();
-	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
+//	contact.setL3Sent();
+//	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 	return bundleToOfferMeta;
 }
 

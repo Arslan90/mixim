@@ -46,6 +46,7 @@ void VPApOpp::initialize(int stage) {
     	 */
 
     	delayStats.setName("delayStats");
+    	newDelayStats.setName("newDelayStats");
 //    	delayStats.setRangeAutoUpper(0, 10, 1.5);
     	delays.setName("delays");
 
@@ -164,6 +165,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 
 		delays.record(avgDelay);
 		delayStats.collect(avgDelay);
+		newDelayStats.collect(time.dbl());
 
 		hopCountVector.record(wsm->getHopCount());
 		hopCountStats.collect(wsm->getHopCount());
@@ -245,6 +247,8 @@ void VPApOpp::finish()
 //		EV << "Delay, stddev: " << delayStats.getStddev() << endl;
 
 		delayStats.recordAs("delayScalar");
+
+		newDelayStats.recordAs("NewdelayScalar");
 
 //		EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
 //		EV << "Hop count, max:    " << hopCountStats.getMax() << endl;

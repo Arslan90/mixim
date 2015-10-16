@@ -22,8 +22,8 @@ simple VEHICLEpOpp extends BaseWaveApplLayer
 		int maxY= default(41947); // valor maximo de la map.
 		
 		bool dtnTestMode = default(false); // wheter we are testing DTN
-		int dtnTestCycle @unit("s") = default(5s); // cycle of periodic sending dtnMessage
-		int dtnTestMaxTime @unit("s"); // max time for sending dtnMessage
+		int dtnTestCycle = default(5); // cycle of periodic sending dtnMessage
+		int dtnTestMaxTime; // max time for sending dtnMessage
 		bool dtnSynchronized = default(false);
 		
 		// my functions

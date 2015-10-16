@@ -85,6 +85,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		int counterRx; //This is a counter of messages reception (Rx).
 		int neighbors; //this keep the value of the neighbors detected pending a determined period of time (e.g. 1sg)
 		int currentSector; //This maintain the current sector where the vehicle is transit.
+		int lastSector; //This maintain the last sector where the vehicle transited.
 		int currentSectorTimer; //This is used to time the vehicle message reception and sectorId's.
 		bool receivedSectorId; //This check in case I've received the VPAid of the sector.
 	    bool appCW; //wheter I'll use or not the APP WC.
@@ -116,6 +117,10 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 
 		void sendDtnMessage();
 		int vpaDestAddr();
+		/*
+		 * Warning: In this function, we considerate that the sectorID is the same as the vpaID, so Sector 0 => VPA 0
+		 */
+		int vpaDestAddr(int sectorID);
 
 		void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 

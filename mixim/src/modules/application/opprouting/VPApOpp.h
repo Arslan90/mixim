@@ -82,6 +82,7 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 
 		  cOutVector delays;
 		  cDoubleHistogram delayStats;
+		  cDoubleHistogram newDelayStats;
 
 		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;
