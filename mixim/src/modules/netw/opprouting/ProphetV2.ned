@@ -55,8 +55,7 @@ simple ProphetV2 extends BaseNetwLayer
         bool withFailBndlClassifier = default(false);
     	bool withFailBndlAckClassifier = default(false);
     	
-    	bool CDFForGlobalClassifier = default(false);             
-        bool CDFForSuccClassifier = default(false);               
-        bool CDFForFailClassifier = default(false);                      bool CDFForFailRIBClassifier = default(false);                   bool CDFForFailBndlOfferClassifier = default(false);             bool CDFForFailBndlRespClassifier = default(false);              bool CDFForFailBndlClassifier = default(false);                  bool CDFForFailBndlAckClassifier = default(false);
-        
+    	bool CDFForGlobalClassifier = default(false);
+        bool CDFForSuccClassifier = default(false);
+        bool CDFForFailClassifier = default(false);        bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
 }       
