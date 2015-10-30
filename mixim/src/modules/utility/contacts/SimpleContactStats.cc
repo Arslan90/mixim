@@ -15,53 +15,53 @@
 
 #include "SimpleContactStats.h"
 
-SimpleContactStats::SimpleContactStats() {
-	// TODO Auto-generated constructor stub
-	ContactStats();
-	this->startTime = std::numeric_limits<double>::max();
-	this->endTime = std::numeric_limits<double>::max();
+void SimpleContactStats::init()
+{
+	this->startTime = STARTTimeInitValue;
+	this->endTime = ENDTimeInitValue;
+	this->serial = -1;
 	this->state = -1;
 	this->successfulContact = false;
 	this->repeatedContact = false;
+	this->hasForcedEnding = false;
+
+}
+
+SimpleContactStats::SimpleContactStats() {
+	// TODO Auto-generated constructor stub
+	ContactStats();
+	init();
 }
 
 SimpleContactStats::SimpleContactStats(double startingTime)
 {
 	ContactStats();
+	init();
 	this->startTime = startingTime;
-	this->endTime = std::numeric_limits<double>::max();
-	this->state = -1;
-	this->successfulContact = false;
-	this->repeatedContact = false;
 }
 
 SimpleContactStats::SimpleContactStats(double startingTime, int startingState)
 {
 	ContactStats();
+	init();
 	this->startTime = startingTime;
-	this->endTime = std::numeric_limits<double>::max();
 	this->state = startingState;
-	this->successfulContact = false;
-	this->repeatedContact = false;
 }
 
 SimpleContactStats::SimpleContactStats(double startingTime, bool repeatedContact)
 {
 	ContactStats();
+	init();
 	this->startTime = startingTime;
-	this->endTime = std::numeric_limits<double>::max();
-	this->state = -1;
-	this->successfulContact = false;
 	this->repeatedContact = repeatedContact;
 }
 
 SimpleContactStats::SimpleContactStats(double startingTime, bool repeatedContact, int startingState)
 {
 	ContactStats();
+	init();
 	this->startTime = startingTime;
-	this->endTime = std::numeric_limits<double>::max();
 	this->state = startingState;
-	this->successfulContact = false;
 	this->repeatedContact = repeatedContact;
 }
 
@@ -89,9 +89,35 @@ bool SimpleContactStats::operator <=(const SimpleContactStats & b) const
 	return !(this->operator >(b));
 }
 
-bool SimpleContactStats::isFinished()
+bool SimpleContactStats::hasFinished()
 {
-	return ((startTime!=std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max()));
+	return (endTime!=ENDTimeInitValue);
+}
+
+
+
+SimpleContactStats::SimpleContactStats(int serial, double startingTime)
+{
+	ContactStats();
+	init();
+	this->serial = serial;
+	this->startTime = startingTime;
+}
+
+bool SimpleContactStats::hasStarted()
+{
+	return (startTime!=STARTTimeInitValue);
+}
+
+double SimpleContactStats::getDuration()
+{
+	double duration;
+	if ((hasFinished())&&(hasStarted())){
+		duration = endTime - startTime;
+	}else {
+		opp_error("Impossible to calculate the duration of the contact(SimpleContactStats::getDuration)");
+	}
+	return duration;
 }
 
 bool SimpleContactStats::operator >=(const SimpleContactStats & b) const

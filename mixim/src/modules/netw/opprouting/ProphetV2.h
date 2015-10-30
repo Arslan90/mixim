@@ -42,10 +42,6 @@
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
 #include "iterator"
-//#include "limits"
-//#include "../../messages/WaveShortMessage_m.h"
-//#include "../../utility/opprouting/Prophet_Enum.h"
-//#include "../../messages/opprouting/Prophet_m.h"
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
@@ -53,6 +49,9 @@ typedef std::map<int ,WaveShortMessage*> innerIndexMap;
 typedef std::map<int ,WaveShortMessage*>::iterator innerIndexIterator;
 
 typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
+
+typedef std::map<LAddress::L3Type, std::list<int> >::iterator iteratorContactID;
+typedef std::map<int, SimpleContactStats>::iterator iteratorContactStats;
 
 class ProphetV2: public BaseNetwLayer {
 /*******************************************************************
@@ -123,8 +122,6 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
-
-
 	/** delivery predictability max value */
 	double PEncMax;
 	/** delivery predictability initialization constant*/
@@ -156,6 +153,10 @@ private:
 	 * Map structures for ACKs
 	 */
 	std::list<BundleMeta> acks;
+
+	bool withTTL;
+	int ttl;
+	int nbrDeletedWithTTL;
 
 	/**
  	 * Specific map with K as serial of WSM &
@@ -199,6 +200,9 @@ private:
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
+
+	bool recordContactStats;
+
 	long nbrL3Sent;
 	long nbrL3Received;
 //    cLongHistogram sentStats;
@@ -222,21 +226,41 @@ private:
 
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
 
-	ClassifiedContactStats global;
+	std::map<LAddress::L3Type, std::list<int> > indexContactID;
 
-	ClassifiedContactStats successful;
+	std::map<int, SimpleContactStats> indexContactStats;
 
-	ClassifiedContactStats failed;
+	ClassifiedContactStats Global;
+	bool withGlobal;
+	bool withCDFForGlobal;
 
-	ClassifiedContactStats ribFail;
+	ClassifiedContactStats Succ;
+	bool withSucc;
+	bool withCDFForSucc;
 
-	ClassifiedContactStats failedAtBundleOffer;
+	ClassifiedContactStats Fail;
+	bool withFail;
+	bool withCDFForFail;
 
-	ClassifiedContactStats responseFail;
+	ClassifiedContactStats FailRIB;
+	bool withFailRIB;
+	bool withCDFForFailRIB;
 
-	ClassifiedContactStats failedAtBundle;
+	ClassifiedContactStats FailBndlOffer;
+	bool withFailBndlOffer;
+	bool withCDFForFailBndlOffer;
 
-	ClassifiedContactStats failedAtBundleAck;
+	ClassifiedContactStats FailBndlResp;
+	bool withFailBndlResp;
+	bool withCDFForFailBndlResp;
+
+	ClassifiedContactStats FailBndl;
+	bool withFailBndl;
+	bool withCDFForFailBndl;
+
+	ClassifiedContactStats FailBndlAck;
+	bool withFailBndlAck;
+	bool withCDFForFailBndlAck;
 
 	double sumOfInterContactDur;
 
@@ -263,10 +287,7 @@ private:
 
 	int demandedAckedBundle;
 
-	int notCorrectlyDeleted;
-
 	int bundlesReceived;
-
 
 	int nbrSimpleContactStats;
 
@@ -295,10 +316,13 @@ private:
 	void update(Prophet *prophetPkt);
 
 	/** Function for executing all actions of Initiator Role in the IEP Phase*/
-	void executeInitiatorRole(short  kind, Prophet *prophetPkt = NULL, LAddress::L3Type destAddr = 0);
+	void executeInitiatorRole(short  kind, Prophet *prophetPkt);
 
 	/** Function for executing all actions of Listener Role in the IEP Phase*/
-	void executeListenerRole(short  kind, Prophet *prophetPkt = NULL, LAddress::L3Type destAddr = 0);
+	void executeListenerRole(short  kind, Prophet *prophetPkt);
+
+	/** Function for checking if we must abord the communication due to no more things to do or due to an error	 */
+	bool abortConnection(short  kind, Prophet *prophetPkt);
 
 	/** Function for preparing Prophet message */
 	Prophet* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
@@ -307,7 +331,7 @@ private:
 	/**
 	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
 	 */
-	std::list<BundleMeta> defineBundleOffer(Prophet *prophetPkt);
+	std::vector<std::list<BundleMeta> >defineBundleOffer(Prophet *prophetPkt);
 
 	/**
 	 * @brief Function that check if the WaveShortMessage identified by
@@ -320,6 +344,18 @@ private:
 	 * @param bndlMeta is currently stored in this node
 	 */
 	bool exist(BundleMeta bndlMeta);
+
+	/**
+	 * @brief Function that check if an ack  identified by
+	 * @param *msg serial is currently stored in this node
+	 */
+	bool ackExist(WaveShortMessage *msg);
+
+	/**
+	 * @brief Function that check if an ack identified by
+	 * @param bndlMeta serial is currently stored in this node
+	 */
+	bool ackExist(BundleMeta bndlMeta);
 
 	/**
 	 * @brief Function that check if the WaveShortMessage identified by
@@ -339,6 +375,13 @@ private:
 	 */
 	LAddress::L3Type getAddressFromName(const char * name);
 
+	/*
+	 * Convert a string to time
+	 */
+	double getTimeFromName(const char * name);
+
+	void deleteOldBundle(int ttl);
+
 	/** @brief Handle messages from upper layer */
 	virtual void handleUpperMsg(cMessage* msg);
 
@@ -354,9 +397,6 @@ private:
 	/** @brief Handle control messages from lower layer */
 	virtual void handleUpperControl(cMessage* msg);
 
-	/** @brief Encapsulate higher layer packet into an NetwPkt */
-	virtual NetwPkt* encapsMsg(cPacket*);
-
 	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
 
 	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
@@ -366,13 +406,39 @@ private:
 	********************************************************************/
 
 	/*
+	 * generate contact serial
+	 */
+	int generateContactSerial( int myAddr, int seqNumber, int otherAddr);
+
+	/*
+	 * start recording
+	 */
+	int startRecordingContact(int addr, double time);
+
+	/*
+	 * start recording
+	 */
+	int startRecordingContact(int addr, int contactID);
+
+	/*
+	 * end recording
+	 */
+	int endRecordingContact(int addr, double time);
+
+	int endRecordingContact(int contactID, bool hasForcedEnding);
+
+	void updateContactWhenInit(Prophet* prophetPkt, int contactID, SimpleContactStats contact, int kind);
+
+	void updateContactWhenList(Prophet* prophetPkt, int contactID, SimpleContactStats contact, int kind);
+
+	/*
 	 * Function for collecting data about predictions
 	 */
 	void recordPredsStats();
 
 	void updatingL3Sent(){
 		nbrL3Sent++;
-	};
+	}
 
 	void updatingL3Received(){
 		nbrL3Received++;
@@ -386,13 +452,11 @@ private:
 
 	void updatingContactState(LAddress::L3Type addr, Prophetv2MessageKinds kind);
 
-	void recordBeginSimplContactStats(LAddress::L3Type addr, double time);
+	void classify(SimpleContactStats* newContact);
 
-	void recordEndSimpleContactStats(LAddress::L3Type addr, double time);
+	void classifyAll();
 
-	void classify(SimpleContactStats newContact);
-
-	void classifyRemaining();
+	void initAllClassifier();
 
 	void recordClassifier(ClassifiedContactStats classifier);
 
@@ -403,17 +467,6 @@ private:
 	** 							End of metrics methods section
 	********************************************************************/
 public:
-	const LAddress::L3Type getMyNetwAddress(){
-		return myNetwAddr;
-	}
-
-	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > getSimpleContactStats(LAddress::L3Type addr, double creationTime);
-
-	SimpleContactStats getLastSimpleContactStats(LAddress::L3Type addr, double time);
-
-	SimpleContactStats getLastSimpleContactStats(LAddress::L3Type addr);
-
-	void updateSimpleContactStats(LAddress::L3Type addr, SimpleContactStats newContact, std::set<SimpleContactStats>::iterator iterator);
 
 	virtual void initialize(int stage);
 	virtual void finish();

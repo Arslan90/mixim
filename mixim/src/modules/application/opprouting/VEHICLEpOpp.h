@@ -56,7 +56,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
 			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
 			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
-			DTN_TEST_MODE = 70									// Added by Arslan HAMZA CHERIF
+			DTN_TEST_MODE = 70,									// Added by Arslan HAMZA CHERIF
+			UPDATE = 80									// Added by Arslan HAMZA CHERIF
 	    };
 
 	protected:

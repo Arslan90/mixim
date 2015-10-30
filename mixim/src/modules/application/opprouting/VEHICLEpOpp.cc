@@ -16,6 +16,7 @@
  *********************************************/
 
 #include "VEHICLEpOpp.h"
+#include "multiFunctions.h"
 
 
 Define_Module(VEHICLEpOpp);
@@ -84,22 +85,6 @@ void VEHICLEpOpp::initialize(int stage) {
 			nbrBundleReceived = 0;
 
 		}
-
-
-
-//		// My variables
-//		vehicleIdAsInt = par("vehicleIdAsInt");
-//		if (vehicleIdAsInt){
-//			vehicleId = atoi(traci->getExternalId().c_str());
-//			int modulo = traci->getManager()->getStepForVehiclesLoop();
-//			if (modulo != 0){
-//				loopVehicle ( ( (vehicleId-1) % modulo) == 0  )
-//			}
-//		}else {
-//			vehicleId = -1;
-//			loopVehicle = false;
-//		}
-
 	}
 	if(stage==1){
 		isNetwAddrInit = false;
@@ -141,13 +126,6 @@ void VEHICLEpOpp::initialize(int stage) {
 
 
 	}
-//	else if(stage==2) {
-//		cModule *netw = this->getParentModule()->getSubmodule("netw");
-//		if (netw!=NULL){
-//			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
-//			isNetwAddrInit = true;
-//		}
-//	}
 }
 
 //SELF-MESSAGES
@@ -535,7 +513,7 @@ void VEHICLEpOpp::sendDtnMessage()
 	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA with address "<< addr <<endl;
 	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
 	if (isNetwAddrInit){
-	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,generateUniqueSerial(netwAddr,nbrMsgSent)));
+	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 //	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,0));
 	nbrBundleSent++;
 	}else {
@@ -565,49 +543,6 @@ int VEHICLEpOpp::vpaDestAddr()
 void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
 	if (signalID == mobilityStateChangedSignal) {
-
-//		std::string currentEdgeId = traci->getRoadId();
-//		EV << "my current road id is :" << currentEdgeId << endl;
-
-//		std::list<std::string> route, reverseadRoute;
-//
-//		route = traci->commandGetSingleVehicleRoutes();
-//
-//		std::string tmp;
-//		std::list<std::string>::iterator it, it2;
-//
-//		for (it  = route.begin();  it  != route.end(); it++) {
-//			tmp+= *it + " ";
-//		}
-//		EV << "my current route is defined like this : "<< tmp << endl;
-
-//		reverseadRoute = route;
-//		reverseadRoute.reverse();
-//
-//		std::string firstEdgeOfLoop;
-//		for (it  = route.begin();  it  != route.end(); it++) {
-//			for (it2  = reverseadRoute.begin();  it2  != reverseadRoute.end(); it2++) {
-//				if (*it == *it2){
-//					// we just find the recurrent edge
-//					firstEdgeOfLoop = *it;
-//					break;
-//				}
-//			}
-//		}
-//
-//		if (currentEdgeId == "B1"){
-//			// we have to reroute this vehicule
-//			traci->commandChangeRouteById("")
-//		}
-//		if (currentEdgeId == ":6_13"){
-//			// we have to reroute this vehicule
-//			traci->commandChangeRoute("B1R",9999);
-//		}
-//
-//		if (traci->getRoadId() == "B1"){
-//			traci->commandChangeRouteById("virtual_loop");
-//		}
-
 		if (loopVehicle){
 			if (!reroutedToLoopRoute){
 				// list of all avaibales routes
@@ -643,17 +578,6 @@ void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 					currentRouteId = compatibleLoopRoutes[intrand(compatibleLoopRoutes.size())];
 					currentRoute = traci->commandGetEdgesOfRoute(currentRouteId);
 
-//				std::list<std::string> reverseadRoute = currentRoute;
-//				reverseadRoute.reverse();
-
-//				std::list<std::string> reverseadRoute;
-//				for (std::list<std::string>::iterator it = currentRoute.begin(); it != currentRoute.end(); it++) {
-//					std::string tmp = *it;
-//					EV << *it << endl;
-//					reverseadRoute.push_front(*it);
-//				}
-
-
 				// detecting the edge for infinite looping
 
 					std::vector<std::string> tmpVector = std::vector<std::string>(currentRoute.begin(),currentRoute.end());
@@ -667,21 +591,6 @@ void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 							}
 						}
 					}
-
-//				for (std::list<std::string>::iterator it = currentRoute.begin(); it != currentRoute.end(); it++) {
-//					if (*it == currentRoute.back()){
-//						break;
-//					}
-//					for (std::list<std::string>::iterator it2 = it+1; it2 != currentRoute.end(); it2++) {
-//						if (*it==*it2){
-//							std::string tmp1 = *it;
-//							std::string tmp2 = *it2;
-//							EV << *it2 << endl;
-//							edgeForLooping = *it;
-//							break;
-//						}
-//					}
-//				}
 
 				// rerouting and setting boolean
 				traci->commandChangeRouteById(currentRouteId);
@@ -749,7 +658,8 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 	wsm->setTimestamp(simTime());
 	wsm->setSenderAddress(netwAddr);
 	wsm->setRecipientAddress(rcvId);
-	wsm->setSenderPos(curPosition);
+//	wsm->setSenderPos(curPosition);
+	wsm->setSenderPos(traci->getCurrentPosition());
 	wsm->setSerial(serial);
 
 	return wsm;

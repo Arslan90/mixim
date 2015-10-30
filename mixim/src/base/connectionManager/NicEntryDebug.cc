@@ -285,20 +285,40 @@ cGate* NicEntryDebug::requestOutGate(void) {
 
 void NicEntryDebug::prepareControlMsg(short controlKind, int destAddr)
 {
+
 	if (nicPtr->findSubmodule("mac1609_4_opp")!=-1){
 		cModule* module = nicPtr->getSubmodule("mac1609_4_opp");
-//		if (module !=NULL){
-//			Mac1609_4_opp *mac = check_and_cast<Mac1609_4_opp*>(module);
-//			mac->neighborhoodNotifier(controlKind);
-//		}
 		if (module !=NULL){
 			BaseLayer *mac = check_and_cast<BaseLayer*>(module);
-			mac->enForceExecution(controlKind, destAddr);
-//			mac->sendControlUp(msg);
-//			mac->neighborhoodNotifier(controlKind);
+			if ((controlKind == 24500) || (controlKind == 24520)){
+				/*
+				 * if first connection or disconnection of the last neighbor
+				 */
+				mac->enForceExecution(controlKind);
+			}else if ((controlKind == 24510) || (controlKind == 24530)){
+				/*
+				 * if connection or disconnection of a neighbor
+				 */
+				mac->enForceExecution(controlKind, destAddr);
+			}
 		}
-//		cMessage *msg = new cMessage();
-//		msg->setKind(controlKind);
-//		sendControlUp(msg);
+	}else{
+		opp_error("no submodule of mac1609_4_opp type found (NicEntryDebug Class)");
 	}
 }
+
+int NicEntryDebug::l3AddressOfNicEntry(NicEntry* nic)
+{
+	cModule* otherNode = nic->nicPtr->getParentModule();
+	int destAddr =0;
+	if (otherNode->findSubmodule("netw")!=-1){
+		cModule* module = otherNode->getSubmodule("netw");
+		BaseNetwLayer *netw = check_and_cast<BaseNetwLayer*>(module);
+		destAddr = netw->getMyNetwAddr();
+	}else{
+		opp_error("no submodule of netw type found (NicEntryDebug Class)");
+	}
+	return destAddr;
+}
+
+

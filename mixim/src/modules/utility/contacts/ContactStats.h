@@ -132,12 +132,12 @@ public:
 
     void setPredictionsReceived(int predictionsReceived)
     {
-        this->predictionsReceived += predictionsReceived;
+        this->predictionsReceived = predictionsReceived;
     }
 
     void setPredictionsSent(int predictionsSent)
     {
-        this->predictionsSent += predictionsSent;
+        this->predictionsSent = predictionsSent;
     }
 
 };

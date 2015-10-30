@@ -147,6 +147,11 @@ class NicEntryDebug: public NicEntry
      * can detect if this node is connected, disconnected or has a new neighbor
      */
     void prepareControlMsg(short controlKind, int destAddr = 0);
+
+    /**
+     * @brief Function to get the @netw addr of a NicEntry
+     */
+    int l3AddressOfNicEntry(NicEntry* nic);
 };
 
 #endif

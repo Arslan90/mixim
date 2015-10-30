@@ -41,18 +41,28 @@ void VPApOpp::initialize(int stage) {
     	receivedBundles = std::map<int, WaveShortMessage* >();
     	receivedBundles.clear();
 
+    	vehiclesAddr = std::set<int>();
+    	vehiclesAddr.clear();
+    	updateSectorCycle = par("updateSectorCycle");
+    	update = new cMessage("update veh density", UPDATE);
+    	if (updateSectorCycle >=0){
+    		scheduleAt(simTime()+updateSectorCycle,update);
+    	}else{
+    		opp_error("updateSectorCycle value cannot be negative(VPApOpp::initialize)");
+    	}
+
+
     	/*
     	 * Section created by me for initializing dtnTestMode & silentMode booleans
     	 */
 
-    	delayStats.setName("delayStats");
-    	newDelayStats.setName("newDelayStats");
-//    	delayStats.setRangeAutoUpper(0, 10, 1.5);
-    	delays.setName("delays");
+    	delayStats.setName("DelayStats for 1st Copy");
+    	delays.setName("Delays");
 
-	    hopCountStats.setName("hopCountStats");
-	    hopCountStats.setRangeAutoUpper(0, 10, 1.5);
+	    hopCountStats.setName("HopCountStats for 1st Copy");
 	    hopCountVector.setName("HopCount");
+
+	    vehicleDensity.setName("Vehicle Density");
 
     	dtnTestMode = par("dtnTestMode").boolValue();
     	silentMode = par("silentMode").boolValue();
@@ -61,21 +71,11 @@ void VPApOpp::initialize(int stage) {
     	 * End of section
     	 */
 
-		//Borrar automaticamente el directorio nic cuando se cree el primer VPA.
-		if (myId== 8)
-			system("rm  nic/*.txt");
-
 		sendBeaconEvt = new cMessage("beacon evt", SEND_BEACON_EVT);
 		if (dtnTestMode){
 			nbrBundleSent = 0;
 			nbrBundleReceived = 0;
 			nbrUniqueBundleReceived = 0;
-			nbrUniqueBundleReceivedBefore300 = 0;
-			uniqueBundleReceivedBefore300Vect.setName("uniqueBundleReceivedBefore300Vect");
-			nbrUniqueBundleReceivedBet300_900 = 0;
-			uniqueBundleReceivedBet300_900Vect.setName("uniqueBundleReceivedBet300_900Vect");
-			nbrUniqueBundleReceivedBet900_1800 = 0;
-			uniqueBundleReceivedBet900_1800Vect.setName("uniqueBundleReceivedBet900_1800Vect");
 			avgDelay = 0;
 			totalDelay = 0;
 			/*
@@ -109,7 +109,9 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 	switch (msg->getKind()) {
 		case DTN_TEST_MODE:
 			if (dtnTestMode){
-				nbrBundleSent++;
+				/*
+				 * Nothing to do for the moment
+				 */
 			}
 			break;
 		case SEND_BEACON_EVT: {
@@ -120,6 +122,16 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 			//Reschedule the self-message
 			scheduleAt(simTime() + T, sendBeaconEvt);
 	        EV <<"logs, T time: " << T <<endl;
+	        nbrBundleSent++;
+			break;
+		}
+		case UPDATE: {
+			vehiclesAddr.clear();
+	    	if (updateSectorCycle >=0){
+	    		scheduleAt(simTime()+updateSectorCycle,update);
+	    	}else{
+	    		opp_error("updateSectorCycle value cannot be negative(VPApOpp::handleSelfMsg)");
+	    	}
 			break;
 		}
 		default: {
@@ -147,28 +159,24 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 		if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
 			receivedBundles.insert(std::pair<int ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
-			if (time.dbl() <= 300){
-				nbrUniqueBundleReceivedBefore300++;
-				uniqueBundleReceivedBefore300Vect.record(nbrUniqueBundleReceivedBefore300);
-			}else if ((time.dbl() > 300) && (time.dbl() <= 900)) {
-				nbrUniqueBundleReceivedBet300_900++;
-				uniqueBundleReceivedBet300_900Vect.record(nbrUniqueBundleReceivedBet300_900);
-			}else if ((time.dbl() > 900) && (time.dbl() <= 900)) {
-				nbrUniqueBundleReceivedBet900_1800++;
-				uniqueBundleReceivedBet900_1800Vect.record(nbrUniqueBundleReceivedBet900_1800);
+
+			vehiclesAddr.insert(wsm->getSenderAddress());
+			int currentVehDensity = vehiclesAddr.size();
+			vehicleDensity.record(currentVehDensity);
+
+			totalDelay = totalDelay + time.dbl();
+			if (nbrUniqueBundleReceived>0){
+				avgDelay = totalDelay / nbrUniqueBundleReceived;
+			}else{
+				opp_error("Nbr Unique Bundle Received equal or less then zero(VPApOpp::handleLowerMsg)");
 			}
+
+			delays.record(avgDelay);
+			delayStats.collect(time.dbl());
+
+			hopCountVector.record(wsm->getHopCount());
+			hopCountStats.collect(wsm->getHopCount());
 		}
-
-
-		totalDelay = totalDelay + time.dbl();
-		avgDelay = totalDelay / nbrBundleReceived;
-
-		delays.record(avgDelay);
-		delayStats.collect(avgDelay);
-		newDelayStats.collect(time.dbl());
-
-		hopCountVector.record(wsm->getHopCount());
-		hopCountStats.collect(wsm->getHopCount());
 	}
 
 	delete(msg);
@@ -241,23 +249,10 @@ void VPApOpp::finish()
 		recordScalar("# Bundle Received", nbrBundleReceived);
 		recordScalar("# Unique Bundle Received", nbrUniqueBundleReceived);
 
-//		EV << "Delay, min:    " << delayStats.getMin() << endl;
-//		EV << "Delay, max:    " << delayStats.getMax() << endl;
-//		EV << "Delay, mean:   " << delayStats.getMean() << endl;
-//		EV << "Delay, stddev: " << delayStats.getStddev() << endl;
+		delayStats.recordAs("Delays for 1st Copy");
 
-		delayStats.recordAs("delayScalar");
+		hopCountStats.recordAs("HopCount for 1st Copy");
 
-		newDelayStats.recordAs("NewdelayScalar");
-
-//		EV << "Hop count, min:    " << hopCountStats.getMin() << endl;
-//		EV << "Hop count, max:    " << hopCountStats.getMax() << endl;
-//		EV << "Hop count, mean:   " << hopCountStats.getMean() << endl;
-//		EV << "Hop count, stddev: " << hopCountStats.getStddev() << endl;
-
-		hopCountStats.recordAs("hop count");
-
-	// cancelling selfmessage
 	BaseWaveApplLayer::finish();
 }
 

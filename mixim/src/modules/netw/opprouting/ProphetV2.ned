@@ -40,4 +40,23 @@ simple ProphetV2 extends BaseNetwLayer
     	
     	bool withAck = default(false);
     	int ackSize = default(1000);
-}
+    	
+    	bool withTTL = default(false);
+    	int ttl = default(900);
+    	
+    	bool recordContactStats = default(true);
+    	
+    	bool withGlobalClassifier = default(true);
+        bool withSuccClassifier = default(true);
+        bool withFailClassifier = default(true);
+        bool withFailRIBClassifier = default(false);
+        bool withFailBndlOfferClassifier = default(false);
+        bool withFailBndlRespClassifier = default(false);
+        bool withFailBndlClassifier = default(false);
+    	bool withFailBndlAckClassifier = default(false);
+    	
+    	bool CDFForGlobalClassifier = default(false);             
+        bool CDFForSuccClassifier = default(false);               
+        bool CDFForFailClassifier = default(false);                      bool CDFForFailRIBClassifier = default(false);                   bool CDFForFailBndlOfferClassifier = default(false);             bool CDFForFailBndlRespClassifier = default(false);              bool CDFForFailBndlClassifier = default(false);                  bool CDFForFailBndlAckClassifier = default(false);
+        
+}       

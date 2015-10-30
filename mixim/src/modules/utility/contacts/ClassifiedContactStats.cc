@@ -18,102 +18,61 @@
 ClassifiedContactStats::ClassifiedContactStats() {
 	// TODO Auto-generated constructor stub
 	ContactStats();
-	discardUnfinished = false;
-	nbrContacts = 0;
-	nbrRepeated = 0;
-	nbrToDiscard = 0;
-	durationStats.setName("contacts duration stats");
-
-	nbrLQ5 = 0;
-	nbrG5LQ20 = 0;
-	nbrG20LQ50 = 0;
-	nbrG50LQ100 = 0;
-	nbrG100LQ500 = 0;
-	nbrG500LQ1800 = 0;
-	nbrG1800 = 0;
+    init();
 }
 
 ClassifiedContactStats::ClassifiedContactStats(string name, bool discardUnfinished) {
 	// TODO Auto-generated constructor stub
 	ContactStats();
+	init();
 	this->name = name;
 	string tmp = name + "contacts duration stats";
 	this->discardUnfinished = discardUnfinished;
-	nbrContacts = 0;
-	nbrRepeated = 0;
-	nbrToDiscard = 0;
 	durationStats.setName(tmp.c_str());
-
-	nbrLQ5 = 0;
-	nbrG5LQ20 = 0;
-	nbrG20LQ50 = 0;
-	nbrG50LQ100 = 0;
-	nbrG100LQ500 = 0;
-	nbrG500LQ1800 = 0;
-	nbrG1800 = 0;
 }
 
-ClassifiedContactStats::ClassifiedContactStats(string name, SimpleContactStats firstContact) {
+ClassifiedContactStats::ClassifiedContactStats(string name, bool discardUnfinished, bool withCDF) {
 	// TODO Auto-generated constructor stub
 	ContactStats();
+	init();
 	this->name = name;
 	string tmp = name + "contacts duration stats";
-	discardUnfinished = false;
-	nbrContacts = 0;
-	nbrRepeated = 0;
-	nbrToDiscard = 0;
+	this->discardUnfinished = discardUnfinished;
 	durationStats.setName(tmp.c_str());
-	update(firstContact);
-
-	nbrLQ5 = 0;
-	nbrG5LQ20 = 0;
-	nbrG20LQ50 = 0;
-	nbrG50LQ100 = 0;
-	nbrG100LQ500 = 0;
-	nbrG500LQ1800 = 0;
-	nbrG1800 = 0;
+	this->withCDF = withCDF;
 }
 
-void ClassifiedContactStats::update(SimpleContactStats newContact)
+void ClassifiedContactStats::update(SimpleContactStats* newContact)
 {
 	bool haveToUpdate = false;
 	double duration;
 
-	if (discardUnfinished){
-		if (newContact.isFinished()){
+	if(newContact->isHasForcedEnding()){
+		this->nbrToDiscard++;
+		if (!discardUnfinished){
 			haveToUpdate = true;
-			duration = newContact.getDuration();
-			categorizeContactDuration(duration);
 		}
-	}else{
+	}else {
 		haveToUpdate = true;
-		if (newContact.isFinished()){
-			duration = newContact.getDuration();
-			categorizeContactDuration(duration);
-		}else{
-			nbrToDiscard++;
-			if (newContact.getStartTime()==std::numeric_limits<double>::max()){
-				duration = 0;
-			}else {
-				duration = simTime().dbl() - newContact.getStartTime();
-			}
-		}
 	}
 
 	if (haveToUpdate){
 		this->nbrContacts++;
-		if (newContact.isRepeatedContact()){
+		if (newContact->isRepeatedContact()){
 			this->nbrRepeated++;
 		}
 
-		this->L3Sent+=newContact.getL3Sent();
-		this->L3Received+=newContact.getL3Received();
-		this->ackSent+=newContact.getAckSent();
-		this->ackReceived+=newContact.getAckReceived();
-		this->bundleSent+=newContact.getBundleSent();
-		this->bundleReceived+=newContact.getBundleReceived();
-		this->predictionsSent+=newContact.getPredictionsSent();
-		this->predictionsReceived+=newContact.getPredictionsReceived();
+		duration = newContact->getDuration();
+		categorizeContactDuration(duration);
+
+		this->L3Sent+=newContact->getL3Sent();
+		this->L3Received+=newContact->getL3Received();
+		this->ackSent+=newContact->getAckSent();
+		this->ackReceived+=newContact->getAckReceived();
+		this->bundleSent+=newContact->getBundleSent();
+		this->bundleReceived+=newContact->getBundleReceived();
+		this->predictionsSent+=newContact->getPredictionsSent();
+		this->predictionsReceived+=newContact->getPredictionsReceived();
 
 		this->durationStats.collect(duration);
 	}
@@ -133,7 +92,7 @@ int ClassifiedContactStats::getNbrToDiscard() const
 void ClassifiedContactStats::categorizeContactDuration(double contactDuration)
 {
 	if (contactDuration < 0 ){
-		opp_error("Contact duration is lesser than 0");
+		opp_error("Contact duration is lesser than 0(ClassifiedContactStats::categorizeContactDuration)");
 	}
 
 	if (contactDuration <= 5 ){
@@ -151,6 +110,24 @@ void ClassifiedContactStats::categorizeContactDuration(double contactDuration)
 	}else if (contactDuration > 1800){
 		nbrG1800++;
 	}
+}
+
+void ClassifiedContactStats::init()
+{
+	discardUnfinished = false;
+	withCDF = false;
+	nbrContacts = 0;
+	nbrRepeated = 0;
+	nbrToDiscard = 0;
+	durationStats.setName("contacts duration stats");
+
+	nbrLQ5 = 0;
+	nbrG5LQ20 = 0;
+	nbrG20LQ50 = 0;
+	nbrG50LQ100 = 0;
+	nbrG100LQ500 = 0;
+	nbrG500LQ1800 = 0;
+	nbrG1800 = 0;
 }
 
 void ClassifiedContactStats::setNbrToDiscard(int nbrToDiscard)

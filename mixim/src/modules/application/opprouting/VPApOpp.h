@@ -45,7 +45,8 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
 			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
 			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
-			DTN_TEST_MODE = 70									// Added by Arslan HAMZA CHERIF
+			DTN_TEST_MODE = 70,									// Added by Arslan HAMZA CHERIF
+			UPDATE = 80										// Added by Arslan HAMZA CHERIF
 	    };
 
 
@@ -70,24 +71,22 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int nbrBundleSent;
 		  int nbrBundleReceived;
 		  int nbrUniqueBundleReceived;
-		  int nbrUniqueBundleReceivedBefore300;
-		  int nbrUniqueBundleReceivedBet300_900;
-		  int nbrUniqueBundleReceivedBet900_1800;
-		  cOutVector uniqueBundleReceivedBefore300Vect;
-          cOutVector uniqueBundleReceivedBet300_900Vect;
-          cOutVector uniqueBundleReceivedBet900_1800Vect;
 
 		  double avgDelay;
 		  double totalDelay;
 
 		  cOutVector delays;
 		  cDoubleHistogram delayStats;
-		  cDoubleHistogram newDelayStats;
 
 		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;
 
 		std::map<int ,WaveShortMessage*> receivedBundles;
+
+		std::set<int> vehiclesAddr;
+		int updateSectorCycle;
+		cMessage* update;
+		cOutVector vehicleDensity;
 
 
 		  void sendVPApBroadcast(int messageSequenced);//send numerated broadcast.

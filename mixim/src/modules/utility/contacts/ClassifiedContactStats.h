@@ -30,12 +30,18 @@ private:
 	string name;
 	int nbrContacts;
 	int nbrRepeated;
+	/*
+	 * Counter for contacts that we have forced the ending
+	 */
 	int nbrToDiscard;
 	cDoubleHistogram durationStats;
 
 	/*
 	 * # of contacts of a duration lesser or equal(LQ) or greater (G) to X seconds (5s,20s,50s,100s,500s,1800s)
 	 */
+
+	bool withCDF;
+
 	int nbrLQ5;
 	int nbrG5LQ20;
 	int nbrG20LQ50;
@@ -45,10 +51,12 @@ private:
 	int nbrG1800;
 
 public:
+	void init();
 	ClassifiedContactStats();
 	ClassifiedContactStats(string name, bool discardUnfinished);
-	ClassifiedContactStats(string name, SimpleContactStats firstContact);
-	void update(SimpleContactStats newContact);
+	ClassifiedContactStats(string name, bool discardUnfinished, bool withCDF);
+	ClassifiedContactStats(string name, SimpleContactStats* firstContact);
+	void update(SimpleContactStats* newContact);
 	/*
 	 * Categorize the contact duration of a simple contact in order to estimate the CDF and the PDF
 	 * NOTE: automatically discard the contact with a incoherent contact duration,
@@ -59,6 +67,15 @@ public:
 	virtual ~ClassifiedContactStats();
     int getNbrToDiscard() const;
     void setNbrToDiscard(int nbrToDiscard);
+    bool isWithCdf() const
+    {
+        return withCDF;
+    }
+
+    void setWithCdf(bool withCdf)
+    {
+        withCDF = withCdf;
+    }
     int getNbrG100Lq500() const
     {
         return nbrG100LQ500;

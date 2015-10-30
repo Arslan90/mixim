@@ -18,23 +18,32 @@
 
 #include "ContactStats.h"
 #include "limits"
+#include "simutil.h"
 //#include "Prophetv2Kinds.h"
+
+const double STARTTimeInitValue = std::numeric_limits<double>::max();
+const double ENDTimeInitValue = std::numeric_limits<double>::max();
 
 
 class SimpleContactStats: public ContactStats {
 private:
+	int serial;
 	double startTime;
 	double endTime;
 	bool successfulContact;
 	bool repeatedContact;
 	int state;
+	bool hasForcedEnding;
 public:
+	void init();
 	SimpleContactStats();
+	SimpleContactStats(int serial, double startingTime);
 	SimpleContactStats(double startingTime);
 	SimpleContactStats(double startingTime, int startingState);
 	SimpleContactStats(double startingTime, bool repeatedContact);
 	SimpleContactStats(double startingTime, bool repeatedContact, int startingState);
-	bool isFinished();
+	bool hasFinished();
+	bool hasStarted();
 	virtual ~SimpleContactStats();
 
 	double getEndTime() const
@@ -56,16 +65,7 @@ public:
         this->repeatedContact = repeatedContact;
     }
 
-	double getDuration() const
-    {
-		double duration;
-        if ((startTime!=std::numeric_limits<double>::max())&&(endTime!=std::numeric_limits<double>::max())){
-        	duration = endTime - startTime;
-        }else {
-        	duration = -1;
-        }
-        return duration;
-    }
+	double getDuration();
 
     double getStartTime() const
     {
@@ -102,6 +102,23 @@ public:
     bool operator>(const SimpleContactStats& b) const;
     bool operator<=(const SimpleContactStats& b) const;
 	bool operator>=(const SimpleContactStats& b) const;
+    bool isHasForcedEnding() const
+    {
+    	return hasForcedEnding;
+    }
+    void setHasForcedEnding(bool hasForcedEnding)
+    {
+    	this->hasForcedEnding = hasForcedEnding;
+    }
+    int getSerial() const
+    {
+        return serial;
+    }
+
+    void setSerial(int serial)
+    {
+        this->serial = serial;
+    }
 //    bool operator!=(const SimpleContactStats& b);
 //    bool operator!=(const SimpleContactStats& b);
 };

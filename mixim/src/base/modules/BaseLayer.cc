@@ -137,19 +137,30 @@ void BaseLayer::sendControlDown(cMessage *msg) {
     }
 }
 
-void BaseLayer::enForceExecution(short controlKind, int addr)
+void BaseLayer::enForceExecution(short controlKind)
+{
+	Enter_Method("enForceExecution");
+	cMessage *msg = new cMessage();
+	msg->setKind(controlKind);
+	sendControlUp(msg);
+}
+
+void BaseLayer::enForceExecution(short  controlKind, int destAddr)
 {
 	Enter_Method("enForceExecution");
 	cMessage *msg = new cMessage();
 	msg->setKind(controlKind);
 
-	if (addr != 0){
-		std::ostringstream flux;
-		flux << addr;
-		std::string s = flux.str();
+	double time = simTime().dbl();
+
+	if (destAddr != 0){
+		std::ostringstream flux1, flux2;
+		flux1 << destAddr;
+		flux2 << time;
+		std::string s = flux1.str()+":"+flux2.str();
 		msg->setName(s.c_str());
 	} else {
-		msg->setName(NULL);
+		opp_error("destination Address cannot be Null (BaseLayer::enForceExecution)");
 	}
 	sendControlUp(msg);
 }
