@@ -19,7 +19,7 @@ void SimpleContactStats::init()
 {
 	this->startTime = STARTTimeInitValue;
 	this->endTime = ENDTimeInitValue;
-	this->serial = -1;
+	this->serial = 0;
 	this->state = -1;
 	this->successfulContact = false;
 	this->repeatedContact = false;
@@ -96,7 +96,7 @@ bool SimpleContactStats::hasFinished()
 
 
 
-SimpleContactStats::SimpleContactStats(int serial, double startingTime)
+SimpleContactStats::SimpleContactStats(unsigned long serial, double startingTime)
 {
 	ContactStats();
 	init();

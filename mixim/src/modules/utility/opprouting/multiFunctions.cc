@@ -8,8 +8,8 @@
 #include "multiFunctions.h"
 #include "simutil.h"
 
-int multiFunctions::cantorPairingFunc(const int x, const int y){
-		int result = 0;
+unsigned long multiFunctions::cantorPairingFunc(const unsigned long x, const unsigned long y){
+		unsigned long result = 0;
 		if (!((x>=0) && (y>=0))){
 			opp_error("entries for cantorParing function must be naturals numbers (namespace myFunctions)");
 		}else{

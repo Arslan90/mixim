@@ -62,7 +62,7 @@ void ProphetV2::initialize(int stage)
 			opp_error("Size of the structure that store acks can not be negative");
 		}
 		acks = std::list<BundleMeta>();
-		acksIndex = std::map<int,BundleMeta>();
+		acksIndex = std::map<unsigned long,BundleMeta>();
 
 		withTTL = par("withTTL").boolValue();
 		ttl = par("ttl");
@@ -356,7 +356,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					emulatedPkt->setBitLength(headerLength);
 
 					if (recordContactStats){
-						int contactID = startRecordingContact(addr,time);
+						unsigned long contactID = startRecordingContact(addr,time);
 						emulatedPkt->setContactID(contactID);
 					}
 
@@ -438,8 +438,8 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 		// step 3 : adding this bundle to index
 		if (bundlesIndex.count(msg->getRecipientAddress())==0){
 			// no entry for msg->getRecipientAddress())
-			std::map <int, WaveShortMessage*> inner_map;
-			inner_map.insert(std::pair<int,WaveShortMessage*>(msg->getSerial(),msg));
+			std::map <unsigned long, WaveShortMessage*> inner_map;
+			inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 			bundlesIndex.insert(std::pair<LAddress::L3Type, innerIndexMap >(msg->getRecipientAddress(),inner_map));
 		}else {
 			/*
@@ -447,7 +447,7 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 			 * we have to add this message to the existing entry
 			 */
 			bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-			it->second.insert(std::pair<int,WaveShortMessage*>(msg->getSerial(),msg));
+			it->second.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 		}
 	}
 }
@@ -456,12 +456,12 @@ void ProphetV2::storeACK(BundleMeta meta)
 {
 	if (!ackExist(meta)){
 		if (acks.size()==ackStructureSize){
-			int serial = acks.front().getSerial();
+			unsigned long serial = acks.front().getSerial();
 			acksIndex.erase(serial);
 			acks.pop_front();
 		}
 
-		acksIndex.insert(std::pair<int, BundleMeta>(meta.getSerial(),meta));
+		acksIndex.insert(std::pair<unsigned long, BundleMeta>(meta.getSerial(),meta));
 		acks.push_back(meta);
 
 		if (existAndErase(meta)) {
@@ -475,7 +475,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 	/*
 	 * First we check if we actually record stats about contact
 	 */
-	int contactID;
+	unsigned long contactID;
 	SimpleContactStats contact;
 	if (recordContactStats){
 		contactID = prophetPkt->getContactID();
@@ -730,7 +730,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 	/*
 	 * First we check if we actually record stats about contact
 	 */
-	int contactID;
+	unsigned long contactID;
 	SimpleContactStats contact;
 	if (recordContactStats){
 		contactID = prophetPkt->getContactID();
@@ -1260,7 +1260,7 @@ bool ProphetV2::ackExist(BundleMeta bndlMeta)
 	return exist;
 }
 
-void ProphetV2::updateContactWhenInit(Prophet *prophetPkt, int contactID, SimpleContactStats contact, int kind)
+void ProphetV2::updateContactWhenInit(Prophet *prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind)
 {
 	/*
 	 * Last we update stats about contact
@@ -1282,7 +1282,7 @@ void ProphetV2::updateContactWhenInit(Prophet *prophetPkt, int contactID, Simple
 	}
 }
 
-void ProphetV2::updateContactWhenList(Prophet *prophetPkt, int contactID, SimpleContactStats contact, int kind)
+void ProphetV2::updateContactWhenList(Prophet *prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind)
 {
 	/*
 	 * Last we update stats about contact
@@ -1511,10 +1511,10 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 	contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(addr,kind));
 }
 
-int ProphetV2::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
+unsigned long ProphetV2::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
 {
-	int serial = 0;
-	int cantorPairForAddresses;
+	unsigned long serial = 0;
+	unsigned long cantorPairForAddresses;
 
 	if (myAddr>otherAddr){
 		cantorPairForAddresses = multiFunctions::cantorPairingFunc(otherAddr,seqNumber);
@@ -1527,10 +1527,10 @@ int ProphetV2::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
 	return serial;
 }
 
-int ProphetV2::startRecordingContact(int addr, double time)
+unsigned long ProphetV2::startRecordingContact(int addr, double time)
 {
-	int contactID = 0, lastContactID = 0;
-	std::list<int> contactIDList;
+	unsigned long contactID = 0, lastContactID = 0;
+	std::list<unsigned long> contactIDList;
 	SimpleContactStats contact, lastContact;
 	iteratorContactID iterator1 = indexContactID.find(addr);
 	if (iterator1 == indexContactID.end()){
@@ -1539,11 +1539,11 @@ int ProphetV2::startRecordingContact(int addr, double time)
 		 */
 		contactID = generateContactSerial(myNetwAddr,1,addr);
 		contactIDList.push_back(contactID);
-		indexContactID.insert(std::pair<int,std::list<int> >(addr,contactIDList));
+		indexContactID.insert(std::pair<int,std::list<unsigned long> >(addr,contactIDList));
 
 		contact = SimpleContactStats(time);
 		contact.setSerial(contactID);
-		indexContactStats.insert(std::pair<int,SimpleContactStats>(contactID,contact));
+		indexContactStats.insert(std::pair<unsigned long,SimpleContactStats>(contactID,contact));
 	}else{
 		/*
 		 * there is an entry for this address
@@ -1592,28 +1592,28 @@ int ProphetV2::startRecordingContact(int addr, double time)
 	return contactID;
 }
 
-int ProphetV2::startRecordingContact(int addr, int contactID)
+unsigned long ProphetV2::startRecordingContact(int addr, unsigned long contactID)
 {
 	/*
 	 * possibility that we received the RIB msg before receiving the control msg
 	 * We must create an entry for this contact
 	 */
 
-	std::list<int> contactIDList = indexContactID[addr];
+	std::list<unsigned long> contactIDList = indexContactID[addr];
 	contactIDList.push_back(contactID);
 	indexContactID[addr] = contactIDList;
 
 	SimpleContactStats contact = SimpleContactStats();
 	contact.setSerial(contactID);
-	indexContactStats.insert(std::pair<int,SimpleContactStats>(contactID,contact));
+	indexContactStats.insert(std::pair<unsigned long,SimpleContactStats>(contactID,contact));
 
 	return contactID;
 }
 
-int ProphetV2::endRecordingContact(int addr, double time)
+unsigned long ProphetV2::endRecordingContact(int addr, double time)
 {
-	int contactID = 0;
-	std::list<int> contactIDList;
+	unsigned long contactID = 0;
+	std::list<unsigned long> contactIDList;
 	SimpleContactStats contact;
 	iteratorContactID iterator1 = indexContactID.find(addr);
 	if (iterator1 == indexContactID.end()){
@@ -1643,7 +1643,7 @@ int ProphetV2::endRecordingContact(int addr, double time)
 	return contactID;
 }
 
-int ProphetV2::endRecordingContact(int contactID, bool hasForecedEnding)
+unsigned long ProphetV2::endRecordingContact(unsigned long contactID, bool hasForecedEnding)
 {
 	iteratorContactStats iterator = indexContactStats.find(contactID);
 	if (iterator == indexContactStats.end()){

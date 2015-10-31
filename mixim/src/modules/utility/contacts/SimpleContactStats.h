@@ -27,7 +27,7 @@ const double ENDTimeInitValue = std::numeric_limits<double>::max();
 
 class SimpleContactStats: public ContactStats {
 private:
-	int serial;
+	unsigned long serial;
 	double startTime;
 	double endTime;
 	bool successfulContact;
@@ -37,7 +37,7 @@ private:
 public:
 	void init();
 	SimpleContactStats();
-	SimpleContactStats(int serial, double startingTime);
+	SimpleContactStats(unsigned long serial, double startingTime);
 	SimpleContactStats(double startingTime);
 	SimpleContactStats(double startingTime, int startingState);
 	SimpleContactStats(double startingTime, bool repeatedContact);
@@ -110,12 +110,12 @@ public:
     {
     	this->hasForcedEnding = hasForcedEnding;
     }
-    int getSerial() const
+    unsigned long getSerial() const
     {
         return serial;
     }
 
-    void setSerial(int serial)
+    void setSerial(unsigned long serial)
     {
         this->serial = serial;
     }

@@ -38,7 +38,7 @@ void VPApOpp::initialize(int stage) {
         messageSequence = 0; //First message sequence.
     	CW= 0; //Contention Window value.
 
-    	receivedBundles = std::map<int, WaveShortMessage* >();
+    	receivedBundles = std::map<unsigned long, WaveShortMessage* >();
     	receivedBundles.clear();
 
     	vehiclesAddr = std::set<int>();
@@ -157,7 +157,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 		simtime_t time = (simTime()-wsm->getTimestamp());
 
 		if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
-			receivedBundles.insert(std::pair<int ,WaveShortMessage*>(wsm->getSerial(), wsm));
+			receivedBundles.insert(std::pair<unsigned long long ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
 
 			vehiclesAddr.insert(wsm->getSenderAddress());
@@ -206,7 +206,7 @@ void VPApOpp::sendVPApBroadcast(int messageSequence) {
 
 
 //OVERRIDING THE SENT MESSAGE 'CAUSE I NEED TO ADD THE SETKIND MESSAGE.
-WaveShortMessage*  VPApOpp::prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, int serial) {
+WaveShortMessage*  VPApOpp::prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, unsigned long serial) {
 	WaveShortMessage* wsm =		new WaveShortMessage(name.c_str());
 	wsm->addBitLength(headerLength);
 	wsm->addBitLength(lengthBits);

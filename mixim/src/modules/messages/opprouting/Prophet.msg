@@ -40,7 +40,7 @@ class noncobject bndlMeta;
 packet Prophet extends NetwPkt {
     int result_Field @enum(t_result_field);
     int identifier;
-    int contactID;
+    unsigned long contactID;
     int tlv_Flags;
     predictions preds = std::map<LAddress::L3Type, double>();
     bndlMeta bndlmeta = std::list<BundleMeta>();

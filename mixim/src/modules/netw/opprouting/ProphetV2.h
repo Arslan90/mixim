@@ -45,13 +45,13 @@
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
-typedef std::map<int ,WaveShortMessage*> innerIndexMap;
-typedef std::map<int ,WaveShortMessage*>::iterator innerIndexIterator;
+typedef std::map<unsigned long ,WaveShortMessage*> innerIndexMap;
+typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
 
 typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
 
-typedef std::map<LAddress::L3Type, std::list<int> >::iterator iteratorContactID;
-typedef std::map<int, SimpleContactStats>::iterator iteratorContactStats;
+typedef std::map<LAddress::L3Type, std::list<unsigned long> >::iterator iteratorContactID;
+typedef std::map<unsigned long, SimpleContactStats>::iterator iteratorContactStats;
 
 class ProphetV2: public BaseNetwLayer {
 /*******************************************************************
@@ -163,7 +163,7 @@ private:
 	 * V as a bndl_meta struct.
 	 * This structure simplify the search of ACKs
 	 */
-	std::map<int,BundleMeta> acksIndex;
+	std::map<unsigned long,BundleMeta> acksIndex;
 
 	/**
 	 * Size of acks structure
@@ -226,9 +226,9 @@ private:
 
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
 
-	std::map<LAddress::L3Type, std::list<int> > indexContactID;
+	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
 
-	std::map<int, SimpleContactStats> indexContactStats;
+	std::map<unsigned long, SimpleContactStats> indexContactStats;
 
 	ClassifiedContactStats Global;
 	bool withGlobal;
@@ -408,28 +408,28 @@ private:
 	/*
 	 * generate contact serial
 	 */
-	int generateContactSerial( int myAddr, int seqNumber, int otherAddr);
+	unsigned long generateContactSerial( int myAddr, int seqNumber, int otherAddr);
 
 	/*
 	 * start recording
 	 */
-	int startRecordingContact(int addr, double time);
+	unsigned long startRecordingContact(int addr, double time);
 
 	/*
 	 * start recording
 	 */
-	int startRecordingContact(int addr, int contactID);
+	unsigned long startRecordingContact(int addr, unsigned long contactID);
 
 	/*
 	 * end recording
 	 */
-	int endRecordingContact(int addr, double time);
+	unsigned long endRecordingContact(int addr, double time);
 
-	int endRecordingContact(int contactID, bool hasForcedEnding);
+	unsigned long endRecordingContact(unsigned long contactID, bool hasForcedEnding);
 
-	void updateContactWhenInit(Prophet* prophetPkt, int contactID, SimpleContactStats contact, int kind);
+	void updateContactWhenInit(Prophet* prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind);
 
-	void updateContactWhenList(Prophet* prophetPkt, int contactID, SimpleContactStats contact, int kind);
+	void updateContactWhenList(Prophet* prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind);
 
 	/*
 	 * Function for collecting data about predictions

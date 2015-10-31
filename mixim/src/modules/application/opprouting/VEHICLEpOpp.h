@@ -133,7 +133,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		void whatSectorIm(); //Check in which sector is the vehicle located.
 		void vehicleVideos(); //This is to generate videos, CAUTION it generates copious logs.
 		void WMS(); //Gather the Weight Map Sector.
-		WaveShortMessage* prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, int serial); //overrinding with my modified own function
+		WaveShortMessage* prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, unsigned long serial); //overrinding with my modified own function
 		void readNicFiles();//Read the nic/files.txt in order to retrieve the node information and update internal messages.
 
 		//OLDER AND TO REVIEW!!

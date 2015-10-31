@@ -23,7 +23,7 @@ class BundleMeta {
 private:
 	int senderAddress;
 	int recipientAddress;
-	int serial;
+	unsigned long serial;
 	simtime_t timestamp;
 	Prophet_Enum::bndlFlags bFlags;
 public:
@@ -62,7 +62,7 @@ public:
         return senderAddress;
     }
 
-    int getSerial() const
+    unsigned long getSerial() const
     {
         return serial;
     }

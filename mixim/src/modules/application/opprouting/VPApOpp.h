@@ -81,7 +81,7 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;
 
-		std::map<int ,WaveShortMessage*> receivedBundles;
+		std::map<unsigned long ,WaveShortMessage*> receivedBundles;
 
 		std::set<int> vehiclesAddr;
 		int updateSectorCycle;
@@ -93,7 +93,7 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  void handleLowerMsg(cMessage* msg);
 		  void handleSelfMsg(cMessage* msg);
 		  //Adding my own prepareWSM messages.
-		  virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0);
+		  virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, unsigned long serial=0);
 
 		  virtual void finish();
 };

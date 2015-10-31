@@ -626,7 +626,7 @@ void VEHICLEpOpp::sendMessage() {
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 //	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
 	if (isNetwAddrInit){
-		sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,generateUniqueSerial(netwAddr,nbrMsgSent)));
+		sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 	}else{
 		opp_error("netw adress not ye initialized");
 	}
@@ -637,7 +637,7 @@ void VEHICLEpOpp::sendMessage() {
 
 // I'm Overriding this function from inherit class 'cause I got to add the wsm->setKind() to 30=BROADCAST_VPA_WMS or 40=BROADCAST_VEH_WMS
 // I've to add a different KIND message when sending from vehicle or from VPA.
-WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, int serial) {
+WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, unsigned long serial) {
 	WaveShortMessage* wsm =		new WaveShortMessage(name.c_str());
 	wsm->addBitLength(headerLength);
 	wsm->addBitLength(lengthBits);

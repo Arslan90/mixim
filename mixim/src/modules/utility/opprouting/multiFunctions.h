@@ -10,7 +10,7 @@
 
 namespace multiFunctions {
 
-	int cantorPairingFunc(const int x, const int y);
+	unsigned long cantorPairingFunc(const unsigned long x, const unsigned long y);
 
 }
 

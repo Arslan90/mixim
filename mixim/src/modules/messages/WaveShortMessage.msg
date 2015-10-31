@@ -46,7 +46,7 @@ packet WaveShortMessage {
 
 	int senderAddress = 0;
 	int recipientAddress = -1;
-	int serial = 0;
+	unsigned long serial = 0;
 	Coord senderPos;
 	simtime_t timestamp = 0;
 	
