@@ -116,6 +116,11 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		int nbrBundleReceived;
 		bool dtnSynchronized;
 
+		bool sectorMode;
+		int oldSector;
+
+		bool updateMode;
+
 		void sendDtnMessage();
 		int vpaDestAddr();
 		/*
@@ -168,6 +173,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		virtual void onData(WaveShortMessage* wsm);
 		void sendMessage();
 		int generateUniqueSerial(const int netwAddr, const int nbrMsgSent);
+
 
 
 };

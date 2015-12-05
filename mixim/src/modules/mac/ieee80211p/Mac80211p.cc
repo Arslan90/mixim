@@ -21,6 +21,8 @@
 #include "Mac80211p.h"
 #include "VEHICLEp.h" //Arturo, trying to send evenements to my apps. WELL IT FUCKING WORKS!
 
+#include <iostream>
+
 Define_Module(Mac80211p);
 
 /**
@@ -377,6 +379,9 @@ void Mac80211p::updateStatusNotIdle(cMessage* msg) {
  */
 void Mac80211p::executeMac(t_mac_event event, cMessage* msg) {
 
+	std::stringstream iss;
+	std::string tmp;
+
 	if (macState != IDLE_1 && event == EV_SEND_REQUEST) {
 		updateStatusNotIdle(msg);
 	}
@@ -396,7 +401,10 @@ void Mac80211p::executeMac(t_mac_event event, cMessage* msg) {
 				break;
 			default:
 				DBG << "Error in CSMA FSM: an unknown state has been reached. macState=" << macState << endl;
-				opp_error("802.11 FSM received an unknown event");
+				iss << macState;
+				tmp = "802.11 FSM received an unknown event: " + iss.str();
+				opp_error(tmp.c_str());
+//				opp_error("802.11 FSM received an unknown event");
 				break;
 		}
 	}
@@ -413,7 +421,13 @@ void Mac80211p::fsmError(t_mac_event event, cMessage* msg) {
 	DBG << "FSM Error ! In state " << macState << ", received unknown event:" << event << "." << endl;
 	if (msg != NULL)
 		delete msg;
-	opp_error("802.11 FSM received an unknown event");
+
+	std::stringstream iss, iss2;
+	iss << macState;
+	iss2 << event;
+	std::string tmp = "802.11 FSM received an unknown event: " + iss.str()+ ": "+ iss2.str();
+	opp_error(tmp.c_str());
+//	opp_error("802.11 FSM received an unknown event");
 }
 
 void Mac80211p::startTimer(t_mac_timer timer) {

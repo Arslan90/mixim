@@ -15,6 +15,7 @@
 
 #include "ProphetV2.h"
 #include "multiFunctions.h"
+#include "ApplOppControlInfo.h"
 
 Define_Module(ProphetV2);
 
@@ -399,6 +400,39 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 			break;
 	}
 	delete msg;
+}
+
+void ProphetV2::handleUpperControl(cMessage* msg)
+{
+	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
+	int oldAddr = controlInfo->getOldSectorNetwAddr();
+	int newAddr = controlInfo->getNewSectorNetwAddr();
+
+	bundlesIndexIterator it1 = bundlesIndex.find(oldAddr);
+	innerIndexMap innerMap;
+
+	if (it1 != bundlesIndex.end()){
+		// we have to update the corresponding bundles
+		innerMap = it1->second;
+		for (innerIndexIterator it2 = it1->second.begin(); it2 != it1->second.end(); it2++){
+			it2->second->setRecipientAddress(newAddr);
+			innerMap.insert(std::pair<unsigned long,WaveShortMessage*>(it2->first,it2->second));
+		}
+
+		// we delete the old entry and update it with the new one
+		bundlesIndex.erase(oldAddr);
+
+		bundlesIndexIterator it3 = bundlesIndex.find(newAddr);
+		if (it3 == bundlesIndex.end()){
+			bundlesIndex[newAddr] = innerMap;
+		}else {
+			it3->second.insert(innerMap.begin(), innerMap.end());
+		}
+	}
+
+
+
+
 }
 
 void ProphetV2::storeBundle(WaveShortMessage *msg)
@@ -1860,11 +1894,6 @@ void ProphetV2::initAllClassifier()
 ********************************************************************/
 
 void ProphetV2::handleSelfMsg(cMessage* msg)
-{
-
-}
-
-void ProphetV2::handleUpperControl(cMessage* msg)
 {
 
 }

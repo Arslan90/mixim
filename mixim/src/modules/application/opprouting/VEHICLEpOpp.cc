@@ -17,6 +17,7 @@
 
 #include "VEHICLEpOpp.h"
 #include "multiFunctions.h"
+#include "ApplOppControlInfo.h"
 
 
 Define_Module(VEHICLEpOpp);
@@ -83,8 +84,10 @@ void VEHICLEpOpp::initialize(int stage) {
 			dtnTestMaxTime = par("dtnTestMaxTime");
 			nbrBundleSent = 0;
 			nbrBundleReceived = 0;
-
+			sectorMode = par("sectorMode").boolValue();
+			updateMode = par("updateMode").boolValue();
 		}
+		oldSector= -1; //start in clean.
 	}
 	if(stage==1){
 		isNetwAddrInit = false;
@@ -118,7 +121,7 @@ void VEHICLEpOpp::initialize(int stage) {
 	        	double tmp;
 	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
 //	        	tmp =  (dtnSynchronized)? 0 : dblrand() * double(dtnTestCycle) ;
-	        	if (simTime() + tmp <dtnTestMaxTime){
+	        	if ((simTime() + tmp <dtnTestMaxTime) && (!sectorMode)){
 	        		scheduleAt(simTime() + tmp, dtnTestMsg);
 	        	}
 //	        	scheduleAt(simTime(), dtnTestMsg);
@@ -139,7 +142,7 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     	if (dtnTestMode){
     		sendDtnMessage();
     		// Finally reschedule message
-    		if (simTime() + dtnTestCycle < dtnTestMaxTime){
+    		if ((simTime() + dtnTestCycle < dtnTestMaxTime) && (!sectorMode)){
     			scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
 				nbrMsgSent++;
 			}
@@ -174,6 +177,29 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     case DO_THINGS_EVERY_SECOND:
     	inJunction(); //Update if vehicleId is in junctionId area
     	whatSectorIm(); //Check in which sector is the vehicle
+
+    	// check if the sector changed
+    	if (sectorMode){
+    		if (currentSector != oldSector){
+    			scheduleAt(simTime(), dtnTestMsg);
+				nbrMsgSent++;
+    		}
+    	}
+
+    	if (updateMode){
+    		if ((currentSector != oldSector) && (oldSector != -1)){
+				cMessage* ctrlMsg = new cMessage();
+				ctrlMsg->setName("ControlMsg");
+				ApplOppControlInfo* controlInfo = new ApplOppControlInfo(vpaDestAddr(oldSector),vpaDestAddr(currentSector));
+				ctrlMsg->setControlInfo(controlInfo);
+				sendControlDown(ctrlMsg);
+    		}
+		}
+
+		oldSector = currentSector;
+
+
+
 	//HACK turn off Videos for faster simulation.
     	//vehicleVideos(); //This is to generate videos, CAUTION it generates copious logs.
     	WMS(); //Gather the Weight Map Sector.//TODO: Is missing how to agreggate the WMS.Check the function for further information

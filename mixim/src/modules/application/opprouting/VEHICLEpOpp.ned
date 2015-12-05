@@ -26,6 +26,9 @@ simple VEHICLEpOpp extends BaseWaveApplLayer
 		int dtnTestMaxTime; // max time for sending dtnMessage
 		bool dtnSynchronized = default(false);
 		
+		bool sectorMode = default(false);
+		bool updateMode = default(false);
+		
 		// my functions
 		bool vehicleIdAsInt = default(false);
            
