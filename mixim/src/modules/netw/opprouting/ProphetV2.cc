@@ -405,34 +405,27 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 void ProphetV2::handleUpperControl(cMessage* msg)
 {
 	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
-	int oldAddr = controlInfo->getOldSectorNetwAddr();
 	int newAddr = controlInfo->getNewSectorNetwAddr();
 
-	bundlesIndexIterator it1 = bundlesIndex.find(oldAddr);
+	bundlesIndexIterator it1;
+	innerIndexIterator it2;
 	innerIndexMap innerMap;
 
-	if (it1 != bundlesIndex.end()){
-		// we have to update the corresponding bundles
-		innerMap = it1->second;
-		for (innerIndexIterator it2 = it1->second.begin(); it2 != it1->second.end(); it2++){
+	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+		for (it2 = it1->second.begin(); it2 != it1->second.end() ; it2++){
 			it2->second->setRecipientAddress(newAddr);
 			innerMap.insert(std::pair<unsigned long,WaveShortMessage*>(it2->first,it2->second));
 		}
-
-		// we delete the old entry and update it with the new one
-		bundlesIndex.erase(oldAddr);
-
-		bundlesIndexIterator it3 = bundlesIndex.find(newAddr);
-		if (it3 == bundlesIndex.end()){
-			bundlesIndex[newAddr] = innerMap;
-		}else {
-			it3->second.insert(innerMap.begin(), innerMap.end());
-		}
 	}
 
+	// we clear all the bundlesIndex container and reconstruct it
+	// with one unique destination which correspond to newAddr
 
 
-
+	if (!innerMap.empty()){
+		bundlesIndex.clear();
+		bundlesIndex[newAddr] = innerMap;
+	}
 }
 
 void ProphetV2::storeBundle(WaveShortMessage *msg)

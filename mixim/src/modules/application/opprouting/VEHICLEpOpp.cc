@@ -85,7 +85,7 @@ void VEHICLEpOpp::initialize(int stage) {
 			nbrBundleSent = 0;
 			nbrBundleReceived = 0;
 			sectorMode = par("sectorMode").boolValue();
-			updateMode = par("updateMode").boolValue();
+			anyVPA = par("updateMode").boolValue();
 		}
 		oldSector= -1; //start in clean.
 	}
@@ -186,7 +186,7 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     		}
     	}
 
-    	if (updateMode){
+    	if (anyVPA){
     		if ((currentSector != oldSector) && (oldSector != -1)){
 				cMessage* ctrlMsg = new cMessage();
 				ctrlMsg->setName("ControlMsg");

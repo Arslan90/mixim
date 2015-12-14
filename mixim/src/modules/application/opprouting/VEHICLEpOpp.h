@@ -119,7 +119,7 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		bool sectorMode;
 		int oldSector;
 
-		bool updateMode;
+		bool anyVPA;
 
 		void sendDtnMessage();
 		int vpaDestAddr();
