@@ -51,7 +51,7 @@ void ProphetV2::initialize(int stage)
 		 */
 		lastAgeUpdate = 0;
 		bundlesStructureSize = par("storageSize");
-		if (bundlesStructureSize<0){
+		if (bundlesStructureSize<=0){
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
 		bundles = std::list<WaveShortMessage*>();
@@ -68,6 +68,22 @@ void ProphetV2::initialize(int stage)
 		withTTL = par("withTTL").boolValue();
 		ttl = par("ttl");
 		nbrDeletedWithTTL = 0;
+
+		equipedVehPc = par("equipedVehPc").doubleValue();
+		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
+			opp_error("Pourcentage of equiped vehicle is wrong, please correct it");
+		}
+		if (equipedVehPc == 1){
+			isEquiped = true;
+		}else {
+			double tmp = uniform(0,1);
+			if (tmp <= equipedVehPc){
+				isEquiped = true;
+			}else {
+				isEquiped = false;
+			}
+		}
+
 
 		/*
 		 * Collecting data & metrics
@@ -267,6 +283,8 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
     Prophet *prophetPkt = check_and_cast<Prophet *>(m->decapsulate());
 
+    if (isEquiped){
+
     if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
 
 		switch (prophetPkt->getKind()) {
@@ -312,19 +330,26 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 		}
     }
 
+    }
+
     delete prophetPkt;
     delete msg;
 }
 
 void ProphetV2::handleUpperMsg(cMessage* msg)
 {
-	assert(dynamic_cast<WaveShortMessage*>(msg));
-	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	storeBundle(upper_msg);
+	if (isEquiped){
+		assert(dynamic_cast<WaveShortMessage*>(msg));
+		WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
+		storeBundle(upper_msg);
+	}
 }
 
 void ProphetV2::handleLowerControl(cMessage* msg)
 {
+
+	if (isEquiped) {
+
 	switch (msg->getKind()) {
 		case NEWLY_CONNECTED:
 			canITransmit = true;
@@ -398,6 +423,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 //				recordEndSimpleContactStats(addr,time);
 			}
 			break;
+	}
+
 	}
 	delete msg;
 }

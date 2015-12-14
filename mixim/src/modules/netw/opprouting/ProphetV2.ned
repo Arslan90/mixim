@@ -58,4 +58,7 @@ simple ProphetV2 extends BaseNetwLayer
     	bool CDFForGlobalClassifier = default(false);
         bool CDFForSuccClassifier = default(false);
         bool CDFForFailClassifier = default(false);        bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
+        
+        // equiped vehicle pourcentage, by default 1 (100%)
+        double equipedVehPc = default(1);
 }       

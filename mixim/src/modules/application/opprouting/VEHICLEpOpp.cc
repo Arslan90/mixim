@@ -18,6 +18,7 @@
 #include "VEHICLEpOpp.h"
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
+#include "ProphetV2.h"
 
 
 Define_Module(VEHICLEpOpp);
@@ -110,6 +111,7 @@ void VEHICLEpOpp::initialize(int stage) {
 		if (netw!=NULL){
 			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
 			isNetwAddrInit = true;
+			isEquiped = check_and_cast<ProphetV2*>(netw)->isAnEquipedVehicle();
 		}
 
 
@@ -134,6 +136,8 @@ void VEHICLEpOpp::initialize(int stage) {
 //SELF-MESSAGES
 void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
 	EV << "logs, SELF-message RECEIVED in, "<< traci->getExternalId() <<" kind= "<< msg->getKind() <<endl; // pour voir qui recoi le message..
+
+	if (isEquiped){
 
     switch(msg->getKind())
     {
@@ -226,6 +230,8 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
         EV <<"logs, Unknown self-message! -> delete, kind: "<<msg->getKind()<<endl;
         break;
     }
+
+	}
 }
 
 

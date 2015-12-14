@@ -168,7 +168,7 @@ private:
 	/**
 	 * Size of acks structure
 	 */
-	unsigned int ackStructureSize;
+	int ackStructureSize;
 
 	/** delivery predictabilities */
 	std::map<LAddress::L3Type, double> preds;
@@ -182,7 +182,7 @@ private:
 	double lastAgeUpdate;
 
 	/** Size of the WMS Storage structure */
-	unsigned int bundlesStructureSize;
+	int bundlesStructureSize;
 
 	/** Fifo structure for WMS Storage*/
 	std::list<WaveShortMessage*> bundles;
@@ -196,6 +196,17 @@ private:
 
 	/** Boolean to verify if the transmission is possible */
 	bool canITransmit;
+
+	/**
+	 * Equiped vehicle in pourcentage, by default all vehicles
+	 * are equiped (100% = 1)
+	 */
+	double equipedVehPc;
+
+	/**
+	 * Determine if this vehicle is equiped or not
+	 */
+	bool isEquiped;
 
 	/*******************************************************************
 	** 							Metrics variables section
@@ -471,6 +482,13 @@ public:
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();
+
+	/*
+	 * Getter for isEquiped boolean
+	 */
+	bool isAnEquipedVehicle(){
+		return isEquiped;
+	}
 
 };
 

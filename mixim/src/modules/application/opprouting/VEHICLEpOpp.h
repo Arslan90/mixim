@@ -121,6 +121,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 
 		bool anyVPA;
 
+		bool isEquiped;
+
 		void sendDtnMessage();
 		int vpaDestAddr();
 		/*
