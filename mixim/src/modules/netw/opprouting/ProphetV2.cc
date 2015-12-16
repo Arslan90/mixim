@@ -379,7 +379,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 					Prophet* emulatedPkt;
 					emulatedPkt = prepareProphet(0,addr,myNetwAddr);
-					emulatedPkt->setBitLength(headerLength);
+//					emulatedPkt->setBitLength(headerLength);
 
 					if (recordContactStats){
 						unsigned long contactID = startRecordingContact(addr,time);
@@ -559,7 +559,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			tmp.insert(preds.begin(),preds.end());
 			ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &tmp);
 			ribPkt->setContactID(prophetPkt->getContactID());
-			ribPkt->setBitLength(headerLength);
+//			ribPkt->setBitLength(headerLength);
 			if (canITransmit){
 				sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
 
@@ -664,7 +664,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			Prophet *responsePkt;// = new Prophet();
 			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
 			responsePkt->setContactID(prophetPkt->getContactID());
-			responsePkt->setBitLength(headerLength);
+//			responsePkt->setBitLength(headerLength);
 			if (canITransmit){
 				sendDown(responsePkt);
 
@@ -753,7 +753,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 
 				ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, prophetPkt->getSrcAddr(), &acksMeta);
 				ackPkt->setContactID(prophetPkt->getContactID());
-				ackPkt->setBitLength(headerLength);
+//				ackPkt->setBitLength(headerLength);
 				if (canITransmit){
 					sendDown(ackPkt);
 					/*
@@ -905,7 +905,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 			Prophet *offerPkt;// = new Prophet();
 			offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bundleToOfferMeta);
 			offerPkt->setContactID(prophetPkt->getContactID());
-			offerPkt->setBitLength(headerLength);
+//			offerPkt->setBitLength(headerLength);
 			if (canITransmit){
 				sendDown(offerPkt);
 
@@ -971,7 +971,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				 */
 				bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,NULL);
 				bundlePkt->setContactID(prophetPkt->getContactID());
-				bundlePkt->setBitLength(headerLength);
+//				bundlePkt->setBitLength(headerLength);
 				if (canITransmit){
 					sendDown(bundlePkt);
 					/*
@@ -997,7 +997,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 						if (it3!=it2->second.end()){
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
 							bundlePkt->setContactID(prophetPkt->getContactID());
-							bundlePkt->setBitLength(headerLength);
+//							bundlePkt->setBitLength(headerLength);
 							if (canITransmit){
 								sendDown(bundlePkt);
 								/*
@@ -1054,19 +1054,39 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
 
+	int realPktLength = 0, msgSize = 0, metaLength = 0, predsLength = 0;
 	Prophet *prophetMsg = new Prophet();
 	prophetMsg->setKind(kind);
 	prophetMsg->setSrcAddr(srcAddr);
 	prophetMsg->setDestAddr(destAddr);
+
+	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
 	if (meta!=NULL){
 		prophetMsg->setBndlmeta(*meta);
+		metaLength = (sizeof(BundleMeta) + 8 ) * meta->size();
+//		realPktLength += sizeof(prophetMsg->getBndlmeta());
+		realPktLength += metaLength;
 	}
 	if (preds!=NULL){
 		prophetMsg->setPreds(*preds);
+		predsLength = (sizeof(int ) + sizeof(double) + 16 ) * preds->size();
+//		realPktLength += sizeof(prophetMsg->getPreds());
+		realPktLength+= predsLength;
 	}
 	if (msg!=NULL){
 		prophetMsg->encapsulate(msg);
+//		realPktLength += sizeof(msg);
+		msgSize = msg->getBitLength();
 	}
+
+	realPktLength *= 8;
+	realPktLength += msgSize;
+
+	if (realPktLength > 1000){
+		opp_warning("header length is big");
+	}
+
+	prophetMsg->setBitLength(realPktLength);
 
 	return prophetMsg;
 }

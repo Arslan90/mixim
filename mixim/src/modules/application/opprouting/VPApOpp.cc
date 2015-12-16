@@ -51,6 +51,8 @@ void VPApOpp::initialize(int stage) {
     		opp_error("updateSectorCycle value cannot be negative(VPApOpp::initialize)");
     	}
 
+    	anyVPA = par("updateMode").boolValue();
+
 
     	/*
     	 * Section created by me for initializing dtnTestMode & silentMode booleans
@@ -156,7 +158,16 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 		nbrBundleReceived++;
 		simtime_t time = (simTime()-wsm->getTimestamp());
 
-		if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
+		bool existUnderOtherVPA = false;
+
+		if (anyVPA){
+			existUnderOtherVPA = bundleExistUnderOtherVPA(wsm->getSerial());
+		}
+
+
+		if (((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end()))
+			&& (!existUnderOtherVPA)){
+
 			receivedBundles.insert(std::pair<unsigned long long ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
 
@@ -176,6 +187,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 
 			hopCountVector.record(wsm->getHopCount());
 			hopCountStats.collect(wsm->getHopCount());
+
 		}
 	}
 
@@ -228,6 +240,40 @@ WaveShortMessage*  VPApOpp::prepareWSM(std::string name, int lengthBits, t_chann
 	return wsm;
 }
 
+bool VPApOpp::bundleExistUnderOtherVPA(unsigned long  serial)
+{
+	bool exist = false;
+
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = systemModule->par("numeroNodes");
+
+	cModule *vpa;
+	for (int i = 0; i < numberVPA; ++i) {
+
+		vpa = systemModule->getSubmodule("VPA", i);
+		if (vpa!=NULL){
+			cModule *appl = vpa->getSubmodule("appl");
+			if (appl!=NULL){
+				VPApOpp *vpa_appl = check_and_cast<VPApOpp*>(appl);
+				std::map<unsigned long ,WaveShortMessage*> receivedBundleOtherVPA = vpa_appl->getReceivedBundles();
+
+				if ((! receivedBundleOtherVPA.empty()) && (receivedBundleOtherVPA.find(serial) != receivedBundleOtherVPA.end())){
+					exist = true;
+				}
+			}
+		}
+
+		if (exist){
+			break;
+		}
+	}
+
+
+	return exist;
+}
 
 
 /************** TO DELETE / TESTING AREA *************/

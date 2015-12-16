@@ -36,18 +36,23 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		virtual ~VPApOpp();
 
 		virtual void initialize(int stage);
-	    /**ARTURO  @brief Message kinds used by this layer */
-	    enum MyTestApplMessageKinds{
-			SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
-			BROADCAST_MESSAGE = 10,								//simple broadcast
-			BROADCAST_REPLY_MESSAGE = 20,						//simple reply
-			BROADCAST_VPA_WMS = 30,								//identified VPA beacon
-			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
-			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
-			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
-			DTN_TEST_MODE = 70,									// Added by Arslan HAMZA CHERIF
-			UPDATE = 80										// Added by Arslan HAMZA CHERIF
-	    };
+
+    std::map<unsigned long ,WaveShortMessage*> getReceivedBundles() const
+    {
+        return receivedBundles;
+    }
+
+    /**ARTURO  @brief Message kinds used by this layer */
+    enum MyTestApplMessageKinds{ SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
+    BROADCAST_MESSAGE = 10, //simple broadcast
+    BROADCAST_REPLY_MESSAGE = 20, //simple reply
+    BROADCAST_VPA_WMS = 30, //identified VPA beacon
+    BROADCAST_VEH_WMS = 40, //identified Vehicular beacon
+    DO_THINGS_EVERY_SECOND = 50, //internal timer for vehicular stuffs
+    LAST_TEST_APPL_MESSAGE_KIND = 60, //I do not..
+    DTN_TEST_MODE = 70, // Added by Arslan HAMZA CHERIF
+    UPDATE = 80};
+    // Added by Arslan HAMZA CHERIF
 
 
 	protected:
@@ -71,6 +76,7 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int nbrBundleSent;
 		  int nbrBundleReceived;
 		  int nbrUniqueBundleReceived;
+		  bool anyVPA;
 
 		  double avgDelay;
 		  double totalDelay;
@@ -94,6 +100,11 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  void handleSelfMsg(cMessage* msg);
 		  //Adding my own prepareWSM messages.
 		  virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, unsigned long serial=0);
+
+		  /*
+		   * Return true if
+		   */
+		  bool bundleExistUnderOtherVPA(unsigned long serial);
 
 		  virtual void finish();
 };

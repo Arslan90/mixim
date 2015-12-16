@@ -16,4 +16,5 @@ simple VPApOpp extends BaseWaveApplLayer
         bool dtnTestMode = default(false); // wheter we are testing DTN
         bool silentMode = default(false); // turn VPA in silent mode
         int updateSectorCycle = default(300);
+        bool updateMode = default(false);
 }
