@@ -365,7 +365,10 @@ void Mac80211p::updateStatusTransmitFrame(t_mac_event event, cMessage* msg) {
 		updateMacState(IDLE_1);
 	}
 	else {
-		fsmError(event, msg);
+		if (!event == EV_BROADCAST_RECEIVED){
+			fsmError(event, msg);
+		}
+
 	}
 }
 
