@@ -41,6 +41,9 @@ packet Prophet extends NetwPkt {
     int result_Field @enum(t_result_field);
     int identifier;
     unsigned long contactID;
+    bool fragmentFlag = false;
+    short fragmentNum = 0;
+    short totalFragment = 0;
     int tlv_Flags;
     predictions preds = std::map<LAddress::L3Type, double>();
     bndlMeta bndlmeta = std::list<BundleMeta>();

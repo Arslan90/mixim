@@ -84,6 +84,12 @@ void ProphetV2::initialize(int stage)
 			}
 		}
 
+		maxPcktLength = par("MTU"); // MTU is expressed in bytes unit
+		maxPcktLength*=8;
+
+		dataLength = maxPcktLength - headerLength;
+
+		I_Preds = par("I_Preds").doubleValue();
 
 		/*
 		 * Collecting data & metrics
@@ -265,6 +271,12 @@ void ProphetV2::ageDeliveryPreds()
 void ProphetV2::update(Prophet *prophetPkt)
 {
 	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
+	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
+	recordPredsStats();
+}
+
+void ProphetV2::partialUpdate(Prophet *prophetPkt)
+{
 	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
 	recordPredsStats();
 }
@@ -553,29 +565,111 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			break;
 		case RIB:
 		{
-			Prophet *ribPkt;
-			std::map<LAddress::L3Type, double> tmp = std::map<LAddress::L3Type, double>();
+
+			std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
 			ageDeliveryPreds();
-			tmp.insert(preds.begin(),preds.end());
-			ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &tmp);
-			ribPkt->setContactID(prophetPkt->getContactID());
-//			ribPkt->setBitLength(headerLength);
-			if (canITransmit){
-				sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+			predToSend.insert(preds.begin(),preds.end());
 
-				/*
-				 * Collecting data
-				 */
-				updatingL3Sent();
-				updatingContactState(prophetPkt->getSrcAddr(),RIB);
+			// Decide if we have to fragment predictions in order to send them
+			bool shouldFragment = false;
+			int predSize = ((sizeof(int) + sizeof(double) + 16 ) * predToSend.size()) * 8; // to express the size in bits unit
 
-				if (recordContactStats){
-					contact.setL3Sent();
-					contact.setPredictionsSent(contact.getPredictionsSent()+tmp.size());
-					updateContactWhenInit(prophetPkt, contactID, contact, kind);
+			if (predSize > dataLength) {
+				shouldFragment = true;
+			}
+
+			if (!shouldFragment){
+				Prophet *ribPkt;
+				ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predToSend);
+				ribPkt->setContactID(prophetPkt->getContactID());
+				ribPkt->setFragmentFlag(false);
+	//			ribPkt->setBitLength(headerLength);
+				if (canITransmit){
+					sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+
+					/*
+					 * Collecting data
+					 */
+					updatingL3Sent();
+					updatingContactState(prophetPkt->getSrcAddr(),RIB);
+
+					if (recordContactStats){
+						contact.setL3Sent();
+						contact.setPredictionsSent(contact.getPredictionsSent()+predToSend.size());
+						updateContactWhenInit(prophetPkt, contactID, contact, kind);
+					}
+				}else {
+					delete ribPkt;
 				}
-			}else {
-				delete ribPkt;
+
+
+			}else{
+				// we have to send fragment of predictions separately
+
+				int entrySize = (sizeof(int) + sizeof(double) + 16 ) * 8;
+				int maxEntriesParFrag = dataLength / entrySize;
+				int totalEntries = predSize / entrySize;
+
+				short nbrFragment = totalEntries / maxEntriesParFrag;
+				if (totalEntries % maxEntriesParFrag != 0){
+					nbrFragment++;
+				}
+
+				short fragmentNum = 0;
+				int index = 0;
+				int remainingEntries = totalEntries;
+				int nbrEntriesParFrag = 0;
+
+
+				// in order to facilitate the process we copy preds into a vector to access it by index
+				std::vector<std::pair<LAddress::L3Type, double> >tmp = std::vector<std::pair<LAddress::L3Type, double> >();
+
+				for (predsIterator it = predToSend.begin(); it != predToSend.end(); it++){
+					tmp.push_back(std::pair<LAddress::L3Type, double>(it->first, it->second));
+				}
+
+				while (remainingEntries > 0){
+					if (remainingEntries >= maxEntriesParFrag){
+						nbrEntriesParFrag = maxEntriesParFrag;
+					}else{
+						nbrEntriesParFrag = remainingEntries;
+					}
+
+
+					std::map<LAddress::L3Type, double> predFragment = std::map<LAddress::L3Type, double>();
+					for (int i = index; i < index+nbrEntriesParFrag;i++){
+						predFragment.insert(tmp[i]);
+					}
+
+					Prophet *ribPkt;
+					ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predFragment);
+					ribPkt->setContactID(prophetPkt->getContactID());
+					ribPkt->setFragmentFlag(true);
+					ribPkt->setFragmentNum(fragmentNum);
+					ribPkt->setTotalFragment(nbrFragment);
+
+					if (canITransmit){
+						sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+
+						/*
+						 * Collecting data
+						 */
+						updatingL3Sent();
+						updatingContactState(prophetPkt->getSrcAddr(),RIB);
+
+						if (recordContactStats){
+							contact.setL3Sent();
+							contact.setPredictionsSent(contact.getPredictionsSent()+predToSend.size());
+							updateContactWhenInit(prophetPkt, contactID, contact, kind);
+						}
+					}else {
+						delete ribPkt;
+					}
+
+					remainingEntries-=nbrEntriesParFrag;
+					fragmentNum++;
+					index = index+nbrEntriesParFrag;
+				}
 			}
 		}
 			break;
@@ -898,29 +992,111 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				}
 			}
 
-			/*
-			 * Step 2 : Sending the ProphetPckt
-			 */
+			// Decide if we have to fragment predictions in order to send them
+			bool shouldFragment = false;
+			int bundleMetaSize = ((sizeof(BundleMeta) + 8 ) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
 
-			Prophet *offerPkt;// = new Prophet();
-			offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bundleToOfferMeta);
-			offerPkt->setContactID(prophetPkt->getContactID());
-//			offerPkt->setBitLength(headerLength);
-			if (canITransmit){
-				sendDown(offerPkt);
+			if (bundleMetaSize > dataLength) {
+				shouldFragment = true;
+			}
+
+			if (!shouldFragment){
 
 				/*
-				 * Collecting data
+				 * Step 2 : Sending the ProphetPckt
 				 */
-				updatingL3Sent();
 
-				if (recordContactStats){
-					contact.setL3Sent();
-					contact.setAckSent(contact.getAckSent()+ackToOffer.size());
-					updateContactWhenList(prophetPkt, contactID, contact, kind);
+				Prophet *offerPkt;// = new Prophet();
+				offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bundleToOfferMeta);
+				offerPkt->setContactID(prophetPkt->getContactID());
+				offerPkt->setFragmentFlag(false);
+	//			offerPkt->setBitLength(headerLength);
+				if (canITransmit){
+					sendDown(offerPkt);
+
+					/*
+					 * Collecting data
+					 */
+					updatingL3Sent();
+
+					if (recordContactStats){
+						contact.setL3Sent();
+						contact.setAckSent(contact.getAckSent()+ackToOffer.size());
+						updateContactWhenList(prophetPkt, contactID, contact, kind);
+					}
+				}else{
+					delete offerPkt;
 				}
+
 			}else{
-				delete offerPkt;
+				// we have to send fragment of predictions separately
+
+				int entrySize = (sizeof(BundleMeta) + 8 ) * 8;
+				int maxEntriesParFrag = dataLength / entrySize;
+				int totalEntries = bundleMetaSize / entrySize;
+
+				short nbrFragment = totalEntries / maxEntriesParFrag;
+				if (totalEntries % maxEntriesParFrag != 0){
+					nbrFragment++;
+				}
+
+				short fragmentNum = 0;
+				int index = 0;
+				int remainingEntries = totalEntries;
+				int nbrEntriesParFrag = 0;
+
+				while (remainingEntries > 0){
+					if (remainingEntries >= maxEntriesParFrag){
+						nbrEntriesParFrag = maxEntriesParFrag;
+					}else{
+						nbrEntriesParFrag = remainingEntries;
+					}
+
+					std::list<BundleMeta> bndlMetaFragment = std::list<BundleMeta>();
+					for (int i = index; i < index+nbrEntriesParFrag;i++){
+						BundleMeta tmp = BundleMeta(bundleToOfferMeta.front());
+						bndlMetaFragment.push_back(tmp);
+						bundleToOfferMeta.pop_front();
+					}
+
+					/*
+					 * Step 2 : Sending the ProphetPckt
+					 */
+
+					Prophet *offerPkt;// = new Prophet();
+					offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bndlMetaFragment);
+					offerPkt->setContactID(prophetPkt->getContactID());
+					offerPkt->setFragmentFlag(true);
+					offerPkt->setFragmentNum(fragmentNum);
+					offerPkt->setTotalFragment(nbrFragment);
+		//			offerPkt->setBitLength(headerLength);
+					if (canITransmit){
+						sendDown(offerPkt);
+
+						/*
+						 * Collecting data
+						 */
+						updatingL3Sent();
+
+						if (recordContactStats){
+							contact.setL3Sent();
+							int nbrAckSent = 0;
+							for (std::list<BundleMeta>::iterator it = bndlMetaFragment.begin(); it != bndlMetaFragment.end(); it++){
+								if (it->getFlags() == Prophet_Enum::PRoPHET_ACK){
+									nbrAckSent++;
+								}
+							}
+							contact.setAckSent(contact.getAckSent()+nbrAckSent);
+							updateContactWhenList(prophetPkt, contactID, contact, kind);
+						}
+					}else{
+						delete offerPkt;
+					}
+
+					remainingEntries-= nbrEntriesParFrag;
+					fragmentNum++;
+					index = index+nbrEntriesParFrag;
+				}
 			}
 		}
 			break;
@@ -1082,7 +1258,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	realPktLength *= 8;
 	realPktLength += msgSize;
 
-	if (realPktLength > 1000){
+	if (realPktLength > 18000){
 		opp_warning("header length is big");
 	}
 

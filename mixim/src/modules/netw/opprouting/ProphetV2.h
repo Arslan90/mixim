@@ -208,6 +208,15 @@ private:
 	 */
 	bool isEquiped;
 
+	int maxPcktLength;
+
+	int dataLength;
+
+	/*
+	 * Threshold for Interval of time between first and last preds
+	 */
+	double I_Preds;
+
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
@@ -325,6 +334,9 @@ private:
 
 	/** Function for updating & exchanging probabilities */
 	void update(Prophet *prophetPkt);
+
+	/** Function for partially updating & exchanging probabilities */
+	void partialUpdate(Prophet *prophetPkt);
 
 	/** Function for executing all actions of Initiator Role in the IEP Phase*/
 	void executeInitiatorRole(short  kind, Prophet *prophetPkt);

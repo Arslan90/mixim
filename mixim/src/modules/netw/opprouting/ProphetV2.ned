@@ -44,6 +44,11 @@ simple ProphetV2 extends BaseNetwLayer
     	bool withTTL = default(false);
     	int ttl = default(900);
     	
+    	int MTU = default(2304); // in bytes (octets)
+    	headerLength @unit(bit) = default(272bit);
+    	
+    	double I_Preds = default(5);
+    	
     	bool recordContactStats = default(true);
     	
     	bool withGlobalClassifier = default(true);
