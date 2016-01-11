@@ -217,6 +217,8 @@ private:
 	 */
 	double I_Preds;
 
+	std::vector<LAddress::L3Type> addrCommunities;
+
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
@@ -235,6 +237,8 @@ private:
 	cOutVector predsMax;
 	cOutVector predsMin;
 	cOutVector predsVariance;
+
+	cOutVector *predsMeanCommunities;
 
 	double sumOfContactDur;
 
@@ -311,6 +315,22 @@ private:
 
 	int nbrSimpleContactStats;
 
+	/**
+	 * Stats for repeated contacts only
+	 */
+
+	std::map<LAddress::L3Type, int > nbrRepeatedContact;
+	cLongHistogram histRepeatedContact;
+
+	/*
+	 * contact duration for RepeatedContact (RC)
+	 */
+	std::map<int, std::list<double> > contactDurForRC;
+
+	/*
+	 * Intercontact duration for RepeatedContact (RC)
+	 */
+	std::map<int, std::list<double> > interContactDurForRC;
 
 	/*******************************************************************
 	** 							end of metrics variables section
@@ -490,6 +510,10 @@ private:
 	** 							End of metrics methods section
 	********************************************************************/
 public:
+
+    virtual int numInitStages() const {
+		return 3;
+	}
 
 	virtual void initialize(int stage);
 	virtual void finish();

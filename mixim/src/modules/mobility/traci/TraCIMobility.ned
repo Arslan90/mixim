@@ -37,5 +37,10 @@ simple TraCIMobility extends BaseMobility
         double accidentStart @unit("s") = default(uniform(30s,60s));  // time until first accident, relative to departure time
         volatile double accidentDuration @unit("s") = default(uniform(30s,60s));  // duration of accident
         volatile double accidentInterval @unit("s") = default(uniform(30s,60s));  // time between accidents
+        double c_probability = default(0.5);
+        double g_probability = default(0.5);
+        int nbrCommunities = default(15);
+        string g_community = default("C7");
+        string targetFileName;
 }
 

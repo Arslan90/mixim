@@ -135,6 +135,32 @@ void ProphetV2::initialize(int stage)
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
 	}
+	else if (stage==2){
+		cModule *systemModule = this->getParentModule();
+		while (systemModule->getParentModule() !=NULL){
+			systemModule = systemModule->getParentModule();
+		}
+		int numberVPA = systemModule->par("numeroNodes");
+		predsMeanCommunities = new cOutVector[numberVPA];
+
+		for (int i = 0; i < numberVPA; ++i) {
+			cModule *vpa = systemModule->getSubmodule("VPA", i);
+			if (vpa!=NULL){
+				cModule *netw = vpa->getSubmodule("netw");
+				if (netw!=NULL){
+					BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+					int vpaAddr = baseNetw->getMyNetwAddr();
+					addrCommunities.push_back(vpaAddr);
+					stringstream flux1,flux2;
+					flux1 << i;
+					flux2 << myNetwAddr;
+					std::string tmpStr = "Mean Predictions for Community "+ flux1.str();
+					const char *tmp = tmpStr.c_str();
+					predsMeanCommunities[i].setName(tmp);
+				}
+			}
+		}
+	}
 }
 
 /*******************************************************************
@@ -207,7 +233,7 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 	ageDeliveryPreds();
 	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
 
-		if (it->first==myNetwAddr){
+		if ((it->first==myNetwAddr)||(it->first==BAdress)){
 			continue;
 		}
 
@@ -273,12 +299,30 @@ void ProphetV2::update(Prophet *prophetPkt)
 	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
 	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
 	recordPredsStats();
+
+	for (int i = 0; i < addrCommunities.size(); ++i) {
+		double predForCommunityI = 0;
+		predsIterator it = preds.find(addrCommunities[i]);
+		if (it != preds.end()){
+			predForCommunityI = it->second;
+		}
+		predsMeanCommunities[i].record(predForCommunityI);
+	}
 }
 
 void ProphetV2::partialUpdate(Prophet *prophetPkt)
 {
 	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
 	recordPredsStats();
+
+	for (int i = 0; i < addrCommunities.size(); ++i) {
+		double predForCommunityI = 0;
+		predsIterator it = preds.find(addrCommunities[i]);
+		if (it != preds.end()){
+			predForCommunityI = it->second;
+		}
+		predsMeanCommunities[i].record(predForCommunityI);
+	}
 }
 
 /*******************************************************************
@@ -1259,7 +1303,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	realPktLength += msgSize;
 
 	if (realPktLength > 18000){
-		opp_warning("header length is big");
+		//opp_warning("header length is big");
 	}
 
 	prophetMsg->setBitLength(realPktLength);
@@ -1616,6 +1660,64 @@ void ProphetV2::finish()
 		delete bundles.front();
 		bundles.pop_front();
 	}
+
+	if (!nbrRepeatedContact.empty()){
+		histRepeatedContact.setName("Histogramme for nbr repeated contact");
+		std::map<LAddress::L3Type, int>::iterator it;
+		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
+			histRepeatedContact.collect(it->second);
+		}
+		histRepeatedContact.recordAs("Histogram for nbr repeated contact");
+
+		std::map<int, std::list<double> >::iterator it2;
+		for (it2 = contactDurForRC.begin(); it2 != contactDurForRC.end(); it2++){
+			std::list<double> durationList = it2->second;
+			int leq20= 0, leq50 = 0, leq100 = 0, u100 =0;
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				if (*it3 <= 20){
+					leq20++;
+				}else if (*it3 <= 50){
+					leq50++;
+				}else if (*it3 <= 100){
+					leq100++;
+				}else {
+					u100++;
+				}
+			}
+
+			stringstream flux1;
+			flux1 << it2->first;
+			std::string tmpStr = "#repeated "+ flux1.str();
+			recordScalar(string("Contact CDF leq20 "+tmpStr).c_str(),leq20);
+			recordScalar(string("Contact CDF leq50 "+tmpStr).c_str(),leq50);
+			recordScalar(string("Contact CDF leq100 "+tmpStr).c_str(),leq100);
+			recordScalar(string("Contact CDF u100 "+tmpStr).c_str(),u100);
+		}
+
+		for (it2 = interContactDurForRC.begin(); it2 != interContactDurForRC.end(); it2++){
+			std::list<double> durationList = it2->second;
+			int leq20= 0, leq50 = 0, leq100 = 0, u100 =0;
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				if (*it3 <= 20){
+					leq20++;
+				}else if (*it3 <= 50){
+					leq50++;
+				}else if (*it3 <= 100){
+					leq100++;
+				}else {
+					u100++;
+				}
+			}
+
+			stringstream flux1;
+			flux1 << it2->first;
+			std::string tmpStr = "#repeated "+ flux1.str();
+			recordScalar(string("InterContact CDF leq20 "+tmpStr).c_str(),leq20);
+			recordScalar(string("InterContact CDF leq50 "+tmpStr).c_str(),leq50);
+			recordScalar(string("InterContact CDF leq100 "+tmpStr).c_str(),leq100);
+			recordScalar(string("InterContact CDF u100 "+tmpStr).c_str(),u100);
+		}
+	}
 }
 
 /*******************************************************************
@@ -1712,7 +1814,8 @@ void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
 
 void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 {
-	sumOfContactDur+=time - contacts.find(addr)->second;
+	double duration = time - contacts.find(addr)->second;
+	sumOfContactDur+=duration;
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
 
 	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
@@ -1737,18 +1840,51 @@ void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 
 		contacts.erase(addr);
 		contactState.erase(addr);
+
+		std::map<LAddress::L3Type, int>::iterator it2 = nbrRepeatedContact.find(addr);
+		int nbrReContact;
+		if (it2 != nbrRepeatedContact.end()){
+			nbrReContact = it2->second;
+			std::map<int, std::list<double> >::iterator it3 = contactDurForRC.find(nbrReContact);
+			std::list<double> durationList;
+			if (it3 != contactDurForRC.end()){
+				durationList = it3->second;
+			}
+			durationList.push_back(duration);
+			contactDurForRC[nbrReContact] = durationList;
+		}
 	}
 }
 
 void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
 {
 	std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(addr);
+	double duration = 0;
 	if (it != lastEncouterTime.end()){
 		// updating nbr repeated contacts nodes
 		nbrRecontacts++;
 		// updating vector stats for recontacted nodes
-		sumOfInterContactDur+=time - it->second;
+		duration = time - it->second;
+		sumOfInterContactDur+=duration;
 		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
+
+		std::map<LAddress::L3Type, int>::iterator it2 = nbrRepeatedContact.find(addr);
+		int nbrReContact;
+		if (it2 == nbrRepeatedContact.end()){
+			nbrReContact = 1;
+		}else{
+			nbrReContact = it2->second;
+			nbrReContact++;
+		}
+		nbrRepeatedContact[addr] = nbrReContact;
+
+		std::map<int, std::list<double> >::iterator it3 = interContactDurForRC.find(nbrReContact);
+		std::list<double> durationList;
+		if (it3 != interContactDurForRC.end()){
+			durationList = it3->second;
+		}
+		durationList.push_back(duration);
+		interContactDurForRC[nbrReContact] = durationList;
 	}
 }
 

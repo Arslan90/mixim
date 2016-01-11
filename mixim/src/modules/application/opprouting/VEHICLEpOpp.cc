@@ -79,12 +79,13 @@ void VEHICLEpOpp::initialize(int stage) {
 		// added by me for testing
 		dtnTestMode = par("dtnTestMode").boolValue();
 		dtnSynchronized = par("dtnSynchronized").boolValue();
+		nbrBundleSent = 0;
+		nbrBundleReceived = 0;
 		if (dtnTestMode){
 			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
 			dtnTestCycle = par("dtnTestCycle");
 			dtnTestMaxTime = par("dtnTestMaxTime");
-			nbrBundleSent = 0;
-			nbrBundleReceived = 0;
+
 			sectorMode = par("sectorMode").boolValue();
 			anyVPA = par("updateMode").boolValue();
 		}
@@ -184,7 +185,7 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
 
     	// check if the sector changed
     	if (sectorMode){
-    		if (currentSector != oldSector){
+    		if ((dtnTestMode) && (currentSector != oldSector)){
     			scheduleAt(simTime(), dtnTestMsg);
 				nbrMsgSent++;
     		}
@@ -468,9 +469,9 @@ void VEHICLEpOpp::whatSectorIm() {
 	//MYDEBUG <<"logs, vehicle position," << traci->getExternalId() << ",x," << vehiclePosition.x <<",y,"<< axeY  <<endl;
 
 	//step 2
-	row= int( (vehiclePosition.x - offsetX) /1000); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
-	col= int( (axeY - offsetY) /1000); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
-	inSector= (row * 33) + col; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
+	col= int( (vehiclePosition.x - offsetX) /2000); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
+	row= int( (axeY - offsetY) /2000); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
+	inSector= (row * 5) + col; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
 	//MYDEBUG <<"logs, vehicle sector," << traci->getExternalId() << ",row," << row <<",colum,"<< col<<",sector number,"<< currentSector <<"," <<endl;
 
 	//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.

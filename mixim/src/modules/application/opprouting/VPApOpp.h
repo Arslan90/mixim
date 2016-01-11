@@ -42,6 +42,10 @@ class VPApOpp  : 	public BaseWaveApplLayer {
         return receivedBundles;
     }
 
+    virtual int numInitStages() const {
+		return 3;
+	}
+
     /**ARTURO  @brief Message kinds used by this layer */
     enum MyTestApplMessageKinds{ SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
     BROADCAST_MESSAGE = 10, //simple broadcast
@@ -68,7 +72,11 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  /*
 		   * bool variable for enabling dtnTestMode
 		   */
-		  bool dtnTestMode;
+			bool dtnTestMode;
+			cMessage *dtnTestMsg;
+			int dtnTestCycle;
+			int dtnTestMaxTime;
+			bool dtnSynchronized;
 		  /*
 		   * bool variable for enabling silentMode for VPA, VPA are only receiving messages
 		   */
@@ -77,6 +85,9 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int nbrBundleReceived;
 		  int nbrUniqueBundleReceived;
 		  bool anyVPA;
+
+		  bool isNetwAddrInit;
+		  int netwAddr;
 
 		  double avgDelay;
 		  double totalDelay;
@@ -100,6 +111,13 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  void handleSelfMsg(cMessage* msg);
 		  //Adding my own prepareWSM messages.
 		  virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, unsigned long serial=0);
+		  void sendDtnMessage();
+
+		  /*
+		   * Warning: In this function, we choose a random VPA (different from the current one)
+		   */
+		  int vpaDestAddr();
+
 
 		  /*
 		   * Return true if

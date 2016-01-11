@@ -14,6 +14,9 @@ simple VPApOpp extends BaseWaveApplLayer
         double timeT @unit("s") = default(5s);
         double epicenterValue @unit("m") = default(20m);
         bool dtnTestMode = default(false); // wheter we are testing DTN
+		int dtnTestCycle = default(5); // cycle of periodic sending dtnMessage
+		int dtnTestMaxTime; // max time for sending dtnMessage
+		bool dtnSynchronized = default(false);
         bool silentMode = default(false); // turn VPA in silent mode
         int updateSectorCycle = default(300);
         bool updateMode = default(false);

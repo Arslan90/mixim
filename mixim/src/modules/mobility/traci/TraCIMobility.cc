@@ -109,6 +109,42 @@ void TraCIMobility::initialize(int stage)
 			stopAccidentMsg = new cMessage("scheduledAccidentResolved");
 			scheduleAt(simTime() + accidentStart, startAccidentMsg);
 		}
+
+		c_probability = par("c_probability").doubleValue();
+		g_probability = par("g_probability").doubleValue();
+
+		my_community ="";
+		target_community ="";
+		target_edgeID= "";
+
+		g_community = par("g_community").stringValue();
+		nbrCommunities = par("nbrCommunities");
+
+		targetFileName = par("targetFileName").stringValue();
+
+		std::ifstream infile(targetFileName.c_str());
+		std::string line;
+
+		int nbrLine = 0;
+		while (std::getline(infile, line))
+		{
+			nbrLine++;
+		    std::vector<std::string> edges;
+		    char* edgeChar = (char*) line.c_str();
+		    std::string edgeString ="";
+		    char* token = strtok(edgeChar,";");
+		    while (token) {
+		    	edgeString = std::string(token);
+			    edges.push_back(edgeString);
+		        token = strtok(NULL, ";");
+		    }
+		    targetEdgesByCommunity.push_back(edges);
+		}
+
+		int x = targetEdgesByCommunity.size();
+		if (x != nbrCommunities){
+			opp_error("Error nbr communities is not equal to targetFile");
+		}
 	}
 	else if (stage == 1)
 	{
@@ -131,6 +167,9 @@ void TraCIMobility::finish()
 	cancelAndDelete(stopAccidentMsg);
 
 	isPreInitialized = false;
+
+	int my_community_rank = atoi(std::string(my_community).erase(0,1).c_str());
+	recordScalar("Community", my_community_rank);
 }
 
 void TraCIMobility::handleSelfMsg(cMessage *msg)
@@ -174,6 +213,76 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 	this->speed = speed;
 	this->angle = angle;
 	changePosition();
+
+
+	std::list<std::string> edgesOfRoute = commandGetEdgesOfRoute(commandGetRouteId());
+
+	// On starting we are in our community and we will move to the gathering place
+	if (my_community == ""){
+		my_community = commandGetVehicleTypeId();
+	}
+	if (target_community == ""){
+		target_community =g_community; // Gathering place is the community 7
+	}
+	// We initialize this value the first time that we insert the vehicle
+	if (target_edgeID == ""){
+		target_edgeID = edgesOfRoute.back();
+	}
+
+	// check if we arrived to the edge before the targeted
+	bool arrivedToTarget = false;
+	std::list<std::string>::iterator iter = edgesOfRoute.end();
+	std::advance(iter, -2);
+	std::string lastEdgeBeforeTarget = *(iter);
+	if (road_id == lastEdgeBeforeTarget){
+		arrivedToTarget = true;
+	}
+
+	if (arrivedToTarget){
+		// we have to change our target
+		double probability = dblrand();
+
+		std::string g = std::string(g_community).erase(0,1);
+		std::string t = std::string(target_community).erase(0,1);
+		std::string c = std::string(my_community).erase(0,1);
+		int g_rank = atoi(g.c_str());
+		int t_rank = atoi(t.c_str());
+		int c_rank = atoi(c.c_str());
+		int newT_rank = -1;
+
+		if (target_community == my_community){
+			// if our target is our community we have to choose a different target
+			// between Gathering place and other places
+			if (probability <= g_probability ){
+				// we have choosed to go to Gathering place
+				newT_rank = g_rank;
+			}else {
+				while ((newT_rank == -1) || (newT_rank == t_rank) || (newT_rank == g_rank)){
+					newT_rank = rand() % nbrCommunities;
+				}
+			}
+		}else {
+			// if our target is not our community we have to choose a different target
+			// between our community and other places
+			if (probability <= c_probability ){
+				// we have choosed to go to our community
+				newT_rank = c_rank;
+			}else {
+				while ((newT_rank == -1) || (newT_rank == t_rank) || (newT_rank == g_rank)){
+					newT_rank = rand() % nbrCommunities;
+				}
+			}
+		}
+
+
+		std::ostringstream stream;
+		stream << "C" << newT_rank;
+		target_community = stream.str();
+
+		target_edgeID = targetEdgesByCommunity[t_rank][newT_rank];
+		commandChangeTarget(target_edgeID);
+	}
+
 }
 
 void TraCIMobility::changePosition()

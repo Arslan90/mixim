@@ -154,6 +154,9 @@ class TraCIMobility : public BaseMobility
 		/* ARTURO jusqu'ici mes functions qui travaillent très très bien.  ok I'm doing progress ...  ;)*/
 
 		// My Function
+		void commandChangeTarget(std::string edgeId) {
+				getManager()->commandChangeTarget(getExternalId(), edgeId);
+		}
 		void commandChangeRouteById(std::string routeId) {
 				getManager()->commandChangeRouteById(getExternalId(), routeId);
 		}
@@ -163,6 +166,10 @@ class TraCIMobility : public BaseMobility
 
 		std::string commandGetRouteId() {
 			return getManager()->commandGetRouteId(getExternalId());
+		}
+
+		std::string commandGetVehicleTypeId() {
+			return getManager()->commandGetVehicleTypeId(getExternalId());
 		}
 
 		std::list<std::string> commandGetEdgesOfRoute(std::string routeId) {
@@ -196,6 +203,29 @@ class TraCIMobility : public BaseMobility
 		cMessage* stopAccidentMsg;
 		mutable TraCIScenarioManager* manager;
 		double last_speed;
+
+		/*
+		 * Probability to back from any place to its own community
+		 */
+		double c_probability;
+		/*
+		 * Probability to go from its own community to the gathering place
+		 */
+		double g_probability;
+
+		std::string my_community; /**community which i belong**/
+		std::string target_community; /**targeted community **/
+
+		std::string target_edgeID; /**targeted edgeID (roadID) **/
+		std::string g_community; /** gathering community **/
+		int nbrCommunities;
+
+		std::string targetFileName;
+
+		/**
+		 * Matrix for selecting the good target based on the previous targeted community
+		 */
+		std::vector<std::vector<std::string> > targetEdgesByCommunity;
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */
 
