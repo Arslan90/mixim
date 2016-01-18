@@ -122,6 +122,9 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
+
+	int delayed;
+
 	/** delivery predictability max value */
 	double PEncMax;
 	/** delivery predictability initialization constant*/
@@ -210,7 +213,11 @@ private:
 
 	int maxPcktLength;
 
+	bool dontFragment;
+
 	int dataLength;
+
+	std::vector<double> cutPoitsCDF;
 
 	/*
 	 * Threshold for Interval of time between first and last preds
@@ -236,6 +243,15 @@ private:
 	cOutVector predsMin;
 	cOutVector predsVariance;
 
+	cOutVector *predsMeanCommunities;
+
+//	cOutVector *predsForRC;
+
+	std::map<LAddress::L3Type, cOutVector* > predsForRC;
+
+	cOutVector nbrContactsForRCVect;
+	std::map<LAddress::L3Type, int > nbrContactsForRC;
+
 	double sumOfContactDur;
 
 	int nbrContacts;
@@ -243,6 +259,8 @@ private:
 	cOutVector contactDurVector;
 
 	std::map<LAddress::L3Type, double> contacts;
+
+	std::map<LAddress::L3Type, double> endContactTime;
 
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
 
@@ -311,6 +329,30 @@ private:
 
 	int nbrSimpleContactStats;
 
+	/**
+	 * Stats for repeated contacts only
+	 */
+
+	std::map<LAddress::L3Type, int > nbrRepeatedContact;
+	cLongHistogram histMaxRepeatedContact;
+
+	int maxForRC;
+
+	/*
+	 * contact duration for RepeatedContact (RC)
+	 */
+	std::map<int, std::list<double> > contactDurForRC;
+
+	std::map<LAddress::L3Type, std::list<double> > contactDurByAddr;
+	cLongHistogram contactDurHist;
+
+	/*
+	 * Intercontact duration for RepeatedContact (RC)
+	 */
+	std::map<int, std::list<double> > interContactDurForRC;
+
+	std::map<LAddress::L3Type, std::list<double> > interContactDurByAddr;
+	cLongHistogram interContactDurHist;
 
 	/*******************************************************************
 	** 							end of metrics variables section
@@ -490,6 +532,10 @@ private:
 	** 							End of metrics methods section
 	********************************************************************/
 public:
+
+    virtual int numInitStages() const {
+		return 3;
+	}
 
 	virtual void initialize(int stage);
 	virtual void finish();

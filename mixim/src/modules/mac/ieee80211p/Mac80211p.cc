@@ -374,7 +374,7 @@ void Mac80211p::updateStatusTransmitFrame(t_mac_event event, cMessage* msg) {
 
 void Mac80211p::updateStatusNotIdle(cMessage* msg) {
 	//this should never happen because upper layer only hands down packets if we told it to
-	assert(false);
+//	assert(false);
 }
 
 /**

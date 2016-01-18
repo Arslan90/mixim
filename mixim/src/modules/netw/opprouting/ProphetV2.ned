@@ -44,6 +44,7 @@ simple ProphetV2 extends BaseNetwLayer
     	bool withTTL = default(false);
     	int ttl = default(900);
     	
+    	bool DF = default(false);
     	int MTU = default(2304); // in bytes (octets)
     	headerLength @unit(bit) = default(272bit);
     	
@@ -66,4 +67,9 @@ simple ProphetV2 extends BaseNetwLayer
         
         // equiped vehicle pourcentage, by default 1 (100%)
         double equipedVehPc = default(1);
+        
+        string cutPoints = default("1;5;20;50;100;500;");
+//        string cutPoints = default("20;50;100");
+
+		int delayed = default(0);
 }       

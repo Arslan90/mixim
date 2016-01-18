@@ -87,6 +87,29 @@ void ProphetV2::initialize(int stage)
 		maxPcktLength = par("MTU"); // MTU is expressed in bytes unit
 		maxPcktLength*=8;
 
+		dontFragment = par("DF").boolValue();
+
+		const char* cutPoints = par("cutPoints").stringValue();
+		char* cutPointsChar = strdup(cutPoints);
+
+		char* tmp = strtok (cutPointsChar,";");
+		double cutPointValue = 0;
+		std::istringstream iss(tmp);
+		iss >> cutPointValue;
+		cutPoitsCDF.push_back(cutPointValue);
+
+		while (tmp != NULL)	{
+		    tmp = strtok (NULL, ";");
+		    if (tmp != NULL){
+		    	cutPointValue = 0;
+		    	if (strcmp(tmp,"") != 0){
+		    		std::istringstream iss(tmp);
+					iss >> cutPointValue;
+					cutPoitsCDF.push_back(cutPointValue);
+		    	}
+		    }
+		}
+
 		dataLength = maxPcktLength - headerLength;
 
 		I_Preds = par("I_Preds").doubleValue();
@@ -131,6 +154,13 @@ void ProphetV2::initialize(int stage)
         nbrSimpleContactStats = 0;
 
         initAllClassifier();
+
+        maxForRC = 5;
+
+        nbrContactsForRCVect.setName("Evolution of nbrContact between RC");
+
+        delayed = par("delayed");
+
 	}
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
@@ -163,7 +193,11 @@ void ProphetV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 				 * so lastEncTime equal 0
 				 */
 				predsForB = PFirstContact;
-				lastEncTime = 0;
+				if (it2==lastEncouterTime.end()){
+					lastEncTime = 0;
+				}else {
+					lastEncTime = it2->second;
+				}
 
 			}else {
 
@@ -207,7 +241,7 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 	ageDeliveryPreds();
 	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
 
-		if (it->first==myNetwAddr){
+		if ((it->first==myNetwAddr)||(it->first==BAdress)){
 			continue;
 		}
 
@@ -585,7 +619,13 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 				ribPkt->setFragmentFlag(false);
 	//			ribPkt->setBitLength(headerLength);
 				if (canITransmit){
-					sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+//					sendDelayed(ribPkt,dblrand()*5,"lowerLayerOut");
+//					sendDown(ribPkt);
+					if (delayed == 0){
+						sendDown(ribPkt);
+					}else{
+						sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
+					}
 
 					/*
 					 * Collecting data
@@ -649,7 +689,13 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-						sendDelayed(ribPkt,dblrand(),"lowerLayerOut");
+//						sendDelayed(ribPkt,dblrand()*5,"lowerLayerOut");
+//						sendDown(ribPkt);
+						if (delayed == 0){
+							sendDown(ribPkt);
+						}else{
+							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
+						}
 
 						/*
 						 * Collecting data
@@ -1259,7 +1305,7 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	realPktLength += msgSize;
 
 	if (realPktLength > 18000){
-		opp_warning("header length is big");
+		//opp_warning("header length is big");
 	}
 
 	prophetMsg->setBitLength(realPktLength);
@@ -1306,6 +1352,10 @@ std::vector<std::list<BundleMeta> >ProphetV2::defineBundleOffer(Prophet *prophet
 	ageDeliveryPreds();
 	predsIterator itCurrentNode;
 	for (predsIterator itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
+		if (itEncouterdNode->first == encounterdNode){
+			continue;
+		}
+
 		itCurrentNode = preds.find(itEncouterdNode->first);
 		if (itCurrentNode != preds.end()){
 			// the current node have a prediction for @it->first 
@@ -1616,6 +1666,228 @@ void ProphetV2::finish()
 		delete bundles.front();
 		bundles.pop_front();
 	}
+
+	if (!nbrRepeatedContact.empty()){
+		histMaxRepeatedContact.setName("Histogram for max nbr repeated contact");
+//		int maxRepeated = 0;
+		std::map<LAddress::L3Type, int>::iterator it;
+//		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
+//			if (it->second > maxRepeated){
+//				maxRepeated = it->second;
+//			}
+//		}
+
+		std::vector<int> repeatedNTimes(maxForRC,0);
+		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
+			histMaxRepeatedContact.collect(it->second);
+			for (int i = 0; i < it->second; ++i) {
+				int index = 0;
+				if (i < maxForRC){
+					index = i;
+				}else {
+					index = maxForRC - 1;
+				}
+				int tmp = repeatedNTimes[index];
+				repeatedNTimes[index] = tmp +1;
+			}
+		}
+		histMaxRepeatedContact.recordAs("Histogram for max nbr repeated contact");
+
+		for (int i = 0; i < repeatedNTimes.size(); ++i) {
+			stringstream flux1;
+			flux1 << i+1;
+			std::string tmpStr = "Bars for #repeated "+ flux1.str();
+			recordScalar(tmpStr.c_str(),repeatedNTimes[i]);
+		}
+
+		std::map<int, std::list<double> >::iterator it2;
+		std::vector<int> repartitionForMax(cutPoitsCDF.size()+1,0);
+		bool incremented = false;
+		for (it2 = contactDurForRC.begin(); it2 != contactDurForRC.end(); it2++){
+			std::list<double> durationList = it2->second;
+			std::vector<int> repartition(cutPoitsCDF.size()+1,0);
+
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				bool found = false;
+				for (int i = 0; i < cutPoitsCDF.size(); ++i) {
+					if (i == 0){
+						if (*it3 <= cutPoitsCDF[i]){
+							repartition[0]++;
+							found = true;
+						}
+					}else if (i == cutPoitsCDF.size()-1){
+						if (*it3 > cutPoitsCDF[i]){
+							repartition[cutPoitsCDF.size()]++;
+							found = true;
+						}
+					}else{
+						if ((*it3 > cutPoitsCDF[i-1]) && (*it3 <= cutPoitsCDF[i])){
+							repartition[i]++;
+							found = true;
+						}
+					}
+					if (found){
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < repartition.size(); ++i) {
+				stringstream flux1;
+				if (it2->first < maxForRC){
+					flux1 << it2->first;
+					std::string tmpStr = "#repeated "+ flux1.str();
+					flux1.str(std::string());
+					if (i == 0){
+						flux1 << cutPoitsCDF[i];
+						tmpStr = "LQ"+flux1.str()+" "+tmpStr;
+						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
+					}else if (i == repartition.size()-1){
+						flux1 << cutPoitsCDF[i-1];
+						tmpStr = "G"+flux1.str()+" "+tmpStr;
+						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
+					}else{
+						flux1 << cutPoitsCDF[i-1];
+						stringstream flux2;
+						flux2 << cutPoitsCDF[i];
+						tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
+						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
+					}
+				}else{
+					incremented = true;
+					repartitionForMax[i]+=repartition[i];
+				}
+			}
+		}
+
+		if (incremented){
+			for (int i = 0; i < repartitionForMax.size(); ++i) {
+				stringstream flux1;
+				flux1 << maxForRC;
+				std::string tmpStr = "#repeated "+ flux1.str();
+				flux1.str(std::string());
+				if (i == 0){
+					flux1 << cutPoitsCDF[i];
+					tmpStr = "LQ"+flux1.str()+" "+tmpStr;
+					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}else if (i == repartitionForMax.size()-1){
+					flux1 << cutPoitsCDF[i-1];
+					tmpStr = "G"+flux1.str()+" "+tmpStr;
+					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}else{
+					flux1 << cutPoitsCDF[i-1];
+					stringstream flux2;
+					flux2 << cutPoitsCDF[i];
+					tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
+					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}
+			}
+		}
+
+		incremented = false;
+		repartitionForMax = std::vector<int>(cutPoitsCDF.size()+1,0);
+		for (it2 = interContactDurForRC.begin(); it2 != interContactDurForRC.end(); it2++){
+			std::list<double> durationList = it2->second;
+			std::vector<int> repartition(cutPoitsCDF.size()+1,0);
+
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				bool found = false;
+				for (int i = 0; i < cutPoitsCDF.size(); ++i) {
+					if (i == 0){
+						if (*it3 <= cutPoitsCDF[i]){
+							repartition[0]++;
+							found = true;
+						}
+					}else if (i == cutPoitsCDF.size()-1){
+						if (*it3 > cutPoitsCDF[i]){
+							repartition[cutPoitsCDF.size()]++;
+							found = true;
+						}
+					}else{
+						if ((*it3 > cutPoitsCDF[i-1]) && (*it3 <= cutPoitsCDF[i])){
+							repartition[i]++;
+							found = true;
+						}
+					}
+					if (found){
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < repartition.size(); ++i) {
+				stringstream flux1;
+				if (it2->first < maxForRC){
+					flux1 << it2->first;
+					std::string tmpStr = "#repeated "+ flux1.str();
+					flux1.str(std::string());
+					if (i == 0){
+						flux1 << cutPoitsCDF[i];
+						tmpStr = "LQ"+flux1.str()+" "+tmpStr;
+						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
+					}else if (i == repartition.size()-1){
+						flux1 << cutPoitsCDF[i-1];
+						tmpStr = "G"+flux1.str()+" "+tmpStr;
+						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
+					}else{
+						flux1 << cutPoitsCDF[i-1];
+						stringstream flux2;
+						flux2 << cutPoitsCDF[i];
+						tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
+						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
+					}
+				}else{
+					incremented = true;
+					repartitionForMax[i]+=repartition[i];
+				}
+			}
+		}
+
+		if (incremented){
+			for (int i = 0; i < repartitionForMax.size(); ++i) {
+				stringstream flux1;
+				flux1 << maxForRC;
+				std::string tmpStr = "#repeated "+ flux1.str();
+				flux1.str(std::string());
+				if (i == 0){
+					flux1 << cutPoitsCDF[i];
+					tmpStr = "LQ"+flux1.str()+" "+tmpStr;
+					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}else if (i == repartitionForMax.size()-1){
+					flux1 << cutPoitsCDF[i-1];
+					tmpStr = "G"+flux1.str()+" "+tmpStr;
+					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}else{
+					flux1 << cutPoitsCDF[i-1];
+					stringstream flux2;
+					flux2 << cutPoitsCDF[i];
+					tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
+					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
+				}
+			}
+		}
+
+		std::map<LAddress::L3Type, std::list<double> >::iterator it5;
+		for (it5 = contactDurByAddr.begin(); it5 != contactDurByAddr.end(); it5++){
+			std::list<double> durationList = it5->second;
+			double totalDuration = 0;
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				totalDuration+=*it3;
+			}
+			contactDurHist.collect(totalDuration);
+		}
+		contactDurHist.recordAs("Histogram for total contact duration");
+
+		for (it5 = interContactDurByAddr.begin(); it5 != interContactDurByAddr.end(); it5++){
+			std::list<double> durationList = it5->second;
+			double totalDuration = 0;
+			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
+				totalDuration+=*it3;
+			}
+			interContactDurHist.collect(totalDuration);
+		}
+		interContactDurHist.recordAs("Histogram for total interContact duration");
+	}
 }
 
 /*******************************************************************
@@ -1700,6 +1972,31 @@ void ProphetV2::recordPredsStats()
 	predsMean.record(mean);
 	predsVariance.record(variance);
 
+	std::map<LAddress::L3Type, int >::iterator it;
+	std::map<LAddress::L3Type, cOutVector* >::iterator it3;
+
+	for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
+		if (it->second >= maxForRC){
+			it3 = predsForRC.find(it->first);
+			stringstream flux1;
+			std::string tmpStr;
+			cOutVector* tmp;
+			if (it3 == predsForRC.end()){
+				flux1 << it2->first;
+				tmpStr = "Evolution of Preds for RC of @"+ flux1.str();
+				tmp = new cOutVector(tmpStr.c_str());
+			}else{
+				tmp = it3->second;
+			}
+			it2 = preds.find(it->first);
+			if (it2 == preds.end()){
+				tmp->record(0);
+			}else{
+				tmp->record(it2->second);
+			}
+			predsForRC[it->first] = tmp;
+		}
+	}
 }
 
 void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
@@ -1712,7 +2009,8 @@ void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
 
 void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 {
-	sumOfContactDur+=time - contacts.find(addr)->second;
+	double duration = time - contacts.find(addr)->second;
+	sumOfContactDur+=duration;
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
 
 	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
@@ -1737,18 +2035,91 @@ void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 
 		contacts.erase(addr);
 		contactState.erase(addr);
+
+		endContactTime[addr] = time;
+
+		std::map<LAddress::L3Type, int>::iterator it2 = nbrRepeatedContact.find(addr);
+		int nbrReContact;
+		if (it2 != nbrRepeatedContact.end()){
+			nbrReContact = it2->second;
+			std::map<int, std::list<double> >::iterator it3 = contactDurForRC.find(nbrReContact);
+			std::list<double> durationList;
+			if (it3 != contactDurForRC.end()){
+				durationList = it3->second;
+			}
+			durationList.push_back(duration);
+			contactDurForRC[nbrReContact] = durationList;
+
+			std::map<LAddress::L3Type, std::list<double> >::iterator it4 = contactDurByAddr.find(addr);
+			std::list<double> durationListByAddr;
+			if (it4 != contactDurByAddr.end()){
+				durationListByAddr = it4->second;
+			}
+			durationListByAddr.push_back(duration);
+			contactDurByAddr[addr] = durationListByAddr;
+		}
+
+		it2 = nbrContactsForRC.find(addr);
+		int nbrContactSince = 0;
+		if (it2 == nbrContactsForRC.end()){
+			nbrContactSince = nbrContacts - 0;
+		}else{
+			nbrContactSince = nbrContacts - nbrContactsForRC[addr];
+		}
+		nbrContactsForRC[addr] = nbrContactSince;
+		nbrContactsForRCVect.record(nbrContactSince);
 	}
 }
 
 void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
 {
-	std::map<LAddress::L3Type, double>::iterator it = lastEncouterTime.find(addr);
-	if (it != lastEncouterTime.end()){
+	std::map<LAddress::L3Type, double>::iterator it = endContactTime.find(addr);
+	double duration = 0;
+	if (it != endContactTime.end()){
 		// updating nbr repeated contacts nodes
 		nbrRecontacts++;
 		// updating vector stats for recontacted nodes
-		sumOfInterContactDur+=time - it->second;
+		duration = time - it->second;
+
+		sumOfInterContactDur+=duration;
 		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
+
+		std::map<LAddress::L3Type, int>::iterator it2 = nbrRepeatedContact.find(addr);
+
+		int nbrReContact;
+		if (it2 == nbrRepeatedContact.end()){
+			nbrReContact = 1;
+		}else{
+			nbrReContact = it2->second;
+			nbrReContact++;
+		}
+		nbrRepeatedContact[addr] = nbrReContact;
+
+		std::map<int, std::list<double> >::iterator it3 = interContactDurForRC.find(nbrReContact);
+		std::list<double> durationList;
+		if (it3 != interContactDurForRC.end()){
+			durationList = it3->second;
+		}
+		durationList.push_back(duration);
+		interContactDurForRC[nbrReContact] = durationList;
+
+		std::map<LAddress::L3Type, std::list<double> >::iterator it4 = interContactDurByAddr.find(addr);
+		std::list<double> durationListByAddr;
+		if (it4 != interContactDurByAddr.end()){
+			durationListByAddr = it4->second;
+		}
+		durationListByAddr.push_back(duration);
+		interContactDurByAddr[addr] = durationListByAddr;
+
+		it2 = nbrContactsForRC.find(addr);
+		int nbrContactSince = 0;
+		if (it2 == nbrContactsForRC.end()){
+			nbrContactSince = nbrContacts - 0;
+		}else{
+			nbrContactSince = nbrContacts - nbrContactsForRC[addr];
+		}
+		nbrContactsForRC[addr] = nbrContactSince;
+		nbrContactsForRCVect.record(nbrContactSince);
 	}
 }
 

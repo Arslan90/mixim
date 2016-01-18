@@ -1239,6 +1239,19 @@ void TraCIScenarioManager::commandChangeRouteById(std::string nodeId, std::strin
 	ASSERT(buf.eof());
 }
 
+void TraCIScenarioManager::commandChangeTarget(std::string nodeId, std::string edgeId)
+{
+	uint8_t variableId = LANE_EDGE_ID;
+	uint8_t variableType = TYPE_STRING;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << edgeId);
+
+//	uint8_t variableId = VAR_SPEED;
+//	uint8_t variableType = TYPE_DOUBLE;
+//	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << speed);
+
+	ASSERT(buf.eof());
+}
+
 bool TraCIScenarioManager::isALoopVehicle(std::string vehicleId)
 {
 	bool isALoopVehicle = false;
@@ -1307,6 +1320,35 @@ std::string TraCIScenarioManager::commandGetRouteId(std::string nodeId)
 
 	uint8_t varId; buf >> varId; //ubyte
 	ASSERT(varId == VAR_ROUTE_ID);
+
+	std::string polyId_r; buf >> polyId_r; //string
+	ASSERT(polyId_r == nodeId);
+
+	uint8_t resType_r; buf >> resType_r;  //ubyte
+	ASSERT(resType_r == TYPE_STRING);
+	buf >> res; //return response
+
+	ASSERT(buf.eof());
+	return res;
+}
+
+std::string TraCIScenarioManager::commandGetVehicleTypeId(std::string nodeId)
+{
+	std::string res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_TYPE) << nodeId);
+
+	// read additional CMD_GET_VEHICLE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_VEHICLE_VARIABLE);
+
+	uint8_t varId; buf >> varId; //ubyte
+	ASSERT(varId == VAR_TYPE);
 
 	std::string polyId_r; buf >> polyId_r; //string
 	ASSERT(polyId_r == nodeId);

@@ -79,12 +79,13 @@ void VEHICLEpOpp::initialize(int stage) {
 		// added by me for testing
 		dtnTestMode = par("dtnTestMode").boolValue();
 		dtnSynchronized = par("dtnSynchronized").boolValue();
+		nbrBundleSent = 0;
+		nbrBundleReceived = 0;
 		if (dtnTestMode){
 			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
 			dtnTestCycle = par("dtnTestCycle");
 			dtnTestMaxTime = par("dtnTestMaxTime");
-			nbrBundleSent = 0;
-			nbrBundleReceived = 0;
+
 			sectorMode = par("sectorMode").boolValue();
 			anyVPA = par("updateMode").boolValue();
 		}
@@ -184,7 +185,7 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
 
     	// check if the sector changed
     	if (sectorMode){
-    		if (currentSector != oldSector){
+    		if ((dtnTestMode) && (currentSector != oldSector)){
     			scheduleAt(simTime(), dtnTestMsg);
 				nbrMsgSent++;
     		}
