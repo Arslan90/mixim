@@ -122,6 +122,9 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
+
+	int delayed;
+
 	/** delivery predictability max value */
 	double PEncMax;
 	/** delivery predictability initialization constant*/
@@ -210,7 +213,11 @@ private:
 
 	int maxPcktLength;
 
+	bool dontFragment;
+
 	int dataLength;
+
+	std::vector<double> cutPoitsCDF;
 
 	/*
 	 * Threshold for Interval of time between first and last preds
@@ -240,6 +247,13 @@ private:
 
 	cOutVector *predsMeanCommunities;
 
+//	cOutVector *predsForRC;
+
+	std::map<LAddress::L3Type, cOutVector* > predsForRC;
+
+	cOutVector nbrContactsForRCVect;
+	std::map<LAddress::L3Type, int > nbrContactsForRC;
+
 	double sumOfContactDur;
 
 	int nbrContacts;
@@ -247,6 +261,8 @@ private:
 	cOutVector contactDurVector;
 
 	std::map<LAddress::L3Type, double> contacts;
+
+	std::map<LAddress::L3Type, double> endContactTime;
 
 	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
 
@@ -320,17 +336,25 @@ private:
 	 */
 
 	std::map<LAddress::L3Type, int > nbrRepeatedContact;
-	cLongHistogram histRepeatedContact;
+	cLongHistogram histMaxRepeatedContact;
+
+	int maxForRC;
 
 	/*
 	 * contact duration for RepeatedContact (RC)
 	 */
 	std::map<int, std::list<double> > contactDurForRC;
 
+	std::map<LAddress::L3Type, std::list<double> > contactDurByAddr;
+	cLongHistogram contactDurHist;
+
 	/*
 	 * Intercontact duration for RepeatedContact (RC)
 	 */
 	std::map<int, std::list<double> > interContactDurForRC;
+
+	std::map<LAddress::L3Type, std::list<double> > interContactDurByAddr;
+	cLongHistogram interContactDurHist;
 
 	/*******************************************************************
 	** 							end of metrics variables section

@@ -258,7 +258,8 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 				newT_rank = g_rank;
 			}else {
 				while ((newT_rank == -1) || (newT_rank == t_rank) || (newT_rank == g_rank)){
-					newT_rank = rand() % nbrCommunities;
+					newT_rank = intuniform(0,nbrCommunities-1);
+//					newT_rank = rand() % nbrCommunities;
 				}
 			}
 		}else {
@@ -269,7 +270,8 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 				newT_rank = c_rank;
 			}else {
 				while ((newT_rank == -1) || (newT_rank == t_rank) || (newT_rank == g_rank)){
-					newT_rank = rand() % nbrCommunities;
+					newT_rank = intuniform(0,nbrCommunities-1);
+//					newT_rank = rand() % nbrCommunities;
 				}
 			}
 		}

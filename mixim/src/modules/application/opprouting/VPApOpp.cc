@@ -348,19 +348,16 @@ int VPApOpp::vpaDestAddr()
 	int numberVPA = systemModule->par("numeroNodes");
 
 	do {
-		vpaDestAddr = rand() % numberVPA;
-	}while (vpaDestAddr == netwAddr);
-//	while (vpaDestAddr == netwAddr){
-//		vpaDestAddr = rand() % numberVPA;
-//	}
-	cModule *vpa = systemModule->getSubmodule("VPA", vpaDestAddr);
-	if (vpa!=NULL){
-		cModule *netw = vpa->getSubmodule("netw");
-		if (netw!=NULL){
-			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
-			vpaDestAddr = baseNetw->getMyNetwAddr();
+		vpaDestAddr = intuniform(0,numberVPA-1);
+		cModule *vpa = systemModule->getSubmodule("VPA", vpaDestAddr);
+		if (vpa!=NULL){
+			cModule *netw = vpa->getSubmodule("netw");
+			if (netw!=NULL){
+				BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+				vpaDestAddr = baseNetw->getMyNetwAddr();
+			}
 		}
-	}
+	}while (vpaDestAddr == netwAddr);
 	return vpaDestAddr;
 }
 
