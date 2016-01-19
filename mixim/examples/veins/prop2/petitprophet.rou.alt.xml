@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+
+<!-- generated on Tue Nov 25 17:19:48 2014 by SUMO duarouter Version 0.13.1
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="petitprophet.net.xml"/>
+        <flow-files value="flow.xml"/>
+    </input>
+
+    <output>
+        <output-file value="petitprophet.rou.xml"/>
+    </output>
+
+    <processing>
+        <ignore-errors value="true"/>
+        <unsorted-input value="true"/>
+    </processing>
+
+    <time>
+        <begin value="0"/>
+        <end value="600"/>
+    </time>
+
+    <report>
+        <verbose value="true"/>
+    </report>
+
+</configuration>
