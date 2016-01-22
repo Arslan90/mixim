@@ -1,0 +1,7 @@
+start of the simulation : samedi 31 octobre 2015, 23:24:46 (UTC+0100)
+commit 558238ddebbb03ff23e616c23c4fd857c4410e9e
+Author: Arslan90 <hc.arslan90@gmail.com>
+Date:   Sat Oct 31 22:06:33 2015 +0100
+
+    Correcting bug related to integer overflow with CantorPairingFunction
+end of the simulation : dimanche 1 novembre 2015, 16:44:18 (UTC+0100)

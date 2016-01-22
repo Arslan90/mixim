@@ -1,0 +1,9 @@
+start of the simulation : mercredi 22 juillet 2015, 19:44:49 (UTC+0200)
+commit e0d55ed3878cce81f5e2a0d68dfbb28a302154af
+Author: Arslan90 <hc.arslan90@gmail.com>
+Date:   Mon Jul 20 16:47:34 2015 +0100
+
+    - New branch for a convergeCastProtocol inspired from PRoPHETv2
+    (proposal 2)
+    - Adding some fixes for PRoPHETv2 protocol (related to filtering of
+    Bundle_Offer and Bundle_Response)

@@ -1,0 +1,191 @@
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+DEBUG:root:Logging to /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/logSumo.log
+INFO:root:Listening on port 9997
+INFO:root:Detaching to run as daemon
+INFO:root:Fork successful. PID is 18933
+DEBUG:root:Connection from 127.0.0.1 on port 55907
+DEBUG:root:Handling connection from 127.0.0.1 on port 55907
+DEBUG:root:Got TraCI message of length 2
+DEBUG:root:Got TraCI command of length 1
+DEBUG:root:Got TraCI command 0x0
+DEBUG:root:Got CMD_GETVERSION
+DEBUG:root:Got TraCI message of length 288
+DEBUG:root:Got TraCI command of length 283
+DEBUG:root:Got TraCI command 0x75
+DEBUG:root:Got CMD_FILE_SEND for "sumo-launchd.launch.xml"
+DEBUG:root:Got CMD_FILE_SEND with data "<launch>
+  <copy file="cologne.net.xml"/>
+  <copy file="cologne1-3.rou.xml"/>
+  <copy file="cologne.sumo.cfg" type="config"/>
+  <basedir path="/home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/"/>
+  <seed value="0"/>
+</launch>
+"
+DEBUG:root:Creating temporary directory...
+DEBUG:root:Temporary dir is /tmp/sumo-launchd-tmp-Fz14IW
+DEBUG:root:Base dir is /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/cologne2H/
+DEBUG:root:Seed is 0
+DEBUG:root:Finding free port number...
+DEBUG:root:Claiming lock on port
+DEBUG:root:...found port 32942
+INFO:root:Starting SUMO (sumo -c cologne.sumo.cfg) on port 32942, seed 0
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 1)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 2)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 3)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 4)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 5)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 6)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 7)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 8)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 9)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 10)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 11)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 12)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 13)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 14)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 15)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 16)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 17)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 18)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 19)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 20)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 21)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 22)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 23)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 24)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 25)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 26)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 27)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 28)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 29)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 32942 (try 30)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Releasing lock on port
+DEBUG:root:Not cleaning up /tmp/sumo-launchd-tmp-Fz14IW
+DEBUG:root:Result: "None"
+ERROR:root:Aborting on error: [Errno 111] Connection refused
+DEBUG:root:Closing connection from 127.0.0.1 on port 55907
+DEBUG:root:Connection from 127.0.0.1 on port 55949
+DEBUG:root:Handling connection from 127.0.0.1 on port 55949
+DEBUG:root:Got TraCI message of length 2
+DEBUG:root:Got TraCI command of length 1
+DEBUG:root:Got TraCI command 0x0
+DEBUG:root:Got CMD_GETVERSION
+DEBUG:root:Got TraCI message of length 274
+DEBUG:root:Got TraCI command of length 269
+DEBUG:root:Got TraCI command 0x75
+DEBUG:root:Got CMD_FILE_SEND for "sumo-launchd.launch.xml"
+DEBUG:root:Got CMD_FILE_SEND with data "<launch>
+  <copy file="cologne.net.xml"/>
+  <copy file="cologne1-3.rou.xml"/>
+  <copy file="cologne.sumo.cfg" type="config"/>
+  <basedir path="/home/dist/hc.arslan90/mixim/mixim/examples/veins/cologne2H/"/>
+  <seed value="0"/>
+</launch>
+"
+DEBUG:root:Creating temporary directory...
+DEBUG:root:Temporary dir is /tmp/sumo-launchd-tmp-hTv5y3
+DEBUG:root:Base dir is /home/dist/hc.arslan90/mixim/mixim/examples/veins/cologne2H/
+DEBUG:root:Seed is 0
+DEBUG:root:Finding free port number...
+DEBUG:root:Claiming lock on port
+DEBUG:root:...found port 37800
+INFO:root:Starting SUMO (sumo -c cologne.sumo.cfg) on port 37800, seed 0
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 1)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 2)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 3)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 4)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 5)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 6)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 7)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 8)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 9)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 10)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 11)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 12)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 13)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 14)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 15)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 16)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 17)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 18)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 19)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 20)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 21)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 22)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 23)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 24)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 25)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 26)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 27)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 28)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 29)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Connecting to SUMO (sumo -c cologne.sumo.cfg) on port 37800 (try 30)
+DEBUG:root:Error ([Errno 111] Connection refused)
+DEBUG:root:Releasing lock on port
+DEBUG:root:Not cleaning up /tmp/sumo-launchd-tmp-hTv5y3
+DEBUG:root:Result: "None"
+ERROR:root:Aborting on error: [Errno 111] Connection refused
+DEBUG:root:Closing connection from 127.0.0.1 on port 55949

@@ -1,0 +1,19 @@
+0: ./veins -f /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples/veins/petite3600_ACKInFavour/prophet.omnetpp.ini -u Cmdenv -c General -r 0
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: Loading NED files from /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/src/modules: 85
+0: Loading NED files from /home/dist/hc.arslan90/omnetpp-4.2/samples/mixim/examples: 45
+0: 
+0: Preparing for running configuration General, run #0...
+0: Scenario: $seed=0, $repetition=0
+0: Assigned runID=General-0-20150131-14:34:02-20683
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: Initializing...
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2

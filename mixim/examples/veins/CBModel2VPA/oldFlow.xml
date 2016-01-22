@@ -1,0 +1,33 @@
+<flows>
+<vType id="C0" sigma="0"/>
+<vType id="C1" sigma="0"/>
+<flow id="C0toG"  from="0/5to1/5"  to="5/3to6/3"   number="40" begin="0" end="7200" type="C0"/>
+<flow id="C1toG"  from="3/6to3/5"  to="5/3to5/2"   number="40" begin="0" end="7200" type="C1"/>
+<flow id="C2toG"  from="5/6to5/5"  to="5/3to5/2"   number="40" begin="0" end="7200" />
+<flow id="C3toG"  from="7/6to7/5"  to="5/3to5/2"   number="40" begin="0" end="7200" />
+<flow id="C4toG"  from="10/5to9/5" to="5/3to4/3"   number="40" begin="0" end="7200" />
+<flow id="C5toG"  from="0/3to1/3"  to="5/3to6/3"   number="40" begin="0" end="7200" />
+<flow id="C6toG"  from="2/3to3/3"  to="5/3to6/3"   number="40" begin="0" end="7200" />
+<flow id="C8toG"  from="8/3to7/3"  to="5/3to4/3"   number="40" begin="0" end="7200" />
+<flow id="C9toG"  from="10/3to9/3" to="5/3to4/3"   number="40" begin="0" end="7200" />
+<flow id="C10toG" from="0/1to1/1"  to="5/3to6/3"   number="40" begin="0" end="7200" />
+<flow id="C11toG" from="3/0to3/1"  to="5/3to5/4"   number="40" begin="0" end="7200" />
+<flow id="C12toG" from="5/0to5/1"  to="5/3to5/4"   number="40" begin="0" end="7200" />
+<flow id="C13toG" from="7/0to7/1"  to="5/3to5/4"   number="40" begin="0" end="7200" />
+<flow id="C14toG" from="10/1to9/1" to="5/3to4/3"   number="40" begin="0" end="7200" />
+<flow id="GtoC0"  from="5/3to4/3"  to="1/5to0/5"   number="40" begin="0" end="7200" type="C0"/>
+<flow id="GtoC1"  from="5/3to5/4"  to="3/5to3/6"   number="40" begin="0" end="7200" type="C1"/>
+<flow id="GtoC2"  from="5/3to5/4"  to="5/5to5/6"   number="40" begin="0" end="7200" />
+<flow id="GtoC3"  from="5/3to5/4"  to="7/5to7/6"   number="40" begin="0" end="7200" />
+<flow id="GtoC4"  from="5/3to6/3"  to="9/5to10/5"  number="40" begin="0" end="7200" />
+<flow id="GtoC5"  from="5/3to4/3"  to="1/3to0/3"   number="40" begin="0" end="7200" />
+<flow id="GtoC6"  from="5/3to4/3"  to="3/3to2/3"   number="40" begin="0" end="7200" />
+<flow id="GtoC8"  from="5/3to6/3"  to="7/3to8/3"   number="40" begin="0" end="7200" />
+<flow id="GtoC9"  from="5/3to6/3"  to="9/3to10/3"  number="40" begin="0" end="7200" />
+<flow id="GC10"   from="5/3to4/3"  to="1/1to0/1"   number="40" begin="0" end="7200" />
+<flow id="GC11"   from="5/3to5/2"  to="3/1to3/0"   number="40" begin="0" end="7200" />
+<flow id="GC12"   from="5/3to5/2"  to="5/1to5/0"   number="40" begin="0" end="7200" />
+<flow id="GC13"   from="5/3to5/2"  to="7/1to7/0"   number="40" begin="0" end="7200" />
+<flow id="GC14"   from="5/3to6/3"  to="9/1to10/1"  number="40" begin="0" end="7200" />
+</flows>
+

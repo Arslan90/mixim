@@ -1,0 +1,98 @@
+0: -r 0..4 expands to: 0 1 2 3 4
+0: /tmp/filefvK6g9 created
+0: running make -j5 -f /tmp/filefvK6g9...
+0: ./veins -f /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/prophet.omnetpp.ini -u Cmdenv -c General -r 0
+0: ./veins -f /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/prophet.omnetpp.ini -u Cmdenv -c General -r 1
+0: ./veins -f /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/prophet.omnetpp.ini -u Cmdenv -c General -r 2
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: ./veins -f /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/prophet.omnetpp.ini -u Cmdenv -c General -r 3
+0: ./veins -f /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/prophet.omnetpp.ini -u Cmdenv -c General -r 4
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: OMNeT++ Discrete Event Simulation  (C) 1992-2011 Andras Varga, OpenSim Ltd.
+0: Version: 4.2, build: 111116-7631e2d, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+0: See the license for distribution terms and warranty disclaimer
+0: Setting up Cmdenv...
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/base: 17
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/modules: 86
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/modules: 86
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/modules: 86
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/modules: 86
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/src/modules: 86
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/examples: 48
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/examples: 48
+0: 
+0: Preparing for running configuration General, run #1...
+0: 
+0: Preparing for running configuration General, run #0...
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/examples: 48
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/examples: 48
+0: 
+0: Preparing for running configuration General, run #2...
+0: 
+0: Preparing for running configuration General, run #3...
+0: Loading NED files from /home/dist/hc.arslan90/mixim/mixim/examples: 48
+0: Scenario: $repetition=3
+0: Assigned runID=General-3-20150722-19:44:50-2478
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: Scenario: $repetition=1
+0: Assigned runID=General-1-20150722-19:44:50-2475
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: 
+0: Preparing for running configuration General, run #4...
+0: Scenario: $repetition=4
+0: Assigned runID=General-4-20150722-19:44:50-2480
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: Scenario: $repetition=2
+0: Assigned runID=General-2-20150722-19:44:50-2477
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: Scenario: $repetition=0
+0: Assigned runID=General-0-20150722-19:44:50-2473
+0: Setting up network `org.mixim.examples.veins.scenarioOpp'...
+0: Initializing...
+0: Initializing...
+0: Initializing...
+0: Initializing...
+0: Initializing...
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2
+0: 
+0: Running simulation...
+0: ** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+0:      Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+0:      Messages:  created: 7   present: 7   in FES: 2

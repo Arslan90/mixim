@@ -1,0 +1,22 @@
+0: Logging to /home/dist/hc.arslan90/mixim/mixim/examples/veins/petite2HS5_Ack/logSumo
+0: Traceback (most recent call last):
+0:   File "./sumo-launchd.py", line 675, in <module>
+0:     main()
+0:   File "./sumo-launchd.py", line 670, in main
+0:     wait_for_connections(options.command, options.shlex, options.port, options.bind, options.daemonize, options.kill, options.pidfile, options.keep_temp)
+0:   File "./sumo-launchd.py", line 541, in wait_for_connections
+0:     listener.bind((bind_address, sumo_port))
+0:   File "/usr/lib/python2.7/socket.py", line 224, in meth
+0:     return getattr(self._sock,name)(*args)
+0: socket.error: [Errno 98] Address already in use
+0: rm: impossible de supprimer « nic/*.txt »: Aucun fichier ou dossier de ce type
+0: rm: impossible de supprimer « nic/*.txt »: Aucun fichier ou dossier de ce type
+0: rm: impossible de supprimer « nic/*.txt »: Aucun fichier ou dossier de ce type
+0: rm: impossible de supprimer « nic/*.txt »: Aucun fichier ou dossier de ce type
+0: rm: impossible de supprimer « nic/*.txt »: Aucun fichier ou dossier de ce type
+srun: Job step aborted: Waiting up to 2 seconds for job step to finish.
+srun: got SIGCONT
+slurmd[magi27]: *** JOB 164971 CANCELLED AT 2015-07-22T20:03:01 ***
+srun: forcing job termination
+0: slurmd[magi27]: *** STEP 164971.0 CANCELLED AT 2015-07-22T20:03:01 ***
+srun: error: magi27: task 0: Terminated

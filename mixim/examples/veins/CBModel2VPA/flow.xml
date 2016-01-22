@@ -1,0 +1,30 @@
+<flows>
+<vType id="C0" sigma="0"/>
+<vType id="C1" sigma="0"/>
+<vType id="C2" sigma="0"/>
+<vType id="C3" sigma="0"/>
+<vType id="C4" sigma="0"/>
+<vType id="C5" sigma="0"/>
+<vType id="C6" sigma="0"/>
+<vType id="C8" sigma="0"/>
+<vType id="C9" sigma="0"/>
+<vType id="C10" sigma="0"/>
+<vType id="C11" sigma="0"/>
+<vType id="C12" sigma="0"/>
+<vType id="C13" sigma="0"/>
+<vType id="C14" sigma="0"/>
+<flow id="C0toG"  from="0/5to1/5"  to="5/3to6/3"   number="40" begin="0" end="7200" type="C0" color="0,125,0"/>
+<flow id="C1toG"  from="3/6to3/5"  to="5/3to5/2"   number="40" begin="0" end="7200" type="C1" color="0,125,125"/>
+<flow id="C2toG"  from="5/6to5/5"  to="5/3to5/2"   number="40" begin="0" end="7200" type="C2" color="125,125,0"/>
+<flow id="C3toG"  from="7/6to7/5"  to="5/3to5/2"   number="40" begin="0" end="7200" type="C3" color="125,125,125"/>
+<flow id="C4toG"  from="10/5to9/5" to="5/3to4/3"   number="40" begin="0" end="7200" type="C4" color="0,125,255"/>
+<flow id="C5toG"  from="0/3to1/3"  to="5/3to6/3"   number="40" begin="0" end="7200" type="C5" color="0,255,255"/>
+<flow id="C6toG"  from="2/3to3/3"  to="5/3to6/3"   number="40" begin="0" end="7200" type="C6" color="255,125,255"/>
+<flow id="C8toG"  from="8/3to7/3"  to="5/3to4/3"   number="40" begin="0" end="7200" type="C8" color="50,125,0"/>
+<flow id="C9toG"  from="10/3to9/3" to="5/3to4/3"   number="40" begin="0" end="7200" type="C9" color="0,125,50"/>
+<flow id="C10toG" from="0/1to1/1"  to="5/3to6/3"   number="40" begin="0" end="7200" type="C10" color="0,25,50"/>
+<flow id="C11toG" from="3/0to3/1"  to="5/3to5/4"   number="40" begin="0" end="7200" type="C11" color="75,25,50"/>
+<flow id="C12toG" from="5/0to5/1"  to="5/3to5/4"   number="40" begin="0" end="7200" type="C12" color="75,125,0"/>
+<flow id="C13toG" from="7/0to7/1"  to="5/3to5/4"   number="40" begin="0" end="7200" type="C13" color="0,125,20"/>
+<flow id="C14toG" from="10/1to9/1" to="5/3to4/3"   number="40" begin="0" end="7200" type="C14" color="0,125,200"/>
+</flows>

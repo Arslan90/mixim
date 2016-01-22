@@ -1,0 +1,5 @@
+# Partial Tkenv config file -- see $HOME/.tkenvrc as well
+inspector "scenarioOpp" "scenarioOpp" "2" "607x337+674+148:normal"
+inspector "scenarioOpp.VPA[0]" "RsuOpp" "1" "460x314+388+225:normal"
+inspector "scenarioOpp.VPA[1]" "RsuOpp" "1" "460x314+73+85:normal"
+

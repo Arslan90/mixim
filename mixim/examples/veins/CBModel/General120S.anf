@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/mixim/examples/veins/CBModel/results/120S-General-*.vec"/>
+    <inputs name="/mixim/examples/veins/CBModel/results/120S-General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Delays for 1st Copy:mean">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].appl) AND name(&quot;Delays for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:BarChart" name="Delays for 1st Copy:mean"/>
+    </datasets>
+    <datasets name="HopCount for 1st Copy:mean">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].appl) AND name(&quot;HopCount for 1st Copy:mean&quot;)"/>
+      <items xsi:type="scave:BarChart" name="HopCount for 1st Copy:mean"/>
+    </datasets>
+    <datasets name="General  #0">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:BarChart" name="General  #0"/>
+    </datasets>
+    <datasets name="Mean Predictions for Community 7">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Mean Predictions for Community 7"/>
+    </datasets>
+    <datasets name="Mean Predictions for Community 7 (neigbhors communities)">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Mean Predictions for Community 7 (neigbhors communities)"/>
+    </datasets>
+    <datasets name="Mean Predictions for Community 7 (all nodes)">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[7].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[13].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[8].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[10].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[5].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[12].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[2].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[6].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[11].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[4].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[0].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[9].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[1].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[3].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[17].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[21].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[15].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[19].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[23].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[27].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[26].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[25].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[18].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[14].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[16].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[22].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[24].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[20].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[37].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[36].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[41].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[38].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[34].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[39].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[40].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[31].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[28].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[33].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[32].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[35].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[29].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[30].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[53].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[54].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[44].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[51].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[55].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[43].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[47].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[48].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[42].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[46].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[45].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[52].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[49].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[50].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[67].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[68].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[69].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[58].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[62].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[63].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[57].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[64].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[66].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[65].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[60].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[56].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[61].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[59].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[81].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[82].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[77].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[79].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[71].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[78].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[80].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[83].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[73].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[75].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[72].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[70].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[74].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[76].netw) AND name(&quot;Mean Predictions for Community 7&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Mean Predictions for Community 7 (all nodes)" lineNameFormat="">
+        <properties name="Symbols.Size" value="2"/>
+      </items>
+    </datasets>
+    <datasets name="Evolution of contact duration mean">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[2].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[3].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[6].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[7].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[8].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[0].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[1].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[4].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[5].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[9].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[4].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[10].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[11].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[12].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[13].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[16].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[17].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[20].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[21].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[22].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[14].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[15].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[18].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[19].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[23].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[24].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[25].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[26].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[27].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[30].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[31].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[34].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[35].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[36].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[28].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[29].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[32].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[33].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[37].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[38].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[39].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[40].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[41].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[53].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[54].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[44].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[45].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[48].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[49].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[50].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[42].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[43].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[46].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[47].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[51].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[52].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[55].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[67].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[68].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[58].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[59].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[62].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[63].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[64].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[56].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[57].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[60].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[61].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[65].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[66].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[69].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[81].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[82].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[71].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[73].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[72].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[76].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[77].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[78].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[70].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[74].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[75].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[79].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[80].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[83].netw) AND name(&quot;Evolution of contact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Evolution of contact duration mean" lineNameFormat="">
+        <properties name="Symbols.Size" value="2"/>
+      </items>
+    </datasets>
+    <datasets name="Evolution of intercontact duration mean">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[7].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[2].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[11].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[6].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[12].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[8].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[8].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[2].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[6].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[13].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[10].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[21].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[4].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[12].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[7].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[17].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[25].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[26].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[5].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[1].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[0].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[18].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[20].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[27].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[24].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[3].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[13].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[5].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[9].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[22].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[35].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[39].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[23].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[15].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[14].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[36].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[34].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[49].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[19].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[16].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[11].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[41].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[30].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[45].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[9].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[53].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[33].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[40].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[29].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[56].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[46].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[3].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[64].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[31].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[14].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[48].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[10].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[37].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[67].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[50].netw) AND name(&quot;Evolution of intercontact duration mean&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Evolution of intercontact duration mean" lineNameFormat="">
+        <properties name="Symbols.Size" value="2"/>
+      </items>
+    </datasets>
+    <datasets name="Mean Predictions for Community 0 for Vehs of C0">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[0].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[14].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[28].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[42].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[56].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.node[72].netw) AND name(&quot;Mean Predictions for Community 0&quot;)" type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="Mean Predictions for Community 0 for Vehs of C0"/>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="CBModel" charts="//@datasets/@datasets.0/@items.15 //@datasets/@datasets.2/@items.45 //@datasets/@datasets.1/@items.15"/>
+    <chartSheets name="Community 7" charts="//@datasets/@datasets.3/@items.15 //@datasets/@datasets.5/@items.99 //@datasets/@datasets.4/@items.5"/>
+    <chartSheets name="Contact &amp; Intercontact Durations" charts="//@datasets/@datasets.6/@items.99 //@datasets/@datasets.7/@items.61"/>
+    <chartSheets name="" charts="//@datasets/@datasets.8/@items.6"/>
+  </chartSheets>
+</scave:Analysis>
