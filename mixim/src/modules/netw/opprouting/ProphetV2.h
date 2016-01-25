@@ -249,7 +249,7 @@ private:
 
 //	cOutVector *predsForRC;
 
-	std::map<LAddress::L3Type, cOutVector* > predsForRC;
+	cOutVector predsForRC;
 
 	cOutVector nbrContactsForRCVect;
 	std::map<LAddress::L3Type, int > nbrContactsForRC;

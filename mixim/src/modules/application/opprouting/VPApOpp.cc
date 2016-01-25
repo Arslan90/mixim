@@ -113,7 +113,6 @@ void VPApOpp::initialize(int stage) {
 		}
 
 	}else if (stage == 2){
-
 		cModule *netw = this->getParentModule()->getSubmodule("netw");
 		if (netw!=NULL){
 			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
@@ -149,12 +148,12 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 		case SEND_BEACON_EVT: {
 			DBG << "logs, VPA self MESSAGE" << endl;
 
-	        sendVPApBroadcast(messageSequence++); //Sending periodic VPA Beacon (BROADCAST_MESSAGE) with broadcast counter.
+			//sendVPApBroadcast(messageSequence++); //Sending periodic VPA Beacon (BROADCAST_MESSAGE) with broadcast counter.
 
 			//Reschedule the self-message
-			scheduleAt(simTime() + T, sendBeaconEvt);
+			//scheduleAt(simTime() + T, sendBeaconEvt);
 	        EV <<"logs, T time: " << T <<endl;
-	        nbrBundleSent++;
+	        //nbrBundleSent++;
 			break;
 		}
 		case UPDATE: {
@@ -201,7 +200,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 			receivedBundles.insert(std::pair<unsigned long long ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
 
-			vehiclesAddr.insert(wsm->getSenderAddress());
+			vehiclesAddr.insert(netw->getSrcAddr());
 			int currentVehDensity = vehiclesAddr.size();
 			vehicleDensity.record(currentVehDensity);
 

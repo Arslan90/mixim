@@ -138,7 +138,6 @@ void ProphetV2::initialize(int stage)
 	    sumOfInterContactDur = 0.0;
 	    intercontactDurVector.setName("Evolution of intercontact duration mean");
 
-
 	    nbrSuccessfulContact = 0;
         nbrFailedContactBeforeRIB = 0;
         nbrFailedContactAtRIB= 0;
@@ -165,6 +164,7 @@ void ProphetV2::initialize(int stage)
 	}
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
+		predsForRC.setName("Evolution of Preds for RC GQ Max");
 	}
 	else if (stage==2){
 		cModule *systemModule = this->getParentModule();
@@ -1690,7 +1690,7 @@ void ProphetV2::finish()
 //	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
 //	recordScalar("# successful contacts", nbrSuccessfulContact);
 //
-//	recordScalar("# Bundles at L3", bundlesReceived);
+	recordScalar("# Bundles at L3", bundlesReceived);
 //
 //	if (withAck){
 //		recordScalar("# ACKs", acks.size());
@@ -2020,28 +2020,24 @@ void ProphetV2::recordPredsStats()
 	std::map<LAddress::L3Type, int >::iterator it;
 	std::map<LAddress::L3Type, cOutVector* >::iterator it3;
 
+	double total = 0;
+	int nbrEntries = 0;
 	for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
 		if (it->second >= maxForRC){
-			it3 = predsForRC.find(it->first);
-			stringstream flux1;
-			std::string tmpStr;
-			cOutVector* tmp;
-			if (it3 == predsForRC.end()){
-				flux1 << it2->first;
-				tmpStr = "Evolution of Preds for RC of @"+ flux1.str();
-				tmp = new cOutVector(tmpStr.c_str());
-			}else{
-				tmp = it3->second;
-			}
+			int tmp = 0;
 			it2 = preds.find(it->first);
-			if (it2 == preds.end()){
-				tmp->record(0);
-			}else{
-				tmp->record(it2->second);
+			if (it2 != preds.end()){
+				tmp = it2->second;
 			}
-			predsForRC[it->first] = tmp;
+			total+=tmp;
+			nbrEntries++;
 		}
 	}
+	double meanPredsForRC = 0;
+	if (nbrEntries > 0 ){
+		meanPredsForRC = total / (double) nbrEntries;
+	}
+	predsForRC.record(meanPredsForRC);
 }
 
 void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
