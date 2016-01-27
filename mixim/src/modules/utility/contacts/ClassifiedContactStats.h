@@ -17,7 +17,6 @@
 #define CLASSIFIEDCONTACTSTATS_H_
 
 #include "SimpleContactStats.h"
-//#include "ContactStats.h"
 #include "chistogram.h"
 #include "string"
 #include "csimulation.h"

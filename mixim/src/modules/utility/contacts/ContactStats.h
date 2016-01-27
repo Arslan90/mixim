@@ -26,11 +26,90 @@ protected:
 	int bundleReceived;
 	int predictionsSent;
 	int predictionsReceived;
+	int offerSent;
+	int offerReceived;
+	int acceptSent;
+	int acceptReceived;
+	/*
+	 * Counter for nbr bundle offered and already acked
+	 */
+	int nbrAlreadyAcked;
+
 public:
 	ContactStats();
 	virtual ~ContactStats();
 
-	int getAckReceived() const
+	int getNbrAlreadyAcked() const
+    {
+        return nbrAlreadyAcked;
+    }
+
+    void setNbrAlreadyAcked(int nbrAlreadyAcked)
+    {
+        this->nbrAlreadyAcked+= nbrAlreadyAcked;
+    }
+
+    int getAcceptReceived() const
+    {
+        return acceptReceived;
+    }
+
+    int getAcceptSent() const
+    {
+        return acceptSent;
+    }
+
+    int getOfferReceived() const
+    {
+        return offerReceived;
+    }
+
+    int getOfferSent() const
+    {
+        return offerSent;
+    }
+
+    void setAcceptReceived(int acceptReceived)
+    {
+        this->acceptReceived+= acceptReceived;
+    }
+
+    void setAcceptSent(int acceptSent)
+    {
+        this->acceptSent+= acceptSent;
+    }
+
+    void setOfferReceived(int offerReceived)
+    {
+        this->offerReceived+= offerReceived;
+    }
+
+    void setOfferSent(int offerSent)
+    {
+        this->offerSent+= offerSent;
+    }
+
+    void setAcceptReceived()
+    {
+        this->acceptReceived++;
+    }
+
+    void setAcceptSent()
+    {
+        this->acceptSent++;
+    }
+
+    void setOfferReceived()
+    {
+        this->offerReceived++;
+    }
+
+    void setOfferSent()
+    {
+        this->offerSent++;
+    }
+
+    int getAckReceived() const
     {
         return ackReceived;
     }

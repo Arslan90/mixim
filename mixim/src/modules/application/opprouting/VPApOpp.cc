@@ -74,10 +74,12 @@ void VPApOpp::initialize(int stage) {
     	 */
 
 		sendBeaconEvt = new cMessage("beacon evt", SEND_BEACON_EVT);
+		nbrBundleSent = 0;
+		nbrBundleReceived = 0;
+		nbrUniqueBundleReceived = 0;
+
+//		dtnSynchronized = par("dtnSynchronized").boolValue();
 		if (dtnTestMode){
-			nbrBundleSent = 0;
-			nbrBundleReceived = 0;
-			nbrUniqueBundleReceived = 0;
 			avgDelay = 0;
 			totalDelay = 0;
 			/*

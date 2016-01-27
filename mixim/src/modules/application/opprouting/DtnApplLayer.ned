@@ -13,26 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#include "ContactStats.h"
+package org.mixim.modules.application.opprouting;
 
-ContactStats::ContactStats() {
-	// TODO Auto-generated constructor stub
-	L3Sent = 0;
-	L3Received = 0;
-	ackSent= 0;
-	ackReceived= 0;
-	bundleSent= 0;
-	bundleReceived= 0;
-	predictionsSent= 0;
-	predictionsReceived= 0;
-	offerSent= 0;
-	offerReceived= 0;
-	acceptSent= 0;
-	acceptReceived= 0;
-	nbrAlreadyAcked= 0;
+import org.mixim.base.modules.BaseNetwLayer;
+//
+// TODO auto-generated module
+//
+simple DtnApplLayer
+{
+		bool dtnTestMode = default(false); // wheter we are testing DTN
+		int dtnTestCycle = default(5); // cycle of periodic sending dtnMessage
+		int dtnTestMaxTime; // max time for sending dtnMessage
+		bool dtnSynchronized = default(false);
+		
+		bool sectorMode = default(false);
+		bool updateMode = default(false);
 }
-
-ContactStats::~ContactStats() {
-	// TODO Auto-generated destructor stub
-}
-

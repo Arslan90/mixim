@@ -18,7 +18,7 @@
 #include "VEHICLEpOpp.h"
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
-#include "ProphetV2.h"
+#include "DtnNetwLayer.h"
 
 
 Define_Module(VEHICLEpOpp);
@@ -79,6 +79,9 @@ void VEHICLEpOpp::initialize(int stage) {
 		// added by me for testing
 		dtnTestMode = par("dtnTestMode").boolValue();
 		dtnSynchronized = par("dtnSynchronized").boolValue();
+
+		sectorMode = par("sectorMode").boolValue();
+		anyVPA = par("updateMode").boolValue();
 		nbrBundleSent = 0;
 		nbrBundleReceived = 0;
 		if (dtnTestMode){
@@ -86,8 +89,6 @@ void VEHICLEpOpp::initialize(int stage) {
 			dtnTestCycle = par("dtnTestCycle");
 			dtnTestMaxTime = par("dtnTestMaxTime");
 
-			sectorMode = par("sectorMode").boolValue();
-			anyVPA = par("updateMode").boolValue();
 		}
 		oldSector= -1; //start in clean.
 	}
@@ -112,25 +113,20 @@ void VEHICLEpOpp::initialize(int stage) {
 		if (netw!=NULL){
 			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
 			isNetwAddrInit = true;
-			isEquiped = check_and_cast<ProphetV2*>(netw)->isAnEquipedVehicle();
+			isEquiped = check_and_cast<DtnNetwLayer*>(netw)->isAnEquipedVehicle();
 		}
 
+		scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
+		scheduleAt(simTime() + 1, everySecond); //Scheduling the self message.
 
-	        scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
-	        scheduleAt(simTime() + 1, everySecond); //Scheduling the self message.
-
-	        // added by me for testing
-	        if (dtnTestMode){
-	        	double tmp;
-	        	tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
-//	        	tmp =  (dtnSynchronized)? 0 : dblrand() * double(dtnTestCycle) ;
-	        	if ((simTime() + tmp <dtnTestMaxTime) && (!sectorMode)){
-	        		scheduleAt(simTime() + tmp, dtnTestMsg);
-	        	}
-//	        	scheduleAt(simTime(), dtnTestMsg);
-	        }
-
-
+		// added by me for testing
+		if (dtnTestMode){
+			double tmp;
+			tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
+			if ((simTime() + tmp <dtnTestMaxTime) && (!sectorMode)){
+				scheduleAt(simTime() + tmp, dtnTestMsg);
+			}
+		}
 	}
 }
 
@@ -529,7 +525,8 @@ void VEHICLEpOpp::sendDtnMessage()
 {
 //	int addr = vpaDestAddr();
 	whatSectorIm();
-	int addr = vpaDestAddr(currentSector);
+	int addr = vpaDestAddr(0);
+//	int addr = vpaDestAddr(currentSector);
 //	int myAddr = isNetwAddrInit ? netwAddr : myId;
 //	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;

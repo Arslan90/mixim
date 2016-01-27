@@ -5,8 +5,8 @@
  *      Author: arslan
  */
 
+#include "omnetpp.h"
 #include "multiFunctions.h"
-#include "simutil.h"
 
 unsigned long multiFunctions::cantorPairingFunc(const unsigned long x, const unsigned long y){
 		unsigned long result = 0;

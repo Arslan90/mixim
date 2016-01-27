@@ -73,6 +73,11 @@ void ClassifiedContactStats::update(SimpleContactStats* newContact)
 		this->bundleReceived+=newContact->getBundleReceived();
 		this->predictionsSent+=newContact->getPredictionsSent();
 		this->predictionsReceived+=newContact->getPredictionsReceived();
+		this->offerSent+=newContact->getOfferSent();
+		this->offerReceived+=newContact->getOfferReceived();
+		this->acceptSent+=newContact->getAcceptSent();
+		this->acceptReceived+=newContact->getAcceptReceived();
+		this->nbrAlreadyAcked+=newContact->getNbrAlreadyAcked();
 
 		this->durationStats.collect(duration);
 	}
