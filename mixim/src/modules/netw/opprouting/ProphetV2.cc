@@ -538,7 +538,8 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 		// step 3 : adding this bundle to index
 		if (bundlesIndex.count(msg->getRecipientAddress())==0){
 			// no entry for msg->getRecipientAddress())
-			std::map <unsigned long, WaveShortMessage*> inner_map;
+//			std::map <unsigned long, WaveShortMessage*> inner_map;
+			innerIndexMap inner_map;
 			inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 			bundlesIndex.insert(std::pair<LAddress::L3Type, innerIndexMap >(msg->getRecipientAddress(),inner_map));
 		}else {
