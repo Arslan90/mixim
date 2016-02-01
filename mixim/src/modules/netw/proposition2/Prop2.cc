@@ -488,18 +488,19 @@ void Prop2::handleLowerControl(cMessage* msg)
 							// UpdatePreds&Class
 							updateDataWhenCCN(addr);
 							// send directly Bundles To Encountered Node
-							executeListenerRole(Bundle,NULL,addr);
+//							executeListenerRole(Bundle,NULL,addr);
 
 							canIAge = false;
 						}else {
 							// start normal exchange based on IEP
-							executeInitiatorRole(RIB,NULL,addr);
+//							executeInitiatorRole(RIB,NULL,addr);
 						}
 					}else {
 						// nothing to do if VPA (for now)
 					}
 //					/** Starting IEP Phase					*/
 //					executeInitiatorRole(RIB,NULL,addr);
+					executeInitiatorRole(RIB,NULL,addr);
 			}
 			break;
 		case NO_NEIGHBOR_AND_DISCONNECTED:
@@ -899,9 +900,9 @@ void Prop2::executeListenerRole(short  kind, ccProphet *prophetPkt, LAddress::L3
 
 	bool sendBndlToConvergeCastNode = false;
 
-	if ((kind == Bundle) && (destAddr == convergeCastTo)){
-		sendBndlToConvergeCastNode = true;
-	}
+//	if ((kind == Bundle) && (destAddr == convergeCastTo)){
+//		sendBndlToConvergeCastNode = true;
+//	}
 
 	if ((kind == RIB) || sendBndlToConvergeCastNode ){
 		contact = getLastSimpleContactStats(destAddr);
@@ -1172,6 +1173,27 @@ std::list<BundleMeta> Prop2::defineBundleOffer(ccProphet *prophetPkt)
 //		}else{
 //			BClass = Vehicle_Type_II;
 //		}
+
+		// testing area
+		if (BClass == VPA){
+			bundlesIndexIterator it3 = bundlesIndex.find(convergeCastTo);
+			if (it3 != bundlesIndex.end()){
+				innerIndexMap innerMap(it3->second);
+				innerIndexIterator it4;
+				for (it4 = innerMap.begin(); it4 !=innerMap.end(); ++it4){
+					BundleMeta meta (it4->second, Prophet_Enum::Bndl_Accepted);
+
+					if (withAck){
+						if (acksIndex.find(it4->second->getSerial())!=acksIndex.end()){
+							existAndErase(meta);
+							notCorrectlyDeleted++;
+							continue;
+						}
+					}
+					bundleToOfferMeta.push_back(meta);
+				}
+			}
+		}
 
 		// step 1 : define situation where we have to to offer bundle to @encouterdNode based on myClass and BClass (3 type of exchange)
 		if (BClass == Vehicle_Type_I){
