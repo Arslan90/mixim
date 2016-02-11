@@ -1,0 +1,25 @@
+
+ total des msgs L3 envoyes : 668142
+ total des msgs L3 recus : 590963
+ nombre de simulation : 2
+ nombre de simulation pris en compte pour les bundles envoyes par vehs : 2
+ total des bundles envoyes par vehs : 2160
+ nombre de simulation pris en compte pour les bundles recues par VPA : 2
+ total des bundles uniques recues par VPA : 5547
+ le ratio de livraison des bundles : 256.8056
+ nombre de simulation pris en compte pour les bundles envoyes par vehs : 2
+ total des bundles recus par la couche reseau pour tous les noeuds : 0
+ nombre de simulation pris en compte pour les bundles recues par VPA : 2
+ total des bundles recues par VPA : 5547
+ le nombre de copies recus par VPA : 1
+ le nombre de copies generes : 0
+ delai moyen de reception des bundles pour la premiere copie: 552.4619
+ nombre de simulation pris en compte pour les delais de reception : 2
+ delai max de reception des bundles pour la premiere copie: 1711.557
+ moyenne des stddev des delais de reception des bundles  : 258.6184
+ stddev des delais de reception des bundles pour la premiere copie: 88.73106
+ nombre de saut moyen pour la premiere copie: 3.18148
+ nombre de simulation pris en compte pour les delais de reception : 2
+ nombre de saut max pour la premiere copie: 9
+ moyenne des stddev du nombre de saut : 1.137287
+ stddev des nombres de saut pour la premiere copie: 0.2573611

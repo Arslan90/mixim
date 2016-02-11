@@ -16,6 +16,8 @@
 #include "ProphetV2.h"
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
+#include "FindModule.h"
+
 
 Define_Module(ProphetV2);
 
@@ -191,6 +193,18 @@ void ProphetV2::initialize(int stage)
 				}
 			}
 		}
+
+//		cModule *mobilityModule = this->getParentModule()->getSubmodule("mobility");
+		/*TraCIMobility*/
+		mobilityModule = FindModule<TraCIMobility*>::findSubModule(this->getParentModule());
+		if (mobilityModule != NULL){
+			traciNodeID = mobilityModule->getExternalId();
+			coord = mobilityModule->getPositionAt(simTime());
+		}else{
+			traciNodeID = "VPA";
+			coord = new Coord(0,0,0);
+		}
+
 	}
 }
 
@@ -2119,8 +2133,30 @@ void ProphetV2::recordRecontactStats(LAddress::L3Type addr, double time)
 	if (it != endContactTime.end()){
 		// updating nbr repeated contacts nodes
 		nbrRecontacts++;
-		// updating vector stats for recontacted nodes
+		// updating vector stats for recontacte²d nodes
 		duration = time - it->second;
+		if (duration < 1 ){
+			stringstream ss1,ss2,ss3;
+			ss1 << myNetwAddr;
+			ss2 << addr;
+			string s = "";
+			if (mobilityModule != NULL) {
+				string distance ="";
+				coord = mobilityModule->getPositionAt(simTime());
+				TraCIMobility* other = FindModule<TraCIMobility*>::findSubModule(this->getParentModule()->getParentModule()->getSubmodule("node",addr/9));
+				if (other !=NULL){
+					Coord otherCoord = other->getPositionAt(simTime());
+					double dist = sqrt( pow((coord.x-otherCoord.x),2) + pow((coord.y-otherCoord.y),2));
+					ss3 << dist;
+					distance = ss3.str();
+				}
+				s = "intercontact duration very short between:"+ss1.str()+"("+traciNodeID+") distant by "+distance+" from "+ss2.str();
+			}else{
+				s = "intercontact duration very short between:"+ss1.str()+"("+traciNodeID+")"+" and "+ss2.str();
+			}
+
+			opp_warning(s.c_str());
+		}
 
 		sumOfInterContactDur+=duration;
 		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));

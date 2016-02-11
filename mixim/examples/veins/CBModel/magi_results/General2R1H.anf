@@ -1,0 +1,1554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/mixim/examples/veins/CBModel/magi_results/General-*.vec"/>
+    <inputs name="/mixim/examples/veins/CBModel/magi_results/General-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="Bundles S/R">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Bundle Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].appl) AND name(&quot;# Unique Bundle Received&quot;)"/>
+      <items xsi:type="scave:BarChart" name="Bundles S/R">
+        <properties name="Legend.Display" value="true"/>
+      </items>
+    </datasets>
+    <datasets name="nbrContact (G,S,F)">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # nbrContact&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # nbrContact&quot;)"/>
+      <items xsi:type="scave:BarChart" name="nbrContact (G,S,F)">
+        <properties name="Legend.Display" value="true"/>
+      </items>
+    </datasets>
+    <datasets name="S/R">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Global: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Successful: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Sent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # L3Received&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # BundleReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # AckReceived&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsSent&quot;)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].netw) AND name(&quot;Failed: # PredictionsReceived&quot;)"/>
+      <items xsi:type="scave:BarChart" name="S/R">
+        <properties name="Y.Axis.Min" value="0.0"/>
+        <properties name="Y.Axis.Max" value="6.0"/>
+        <properties name="Legend.Display" value="true"/>
+      </items>
+    </datasets>
+    <datasets name="MAC Stats">
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[0].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsReceivedBroadcasts)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsSentPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsLostPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumBackoffs)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsDroppedPackets)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsNumTooLittleTime)"/>
+      <items xsi:type="scave:Add" filterPattern="module(scenarioOpp.VPA[1].nic.mac80211p) AND name(statsTotalBackoffDuration)"/>
+      <items xsi:type="scave:BarChart" name="MAC Stats">
+        <properties name="Legend.Display" value="true"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="" charts="//@datasets/@datasets.0/@items.120 //@datasets/@datasets.2/@items.960 //@datasets/@datasets.1/@items.120 //@datasets/@datasets.3/@items.320"/>
+  </chartSheets>
+</scave:Analysis>

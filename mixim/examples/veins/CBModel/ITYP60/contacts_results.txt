@@ -1,0 +1,45 @@
+current scalar name, Bars for #repeated 1 - total values for it, 256738
+current scalar name, Bars for #repeated 2 - total values for it, 94184
+current scalar name, Bars for #repeated 3 - total values for it, 42582
+current scalar name, Bars for #repeated 4 - total values for it, 24140
+current scalar name, Bars for #repeated 5 - total values for it, 672774
+
+
+ Contact CDF for #repeated 1,  		0.07309573,  0.08610266,  0.9533597,  0.9986511,  0.9990927,  0.9990927,  1
+ InterContact CDF for #repeated 1,  0.1229546,  0.1229546,  0.1229546,  0.1231125,  0.1373801,  0.1373801,  1
+
+ Contact CDF for #repeated 2,  0.2039589,  0.2193351,  0.9391951,  0.9988189,  0.9993657,  0.9993657,  1
+ InterContact CDF for #repeated 2,  0.309046,  0.309046,  0.309046,  0.3093096,  0.3333004,  0.3333004,  1
+
+ Contact CDF for #repeated 3,  0.3812224,  0.3922737,  0.9153373,  0.9987988,  0.9997117,  0.9997117,  1
+ InterContact CDF for #repeated 3,  0.5455909,  0.5456591,  0.5456591,  0.5458637,  0.5803042,  0.5803042,  1
+
+ Contact CDF for #repeated 4,  0.5570005,  0.5667117,  0.9302483,  0.9990711,  0.9997467,  0.9997467,  1
+ InterContact CDF for #repeated 4,  0.7340153,  0.7340153,  0.7340153,  0.734349,  0.7849438,  0.7849438,  1
+
+ Contact CDF for #repeated 5,  0.964057,  0.9647194,  0.9965215,  0.9990871,  0.9999045,  0.9999045,  1
+ InterContact CDF for #repeated 5,  0.9806171,  0.9806171,  0.9806171,  0.9806201,  0.99299,  0.99299,  1
+ 
+
+ contact1 <- c(0.07309573,  0.08610266,  0.9533597,  0.9986511,  0.9990927,  0.9990927,  1)
+ contact2 <- c(0.2039589,  0.2193351,  0.9391951,  0.9988189,  0.9993657,  0.9993657,  1)
+ contact3 <- c(0.3812224,  0.3922737,  0.9153373,  0.9987988,  0.9997117,  0.9997117,  1)
+ contact4 <- c(0.5570005,  0.5667117,  0.9302483,  0.9990711,  0.9997467,  0.9997467,  1)
+ contact5 <- c(0.964057,  0.9647194,  0.9965215,  0.9990871,  0.9999045,  0.9999045,  1)
+ 
+ contacts <- list()
+ contacts[[1]] <- contact1
+ contacts[[2]] <- contact2
+ contacts[[3]] <- contact3
+ contacts[[4]] <- contact4
+ contacts[[5]] <- contact5
+ 
+ intercontact1 <- c(0.1229546,  0.1229546,  0.1229546,  0.1231125,  0.1373801,  0.1373801,  1)
+ intercontact2 <- c(0.309046,  0.309046,  0.309046,  0.3093096,  0.3333004,  0.3333004,  1) intercontact3 <- c(0.5455909,  0.5456591,  0.5456591,  0.5458637,  0.5803042,  0.5803042,  1) intercontact4 <- c(0.7340153,  0.7340153,  0.7340153,  0.734349,  0.7849438,  0.7849438,  1) intercontact5 <- c(0.9806171,  0.9806171,  0.9806171,  0.9806201,  0.99299,  0.99299,  1)
+ 
+ intercontacts <- list()
+ intercontacts[[1]] <- intercontact1
+ intercontacts[[2]] <- intercontact2
+ intercontacts[[3]] <- intercontact3
+ intercontacts[[4]] <- intercontact4
+ intercontacts[[5]] <- intercontact5

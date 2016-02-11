@@ -1,0 +1,45 @@
+
+ total des msgs L3 envoyes : 6639413
+ total des msgs L3 recus : 5670621
+ nombre de simulation : 20
+ nombre de simulation pris en compte pour les bundles envoyes par vehs : 20
+ total des bundles envoyes par vehs : 21600
+ nombre de simulation pris en compte pour les bundles recues par VPA : 20
+ total des bundles uniques recues par VPA : 18966
+ le ratio de livraison des bundles : 87.80556
+ nombre de simulation pris en compte pour les bundles envoyes par vehs : 20
+ total des bundles recus par la couche reseau pour tous les noeuds : 2727372
+ nombre de simulation pris en compte pour les bundles recues par VPA : 20
+ total des bundles recues par VPA : 18966
+ le nombre de copies recus par VPA : 1
+ le nombre de copies generes : 143.8032
+ delai moyen de reception des bundles pour la premiere copie: 619.3524
+ nombre de simulation pris en compte pour les delais de reception : 20
+ delai max de reception des bundles pour la premiere copie: 2535.264
+ moyenne des stddev des delais de reception des bundles  : 318.9812
+ stddev des delais de reception des bundles pour la premiere copie: 116.8535
+ nombre de saut moyen pour la premiere copie: 3.115467
+ nombre de simulation pris en compte pour les delais de reception : 20
+ nombre de saut max pour la premiere copie: 9
+ moyenne des stddev du nombre de saut : 1.097904
+ stddev des nombres de saut pour la premiere copie: 0.2542129
+current scalar name: Bars for #repeated 1 - total values for it: 256400
+current scalar name: Bars for #repeated 2 - total values for it: 91554
+current scalar name: Bars for #repeated 3 - total values for it: 41258
+current scalar name: Bars for #repeated 4 - total values for it: 23728
+current scalar name: Bars for #repeated 5 - total values for it: 708624
+current scalar name: Bars for #repeated 1 - total values for it: 708624
+ Contact CDF for #repeated 1:  0.0717549:  0.0841417:  0.9531313:  0.9984878:  0.9990348:  0.9990348:  1
+ InterContact CDF for #repeated 1:  0.1201074:  0.1201074:  0.1201074:  0.1203772:  0.1345651:  0.1345651:  1
+current scalar name: Bars for #repeated 2 - total values for it: 708624
+ Contact CDF for #repeated 2:  0.2067950:  0.2214457:  0.9367009:  0.9990787:  0.9995506:  0.9995506:  1
+ InterContact CDF for #repeated 2:  0.3046582:  0.3046582:  0.3046582:  0.3047922:  0.331937:  0.331937:  1
+current scalar name: Bars for #repeated 3 - total values for it: 708624
+ Contact CDF for #repeated 3:  0.3844022:  0.3976148:  0.9165677:  0.998565:  0.9995051:  0.9995051:  1
+ InterContact CDF for #repeated 3:  0.5559272:  0.5559272:  0.5559272:  0.5560666:  0.5897972:  0.5897972:  1
+current scalar name: Bars for #repeated 4 - total values for it: 708624
+ Contact CDF for #repeated 4:  0.5725315:  0.5814532:  0.9341168:  0.999228:  0.9997426:  0.9997426:  1
+ InterContact CDF for #repeated 4:  0.7424697:  0.7424697:  0.7424697:  0.7424697:  0.7933756:  0.7933756:  1
+current scalar name: Bars for #repeated 5 - total values for it: 708624
+ Contact CDF for #repeated 5:  0.9658497:  0.9665292:  0.9970666:  0.9992185:  0.9999094:  0.9999094:  1
+ InterContact CDF for #repeated 5:  0.9814382:  0.9814382:  0.9814382:  0.9814382:  0.9935172:  0.9935172:  1

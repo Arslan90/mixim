@@ -42,6 +42,8 @@
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
 #include "iterator"
+#include "Coord.h"
+#include "TraCIMobility.h"
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
@@ -122,6 +124,12 @@ protected:
 	} fwdGRTRmax_CompObject;
 
 private:
+
+	TraCIMobility* mobilityModule;
+
+	string traciNodeID;
+
+	Coord coord;
 
 	int delayed;
 
