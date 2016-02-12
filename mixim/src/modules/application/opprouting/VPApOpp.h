@@ -76,6 +76,14 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  int nbrBundleSent;
 		  int nbrBundleReceived;
 		  int nbrUniqueBundleReceived;
+
+		  int nbrUniqueForAxe1;
+		  int nbrUniqueForAxe2;
+		  int nbrUniqueForAxe3;
+		  int nbrUniqueForAxe4;
+		  int nbrUniqueForAxe5;
+		  int nbrUniqueForAxe6;
+
 		  bool anyVPA;
 
 		  double avgDelay;
@@ -83,6 +91,8 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 
 		  cOutVector delays;
 		  cDoubleHistogram delayStats;
+
+		  cLongHistogram bndlSource;
 
 		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;

@@ -166,6 +166,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		bool reroutedToLoopRoute;
 		std::string edgeForLooping;
 
+		std::string currentAxe;
+
 		int netwAddr;
 		int nbrMsgSent;
 		bool isNetwAddrInit;
