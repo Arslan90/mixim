@@ -64,8 +64,6 @@ void VPApOpp::initialize(int stage) {
 	    hopCountStats.setName("HopCountStats for 1st Copy");
 	    hopCountVector.setName("HopCount");
 
-	    bndlSource.setName("Source of Bundles");
-
 	    vehicleDensity.setName("Vehicle Density");
 
     	dtnTestMode = par("dtnTestMode").boolValue();
@@ -79,13 +77,6 @@ void VPApOpp::initialize(int stage) {
 		nbrBundleSent = 0;
 		nbrBundleReceived = 0;
 		nbrUniqueBundleReceived = 0;
-
-		nbrUniqueForAxe1 = 0;
-		nbrUniqueForAxe2 = 0;
-		nbrUniqueForAxe3 = 0;
-		nbrUniqueForAxe4 = 0;
-		nbrUniqueForAxe5 = 0;
-		nbrUniqueForAxe6 = 0;
 
 //		dtnSynchronized = par("dtnSynchronized").boolValue();
 		if (dtnTestMode){
@@ -181,60 +172,6 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 
 			receivedBundles.insert(std::pair<unsigned long long ,WaveShortMessage*>(wsm->getSerial(), wsm));
 			nbrUniqueBundleReceived++;
-
-			if ((strcmp("0/5to1/5",wsm->getName()) == 0) || (strcmp("11/5to10/5",wsm->getName()) == 0) ){
-				nbrUniqueForAxe1++;
-				if (strcmp("11/5to10/5",wsm->getName()) == 0) {
-					bndlSource.collect(1);
-				}else {
-					bndlSource.collect(2);
-				}
-			}
-
-			if ((strcmp("0/7to1/7",wsm->getName()) == 0) || (strcmp("11/7to10/7",wsm->getName()) == 0) ){
-				nbrUniqueForAxe2++;
-				if (strcmp("11/7to10/7",wsm->getName()) == 0) {
-					bndlSource.collect(3);
-				}else {
-					bndlSource.collect(4);
-				}
-			}
-
-			if ((strcmp("5/11to5/10",wsm->getName()) == 0) || (strcmp("5/0to5/1",wsm->getName()) == 0) ){
-				nbrUniqueForAxe3++;
-				if (strcmp("5/11to5/10",wsm->getName()) == 0) {
-					bndlSource.collect(5);
-				}else {
-					bndlSource.collect(6);
-				}
-			}
-
-			if ((strcmp("7/11to7/10",wsm->getName()) == 0) || (strcmp("7/0to7/1",wsm->getName()) == 0) ){
-				nbrUniqueForAxe4++;
-				if (strcmp("7/11to7/10",wsm->getName()) == 0) {
-					bndlSource.collect(7);
-				}else {
-					bndlSource.collect(8);
-				}
-			}
-
-			if ((strcmp("0/9to1/9",wsm->getName()) == 0) || (strcmp("11/9to10/9",wsm->getName()) == 0)){
-				nbrUniqueForAxe5++;
-				if (strcmp("11/9to10/9",wsm->getName()) == 0) {
-					bndlSource.collect(9);
-				}else {
-					bndlSource.collect(10);
-				}
-			}
-
-			if ((strcmp("9/11to9/10",wsm->getName()) == 0) || (strcmp("9/0to9/1",wsm->getName()) == 0)){
-				nbrUniqueForAxe6++;
-				if (strcmp("9/11to9/10",wsm->getName()) == 0) {
-					bndlSource.collect(11);
-				}else {
-					bndlSource.collect(12);
-				}
-			}
 
 			vehiclesAddr.insert(wsm->getSenderAddress());
 			int currentVehDensity = vehiclesAddr.size();
@@ -360,19 +297,9 @@ void VPApOpp::finish()
 		recordScalar("# Bundle Received", nbrBundleReceived);
 		recordScalar("# Unique Bundle Received", nbrUniqueBundleReceived);
 
-		recordScalar("# Unique Bundle Axe1", nbrUniqueForAxe1);
-		recordScalar("# Unique Bundle Axe2", nbrUniqueForAxe2);
-		recordScalar("# Unique Bundle Axe3", nbrUniqueForAxe3);
-		recordScalar("# Unique Bundle Axe4", nbrUniqueForAxe4);
-		recordScalar("# Unique Bundle Axe5", nbrUniqueForAxe5);
-		recordScalar("# Unique Bundle Axe6", nbrUniqueForAxe6);
-
-
 		delayStats.recordAs("Delays for 1st Copy");
 
 		hopCountStats.recordAs("HopCount for 1st Copy");
-
-		bndlSource.recordAs("Bndl Source for 1st Copy");
 
 	BaseWaveApplLayer::finish();
 }

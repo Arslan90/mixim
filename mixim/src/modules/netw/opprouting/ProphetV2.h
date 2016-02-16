@@ -18,42 +18,50 @@
 
 #ifndef PROPHETV2_H_
 #define PROPHETV2_H_
-#include <cassert>
+//#include <cassert>
+//
+//#include <cobject.h>
+//#include <iostream>
+//#include <map>
+//#include <list>
+//#include <iterator>
+//#include <math.h>
+//#include <algorithm>
+//
+//#include "BaseNetwLayer.h"
+//#include "WaveShortMessage_m.h"
+//#include "NetwPkt_m.h"
+//#include "cmessage.h"
+//#include "NetwControlInfo.h"
+//#include "ArpInterface.h"
+//#include "SimpleAddress.h"
+//#include "cmodule.h"
+//#include "Mac80211Pkt_m.h"
+//#include "Prophet_m.h"
+//#include "BundleMeta.h"
+//#include "SimpleContactStats.h"
+//#include "ClassifiedContactStats.h"
+//#include "iterator"
+//#include "DtnNetwLayer.h"
 
-#include <cobject.h>
-#include <iostream>
-#include <map>
-#include <list>
-#include <iterator>
-#include <math.h>
 #include <algorithm>
-
-#include "BaseNetwLayer.h"
-#include "WaveShortMessage_m.h"
-#include "NetwPkt_m.h"
-#include "cmessage.h"
-#include "NetwControlInfo.h"
-#include "ArpInterface.h"
-#include "SimpleAddress.h"
 #include "cmodule.h"
-#include "Mac80211Pkt_m.h"
+#include "cmessage.h"
+#include <omnetpp.h>
+#include "DtnNetwLayer.h"
 #include "Prophet_m.h"
-#include "BundleMeta.h"
-#include "SimpleContactStats.h"
-#include "ClassifiedContactStats.h"
-#include "iterator"
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
-typedef std::map<unsigned long ,WaveShortMessage*> innerIndexMap;
-typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
+//typedef std::map<unsigned long ,WaveShortMessage*> innerIndexMap;
+//typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
+//
+//typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
+//
+//typedef std::map<LAddress::L3Type, std::list<unsigned long> >::iterator iteratorContactID;
+//typedef std::map<unsigned long, SimpleContactStats>::iterator iteratorContactStats;
 
-typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
-
-typedef std::map<LAddress::L3Type, std::list<unsigned long> >::iterator iteratorContactID;
-typedef std::map<unsigned long, SimpleContactStats>::iterator iteratorContactStats;
-
-class ProphetV2: public BaseNetwLayer {
+class ProphetV2: public DtnNetwLayer {
 /*******************************************************************
 **
 ** 							Variables section
@@ -76,15 +84,15 @@ public:
 		Bundle_Ack = 0xD0,
 		Bundle = 0xFF,
 	};
-	/**
-	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
-	 */
-	enum prophetNetwControlKinds {
-		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
-		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
-		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
-		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
-	};
+//	/**
+//	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
+//	 */
+//	enum prophetNetwControlKinds {
+//		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
+//		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
+//		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
+//		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
+//	};
 
 protected:
 
@@ -123,8 +131,8 @@ protected:
 
 private:
 
-	int delayed;
-
+//	int delayed;
+//
 	/** delivery predictability max value */
 	double PEncMax;
 	/** delivery predictability initialization constant*/
@@ -146,140 +154,136 @@ private:
 	 * How many seconds one time unit is when calculating aging of
 	 * delivery predictions. Should be tweaked for the scenario.*/
 	int secondsInTimeUnit;
-
-	/**
-	 * Boolean for the activation of PRoPHET ACK mecanism
-	 */
-	bool withAck;
-
-	/**
-	 * Map structures for ACKs
-	 */
-	std::list<BundleMeta> acks;
-
-	bool withTTL;
-	int ttl;
-	int nbrDeletedWithTTL;
-
-	/**
- 	 * Specific map with K as serial of WSM &
-	 * V as a bndl_meta struct.
-	 * This structure simplify the search of ACKs
-	 */
-	std::map<unsigned long,BundleMeta> acksIndex;
-
-	/**
-	 * Size of acks structure
-	 */
-	int ackStructureSize;
-
+//
+//	/**
+//	 * Boolean for the activation of PRoPHET ACK mecanism
+//	 */
+//	bool withAck;
+//
+//	/**
+//	 * Map structures for ACKs
+//	 */
+//	std::list<BundleMeta> acks;
+//
+//	bool withTTL;
+//	int ttl;
+//	int nbrDeletedWithTTL;
+//
+//	/**
+// 	 * Specific map with K as serial of WSM &
+//	 * V as a bndl_meta struct.
+//	 * This structure simplify the search of ACKs
+//	 */
+//	std::map<unsigned long,BundleMeta> acksIndex;
+//
+//	/**
+//	 * Size of acks structure
+//	 */
+//	int ackStructureSize;
+//
 	/** delivery predictabilities */
 	std::map<LAddress::L3Type, double> preds;
-	//std::map<DTNHost, double> preds;
-
+//	//std::map<DTNHost, double> preds;
+//
 	/** last encouter timestamp (sim)time */
 	std::map<LAddress::L3Type, double> lastEncouterTime;
-	//std::map<DTNHost, double> lastEncouterTime;
-
+//	//std::map<DTNHost, double> lastEncouterTime;
+//
 	/** last delivery predictability update (sim)time */
 	double lastAgeUpdate;
-
-	/** Size of the WMS Storage structure */
-	int bundlesStructureSize;
-
-	/** Fifo structure for WMS Storage*/
-	std::list<WaveShortMessage*> bundles;
-
-	/** Specific map with K as recipient address of WSMessage &
-	 * V as a pointer to WSMessage.
-	 * This structure simplify the search of WSMessage destinated
-	 * to a specific node
-	 * */
-	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
-
-	/** Boolean to verify if the transmission is possible */
-	bool canITransmit;
-
-	/**
-	 * Equiped vehicle in pourcentage, by default all vehicles
-	 * are equiped (100% = 1)
-	 */
-	double equipedVehPc;
-
-	/**
-	 * Determine if this vehicle is equiped or not
-	 */
-	bool isEquiped;
-
-	int maxPcktLength;
-
-	bool dontFragment;
-
-	int dataLength;
-
-	std::vector<double> cutPoitsCDF;
-
+//
+//	/** Size of the WMS Storage structure */
+//	int bundlesStructureSize;
+//
+//	/** Fifo structure for WMS Storage*/
+//	std::list<WaveShortMessage*> bundles;
+//
+//	/** Specific map with K as recipient address of WSMessage &
+//	 * V as a pointer to WSMessage.
+//	 * This structure simplify the search of WSMessage destinated
+//	 * to a specific node
+//	 * */
+//	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
+//
+//	/** Boolean to verify if the transmission is possible */
+//	bool canITransmit;
+//
+//	/**
+//	 * Equiped vehicle in pourcentage, by default all vehicles
+//	 * are equiped (100% = 1)
+//	 */
+//	double equipedVehPc;
+//
+//	/**
+//	 * Determine if this vehicle is equiped or not
+//	 */
+//	bool isEquiped;
+//
+//	int maxPcktLength;
+//
+//	bool dontFragment;
+//
+//	int dataLength;
+//
+//	std::vector<double> cutPoitsCDF;
+//
 	/*
 	 * Threshold for Interval of time between first and last preds
 	 */
 	double I_Preds;
 
+	bool withPartialUpdate;
+
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
 
-	bool recordContactStats;
-
-	long nbrL3Sent;
-	long nbrL3Received;
-//    cLongHistogram sentStats;
-//    cOutVector sentVector;
-//    cLongHistogram receivedStats;
-//    cOutVector receivedVector;
-
+//	bool recordContactStats;
+//
+//	long nbrL3Sent;
+//	long nbrL3Received;
+//
 	cOutVector nbrPredsVector;
 	cOutVector predsMean;
 	cOutVector predsMax;
 	cOutVector predsMin;
 	cOutVector predsVariance;
-
-	cOutVector *predsMeanCommunities;
-
-//	cOutVector *predsForRC;
+//
+//	cOutVector *predsMeanCommunities;
 
 	std::map<LAddress::L3Type, cOutVector* > predsForRC;
 
 	cOutVector nbrContactsForRCVect;
 	std::map<LAddress::L3Type, int > nbrContactsForRC;
-
-	double sumOfContactDur;
-
-	int nbrContacts;
-
-	cOutVector contactDurVector;
-
-	std::map<LAddress::L3Type, double> contacts;
-
-	std::map<LAddress::L3Type, double> endContactTime;
-
-	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
-
-	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
-
-	std::map<unsigned long, SimpleContactStats> indexContactStats;
-
-	ClassifiedContactStats Global;
-	bool withGlobal;
-	bool withCDFForGlobal;
-
-	ClassifiedContactStats Succ;
-	bool withSucc;
-	bool withCDFForSucc;
-
-	ClassifiedContactStats Fail;
-	bool withFail;
-	bool withCDFForFail;
-
+//
+//	double sumOfContactDur;
+//
+//	int nbrContacts;
+//
+//	cOutVector contactDurVector;
+//
+//	std::map<LAddress::L3Type, double> contacts;
+//
+//	std::map<LAddress::L3Type, double> endContactTime;
+//
+//	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
+//
+//	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
+//
+//	std::map<unsigned long, SimpleContactStats> indexContactStats;
+//
+//	ClassifiedContactStats Global;
+//	bool withGlobal;
+//	bool withCDFForGlobal;
+//
+//	ClassifiedContactStats Succ;
+//	bool withSucc;
+//	bool withCDFForSucc;
+//
+//	ClassifiedContactStats Fail;
+//	bool withFail;
+//	bool withCDFForFail;
+//
 	ClassifiedContactStats FailRIB;
 	bool withFailRIB;
 	bool withCDFForFailRIB;
@@ -299,13 +303,13 @@ private:
 	ClassifiedContactStats FailBndlAck;
 	bool withFailBndlAck;
 	bool withCDFForFailBndlAck;
-
-	double sumOfInterContactDur;
-
-	int nbrRecontacts;
-
-	cOutVector intercontactDurVector;
-
+//
+//	double sumOfInterContactDur;
+//
+//	int nbrRecontacts;
+//
+//	cOutVector intercontactDurVector;
+//
 	/**
 	 * Contact between 2 nodes, where the initiator role had received packets of kind Bundle
 	 */
@@ -320,12 +324,12 @@ private:
 	 * Map for the state of the initator role during contact
 	 */
 	std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
-
-	int deletedBundlesWithAck;
-
-	int demandedAckedBundle;
-
-	int bundlesReceived;
+//
+//	int deletedBundlesWithAck;
+//
+//	int demandedAckedBundle;
+//
+//	int bundlesReceived;
 
 	int nbrSimpleContactStats;
 
@@ -398,57 +402,13 @@ private:
 	 */
 	std::vector<std::list<BundleMeta> >defineBundleOffer(Prophet *prophetPkt);
 
-	/**
-	 * @brief Function that check if the WaveShortMessage identified by
-	 * @param *msg is currently stored in this node
-	 */
-	bool exist(WaveShortMessage *msg);
-
-	/**
-	 * @brief Function that check if the WaveShortMessage identified by
-	 * @param bndlMeta is currently stored in this node
-	 */
-	bool exist(BundleMeta bndlMeta);
-
-	/**
-	 * @brief Function that check if an ack  identified by
-	 * @param *msg serial is currently stored in this node
-	 */
-	bool ackExist(WaveShortMessage *msg);
-
-	/**
-	 * @brief Function that check if an ack identified by
-	 * @param bndlMeta serial is currently stored in this node
-	 */
-	bool ackExist(BundleMeta bndlMeta);
-
-	/**
-	 * @brief Function that check if the WaveShortMessage identified by
-	 * @param bndlMeta is currently stored in this node then deleted it
-	 */
-	bool existAndErase(BundleMeta bndlMeta);
-
 	/*
 	 * Function that store bundles according to the current Queuing Strategy
 	 */
 	void storeBundle(WaveShortMessage *msg);
 
-	void storeACK(BundleMeta meta);
-
-	/*
-	 * Convert a string to L3Address
-	 */
-	LAddress::L3Type getAddressFromName(const char * name);
-
-	/*
-	 * Convert a string to time
-	 */
-	double getTimeFromName(const char * name);
-
-	void deleteOldBundle(int ttl);
-
-	/** @brief Handle messages from upper layer */
-	virtual void handleUpperMsg(cMessage* msg);
+//	/** @brief Handle messages from upper layer */
+//	virtual void handleUpperMsg(cMessage* msg);
 
 	/** @brief Handle messages from lower layer */
 	virtual void handleLowerMsg(cMessage* msg);
@@ -459,38 +419,12 @@ private:
 	/** @brief Handle control messages from lower layer */
 	virtual void handleLowerControl(cMessage* msg);
 
-	/** @brief Handle control messages from lower layer */
-	virtual void handleUpperControl(cMessage* msg);
-
-	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
-
-	virtual cObject *const setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr);
+//	/** @brief Handle control messages from lower layer */
+//	virtual void handleUpperControl(cMessage* msg);
 
 	/*******************************************************************
 	** 							Metrics methods section
 	********************************************************************/
-
-	/*
-	 * generate contact serial
-	 */
-	unsigned long generateContactSerial( int myAddr, int seqNumber, int otherAddr);
-
-	/*
-	 * start recording
-	 */
-	unsigned long startRecordingContact(int addr, double time);
-
-	/*
-	 * start recording
-	 */
-	unsigned long startRecordingContact(int addr, unsigned long contactID);
-
-	/*
-	 * end recording
-	 */
-	unsigned long endRecordingContact(int addr, double time);
-
-	unsigned long endRecordingContact(unsigned long contactID, bool hasForcedEnding);
 
 	void updateContactWhenInit(Prophet* prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind);
 
@@ -501,16 +435,6 @@ private:
 	 */
 	void recordPredsStats();
 
-	void updatingL3Sent(){
-		nbrL3Sent++;
-	}
-
-	void updatingL3Received(){
-		nbrL3Received++;
-	}
-
-	void recordBeginContactStats(LAddress::L3Type addr, double time);
-
 	void recordEndContactStats(LAddress::L3Type addr, double time);
 
 	void recordRecontactStats(LAddress::L3Type addr, double time);
@@ -519,11 +443,7 @@ private:
 
 	void classify(SimpleContactStats* newContact);
 
-	void classifyAll();
-
 	void initAllClassifier();
-
-	void recordClassifier(ClassifiedContactStats classifier);
 
 	void recordAllClassifier();
 
@@ -540,13 +460,6 @@ public:
 	virtual void initialize(int stage);
 	virtual void finish();
 	virtual ~ProphetV2();
-
-	/*
-	 * Getter for isEquiped boolean
-	 */
-	bool isAnEquipedVehicle(){
-		return isEquiped;
-	}
 
 };
 

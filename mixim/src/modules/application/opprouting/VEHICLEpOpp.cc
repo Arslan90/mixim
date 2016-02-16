@@ -107,7 +107,6 @@ void VEHICLEpOpp::initialize(int stage) {
 
 		reroutedToLoopRoute = false;
 		edgeForLooping ="";
-		currentAxe = currentRoute.front();
 	}
 	if(stage==2) {
 		cModule *netw = this->getParentModule()->getSubmodule("netw");
@@ -526,8 +525,8 @@ void VEHICLEpOpp::sendDtnMessage()
 {
 //	int addr = vpaDestAddr();
 	whatSectorIm();
-	int addr = vpaDestAddr(0);
-//	int addr = vpaDestAddr(currentSector);
+	int addr = vpaDestAddr(currentSector);
+//	int addr = vpaDestAddr(0);
 //	int myAddr = isNetwAddrInit ? netwAddr : myId;
 //	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
@@ -542,8 +541,7 @@ void VEHICLEpOpp::sendDtnMessage()
 	//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
 
 	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA with address "<< addr <<endl;
-//	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
-	std::string s = currentRoute.front();
+	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
 	if (isNetwAddrInit){
 	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 //	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,0));
@@ -716,30 +714,6 @@ void VEHICLEpOpp::finish() {
 	cancelAndDelete(everySecond);
 	if (dtnTestMode){
 		cancelAndDelete(dtnTestMsg);
-	}
-
-	if ((currentAxe=="0/5to1/5") || (currentAxe=="11/5to10/5") ){
-		recordScalar("# currentAxe", 1);
-	}
-
-	if ((currentAxe=="0/7to1/7") || (currentAxe=="11/7to10/7") ){
-		recordScalar("# currentAxe", 2);
-	}
-
-	if ((currentAxe=="5/11to5/10") || (currentAxe=="5/0to5/1") ){
-		recordScalar("# currentAxe", 3);
-	}
-
-	if ((currentAxe=="7/11to7/10") || (currentAxe=="7/0to7/1") ){
-		recordScalar("# currentAxe", 4);
-	}
-
-	if ((currentAxe=="0/9to1/9") || (currentAxe=="11/9to10/9") ){
-		recordScalar("# currentAxe", 5);
-	}
-
-	if ((currentAxe=="9/11to9/10") || (currentAxe=="9/0to9/1") ){
-		recordScalar("# currentAxe", 6);
 	}
 }
 

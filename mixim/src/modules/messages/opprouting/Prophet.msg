@@ -45,7 +45,7 @@ packet Prophet extends NetwPkt {
     short fragmentNum = 0;
     short totalFragment = 0;
     int tlv_Flags;
-    predictions preds = std::map<LAddress::L3Type, double>();
+    predictions preds;
     bndlMeta bndlmeta = std::list<BundleMeta>();
     int hopCount = 0;
 }

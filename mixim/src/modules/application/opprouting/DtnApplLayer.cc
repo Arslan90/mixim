@@ -65,6 +65,14 @@ void DtnApplLayer::onBeacon(WaveShortMessage *wsm)
 
 
 
+std::string DtnApplLayer::getDataSrcFromStrategy(t_data_generatorMode currentStrategy)
+{
+}
+
+std::string DtnApplLayer::getDataDestFromStrategy(t_data_generatorMode currentStrategy)
+{
+}
+
 void DtnApplLayer::onData(WaveShortMessage *wsm)
 {
 }

@@ -15,11 +15,11 @@
 
 package org.mixim.modules.netw.opprouting;
 
-import org.mixim.base.modules.BaseNetwLayer;
+import org.mixim.modules.netw.opprouting.DtnNetwLayer;
 //
 // TODO auto-generated type
 //
-simple ProphetV2 extends BaseNetwLayer
+simple ProphetV2 extends DtnNetwLayer
 {	
     parameters:
     	@class(ProphetV2);
@@ -36,40 +36,18 @@ simple ProphetV2 extends BaseNetwLayer
     	int secondsInTimeUnit =default(30);
     	int fwdStrategy =default(7);
     	int qStrategy = default(1);
-    	int storageSize = default(1000);
     	
-    	bool withAck = default(false);
-    	int ackSize = default(1000);
-    	
-    	bool withTTL = default(false);
-    	int ttl = default(900);
-    	
-    	bool DF = default(false);
-    	int MTU = default(2304); // in bytes (octets)
     	headerLength @unit(bit) = default(272bit);
     	
-    	double I_Preds = default(5);
+    	bool withPartialUpdate = default(true);
     	
-    	bool recordContactStats = default(true);
     	
-    	bool withGlobalClassifier = default(true);
-        bool withSuccClassifier = default(true);
-        bool withFailClassifier = default(true);
         bool withFailRIBClassifier = default(false);
         bool withFailBndlOfferClassifier = default(false);
         bool withFailBndlRespClassifier = default(false);
         bool withFailBndlClassifier = default(false);
     	bool withFailBndlAckClassifier = default(false);
     	
-    	bool CDFForGlobalClassifier = default(false);
-        bool CDFForSuccClassifier = default(false);
-        bool CDFForFailClassifier = default(false);        bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
-        
-        // equiped vehicle pourcentage, by default 1 (100%)
-        double equipedVehPc = default(1);
-        
-        string cutPoints = default("1;5;20;50;100;500;");
-//        string cutPoints = default("20;50;100");
+        bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
 
-		int delayed = default(0);
 }       

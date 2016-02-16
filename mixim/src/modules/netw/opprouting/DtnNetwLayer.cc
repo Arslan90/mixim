@@ -16,6 +16,7 @@
 #include "DtnNetwLayer.h"
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
+#include "istream"
 
 
 Define_Module(DtnNetwLayer);
@@ -117,6 +118,14 @@ void DtnNetwLayer::initialize(int stage)
         demandedAckedBundle = 0;
 
         bundlesReceived = 0;
+
+        lastBundleUpdate = 0.0;
+
+        nbrRestartedIEP = 0;
+
+        nbrCancelRestartedIEP = 0;
+
+        withRestart = par("withRestart").boolValue();
 	}
 }
 
@@ -305,6 +314,8 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 		}
 		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 		bundlesIndex[msg->getRecipientAddress()] = inner_map;
+
+		haveToRestartIEP(simTime());
 	}
 }
 
@@ -366,14 +377,21 @@ double DtnNetwLayer::getTimeFromName(const char *name)
 
 void DtnNetwLayer::deleteOldBundle(int ttl)
 {
+	std::list<WaveShortMessage*> bundlesToDelete;
+
 	if (withTTL){
 		std::list<WaveShortMessage*>::iterator it;
 		for (it = bundles.begin(); it != bundles.end(); it++){
 			WaveShortMessage* wsm = *it;
 			if ((wsm->getTimestamp() + ttl) > simTime().dbl()){
-				if(erase(wsm)){
-					nbrDeletedWithTTL++;
-				}
+				bundlesToDelete.push_front(wsm);
+			}
+		}
+
+		for (it = bundlesToDelete.begin(); it != bundlesToDelete.end(); it++){
+			WaveShortMessage* wsm = *it;
+			if(erase(wsm)){
+				nbrDeletedWithTTL++;
 			}
 		}
 	}
@@ -405,6 +423,16 @@ void DtnNetwLayer::handleLowerMsg(cMessage *msg)
 	}
 	delete netwPkt;
 	delete msg;
+}
+
+void DtnNetwLayer::handleSelfMsg(cMessage *msg)
+{
+	switch (msg->getKind()) {
+		case RESTART:
+			break;
+		default:
+			break;
+	}
 }
 
 void DtnNetwLayer::handleLowerControl(cMessage *msg)
@@ -439,6 +467,8 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 						if (recordContactStats){
 							unsigned long contactID = startRecordingContact(addr,time);
 						}
+
+						lastBundleProposal[addr] = time;
 					}
 				}
 				break;
@@ -464,6 +494,8 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 
 					/** Contacts duration stats				 */
 					recordEndContactStats(addr,time);
+
+					lastBundleProposal.erase(addr);
 				}
 				break;
 		}
@@ -496,6 +528,33 @@ void DtnNetwLayer::handleUpperControl(cMessage *msg)
 		bundlesIndex.clear();
 		bundlesIndex[newAddr] = innerMap;
 	}
+}
+
+bool DtnNetwLayer::haveToRestartIEP(simtime_t t)
+{
+	bool haveToRestartIEP = false;
+
+	lastBundleUpdate = t.dbl();
+	if (withRestart){
+		for (std::map<LAddress::L3Type, double>::iterator it = lastBundleProposal.begin(); it != lastBundleProposal.end(); it++){
+			double lastProposal = it->second;
+			if (lastProposal < lastBundleUpdate){
+				stringstream ss;
+				ss << it->first;
+//				if (restartIEP->isScheduled()){
+//					cancelEvent(restartIEP);
+//					nbrCancelRestartedIEP++;
+//				}
+				restartIEP = new cMessage(ss.str().c_str(), RESTART);
+				scheduleAt(simTime(),restartIEP);
+
+				haveToRestartIEP = true;
+				nbrRestartedIEP++;
+			}
+		}
+	}
+
+	return haveToRestartIEP;
 }
 
 unsigned long DtnNetwLayer::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
@@ -861,7 +920,6 @@ bool DtnNetwLayer::erase(BundleMeta bndlMeta)
 
 void DtnNetwLayer::finish()
 {
-
 	recordAllScalars();
 	classifyAll();
 	recordAllClassifier();
@@ -904,6 +962,10 @@ void DtnNetwLayer::recordAllScalars()
 
 	if (withTTL){
 		recordScalar("# DeletedBundlesWithTTL", nbrDeletedWithTTL);
+	}
+
+	if (withRestart){
+		recordScalar("# Restarted IEP", nbrRestartedIEP);
 	}
 }
 

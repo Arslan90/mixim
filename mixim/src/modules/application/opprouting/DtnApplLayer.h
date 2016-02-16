@@ -31,6 +31,118 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		virtual void finish();
 
 	protected:
+		/**ARTURO/Arslan  @brief Message kinds used by Dtn Appl Layer */
+		enum MyTestApplMessageKinds{
+			SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
+			BROADCAST_MESSAGE = 10,								//simple broadcast
+			BROADCAST_REPLY_MESSAGE = 20,						//simple reply
+			BROADCAST_VPA_WMS = 30,								//identified VPA beacon
+			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
+			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
+			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
+			DTN_MSG_MODE = 70,									// Added by Arslan HAMZA CHERIF
+		};
+
+
+		/**
+		 * Enumeration for Data Traffic Generator Mode (Dtn Msgs)
+		 */
+		enum t_data_generatorMode {
+			ALL2ALL	= 1,
+			ALL2VEH	= 2,
+			ALL2VPA	= 3,
+			VPA2ALL = 4,
+			VPA2VEH = 5,
+			VPA2VPA = 6,
+			VEH2ALL	= 7,
+			VEH2VEH	= 8,
+			VEH2VPA	= 9,
+		};
+
+		/**
+		 * Enumeration for Data Traffic Forwarder Mode (Mule)
+		 */
+		enum t_data_forwarderMode {
+			ALL = 1,
+			VPA = 2,
+			VEH = 3,
+		};
+
+		/*
+		 * Variable for specifying data traffic generation mode (Dtn Msgs)
+		 */
+		t_data_generatorMode genStrategy;
+
+		/*
+		 * Variable for specifying data traffic forwarding mode (Mule)
+		 */
+		t_data_forwarderMode muleStrategy;
+
+		/*
+		 * Variable to determine if the module is a sender of DtnMSg
+		 */
+		bool shouldSendDtnMsg;
+
+		/*
+		 *	Method to get the Data Source string from strategy
+		 */
+		virtual std::string getDataSrcFromStrategy(t_data_generatorMode currentStrategy);
+
+		/*
+		 * Variable to determine if the module is a receiver of DtnMSg
+		 */
+		bool shouldReceiveDtnMsg;
+
+		/*
+		 *	Method to get the Data Destination string from strategy
+		 */
+		virtual std::string getDataDestFromStrategy(t_data_generatorMode currentStrategy);
+
+		/**
+		 * Enumeration for Data Traffic Generation type (SectorMode or PeriodicMode) - Typically used by Veh
+		 */
+		enum t_dtnMsgGenerationType {
+			Sector 	 = 1, // At sector entrance (like in Cologne)
+			Periodic = 2, // Generate periodically DtnMsg
+		};
+
+		/**
+		 * Enumeration for Data Traffic Reception type (Unique vs Random vs Any) - Typically used by VPA
+		 */
+		enum t_dtnMsgReceptionType {
+			Unique = 1, // Unique receipt for generated data traffic (have to specify the recipient) - By default VPA[0]
+			Random = 2, // Choose randomly the recipient
+			Any    = 3, // Recipient is the current VPA, which changes every time we switch to another sector
+		};
+
+		/*
+		 * bool variable for enabling DtnMsg;
+		 */
+		bool withDtnMsg;
+
+		/*
+		 * the Dtn Msg that will be exchanged among App Layer
+		 */
+		cMessage *dtnMsg;
+
+		// Different stats for Bundle Sending/Reception
+		int nbrBundleSent;
+		int nbrBundleReceived;
+		int nbrUniqueBundleReceived;
+
+		// Parameters related to Periodic Mode
+		int dtnMsgPeriod;
+		int dtnMsgMaxTime;
+		int dtnMsgMinTime;
+		bool dtnMsgSynchronized;
+
+
+		int oldSector;
+
+		bool anyVPA;
+
+		bool isEquiped;
+
 //		/** @brief handle messages from below */
 //		virtual void handleLowerMsg(cMessage* msg);
 //		/** @brief handle self messages */
@@ -42,27 +154,6 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		virtual void onData(WaveShortMessage* wsm);
 //
 //		virtual void handlePositionUpdate(cObject* obj);
-
-		/*
-		 * bool variable for enabling dtnTestMode
-		 */
-		bool dtnTestMode;
-		cMessage *dtnTestMsg;
-		int dtnTestCycle;
-		int dtnTestMaxTime;
-		int dtnTestMinTime;
-		bool dtnSynchronized;
-
-		int nbrBundleSent;
-		int nbrBundleReceived;
-		int nbrUniqueBundleReceived;
-
-		bool sectorMode;
-		int oldSector;
-
-		bool anyVPA;
-
-		bool isEquiped;
 };
 
 #endif

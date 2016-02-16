@@ -21,13 +21,8 @@ Define_Module(ProphetV2);
 
 void ProphetV2::initialize(int stage)
 {
-	BaseNetwLayer::initialize(stage);
+	DtnNetwLayer::initialize(stage);
 	if (stage==0){
-		/*
-		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
-		 */
-//		myNetwAddr = LAddress::L3Type( getId() );
-
 		/*
 		 * Initialization of ProphetV2 parameters
 		 */
@@ -50,67 +45,6 @@ void ProphetV2::initialize(int stage)
 		 * Initialization of the used structures
 		 */
 		lastAgeUpdate = 0;
-		bundlesStructureSize = par("storageSize");
-		if (bundlesStructureSize<=0){
-			opp_error("Size of the structure that store bundles can not be negative");
-		}
-		bundles = std::list<WaveShortMessage*>();
-
-
-		withAck = par("withAck");
-		ackStructureSize = par("ackSize");
-		if (ackStructureSize<=0){
-			opp_error("Size of the structure that store acks can not be negative");
-		}
-		acks = std::list<BundleMeta>();
-		acksIndex = std::map<unsigned long,BundleMeta>();
-
-		withTTL = par("withTTL").boolValue();
-		ttl = par("ttl");
-		nbrDeletedWithTTL = 0;
-
-		equipedVehPc = par("equipedVehPc").doubleValue();
-		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
-			opp_error("Pourcentage of equiped vehicle is wrong, please correct it");
-		}
-		if (equipedVehPc == 1){
-			isEquiped = true;
-		}else {
-			double tmp = uniform(0,1);
-			if (tmp <= equipedVehPc){
-				isEquiped = true;
-			}else {
-				isEquiped = false;
-			}
-		}
-
-		maxPcktLength = par("MTU"); // MTU is expressed in bytes unit
-		maxPcktLength*=8;
-
-		dontFragment = par("DF").boolValue();
-
-		const char* cutPoints = par("cutPoints").stringValue();
-		char* cutPointsChar = strdup(cutPoints);
-
-		char* tmp = strtok (cutPointsChar,";");
-		double cutPointValue = 0;
-		std::istringstream iss(tmp);
-		iss >> cutPointValue;
-		cutPoitsCDF.push_back(cutPointValue);
-
-		while (tmp != NULL)	{
-		    tmp = strtok (NULL, ";");
-		    if (tmp != NULL){
-		    	cutPointValue = 0;
-		    	if (strcmp(tmp,"") != 0){
-		    		std::istringstream iss(tmp);
-					iss >> cutPointValue;
-					cutPoitsCDF.push_back(cutPointValue);
-		    	}
-		    }
-		}
-
-		dataLength = maxPcktLength - headerLength;
 
 		I_Preds = par("I_Preds").doubleValue();
 
@@ -118,25 +52,11 @@ void ProphetV2::initialize(int stage)
 		 * Collecting data & metrics
 		 */
 
-		recordContactStats = par("recordContactStats");
-
-	    nbrL3Sent = 0;
-	    nbrL3Received = 0;
-
 	    nbrPredsVector.setName("Number of predictions");
 	    predsMean.setName("Mean of predictions");
 	    predsMax.setName("Maximum of predictions");
 	    predsMin.setName("Minimum of predictions");
 	    predsVariance.setName("Variance of predictions");
-
-	    nbrContacts =0;
-	    sumOfContactDur = 0.0;
-	    contacts = std::map<LAddress::L3Type,double>();
-	    contactDurVector.setName("Evolution of contact duration mean");
-
-	    nbrRecontacts = 0;
-	    sumOfInterContactDur = 0.0;
-	    intercontactDurVector.setName("Evolution of intercontact duration mean");
 
 	    nbrSuccessfulContact = 0;
         nbrFailedContactBeforeRIB = 0;
@@ -145,14 +65,6 @@ void ProphetV2::initialize(int stage)
         nbrFailedContactAtBundle_Response = 0;
         contactState = std::map<LAddress::L3Type, Prophetv2MessageKinds>();
 
-        deletedBundlesWithAck = 0;
-
-        demandedAckedBundle = 0;
-
-        bundlesReceived = 0;
-
-        nbrSimpleContactStats = 0;
-
         initAllClassifier();
 
         maxForRC = 5;
@@ -160,6 +72,8 @@ void ProphetV2::initialize(int stage)
         nbrContactsForRCVect.setName("Evolution of nbrContact between RC");
 
         delayed = par("delayed");
+
+        withPartialUpdate = par("withPartialUpdate").boolValue();
 
 	}
 	else if (stage==1){
@@ -264,12 +178,12 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 		}
 
 		preds[CAdress] = predsForC;
-//		preds.insert(std::pair<LAddress::L3Type,double>(CAdress,predsForC));
 	}
 }
 
 void ProphetV2::ageDeliveryPreds()
 {
+	bool belowThreshold = false;
 	predsIterator it2;
 	double time = simTime().dbl();
 	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
@@ -280,7 +194,6 @@ void ProphetV2::ageDeliveryPreds()
 		std::vector<LAddress::L3Type> predsToDelete;
 
 		for (predsIterator it=preds.begin();it!=preds.end();it++){
-
 			if (it->first==myNetwAddr){
 				continue;
 			}
@@ -382,15 +295,6 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
     delete msg;
 }
 
-void ProphetV2::handleUpperMsg(cMessage* msg)
-{
-	if (isEquiped){
-		assert(dynamic_cast<WaveShortMessage*>(msg));
-		WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-		storeBundle(upper_msg);
-	}
-}
-
 void ProphetV2::handleLowerControl(cMessage* msg)
 {
 
@@ -421,11 +325,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					/** Contacts duration stats				*/
 					recordBeginContactStats(addr,time);
 
-//					recordBeginSimplContactStats(addr,time);
-
 					Prophet* emulatedPkt;
-					emulatedPkt = prepareProphet(0,addr,myNetwAddr);
-//					emulatedPkt->setBitLength(headerLength);
+					emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
 
 					if (recordContactStats){
 						unsigned long contactID = startRecordingContact(addr,time);
@@ -466,7 +367,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 				/** Contacts duration stats				 */
 				recordEndContactStats(addr,time);
 
-//				recordEndSimpleContactStats(addr,time);
+				lastBundleProposal.erase(addr);
 			}
 			break;
 	}
@@ -475,31 +376,49 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 	delete msg;
 }
 
-void ProphetV2::handleUpperControl(cMessage* msg)
+
+void ProphetV2::handleSelfMsg(cMessage* msg)
 {
-	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
-	int newAddr = controlInfo->getNewSectorNetwAddr();
+	switch (msg->getKind()) {
+		case RESTART:
+			if (canITransmit){
 
-	bundlesIndexIterator it1;
-	innerIndexIterator it2;
-	innerIndexMap innerMap;
+			/*
+			 * Extracting destAddress and Time from controlMsgName
+			 */
+			char* msgName = strdup(msg->getName());
 
-	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
-		for (it2 = it1->second.begin(); it2 != it1->second.end() ; it2++){
-			it2->second->setRecipientAddress(newAddr);
-			innerMap.insert(std::pair<unsigned long,WaveShortMessage*>(it2->first,it2->second));
-		}
-	}
+			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
 
-	// we clear all the bundlesIndex container and reconstruct it
-	// with one unique destination which correspond to newAddr
+			Prophet* emulatedPkt;
+			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
 
+			if (recordContactStats){
+				unsigned long contactID;
+				iteratorContactID iterator1 = indexContactID.find(addr);
+				if (iterator1 != indexContactID.end()){
+					contactID = iterator1->second.back();
+				}else{
+					opp_error("contact does not exist");
+				}
+				emulatedPkt->setContactID(contactID);
+			}
 
-	if (!innerMap.empty()){
-		bundlesIndex.clear();
-		bundlesIndex[newAddr] = innerMap;
+			/** Starting IEP Phase					*/
+
+			/*
+			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
+			 * calculated by startRecoringContact
+			 */
+			executeInitiatorRole(RIB,emulatedPkt);
+			delete emulatedPkt;
+			}
+			break;
+		default:
+			break;
 	}
 }
+
 
 void ProphetV2::storeBundle(WaveShortMessage *msg)
 {
@@ -536,38 +455,15 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 		bundles.push_back(msg);
 
 		// step 3 : adding this bundle to index
-		if (bundlesIndex.count(msg->getRecipientAddress())==0){
-			// no entry for msg->getRecipientAddress())
-//			std::map <unsigned long, WaveShortMessage*> inner_map;
-			innerIndexMap inner_map;
-			inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
-			bundlesIndex.insert(std::pair<LAddress::L3Type, innerIndexMap >(msg->getRecipientAddress(),inner_map));
-		}else {
-			/*
-			 * there is a current entry for this address,
-			 * we have to add this message to the existing entry
-			 */
-			bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-			it->second.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
+		bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
+		innerIndexMap inner_map;
+		if (it != bundlesIndex.end()){
+			inner_map = it->second;
 		}
-	}
-}
+		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
+		bundlesIndex[msg->getRecipientAddress()] = inner_map;
 
-void ProphetV2::storeACK(BundleMeta meta)
-{
-	if (!ackExist(meta)){
-		if (acks.size()==ackStructureSize){
-			unsigned long serial = acks.front().getSerial();
-			acksIndex.erase(serial);
-			acks.pop_front();
-		}
-
-		acksIndex.insert(std::pair<unsigned long, BundleMeta>(meta.getSerial(),meta));
-		acks.push_back(meta);
-
-		if (existAndErase(meta)) {
-			deletedBundlesWithAck++;
-		}
+//		haveToRestartIEP(simTime());
 	}
 }
 
@@ -600,7 +496,6 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			break;
 		case RIB:
 		{
-
 			std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
 			ageDeliveryPreds();
 			predToSend.insert(preds.begin(),preds.end());
@@ -613,15 +508,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 				shouldFragment = true;
 			}
 
-			if (!shouldFragment){
+			if ((dontFragment) || (!shouldFragment)){
 				Prophet *ribPkt;
 				ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predToSend);
 				ribPkt->setContactID(prophetPkt->getContactID());
 				ribPkt->setFragmentFlag(false);
-	//			ribPkt->setBitLength(headerLength);
 				if (canITransmit){
-//					sendDelayed(ribPkt,dblrand()*5,"lowerLayerOut");
-//					sendDown(ribPkt);
 					if (delayed == 0){
 						sendDown(ribPkt);
 					}else{
@@ -690,13 +582,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-//						sendDelayed(ribPkt,dblrand()*5,"lowerLayerOut");
-//						sendDown(ribPkt);
-						if (delayed == 0){
+//						if (delayed == 0){
 							sendDown(ribPkt);
-						}else{
-							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
-						}
+//						}else{
+//							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
+//						}
 
 						/*
 						 * Collecting data
@@ -744,8 +634,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			}else {
 				std::list<BundleMeta> bndlMetaToAccept;
 
+				int bndlOffer = 0;
+				int alreadyAcked = 0;
+
 				for (std::list<BundleMeta>::iterator it = prophetPkt->getBndlmeta().begin(); it !=prophetPkt->getBndlmeta().end(); ++it) {
 					if (it->getFlags() == Prophet_Enum::Bndl_Accepted){
+						bndlOffer++;
 						/*
 						 * step 1 : check if offered bundles are already stored in this node,
 						 * in that case delete them from the offered list
@@ -759,6 +653,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 						 */
 						if (ackExist(*it)){
 							demandedAckedBundle++;
+							alreadyAcked++;
 							continue;
 						}
 					}else if (it->getFlags() == Prophet_Enum::PRoPHET_ACK){
@@ -776,6 +671,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 						opp_error("Reception of bundle Meta of unknown type(ProphetV2::executeInitiatorRole)");
 					}
 					bndlMetaToAccept.push_back(*it);
+				}
+
+				if (recordContactStats){
+					contact.setOfferReceived(bndlOffer);
+					contact.setNbrAlreadyAcked(alreadyAcked);
+					updateContactWhenInit(prophetPkt, contactID, contact, kind);
 				}
 
 				/*
@@ -805,9 +706,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			Prophet *responsePkt;// = new Prophet();
 			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
 			responsePkt->setContactID(prophetPkt->getContactID());
-//			responsePkt->setBitLength(headerLength);
 			if (canITransmit){
-				sendDown(responsePkt);
+//				if (delayed == 0){
+					sendDown(responsePkt);
+//				}else{
+//					sendDelayed(responsePkt,dblrand()*delayed,"lowerLayerOut");
+//				}
 
 				/*
 				 * Collecting data
@@ -817,6 +721,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 
 				if (recordContactStats){
 					contact.setL3Sent();
+					contact.setAcceptSent(bundleToAcceptMeta.size());
 					updateContactWhenInit(prophetPkt, contactID, contact, kind);
 				}
 			}else{
@@ -894,9 +799,12 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 
 				ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, prophetPkt->getSrcAddr(), &acksMeta);
 				ackPkt->setContactID(prophetPkt->getContactID());
-//				ackPkt->setBitLength(headerLength);
 				if (canITransmit){
-					sendDown(ackPkt);
+//					if (delayed == 0){
+						sendDown(ackPkt);
+//					}else{
+//						sendDelayed(ackPkt,dblrand()*delayed,"lowerLayerOut");
+//					}
 					/*
 					 * Collecting data
 					 */
@@ -957,20 +865,6 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 
 		}
 	}
-	// if destAddr equals 0 then destAddr is  the sender of the previously received prophet packet
-//
-//	if (destAddr == 0) {
-//		coreEV << "destAddr equal 0 (null) in Bundle_Ack of Initiator Role. destAddr will be recalculated";
-//		destAddr = prophetPkt->getSrcAddr();
-//	}
-//	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
-//	SimpleContactStats contact;
-//	if (kind == RIB){
-//		contact = getLastSimpleContactStats(destAddr);
-//	}else {
-//		pair = getSimpleContactStats(destAddr, prophetPkt->getCreationTime().dbl());
-//		contact = pair.first;
-//	}
 
 	switch (kind) {
 		case HELLO:
@@ -981,6 +875,20 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 			break;
 		case RIB:
 		{
+
+			if (!abortConnection(RIB,prophetPkt)){
+				bool haveToPartiallyUpdate = false;
+				if ((prophetPkt->getFragmentFlag()==true)&&(contact.getPredictionsReceived()!=0)){
+					haveToPartiallyUpdate = true;
+				}
+
+				if ((withPartialUpdate)&&(haveToPartiallyUpdate)){
+					partialUpdate(prophetPkt);
+				}else{
+					update(prophetPkt);
+				}
+			}
+
 			/*
 			 * Collecting data
 			 */
@@ -991,9 +899,6 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				updateContactWhenList(prophetPkt, contactID, contact, kind);
 			}
 
-			if (!abortConnection(RIB,prophetPkt)){
-				update(prophetPkt);
-			}
 			executeListenerRole(Bundle_Offer,prophetPkt);
 		}
 			break;
@@ -1039,6 +944,8 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				}
 			}
 
+			lastBundleProposal[prophetPkt->getSrcAddr()] = simTime().dbl();
+
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
 			int bundleMetaSize = ((sizeof(BundleMeta) + 8 ) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
@@ -1047,7 +954,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				shouldFragment = true;
 			}
 
-			if (!shouldFragment){
+			if ((dontFragment) || (!shouldFragment)){
 
 				/*
 				 * Step 2 : Sending the ProphetPckt
@@ -1057,9 +964,12 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bundleToOfferMeta);
 				offerPkt->setContactID(prophetPkt->getContactID());
 				offerPkt->setFragmentFlag(false);
-	//			offerPkt->setBitLength(headerLength);
 				if (canITransmit){
-					sendDown(offerPkt);
+					if (delayed == 0){
+						sendDown(offerPkt);
+					}else{
+						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
+					}
 
 					/*
 					 * Collecting data
@@ -1069,6 +979,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 					if (recordContactStats){
 						contact.setL3Sent();
 						contact.setAckSent(contact.getAckSent()+ackToOffer.size());
+						contact.setOfferSent(directBundleToOffer.size()+otherBundleToOffer.size());
 						updateContactWhenList(prophetPkt, contactID, contact, kind);
 					}
 				}else{
@@ -1116,9 +1027,12 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 					offerPkt->setFragmentFlag(true);
 					offerPkt->setFragmentNum(fragmentNum);
 					offerPkt->setTotalFragment(nbrFragment);
-		//			offerPkt->setBitLength(headerLength);
 					if (canITransmit){
-						sendDown(offerPkt);
+//						if (delayed == 0){
+							sendDown(offerPkt);
+//						}else{
+//							sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
+//						}
 
 						/*
 						 * Collecting data
@@ -1134,6 +1048,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 								}
 							}
 							contact.setAckSent(contact.getAckSent()+nbrAckSent);
+							contact.setOfferSent(prophetPkt->getBndlmeta().size());
 							updateContactWhenList(prophetPkt, contactID, contact, kind);
 						}
 					}else{
@@ -1149,20 +1064,13 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 			break;
 		case Bundle_Response:
 		{
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			if (recordContactStats){
-				contact.setL3Received();
-				updateContactWhenList(prophetPkt, contactID, contact, kind);
-			}
-
+			std::list<BundleMeta> bndlMetaToAccept;
+			bndlMetaToAccept.clear();
 			if (withAck){
 				/*
 				 * 1 step : Check if demanded bundle in bundleResp is currently acked, delete it if it's the case
 				 */
-				std::list<BundleMeta> bndlMetaToAccept;
+
 				for (std::list<BundleMeta>::iterator it = prophetPkt->getBndlmeta().begin(); it !=prophetPkt->getBndlmeta().end(); ++it) {
 					if (!ackExist(*it)){
 						bndlMetaToAccept.push_back(*it);
@@ -1173,6 +1081,16 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				 * and so we will send bundle previously discarded
 				 */
 				prophetPkt->setBndlmeta(bndlMetaToAccept);
+			}
+
+			/*
+			 * Collecting data
+			 */
+			updatingL3Received();
+			if (recordContactStats){
+				contact.setL3Received();
+				contact.setAcceptReceived(prophetPkt->getBndlmeta().size());
+				updateContactWhenList(prophetPkt, contactID, contact, kind);
 			}
 			executeListenerRole(Bundle,prophetPkt);
 		}
@@ -1194,9 +1112,12 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				 */
 				bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,NULL);
 				bundlePkt->setContactID(prophetPkt->getContactID());
-//				bundlePkt->setBitLength(headerLength);
 				if (canITransmit){
-					sendDown(bundlePkt);
+//					if (delayed == 0){
+						sendDown(bundlePkt);
+//					}else{
+//						sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
+//					}
 					/*
 					 * Collecting data
 					 */
@@ -1220,9 +1141,12 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 						if (it3!=it2->second.end()){
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
 							bundlePkt->setContactID(prophetPkt->getContactID());
-//							bundlePkt->setBitLength(headerLength);
 							if (canITransmit){
-								sendDown(bundlePkt);
+//								if (delayed == 0){
+									sendDown(bundlePkt);
+//								}else{
+//									sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
+//								}
 								/*
 								 * Collecting data
 								 */
@@ -1287,27 +1211,20 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	if (meta!=NULL){
 		prophetMsg->setBndlmeta(*meta);
 		metaLength = (sizeof(BundleMeta) + 8 ) * meta->size();
-//		realPktLength += sizeof(prophetMsg->getBndlmeta());
 		realPktLength += metaLength;
 	}
 	if (preds!=NULL){
 		prophetMsg->setPreds(*preds);
 		predsLength = (sizeof(int ) + sizeof(double) + 16 ) * preds->size();
-//		realPktLength += sizeof(prophetMsg->getPreds());
 		realPktLength+= predsLength;
 	}
 	if (msg!=NULL){
 		prophetMsg->encapsulate(msg);
-//		realPktLength += sizeof(msg);
 		msgSize = msg->getBitLength();
 	}
 
 	realPktLength *= 8;
 	realPktLength += msgSize;
-
-	if (realPktLength > 18000){
-		//opp_warning("header length is big");
-	}
 
 	prophetMsg->setBitLength(realPktLength);
 
@@ -1316,10 +1233,6 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 
 std::vector<std::list<BundleMeta> >ProphetV2::defineBundleOffer(Prophet *prophetPkt)
 {
-//	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
-//	pair = getSimpleContactStats(prophetPkt->getSrcAddr(),prophetPkt->getCreationTime().dbl());
-//	SimpleContactStats contact = pair.first;
-
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
 	std::vector<std::pair<LAddress::L3Type, double>	> sortedPreds;
@@ -1423,12 +1336,8 @@ std::vector<std::list<BundleMeta> >ProphetV2::defineBundleOffer(Prophet *prophet
 				continue;
 			}
 			ackToOffer.push_back(*it);
-//			contact.setAckSent();
 		}
 	}
-
-//	contact.setL3Sent();
-//	updateSimpleContactStats(prophetPkt->getSrcAddr(),contact,pair.second);
 
 	allBundleMeta.push_back(directBundleToOffer);
 	allBundleMeta.push_back(otherBundleToOffer);
@@ -1439,59 +1348,6 @@ std::vector<std::list<BundleMeta> >ProphetV2::defineBundleOffer(Prophet *prophet
 	}
 
 	return allBundleMeta;
-}
-
-bool ProphetV2::exist(WaveShortMessage *msg)
-{
-	bool found = false;
-	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2 = innerMap.find(msg->getSerial());
-		if (it2 !=innerMap.end()){
-			found = true;
-		}
-	}
-	return found;
-}
-
-bool ProphetV2::exist(BundleMeta bndlMeta)
-{
-	bool found = false;
-	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2 = innerMap.find(bndlMeta.getSerial());
-		if (it2 !=innerMap.end()){
-			found = true;
-		}
-	}
-	return found;
-}
-
-bool ProphetV2::existAndErase(BundleMeta bndlMeta)
-{
-	bool found = false;
-	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2 = innerMap.find(bndlMeta.getSerial());
-		if (it2 !=innerMap.end()){
-			WaveShortMessage* wsm = it2->second;
-			innerMap.erase(bndlMeta.getSerial());
-			bundles.remove(wsm);
-			if (innerMap.empty()){
-				bundlesIndex.erase(bndlMeta.getRecipientAddress());
-			}else {
-				bundlesIndex[bndlMeta.getRecipientAddress()] = innerMap;
-			}
-			if (wsm->getOwner()==this){
-				delete wsm;
-			}
-			found = true;
-		}
-	}
-	return found;
 }
 
 bool ProphetV2::abortConnection(short  kind, Prophet *prophetPkt)
@@ -1543,24 +1399,6 @@ bool ProphetV2::abortConnection(short  kind, Prophet *prophetPkt)
 	return abort;
 }
 
-bool ProphetV2::ackExist(WaveShortMessage *msg)
-{
-	bool exist = false;
-	if ((withAck)&&(acksIndex.find(msg->getSerial())!=acksIndex.end())){
-		exist = true;
-	}
-	return exist;
-}
-
-bool ProphetV2::ackExist(BundleMeta bndlMeta)
-{
-	bool exist = false;
-	if ((withAck)&&(acksIndex.find(bndlMeta.getSerial())!=acksIndex.end())){
-		exist = true;
-	}
-	return exist;
-}
-
 void ProphetV2::updateContactWhenInit(Prophet *prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind)
 {
 	/*
@@ -1605,40 +1443,12 @@ void ProphetV2::updateContactWhenList(Prophet *prophetPkt, unsigned long contact
 	}
 }
 
-LAddress::L3Type ProphetV2::getAddressFromName(const char *name)
-{
-	int addr = 0;
-	if (strcmp(name,"")!=0){
-		std::istringstream iss(name);
-		iss >> addr;
-	}else {
-		opp_error("getting address from name return NULL (ProphetV2::getAddressFromName)");
-	}
-	return addr;
-}
-
-double ProphetV2::getTimeFromName(const char *name)
-{
-	double time = 0;
-	if (strcmp(name,"")!=0){
-		std::istringstream iss(name);
-		iss >> time;
-	}else {
-		opp_error("getting time from name return NULL (ProphetV2::getTimeFromName)");
-	}
-	return time;
-}
-
 void ProphetV2::finish()
 {
 //	EV << "Sent:     " << nbrL3Sent << endl;
 //	EV << "Received: " << nbrL3Received << endl;
 
-	recordScalar("# L3Sent", nbrL3Sent);
-	recordScalar("# L3Received", nbrL3Received);
-
-	recordScalar("# of Contacts", nbrContacts);
-	recordScalar("# of InterContacts", nbrRecontacts);
+	recordAllScalars();
 
 	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
 	recordScalar("# failed contacts at RIB", nbrFailedContactAtRIB);
@@ -1646,20 +1456,7 @@ void ProphetV2::finish()
 	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
 	recordScalar("# successful contacts", nbrSuccessfulContact);
 
-	recordScalar("# Bundles at L3", bundlesReceived);
 
-	if (withAck){
-		recordScalar("# ACKs", acks.size());
-		recordScalar("# DeletedBundles", deletedBundlesWithAck);
-		recordScalar("# DemandedAckedBundles", demandedAckedBundle);
-		recordScalar("# Bundles", bundles.size());
-	}
-
-	if (withTTL){
-		recordScalar("# DeletedBundlesWithTTL", nbrDeletedWithTTL);
-	}
-
-	recordScalar("# nbrSimpleContactStats", nbrSimpleContactStats);
 	classifyAll();
 	recordAllClassifier();
 
@@ -1670,14 +1467,7 @@ void ProphetV2::finish()
 
 	if (!nbrRepeatedContact.empty()){
 		histMaxRepeatedContact.setName("Histogram for max nbr repeated contact");
-//		int maxRepeated = 0;
 		std::map<LAddress::L3Type, int>::iterator it;
-//		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
-//			if (it->second > maxRepeated){
-//				maxRepeated = it->second;
-//			}
-//		}
-
 		std::vector<int> repeatedNTimes(maxForRC,0);
 		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
 			histMaxRepeatedContact.collect(it->second);
@@ -1694,7 +1484,7 @@ void ProphetV2::finish()
 		}
 		histMaxRepeatedContact.recordAs("Histogram for max nbr repeated contact");
 
-		for (int i = 0; i < repeatedNTimes.size(); ++i) {
+		for (unsigned int i = 0; i < repeatedNTimes.size(); ++i) {
 			stringstream flux1;
 			flux1 << i+1;
 			std::string tmpStr = "Bars for #repeated "+ flux1.str();
@@ -1899,9 +1689,6 @@ void ProphetV2::finish()
 
 void ProphetV2::recordPredsStats()
 {
-	// nbPreds = preds.size()-1, because P(X,X) is counted as a prediction for every node X
-
-
 	double min = DBL_MAX, max = DBL_MIN, mean = 0, sum = 0, variance = 0, varianceSum = 0;
 
 	for (predsIterator it=preds.begin(); it!=preds.end();it++){
@@ -1998,14 +1785,6 @@ void ProphetV2::recordPredsStats()
 			predsForRC[it->first] = tmp;
 		}
 	}
-}
-
-void ProphetV2::recordBeginContactStats(LAddress::L3Type addr, double time)
-{
-	// updating nbr contacts
-	nbrContacts++;
-	// saving the starting time of the contact
-	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
 }
 
 void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
@@ -2133,184 +1912,10 @@ void ProphetV2::updatingContactState(LAddress::L3Type addr, Prophetv2MessageKind
 	contactState.insert(std::pair<LAddress::L3Type, Prophetv2MessageKinds>(addr,kind));
 }
 
-unsigned long ProphetV2::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
-{
-	unsigned long serial = 0;
-	unsigned long cantorPairForAddresses;
-
-	if (myAddr>otherAddr){
-		cantorPairForAddresses = multiFunctions::cantorPairingFunc(otherAddr,seqNumber);
-		serial = multiFunctions::cantorPairingFunc(cantorPairForAddresses,myAddr);
-	}else{
-		cantorPairForAddresses = multiFunctions::cantorPairingFunc(myAddr,seqNumber);
-		serial = multiFunctions::cantorPairingFunc(cantorPairForAddresses,otherAddr);
-	}
-
-	return serial;
-}
-
-unsigned long ProphetV2::startRecordingContact(int addr, double time)
-{
-	unsigned long contactID = 0, lastContactID = 0;
-	std::list<unsigned long> contactIDList;
-	SimpleContactStats contact, lastContact;
-	iteratorContactID iterator1 = indexContactID.find(addr);
-	if (iterator1 == indexContactID.end()){
-		/*
-		 * No entry found for this address
-		 */
-		contactID = generateContactSerial(myNetwAddr,1,addr);
-		contactIDList.push_back(contactID);
-		indexContactID.insert(std::pair<int,std::list<unsigned long> >(addr,contactIDList));
-
-		contact = SimpleContactStats(time);
-		contact.setSerial(contactID);
-		indexContactStats.insert(std::pair<unsigned long,SimpleContactStats>(contactID,contact));
-	}else{
-		/*
-		 * there is an entry for this address
-		 */
-		contactIDList = indexContactID[addr];
-		if (contactIDList.empty()){
-			opp_error("contactIDList cannot be empty if there is an entry for the other addr(ProphetV2::startRecordingContact)");
-		}else{
-			lastContactID = contactIDList.back();
-			iteratorContactStats iterator2 = indexContactStats.find(lastContactID);
-			if (iterator2 == indexContactStats.end()){
-				opp_error("contactStats cannot be NULL if there is an entry for the contactID (ProphetV2::startRecordingContact)");
-			}else{
-				lastContact = iterator2->second;
-				if (lastContact.hasFinished()){
-					/*
-					 * precedent contact has finished, create a new contact
-					 */
-					contactID = generateContactSerial(myNetwAddr,contactIDList.size()+1,addr);
-					contactIDList.push_back(contactID);
-					indexContactID[addr] = contactIDList;
-
-					contact = SimpleContactStats(time);
-					contact.setSerial(contactID);
-					indexContactStats[contactID] = contact;
-				}else{
-					/*
-					 * the last contact is potentially the good one, check if it is the same serial or not
-					 * by generating a contactID based on contactIDList.size() (not size()+1)
-					 */
-					contactID = generateContactSerial(myNetwAddr,contactIDList.size(),addr);
-					if (lastContactID == contactID){
-						/*
-						 * the last contact is the good one, no need to add it to the list, only update starting time
-						 */
-						contact.setStartTime(time);
-						indexContactStats[contactID] = contact;
-					}else {
-						opp_error("Error: generated serial differs from the serial of last contact");
-					}
-				}
-			}
-		}
-	}
-
-	return contactID;
-}
-
-unsigned long ProphetV2::startRecordingContact(int addr, unsigned long contactID)
-{
-	/*
-	 * possibility that we received the RIB msg before receiving the control msg
-	 * We must create an entry for this contact
-	 */
-
-	std::list<unsigned long> contactIDList = indexContactID[addr];
-	contactIDList.push_back(contactID);
-	indexContactID[addr] = contactIDList;
-
-	SimpleContactStats contact = SimpleContactStats();
-	contact.setSerial(contactID);
-	indexContactStats.insert(std::pair<unsigned long,SimpleContactStats>(contactID,contact));
-
-	return contactID;
-}
-
-unsigned long ProphetV2::endRecordingContact(int addr, double time)
-{
-	unsigned long contactID = 0;
-	std::list<unsigned long> contactIDList;
-	SimpleContactStats contact;
-	iteratorContactID iterator1 = indexContactID.find(addr);
-	if (iterator1 == indexContactID.end()){
-		/*
-		 * No entry found for this address, it is impossible
-		 */
-		opp_error("cannot receive end of contact for a not started contact(ProphetV2::endRecordingContact)");
-	}else {
-		/*
-		 * We return the last contact on the contactIDList
-		 */
-		contactIDList = iterator1->second;
-		contactID = contactIDList.back();
-		iteratorContactStats iterator2 = indexContactStats.find(contactID);
-		if (iterator2 == indexContactStats.end()){
-			opp_error("contactStats cannot be NULL if there is an entry for the contactID (ProphetV2::endRecordingContact)");
-		}else{
-			contact = iterator2->second;
-			/*
-			 * we update the end time of the contact
-			 */
-			contact.setEndTime(time);
-			indexContactStats[contactID] = contact;
-		}
-	}
-
-	return contactID;
-}
-
-unsigned long ProphetV2::endRecordingContact(unsigned long contactID, bool hasForecedEnding)
-{
-	iteratorContactStats iterator = indexContactStats.find(contactID);
-	if (iterator == indexContactStats.end()){
-		opp_error("contactStats cannot be NULL if there is an entry for the contactID (ProphetV2::endRecordingContact)");
-	}else{
-		SimpleContactStats contact = iterator->second;
-		/*
-		 * we update the end time of the contact
-		 */
-		contact.setEndTime(simTime().dbl());
-		contact.setHasForcedEnding(hasForecedEnding);
-		indexContactStats[contactID] = contact;
-	}
-
-	return contactID;
-}
-
 void ProphetV2::classify(SimpleContactStats* newContact)
 {
-	/*
-	 * check if the contact has started, otherwise error
-	 */
-	if (!newContact->hasStarted()){
-		opp_error("impossible to classify a not-started contact");
-	}
-	/*
-	 * check if the contact has ended
-	 */
-	if (!newContact->hasFinished()){
-		endRecordingContact(newContact->getSerial(),true);
-	}
-
-	/*
-	 * then classify by classifier
-	 */
-
-	if (withGlobal){
-		Global.update(newContact);
-	}
-	if ((withSucc)&&(newContact->isSuccessfulContact())){
-		Succ.update(newContact);
-	}else{
-		if (withFail){
-			Fail.update(newContact);
-		}
+	DtnNetwLayer::classify(newContact);
+	if (!newContact->isSuccessfulContact()){
 		switch (newContact->getState()) {
 			case RIB:
 				if (withFailRIB){
@@ -2343,61 +1948,10 @@ void ProphetV2::classify(SimpleContactStats* newContact)
 	}
 }
 
-void ProphetV2::classifyAll()
-{
-	for(iteratorContactStats it = indexContactStats.begin(); it != indexContactStats.end(); it++){
-		SimpleContactStats* contactToClassify = &(it->second);
-		classify(contactToClassify);
-	}
-}
-
-void ProphetV2::recordClassifier(ClassifiedContactStats classifier)
-{
-
-	recordScalar(string(classifier.getName()+": # nbrContact").c_str(),classifier.getNbrContacts());
-	recordScalar(string(classifier.getName()+": # nbrToDiscard").c_str(),classifier.getNbrToDiscard());
-
-	if (classifier.getNbrContacts()>0){
-		double repeatedPourcentage = (double (classifier.getNbrRepeated()) / double (classifier.getNbrContacts())) * 100;
-		recordScalar(string(classifier.getName()+": % repeated").c_str(), repeatedPourcentage);
-	}
-
-	recordScalar(string(classifier.getName()+": # L3Sent").c_str(),classifier.getL3Sent());
-	recordScalar(string(classifier.getName()+": # L3Received").c_str(),classifier.getL3Received());
-
-	recordScalar(string(classifier.getName()+": # BundleSent").c_str(),classifier.getBundleSent());
-	recordScalar(string(classifier.getName()+": # BundleReceived").c_str(),classifier.getBundleReceived());
-
-	recordScalar(string(classifier.getName()+": # AckSent").c_str(),classifier.getAckSent());
-	recordScalar(string(classifier.getName()+": # AckReceived").c_str(),classifier.getAckReceived());
-
-	recordScalar(string(classifier.getName()+": # PredictionsSent").c_str(),classifier.getPredictionsSent());
-	recordScalar(string(classifier.getName()+": # PredictionsReceived").c_str(),classifier.getPredictionsReceived());
-
-	if (classifier.isWithCdf()){
-		recordScalar(string(classifier.getName()+": # LQ5").c_str(),classifier.getNbrLq5());
-		recordScalar(string(classifier.getName()+": # G5LQ20").c_str(),classifier.getNbrG5Lq20());
-		recordScalar(string(classifier.getName()+": # G20LQ50").c_str(),classifier.getNbrG20Lq50());
-		recordScalar(string(classifier.getName()+": # G50LQ100").c_str(),classifier.getNbrG50Lq100());
-		recordScalar(string(classifier.getName()+": # G100LQ500").c_str(),classifier.getNbrG100Lq500());
-		recordScalar(string(classifier.getName()+": # G500LQ1800").c_str(),classifier.getNbrG500Lq1800());
-		recordScalar(string(classifier.getName()+": # G1800").c_str(),classifier.getNbrG1800());
-	}
-
-	classifier.getDurationStats().recordAs(string(classifier.getName()+": DurationStats").c_str());
-}
-
 void ProphetV2::recordAllClassifier()
 {
-	if (withGlobal){
-		recordClassifier(Global);
-	}
-	if (withSucc){
-		recordClassifier(Succ);
-	}
-	if (withFail){
-		recordClassifier(Fail);
-	}
+	DtnNetwLayer::recordAllClassifier();
+
 	if (withFailRIB){
 		recordClassifier(FailRIB);
 	}
@@ -2418,27 +1972,7 @@ void ProphetV2::recordAllClassifier()
 
 void ProphetV2::initAllClassifier()
 {
-
-	withGlobal = par("withGlobalClassifier");
-	withCDFForGlobal = par("CDFForGlobalClassifier");
-	if (withGlobal){
-		Global = ClassifiedContactStats("Global",false,withCDFForGlobal);
-	}
-
-
-	withSucc = par("withSuccClassifier");
-	withCDFForSucc = par("CDFForSuccClassifier");
-	if (withSucc){
-	    Succ = ClassifiedContactStats("Successful",false,withCDFForSucc);
-	}
-
-
-	withFail = par("withFailClassifier");
-	withCDFForFail = par("CDFForFailClassifier");
-	if (withFail){
-	    Fail = ClassifiedContactStats("Failed",false,withCDFForFail);
-	}
-
+	DtnNetwLayer::initAllClassifier();
 
 	withFailRIB = par("withFailRIBClassifier");
 	withCDFForFailRIB = par("CDFForFailRIBClassifier");
@@ -2457,7 +1991,7 @@ void ProphetV2::initAllClassifier()
 	withFailBndlResp = par("withFailBndlRespClassifier");
 	withCDFForFailBndlResp = par("CDFForFailBndlRespClassifier");
 	if (withFailBndlResp){
-		FailBndlResp = ClassifiedContactStats("withCDFForFailBndlResp",false,withCDFForFailBndlResp);
+		FailBndlResp = ClassifiedContactStats("BndlRespFail",false,withCDFForFailBndlResp);
 	}
 
 
@@ -2480,62 +2014,6 @@ void ProphetV2::initAllClassifier()
 ** 							Unused functions
 **
 ********************************************************************/
-
-void ProphetV2::handleSelfMsg(cMessage* msg)
-{
-
-}
-
-cObject *const ProphetV2::setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr)
-{
-	return BaseNetwLayer::setDownControlInfo(pMsg, pDestAddr);
-}
-
-cObject *const ProphetV2::setUpControlInfo(cMessage *const pMsg, const LAddress::L3Type& pSrcAddr)
-{
-	return BaseNetwLayer::setUpControlInfo(pMsg, pSrcAddr);
-}
-
-void ProphetV2::deleteOldBundle(int ttl)
-{
-	std::list<BundleMeta> bundleToDelete = std::list<BundleMeta>();
-
-	std::list<WaveShortMessage*>::iterator it;
-	for (it = bundles.begin(); it != bundles.end(); it++){
-		WaveShortMessage* tmp = *it;
-		if ((tmp->getTimestamp() + ttl) > simTime().dbl()){
-			BundleMeta meta = BundleMeta(tmp, Prophet_Enum::Bndl_Accepted);
-		}
-	}
-
-	std::list<BundleMeta>::iterator it2;
-	for (it2 = bundleToDelete.begin(); it2 != bundleToDelete.end(); it2++){
-		nbrDeletedWithTTL++;
-		existAndErase(*it2);
-	}
-
-
-//	= bundlesIndex.find(bndlMeta.getRecipientAddress());
-//	if (it != bundlesIndex.end()){
-//		innerIndexMap innerMap(it->second);
-//		innerIndexIterator it2 = innerMap.find(bndlMeta.getSerial());
-//		if (it2 !=innerMap.end()){
-//			WaveShortMessage* wsm = it2->second;
-//			innerMap.erase(bndlMeta.getSerial());
-//			bundles.remove(wsm);
-//			if (innerMap.empty()){
-//				bundlesIndex.erase(bndlMeta.getRecipientAddress());
-//			}else {
-//				bundlesIndex[bndlMeta.getRecipientAddress()] = innerMap;
-//			}
-//			if (wsm->getOwner()==this){
-//				delete wsm;
-//			}
-//			found = true;
-//		}
-//	}
-//	return found;
-}
 
 ProphetV2::~ProphetV2()
 {

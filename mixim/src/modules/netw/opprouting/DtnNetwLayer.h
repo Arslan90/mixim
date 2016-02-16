@@ -22,19 +22,6 @@
 #include <map>
 #include <iterator>
 
-
-//#include "NetwPkt_m.h"
-//#include "BaseNetwLayer.h"
-//#include "BundleMeta.h"
-//#include "multiFunctions.h"
-//#include "ApplOppControlInfo.h"
-////#include "SimpleAddress.h"
-////#include "ClassifiedContactStats.h"
-////#include "BaseNetwLayer.h"
-//
-//class ClassifiedContactStats;
-//class SimpleContactStats;
-
 #include "BaseNetwLayer.h"
 #include "WaveShortMessage_m.h"
 #include "NetwPkt_m.h"
@@ -111,6 +98,7 @@ class DtnNetwLayer : public BaseNetwLayer {
 		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
 		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
+		RESTART = NEWLY_CONNECTED + 40,
 	};
 
 	long nbrL3Sent;
@@ -184,6 +172,19 @@ class DtnNetwLayer : public BaseNetwLayer {
   	std::vector<double> cutPoitsCDF;
 
   	int deletedBundlesWithAck;
+
+  	double lastBundleUpdate;
+
+  	bool withRestart;
+
+  	int nbrRestartedIEP;
+
+  	int nbrCancelRestartedIEP;
+
+  	std::map<LAddress::L3Type, double> lastBundleProposal;
+
+    // self message to restart IEP after reception of new Bundles
+    cMessage* restartIEP;
 
 
 	/*******************************************************************
@@ -268,11 +269,19 @@ class DtnNetwLayer : public BaseNetwLayer {
   	/** @brief Handle messages from lower layer */
   	virtual void handleLowerMsg(cMessage* msg);
 
+  	/** @brief Handle self messages */
+	virtual void handleSelfMsg(cMessage* msg);
+
   	/** @brief Handle control messages from lower layer */
   	virtual void handleLowerControl(cMessage* msg);
 
   	/** @brief Handle control messages from lower layer */
   	virtual void handleUpperControl(cMessage* msg);
+
+  	/*
+  	 * Function to decide if we have to restart IEP
+  	 */
+  	virtual bool haveToRestartIEP(simtime_t t);
 
   	/*
   	 * generate contact serial

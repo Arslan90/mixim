@@ -425,12 +425,56 @@ void ProccV2::handleLowerControl(cMessage* msg)
 						opp_error("if the encountered node is the convergeCastNode, current node must be a Type_I");
 					}
 				}
+
+				lastBundleProposal.erase(addr);
 			}
 			break;
 	}
 
 	}
 	delete msg;
+}
+
+void ProccV2::handleSelfMsg(cMessage *msg)
+{
+	switch (msg->getKind()) {
+		case RESTART:
+			if (canITransmit){
+
+			/*
+			 * Extracting destAddress and Time from controlMsgName
+			 */
+			char* msgName = strdup(msg->getName());
+
+			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
+
+			Procc* emulatedPkt;
+			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
+
+			if (recordContactStats){
+				unsigned long contactID;
+				iteratorContactID iterator1 = indexContactID.find(addr);
+				if (iterator1 != indexContactID.end()){
+					contactID = iterator1->second.back();
+				}else{
+					opp_error("contact does not exist");
+				}
+				emulatedPkt->setContactID(contactID);
+			}
+
+			/** Starting IEP Phase					*/
+
+			/*
+			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
+			 * calculated by startRecoringContact
+			 */
+			executeInitiatorRole(RIB,emulatedPkt);
+			delete emulatedPkt;
+			}
+			break;
+		default:
+			break;
+	}
 }
 
 void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
@@ -899,6 +943,8 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 				}
 			}
 
+			lastBundleProposal[prophetPkt->getSrcAddr()] = simTime().dbl();
+
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
 			int bundleMetaSize = ((sizeof(BundleMeta) + 8 ) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
@@ -1094,7 +1140,7 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 						if (it3!=it2->second.end()){
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
 							bundlePkt->setContactID(prophetPkt->getContactID());
-//							bundlePkt->setBitLength(headerLength);
+
 							if (canITransmit){
 //								if (delayed == 0){
 									sendDown(bundlePkt);
@@ -1168,7 +1214,6 @@ Procc *ProccV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L
 		metaLength = (sizeof(BundleMeta) + 8 ) * meta->size();
 		realPktLength += metaLength;
 	}
-
 	if (preds!=NULL){
 		prophetMsg->setPreds(*preds);
 		predsLength = (sizeof(int ) + sizeof(double) + 16 ) * preds->size();

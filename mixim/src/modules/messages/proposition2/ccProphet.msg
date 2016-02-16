@@ -45,7 +45,7 @@ packet ccProphet extends NetwPkt {
     int result_Field @enum(t_result_field);
     int identifier;
     int tlv_Flags;
-    histOfPredictions historyOfPredictions = std::map<LAddress::L3Type, std::vector<double> >();
+    histOfPredictions historyOfPredictions;
 //    preds predictions = std::map<LAddress::L3Type, double>();
 //    bndlMeta bndlmeta = std::list<Prophet_Struct::bndl_meta>();
     bndlMeta bndlmeta = std::list<BundleMeta>();
