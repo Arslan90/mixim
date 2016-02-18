@@ -19,6 +19,11 @@ Define_Module(DtnApplLayer);
 
 void DtnApplLayer::initialize(int stage)
 {
+	BaseWaveApplLayer::initialize(stage);
+
+	if (stage==0) {
+
+	}
 }
 
 
@@ -65,11 +70,11 @@ void DtnApplLayer::onBeacon(WaveShortMessage *wsm)
 
 
 
-std::string DtnApplLayer::getDataSrcFromStrategy(t_data_generatorMode currentStrategy)
+std::string DtnApplLayer::getDataSrcFromStrategy(std::string currentStrategy)
 {
 }
 
-std::string DtnApplLayer::getDataDestFromStrategy(t_data_generatorMode currentStrategy)
+std::string DtnApplLayer::getDataDestFromStrategy(std::string currentStrategy)
 {
 }
 

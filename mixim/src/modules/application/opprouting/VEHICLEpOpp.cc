@@ -525,8 +525,8 @@ void VEHICLEpOpp::sendDtnMessage()
 {
 //	int addr = vpaDestAddr();
 	whatSectorIm();
-	int addr = vpaDestAddr(currentSector);
-//	int addr = vpaDestAddr(0);
+//	int addr = vpaDestAddr(currentSector);
+	int addr = vpaDestAddr(0);
 //	int myAddr = isNetwAddrInit ? netwAddr : myId;
 //	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
 	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;

@@ -26,6 +26,11 @@
  */
 class DtnApplLayer : public BaseWaveApplLayer	{
 	public:
+
+		virtual int numInitStages() const {
+			return 3;
+		}
+
 		~DtnApplLayer();
 		virtual void initialize(int stage);
 		virtual void finish();
@@ -43,6 +48,41 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 			DTN_MSG_MODE = 70,									// Added by Arslan HAMZA CHERIF
 		};
 
+/***************** Scenario Model *****************/
+		/**
+		 * Scenario Model Type (Cologne -Koln- like) or Free
+		 */
+		enum t_scenarioType {
+			Free	= 1,
+			Sector	= 2,
+		};
+
+		/*
+		 * Variable for specifying Scenario Model Type
+		 */
+		t_scenarioType scenarioModel;
+
+		// Parameters related to Sector Mode
+		int oldSector;
+		int currentSector;
+		int rowSectorGrid;
+		int colSectorGrid;
+		double sectorSizeX;
+		double sectorSizeY;
+		bool useNegativeValues; // Allow us the use of negative values for Offset - Coord(0.0) of sector[0]
+		double sectorOffsetX;  // Traci Coord X for - Coord(0.0) of sector[0]
+		double sectorOffsetY;  // Traci Coord Y for - Coord(0.0) of sector[0]
+
+/***************** Data Traffic *****************/
+		/*
+		 * bool variable for enabling DtnMsg;
+		 */
+		bool withDtnMsg;
+
+		/*
+		 * the Dtn Msg that will be exchanged among App Layer
+		 */
+		cMessage *dtnMsg;
 
 		/**
 		 * Enumeration for Data Traffic Generator Mode (Dtn Msgs)
@@ -59,6 +99,16 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 			VEH2VPA	= 9,
 		};
 
+		/*
+		 * Variable for specifying data traffic generation mode (Dtn Msgs)
+		 */
+		t_data_generatorMode genStrategy;
+
+		/*
+		 * Variable for storing data traffic generation mode (Dtn Msgs) as a string
+		 */
+		std::string strategy;
+
 		/**
 		 * Enumeration for Data Traffic Forwarder Mode (Mule)
 		 */
@@ -69,42 +119,29 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		};
 
 		/*
-		 * Variable for specifying data traffic generation mode (Dtn Msgs)
-		 */
-		t_data_generatorMode genStrategy;
-
-		/*
 		 * Variable for specifying data traffic forwarding mode (Mule)
 		 */
-		t_data_forwarderMode muleStrategy;
+		t_data_forwarderMode fwdStrategy;
 
-		/*
-		 * Variable to determine if the module is a sender of DtnMSg
-		 */
-		bool shouldSendDtnMsg;
-
-		/*
-		 *	Method to get the Data Source string from strategy
-		 */
-		virtual std::string getDataSrcFromStrategy(t_data_generatorMode currentStrategy);
-
-		/*
-		 * Variable to determine if the module is a receiver of DtnMSg
-		 */
-		bool shouldReceiveDtnMsg;
-
-		/*
-		 *	Method to get the Data Destination string from strategy
-		 */
-		virtual std::string getDataDestFromStrategy(t_data_generatorMode currentStrategy);
-
+/***************** Sending/Receiving Strategies *****************/
 		/**
-		 * Enumeration for Data Traffic Generation type (SectorMode or PeriodicMode) - Typically used by Veh
+		 * Enumeration for Data Traffic Sending type (SectorMode or PeriodicMode) - Typically used by Veh
 		 */
-		enum t_dtnMsgGenerationType {
-			Sector 	 = 1, // At sector entrance (like in Cologne)
+		enum t_dtnMsgSendingType {
+			SectorEntry 	 = 1, // At sector entrance (like in Cologne)
 			Periodic = 2, // Generate periodically DtnMsg
 		};
+
+		// Parameters related to Periodic Mode
+		double dtnMsgPeriod;
+		double dtnMsgMaxTime;
+		double dtnMsgMinTime;
+		bool dtnMsgSynchronized;
+
+		/*
+		 * Variable for specifying Data Traffic Sending type
+		 */
+		t_dtnMsgSendingType sendingStrategy;
 
 		/**
 		 * Enumeration for Data Traffic Reception type (Unique vs Random vs Any) - Typically used by VPA
@@ -116,30 +153,14 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		};
 
 		/*
-		 * bool variable for enabling DtnMsg;
+		 * Variable for specifying Data Traffic Receiving type
 		 */
-		bool withDtnMsg;
-
-		/*
-		 * the Dtn Msg that will be exchanged among App Layer
-		 */
-		cMessage *dtnMsg;
+		t_dtnMsgReceptionType receivingStrategy;
 
 		// Different stats for Bundle Sending/Reception
 		int nbrBundleSent;
 		int nbrBundleReceived;
 		int nbrUniqueBundleReceived;
-
-		// Parameters related to Periodic Mode
-		int dtnMsgPeriod;
-		int dtnMsgMaxTime;
-		int dtnMsgMinTime;
-		bool dtnMsgSynchronized;
-
-
-		int oldSector;
-
-		bool anyVPA;
 
 		bool isEquiped;
 
@@ -154,6 +175,17 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		virtual void onData(WaveShortMessage* wsm);
 //
 //		virtual void handlePositionUpdate(cObject* obj);
+
+		/*
+		 *	Method to get the Data Source string from strategy
+		 */
+		virtual std::string getDataSrcFromStrategy(std::string currentStrategy);
+
+		/*
+		 *	Method to get the Data Destination string from strategy
+		 */
+		virtual std::string getDataDestFromStrategy(std::string currentStrategy);
+
 };
 
 #endif

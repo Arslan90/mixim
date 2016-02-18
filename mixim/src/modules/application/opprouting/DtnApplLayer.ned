@@ -21,10 +21,30 @@ import org.mixim.base.modules.BaseNetwLayer;
 //
 simple DtnApplLayer
 {
-		bool dtnTestMode = default(false); // wheter we are testing DTN
-		int dtnTestCycle = default(5); // cycle of periodic sending dtnMessage
-		int dtnTestMaxTime; // max time for sending dtnMessage
-		bool dtnSynchronized = default(false);
+    	bool withDtnMsg = default(true); // wheter we are testing the sent of DTN Msg
+		
+		string scenarioType = default("Free");
+		// Parameters related to Sector scenarioType only
+		int rowSectorGrid = default(-1);
+		int colSectorGrid = default(-1);   
+		double sectorSizeX = default(-1);  
+		double sectorSizeY = default(-1);
+		bool useNegativeValues = default(false);  
+		double sectorOffsetX = default(-1);
+		double sectorOffsetY = default(-1); 
+		
+		
+		string dataGeneration = default("VEH2VPA");
+		string dataForwarding = default("ALL");
+		
+		string dtnMsgSending = default("Periodic");
+		string dtnMsgReception = default("Unique");
+
+		double dtnMsgPeriod = default(-1); // period for sending dtnMessage
+		double dtnMsgMaxTime = default(-1);     
+		double dtnMsgMinTime = default(-1);     
+		bool dtnMsgSynchronized = default(true);  
+		
 		
 		bool sectorMode = default(false);
 		bool updateMode = default(false);

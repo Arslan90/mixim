@@ -183,7 +183,6 @@ void ProphetV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<L
 
 void ProphetV2::ageDeliveryPreds()
 {
-	bool belowThreshold = false;
 	predsIterator it2;
 	double time = simTime().dbl();
 	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
@@ -194,6 +193,7 @@ void ProphetV2::ageDeliveryPreds()
 		std::vector<LAddress::L3Type> predsToDelete;
 
 		for (predsIterator it=preds.begin();it!=preds.end();it++){
+
 			if (it->first==myNetwAddr){
 				continue;
 			}
@@ -463,7 +463,7 @@ void ProphetV2::storeBundle(WaveShortMessage *msg)
 		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 		bundlesIndex[msg->getRecipientAddress()] = inner_map;
 
-//		haveToRestartIEP(simTime());
+		haveToRestartIEP(simTime());
 	}
 }
 
@@ -582,11 +582,11 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-//						if (delayed == 0){
+						if ((fragmentNum == 0) && (delayed != 0)){
+							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
+						}else{
 							sendDown(ribPkt);
-//						}else{
-//							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
-//						}
+						}
 
 						/*
 						 * Collecting data
@@ -965,11 +965,11 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				offerPkt->setContactID(prophetPkt->getContactID());
 				offerPkt->setFragmentFlag(false);
 				if (canITransmit){
-					if (delayed == 0){
+//					if (delayed == 0){
 						sendDown(offerPkt);
-					}else{
-						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
-					}
+//					}else{
+//						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
+//					}
 
 					/*
 					 * Collecting data
