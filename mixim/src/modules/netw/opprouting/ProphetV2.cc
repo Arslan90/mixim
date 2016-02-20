@@ -71,8 +71,6 @@ void ProphetV2::initialize(int stage)
 
         nbrContactsForRCVect.setName("Evolution of nbrContact between RC");
 
-        delayed = par("delayed");
-
         withPartialUpdate = par("withPartialUpdate").boolValue();
 
 	}
@@ -502,7 +500,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
-			int predSize = ((sizeof(int) + sizeof(double) + 16 ) * predToSend.size()) * 8; // to express the size in bits unit
+			int predSize = ((sizeof(int) + sizeof(double)) * predToSend.size()) * 8; // to express the size in bits unit
 
 			if (predSize > dataLength) {
 				shouldFragment = true;
@@ -539,7 +537,7 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 			}else{
 				// we have to send fragment of predictions separately
 
-				int entrySize = (sizeof(int) + sizeof(double) + 16 ) * 8;
+				int entrySize = (sizeof(int) + sizeof(double)) * 8;
 				int maxEntriesParFrag = dataLength / entrySize;
 				int totalEntries = predSize / entrySize;
 
@@ -582,10 +580,10 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-						if ((fragmentNum == 0) && (delayed != 0)){
-							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
-						}else{
+						if (delayedFrag == 0){
 							sendDown(ribPkt);
+						}else{
+							sendDelayed(ribPkt,dblrand()*delayedFrag,"lowerLayerOut");
 						}
 
 						/*
@@ -948,7 +946,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
-			int bundleMetaSize = ((sizeof(BundleMeta) + 8 ) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
+			int bundleMetaSize = ((sizeof(BundleMeta)) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
 
 			if (bundleMetaSize > dataLength) {
 				shouldFragment = true;
@@ -965,11 +963,11 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 				offerPkt->setContactID(prophetPkt->getContactID());
 				offerPkt->setFragmentFlag(false);
 				if (canITransmit){
-//					if (delayed == 0){
+					if (delayed == 0){
 						sendDown(offerPkt);
-//					}else{
-//						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
-//					}
+					}else{
+						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
+					}
 
 					/*
 					 * Collecting data
@@ -989,7 +987,7 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 			}else{
 				// we have to send fragment of predictions separately
 
-				int entrySize = (sizeof(BundleMeta) + 8 ) * 8;
+				int entrySize = (sizeof(BundleMeta)) * 8;
 				int maxEntriesParFrag = dataLength / entrySize;
 				int totalEntries = bundleMetaSize / entrySize;
 
@@ -1028,11 +1026,11 @@ void ProphetV2::executeListenerRole(short  kind, Prophet *prophetPkt)
 					offerPkt->setFragmentNum(fragmentNum);
 					offerPkt->setTotalFragment(nbrFragment);
 					if (canITransmit){
-//						if (delayed == 0){
+						if (delayedFrag == 0){
 							sendDown(offerPkt);
-//						}else{
-//							sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
-//						}
+						}else{
+							sendDelayed(offerPkt,dblrand()*delayedFrag,"lowerLayerOut");
+						}
 
 						/*
 						 * Collecting data
@@ -1210,12 +1208,12 @@ Prophet *ProphetV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddres
 	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
 	if (meta!=NULL){
 		prophetMsg->setBndlmeta(*meta);
-		metaLength = (sizeof(BundleMeta) + 8 ) * meta->size();
+		metaLength = (sizeof(BundleMeta)) * meta->size();
 		realPktLength += metaLength;
 	}
 	if (preds!=NULL){
 		prophetMsg->setPreds(*preds);
-		predsLength = (sizeof(int ) + sizeof(double) + 16 ) * preds->size();
+		predsLength = (sizeof(int ) + sizeof(double)) * preds->size();
 		realPktLength+= predsLength;
 	}
 	if (msg!=NULL){

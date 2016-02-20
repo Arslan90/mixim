@@ -113,7 +113,9 @@ void DtnNetwLayer::initialize(int stage)
 
 		deletedBundlesWithAck = 0;
 
-		delayed = par("delayed");
+		delayed = par("delayed").doubleValue();
+
+		delayedFrag = par("delayedFrag").doubleValue();
 
         demandedAckedBundle = 0;
 

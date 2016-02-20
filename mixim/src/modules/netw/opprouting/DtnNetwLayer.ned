@@ -55,7 +55,9 @@ simple DtnNetwLayer extends BaseNetwLayer
         string cutPoints = default("1;5;20;50;100;500;");
 //        string cutPoints = default("20;50;100");
 
-		int delayed = default(0);
+		double delayed = default(0.0);
+		
+		double delayedFrag = default(0.0);
 		
 		bool withRestart = default(true);
 }       

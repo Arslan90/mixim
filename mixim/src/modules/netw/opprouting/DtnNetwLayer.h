@@ -104,7 +104,9 @@ class DtnNetwLayer : public BaseNetwLayer {
 	long nbrL3Sent;
 	long nbrL3Received;
 
-  	int delayed;
+  	double delayed;
+
+  	double delayedFrag;
 
   	/**
   	 * Boolean for the activation of PRoPHET ACK mecanism
