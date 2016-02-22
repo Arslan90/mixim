@@ -27,7 +27,7 @@ const simsignalwrap_t VEHICLEpOpp::mobilityStateChangedSignal = simsignalwrap_t(
 
 void VEHICLEpOpp::initialize(int stage) {
 
-	BaseWaveApplLayer::initialize(stage);
+	DtnApplLayer::initialize(stage);
 	if (stage == 0) {
 		//TRACI STUFF
 		traci = TraCIMobilityAccess().get(getParentModule());
@@ -45,10 +45,10 @@ void VEHICLEpOpp::initialize(int stage) {
 		//maxY= 41947; //This is the Maximun Y axis value of the MAP.
 		//maxY= 200; //Add the Max value of Y of the scenario simulated.
 		//maxY= 2100; //Add the Max value of Y of the scenario simulated.
-		offsetX= hasPar("offsetX") ? par("offsetX").doubleValue() : 4000;
-		offsetY= hasPar("offsetY") ? par("offsetY").doubleValue() : 5000;
-		maxY= hasPar("maxY") ? par("maxY").doubleValue() : 41947;
-		EV << "logs, offset values offsetX=" << offsetX <<" offsetY=" << offsetY<< ",maxY,"<< maxY <<endl;
+//		offsetX= hasPar("offsetX") ? par("offsetX").doubleValue() : 4000;
+//		offsetY= hasPar("offsetY") ? par("offsetY").doubleValue() : 5000;
+//		maxY= hasPar("maxY") ? par("maxY").doubleValue() : 41947;
+//		EV << "logs, offset values offsetX=" << offsetX <<" offsetY=" << offsetY<< ",maxY,"<< maxY <<endl;
 
 		headerLength = par("headerLength");
         modeDissemination= false; //When creating the vehicle is in mode listening
@@ -59,7 +59,6 @@ void VEHICLEpOpp::initialize(int stage) {
 		//junctionID= 0; //initialize. A value= 0 is vehicle not in any junction.
 		counterRx=0; //This is a counter of the messages reception (Rx). Maybe I'll use to calculate the CW
 		neighbors=0; //this keep the value of the neighbors detected pending a determined period of time (e.g. 1sg)
-		currentSector= 0; //start in clean.
 		currentSectorTimer= 0; //start in clean.
 		receivedSectorId= false; //reset the Veh sectorId reception
 
@@ -77,25 +76,21 @@ void VEHICLEpOpp::initialize(int stage) {
 		everySecond = new cMessage( "everySecond", DO_THINGS_EVERY_SECOND );
 
 		// added by me for testing
-		dtnTestMode = par("dtnTestMode").boolValue();
-		dtnSynchronized = par("dtnSynchronized").boolValue();
+//		dtnTestMode = par("dtnTestMode").boolValue();
+//		dtnSynchronized = par("dtnSynchronized").boolValue();
 
-		sectorMode = par("sectorMode").boolValue();
-		anyVPA = par("updateMode").boolValue();
-		nbrBundleSent = 0;
-		nbrBundleReceived = 0;
-		if (dtnTestMode){
-			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
-			dtnTestCycle = par("dtnTestCycle");
-			dtnTestMaxTime = par("dtnTestMaxTime");
-
-		}
-		oldSector= -1; //start in clean.
+//		sectorMode = par("sectorMode").boolValue();
+//		anyVPA = par("updateMode").boolValue();
+//		nbrBundleSent = 0;
+//		nbrBundleReceived = 0;
+//		if (dtnTestMode){
+//			dtnTestMsg = new cMessage( "dtn Test", DTN_TEST_MODE);
+//			dtnTestCycle = par("dtnTestCycle");
+//			dtnTestMaxTime = par("dtnTestMaxTime");
+//
+//		}
 	}
 	if(stage==1){
-		isNetwAddrInit = false;
-		nbrMsgSent = 0;
-
 		traci->getManager()->addVehicleID(traci->getExternalId());
 		loopVehicle = false;
 		loopVehicle = traci->getManager()->isALoopVehicle(traci->getExternalId());
@@ -109,22 +104,35 @@ void VEHICLEpOpp::initialize(int stage) {
 		edgeForLooping ="";
 	}
 	if(stage==2) {
-		cModule *netw = this->getParentModule()->getSubmodule("netw");
-		if (netw!=NULL){
-			netwAddr = check_and_cast<BaseNetwLayer*>(netw)->getMyNetwAddr();
-			isNetwAddrInit = true;
-			isEquiped = check_and_cast<DtnNetwLayer*>(netw)->isAnEquipedVehicle();
-		}
-
 		scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
 		scheduleAt(simTime() + 1, everySecond); //Scheduling the self message.
 
-		// added by me for testing
-		if (dtnTestMode){
-			double tmp;
-			tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
-			if ((simTime() + tmp <dtnTestMaxTime) && (!sectorMode)){
-				scheduleAt(simTime() + tmp, dtnTestMsg);
+//		// added by me for testing
+//		if (dtnTestMode){
+//			double tmp;
+//			tmp =  (dtnSynchronized)? 0 : uniform(0,dtnTestCycle) ;
+//			if ((simTime() + tmp <dtnTestMaxTime) && (!sectorMode)){
+//				scheduleAt(simTime() + tmp, dtnTestMsg);
+//			}
+//		}
+
+		if (isEquiped && withDtnMsg && ((getDataSrcFromStrategy(strategy)=="ALL") || (getDataSrcFromStrategy(strategy)=="VEH"))){
+			// we have to send bundles
+			bool haveToSent = false;
+			double tmp = 0;
+			if (sendingStrategy == SectorEntry){
+				whatSectorIm();
+				if (currentSector != oldSector){haveToSent = true;};
+			}else if(sendingStrategy == Periodic){
+				tmp = (dtnMsgSynchronized)? 0: uniform(0,dtnMsgPeriod);
+				if ((dtnMsgMinTime <= simTime().dbl() + tmp) && (simTime().dbl() + tmp <= dtnMsgMaxTime)) {
+					haveToSent = true;
+				}
+			}
+
+			if (haveToSent){
+				scheduleAt(simTime() + tmp, dtnMsg);
+				nbrMsgSent++;
 			}
 		}
 	}
@@ -140,20 +148,27 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     {
     // added by me
     case DTN_TEST_MODE:
-    	if (dtnTestMode){
+    	if (withDtnMsg){
     		sendDtnMessage();
     		// Finally reschedule message
-    		if ((simTime() + dtnTestCycle < dtnTestMaxTime) && (!sectorMode)){
-    			scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
+			if(withDtnMsg && (sendingStrategy == Periodic) && ((dtnMsgMinTime <= simTime().dbl() + dtnMsgPeriod) && (simTime().dbl() + dtnMsgPeriod <= dtnMsgMaxTime))) {
+				scheduleAt(simTime() + dtnMsgPeriod, dtnMsg);
 				nbrMsgSent++;
 			}
+
+//    		if ((simTime() + dtnTestCycle < dtnTestMaxTime) && (!sectorMode)){
+//    			scheduleAt(simTime() + dtnTestCycle, dtnTestMsg);
+//				nbrMsgSent++;
+//			}
     	}
     	break;
     case SEND_BROADCAST_TIMER:
     	if (modeDissemination and junctionRange) { //Vehicle send WMS beacon when in mode Dissemination & near enough to junction.
-    		EV << "logs, VEH Sending PACKET. " << endl;
-    		sendMessage();//Finally send the message.
-    		nbrMsgSent++;
+    		if (withOtherMsg){
+    			EV << "logs, VEH Sending PACKET. " << endl;
+				sendMessage();//Finally send the message.
+				nbrMsgSent++;
+    		}
     	}
 
         //Re-schedule the self-message.
@@ -180,24 +195,19 @@ void VEHICLEpOpp::handleSelfMsg(cMessage* msg) {
     	whatSectorIm(); //Check in which sector is the vehicle
 
     	// check if the sector changed
-    	if (sectorMode){
-    		if ((dtnTestMode) && (currentSector != oldSector)){
-    			scheduleAt(simTime(), dtnTestMsg);
-				nbrMsgSent++;
-    		}
-    	}
-
-    	if (anyVPA){
-    		if ((currentSector != oldSector) && (oldSector != -1)){
-				cMessage* ctrlMsg = new cMessage();
-				ctrlMsg->setName("ControlMsg");
-				ApplOppControlInfo* controlInfo = new ApplOppControlInfo(vpaDestAddr(oldSector),vpaDestAddr(currentSector));
-				ctrlMsg->setControlInfo(controlInfo);
-				sendControlDown(ctrlMsg);
-    		}
+		if (withDtnMsg && (sendingStrategy == SectorEntry) && (currentSector != oldSector)){
+			scheduleAt(simTime(), dtnMsg);
+			nbrMsgSent++;
 		}
 
-		oldSector = currentSector;
+//    	if (sectorMode){
+//    		if ((dtnTestMode) && (currentSector != oldSector)){
+//    			scheduleAt(simTime(), dtnTestMsg);
+//				nbrMsgSent++;
+//    		}
+//    	}
+
+//		oldSector = currentSector;
 
 
 
@@ -246,11 +256,31 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
 	char* y;//I'll use this to do the cast_down
 	char* pch;//I'll use this to receive the split data
 
+	if (isEquiped) {
+
+	nbrMsgReceived++;
+
     switch(wsm->getKind())
     {
     case DTN_TEST_MODE:
-		if (dtnTestMode){
+		if ((withDtnMsg) && ((getDataDestFromStrategy(strategy)=="ALL") || (getDataDestFromStrategy(strategy)=="VEH"))){
 			nbrBundleReceived++;
+			simtime_t time = (simTime()-wsm->getTimestamp());
+
+			if ((receivedBundles.empty())	||	(receivedBundles.find(wsm->getSerial())== receivedBundles.end())){
+				receivedBundles.insert(std::pair<unsigned long long ,WaveShortMessage*>(wsm->getSerial(), wsm));
+				nbrUniqueBundleReceived++;
+
+				totalDelay = totalDelay + time.dbl();
+				if (nbrUniqueBundleReceived>0){
+					avgDelay = totalDelay / nbrUniqueBundleReceived;
+				}else{
+					opp_error("Nbr Unique Bundle Received equal or less then zero(VPApOpp::handleLowerMsg)");
+				}
+
+				delayStats.collect(time.dbl());
+				hopCountStats.collect(wsm->getHopCount());
+			}
 		}
 		break;
 //When receiving VPA Broadcast
@@ -392,6 +422,8 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
         EV <<"logs, Unknown self-message! -> delete, kind, "<<msg->getKind()<<endl;
         break;
     }
+
+	}
     delete msg; //finally delete the message
     delete wsm;
 }
@@ -454,34 +486,59 @@ void VEHICLEpOpp::whatSectorIm() {
 	 * 2) Calculate to determine in which sectorID is the vehicle
 	 * 3) Update the variable: currentSector
 	 */
-	Coord vehiclePosition;//actual XY vehicle position
-	int row; //row of sector
-	int col; //column of sector
-	int inSector; //the sector in.
 
-	//step 1
-	vehiclePosition = traci->getCurrentPosition();
-	double axeY= maxY - vehiclePosition.y;
-	//MYDEBUG <<"logs, vehicle position," << traci->getExternalId() << ",x," << vehiclePosition.x <<",y,"<< axeY  <<endl;
+	if (scenarioModel == Sector){
+		Coord vehiclePosition;//actual XY vehicle position
+		Coord vehiclePosSumo;//actual XY vehicle position
+		int row; //row of sector
+		int col; //column of sector
+		int inSector; //the sector in.
 
-	//step 2
-	row= int( (vehiclePosition.x - offsetX) /1000); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
-	col= int( (axeY - offsetY) /1000); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
-	inSector= (row * 33) + col; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
-	//MYDEBUG <<"logs, vehicle sector," << traci->getExternalId() << ",row," << row <<",colum,"<< col<<",sector number,"<< currentSector <<"," <<endl;
+		//step 1
+		vehiclePosition = traci->getCurrentPosition();
+		vehiclePosSumo.x = traci->getManager()->omnet2traci(vehiclePosition).x;
+		vehiclePosSumo.y = traci->getManager()->omnet2traci(vehiclePosition).y;
+		//MYDEBUG <<"logs, vehicle position," << traci->getExternalId() << ",x," << vehiclePosition.x <<",y,"<< axeY  <<endl;
 
-	//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.
-	//Note: this counter is complemented with the counter in received messages by VPAs or Vehicles.
-	if (inSector != currentSector){
-		MYDEBUG <<"logs, vehicle sector," << traci->getExternalId() << ",sector," << currentSector <<",timer,"<< currentSectorTimer <<",receivedsectorId,"<< receivedSectorId <<",," <<endl;
-		//MYDEBUG <<"logs, backoff,out,"<< currentSector <<","<< traci->getExternalId() << "," << simTime() <<"," <<endl;
-		//MYDEBUG <<"logs, backoff,in," << inSector      <<","<< traci->getExternalId() << "," << simTime() <<"," <<endl;
+		//step 2
+		col= int( (vehiclePosSumo.x - sectorOffsetX) / sectorSizeX); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
+		if (!((0 < col)&&(col < colSectorGrid))){
+			opp_error("Error with column index calculation");
+		}
+		row= int( (vehiclePosSumo.y - sectorOffsetY) / sectorSizeY); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
+		if (!((0 < row)&&(row < rowSectorGrid))){
+			opp_error("Error with row index calculation");
+		}
+		inSector= (col * rowSectorGrid) + row; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
+		//MYDEBUG <<"logs, vehicle sector," << traci->getExternalId() << ",row," << row <<",colum,"<< col<<",sector number,"<< currentSector <<"," <<endl;
 
-		currentSector= inSector; //update Veh sector transit
-		currentSectorTimer= 0; //Reset timer
-		receivedSectorId= false; //reset the Veh sectorId reception
+		//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.
+		//Note: this counter is complemented with the counter in received messages by VPAs or Vehicles.
+		if (inSector != currentSector){
+			MYDEBUG <<"logs, vehicle sector," << traci->getExternalId() << ",sector," << currentSector <<",timer,"<< currentSectorTimer <<",receivedsectorId,"<< receivedSectorId <<",," <<endl;
+			//MYDEBUG <<"logs, backoff,out,"<< currentSector <<","<< traci->getExternalId() << "," << simTime() <<"," <<endl;
+			//MYDEBUG <<"logs, backoff,in," << inSector      <<","<< traci->getExternalId() << "," << simTime() <<"," <<endl;
+
+			currentSector= inSector; //update Veh sector transit
+			currentSectorTimer= 0; //Reset timer
+			receivedSectorId= false; //reset the Veh sectorId reception
+
+
+			if ((receivingStrategy == Any)){
+	    		if ((currentSector != oldSector) && (oldSector != -1)){
+					cMessage* ctrlMsg = new cMessage();
+					ctrlMsg->setName("ControlMsg");
+					ApplOppControlInfo* controlInfo = new ApplOppControlInfo(vpaDestAddr(oldSector),vpaDestAddr(currentSector));
+					ctrlMsg->setControlInfo(controlInfo);
+					sendControlDown(ctrlMsg);
+	    		}
+			}
+
+		}else {
+			oldSector = currentSector;
+		}
+		currentSectorTimer++; //Counter of the Vehicle sector.
 	}
-	currentSectorTimer++; //Counter of the Vehicle sector.
 }
 
 
@@ -497,10 +554,10 @@ void VEHICLEpOpp::vehicleVideos() {
 	 * 2nd. Retrieve for each vehicle its information and finally creates the log
 	 */
 
-	Coord vehPos = traci->getCurrentPosition();
-	double axeY= maxY - vehPos.y;
-
-    MYDEBUG << "logs, carPosition," << simTime() <<","<< myApplAddr() <<","<< vehPos.x <<","<<  axeY <<","<< traci->getSpeed() <<","<< receivedSectorId <<","<<  neighbors <<","<< junctionRange <<","<< modeDissemination <<","<< messageSequence <<","<<endl;
+//	Coord vehPos = traci->getCurrentPosition();
+//	double axeY= maxY - vehPos.y;
+//
+//    MYDEBUG << "logs, carPosition," << simTime() <<","<< myApplAddr() <<","<< vehPos.x <<","<<  axeY <<","<< traci->getSpeed() <<","<< receivedSectorId <<","<<  neighbors <<","<< junctionRange <<","<< modeDissemination <<","<< messageSequence <<","<<endl;
 }
 
 void VEHICLEpOpp::WMS() {
@@ -523,51 +580,57 @@ void VEHICLEpOpp::WMS() {
 
 void VEHICLEpOpp::sendDtnMessage()
 {
-//	int addr = vpaDestAddr();
-	whatSectorIm();
-//	int addr = vpaDestAddr(currentSector);
-	int addr = vpaDestAddr(0);
-//	int myAddr = isNetwAddrInit ? netwAddr : myId;
-//	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
-	//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
-
-
-//	char numstr[6]; // Numbered Message
-//	sprintf(numstr, "%d+%d", messageSequenceVPA,messageSequence); // convert INT to STRING. VPAId+SequenceNumber
-//	char* result = numstr; //concatenate in VPAiD,messageSequence
-
-	//Sending message
-	t_channel channel = dataOnSch ? type_SCH : type_CCH;
-	//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
-
-	MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to VPA with address "<< addr <<endl;
-	std::string s = "Periodic DTN message sent to VPA[0] with the current netw addr : "+addr;
-	if (isNetwAddrInit){
-	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
-//	sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,0));
-	nbrBundleSent++;
-	}else {
-		opp_error("netw adress not ye initialized");
-	}
-}
-
-int VEHICLEpOpp::vpaDestAddr()
-{
-	int vpaDestAddr = -2;
-	cModule *systemModule = this->getParentModule();
-	while (systemModule->getParentModule() !=NULL){
-		systemModule = systemModule->getParentModule();
-	}
-	int numberVPA = systemModule->par("numeroNodes");
-	cModule *vpa = systemModule->getSubmodule("VPA", numberVPA-1);
-	if (vpa!=NULL){
-		cModule *netw = vpa->getSubmodule("netw");
-		if (netw!=NULL){
-			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
-			vpaDestAddr = baseNetw->getMyNetwAddr();
+	if (getDataDestFromStrategy(strategy)=="VPA"){
+		int addr = 0;
+		switch (receivingStrategy) {
+			case Unique:
+				if (scenarioModel == Free){
+					addr = destAddr;
+				}else if (scenarioModel == Sector){
+					whatSectorIm();
+					addr = vpaDestAddr(currentSector);
+				}
+				break;
+			case Random:
+				addr = randomVPADestAddr();
+				break;
+			case Any:
+				if (scenarioModel == Free){
+					opp_error("Must Define an anycast addr for Free model");
+				}else if (scenarioModel == Sector){
+					whatSectorIm();
+					addr = vpaDestAddr(currentSector);
+				}
+				break;
+			default:
+				opp_error("Undefined behavior when selecting destinated VPA");
+				break;
 		}
+	//	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
+		//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
+
+
+	//	char numstr[6]; // Numbered Message
+	//	sprintf(numstr, "%d+%d", messageSequenceVPA,messageSequence); // convert INT to STRING. VPAId+SequenceNumber
+	//	char* result = numstr; //concatenate in VPAiD,messageSequence
+
+		//Sending message
+		t_channel channel = dataOnSch ? type_SCH : type_CCH;
+		//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
+
+		MYDEBUG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to address "<< addr <<endl;
+		std::string s = "Periodic DTN message sent from :"+netwAddr;
+		std::string tmp = "to the current netw addr : "+addr;
+		s = s+tmp;
+		if (isNetwAddrInit){
+		sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
+		nbrBundleSent++;
+		}else {
+			opp_error("netw address not yet initialized");
+		}
+	}else{
+		opp_error("Sending DtnMsg to VEH & ALL mode is not supported");
 	}
-	return vpaDestAddr;
 }
 
 void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
@@ -639,7 +702,15 @@ void VEHICLEpOpp::sendMessage() {
 	//This is just to track the current Vehicle Position Tracking,
 	//and just Something that I need at this moment in my repport.
 	Coord vehPos = traci->getCurrentPosition();
-	double axeY= maxY - vehPos.y;
+	Coord vehiclePosSumo;//actual XY vehicle position
+
+	//step 1
+	vehiclePosSumo.x = traci->getManager()->omnet2traci(vehPos).x;
+	vehiclePosSumo.y = traci->getManager()->omnet2traci(vehPos).y;
+
+
+//	double axeY= maxY - vehPos.y;
+	double axeY = vehiclePosSumo.y;
 
 //	int myAddr = isNetwAddrInit ? netwAddr : myId;
 
@@ -658,7 +729,7 @@ void VEHICLEpOpp::sendMessage() {
 	if (isNetwAddrInit){
 		sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 	}else{
-		opp_error("netw adress not ye initialized");
+		opp_error("netw address not yet initialized");
 	}
 
 
@@ -676,7 +747,7 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 		case type_SCH: wsm->setChannelNumber(Channels::SCH1); break; //will be rewritten at Mac1609_4 to actual Service Channel. This is just so no controlInfo is needed
 		case type_CCH: wsm->setChannelNumber(Channels::CCH); break;
 	}
-	if (dtnTestMode){
+	if (withDtnMsg){
 		wsm->setKind(DTN_TEST_MODE);
 	}else {
 		wsm->setKind(BROADCAST_VEH_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
@@ -704,17 +775,7 @@ void VEHICLEpOpp::finish() {
 	 */
 	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
 
-	// Added by Arslan HAMZA CHERIF
-	recordScalar("# Bundle Sent", nbrBundleSent);
-	recordScalar("# Bundle Received", nbrBundleReceived);
-
-	// cancelling selfmessage
-	BaseWaveApplLayer::finish();
-	cancelAndDelete(delayTimer);
-	cancelAndDelete(everySecond);
-	if (dtnTestMode){
-		cancelAndDelete(dtnTestMsg);
-	}
+	DtnApplLayer::finish();
 }
 
 ////////////////// TESTING AREA /////////////    ////////////////// TESTING AREA /////////////
@@ -830,33 +891,64 @@ int VEHICLEpOpp::vpaDestAddr(int sectorID)
 	while (systemModule->getParentModule() !=NULL){
 		systemModule = systemModule->getParentModule();
 	}
-	int numberVPA = systemModule->par("numeroNodes");
+	int numberVPA = 0;
+	if (systemModule->hasPar("numeroNodes")){
+		numberVPA = systemModule->par("numeroNodes");
+	}
+	if (!systemModule->hasPar("numeroNodes") || (0 <= numberVPA)){
+		opp_error("Impossible to determine number of VPA");
+	}
 	if ((sectorID < 0) || (sectorID > numberVPA)){
 		opp_error("error : sectorID out of bound");
 	}
+
 	cModule *vpa = systemModule->getSubmodule("VPA", sectorID);
 	if (vpa!=NULL){
-		cModule *netw = vpa->getSubmodule("netw");
+		DtnNetwLayer *netw = FindModule<DtnNetwLayer*>::findSubModule(vpa);
 		if (netw!=NULL){
-			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
-			vpaDestAddr = baseNetw->getMyNetwAddr();
+			vpaDestAddr = netw->getMyNetwAddr();
 		}
 	}
+
+	if (vpaDestAddr == -2){
+		opp_error("Impossible to determine VPA address");
+	}
+
 	return vpaDestAddr;
 }
 
-int VEHICLEpOpp::generateUniqueSerial(const int netwAddr, const int nbrMsgSent)
+int VEHICLEpOpp::randomVPADestAddr()
 {
-	// we do it using the Cantor Pairing Function which is defined like this
-	// F(x,y) = ((x+y)*(x+y+1))/2 + y
-	int x,y;
-	x = netwAddr;
-	y = nbrMsgSent;
-	return (((x+y)*(x+y+1))/2 + y);
+	int vpaDestAddr = -2;
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = 0;
+	if (systemModule->hasPar("numeroNodes")){
+		numberVPA = systemModule->par("numeroNodes");
+	}
+	if (!systemModule->hasPar("numeroNodes") || (0 <= numberVPA)){
+		opp_error("Impossible to determine number of VPA");
+	}
+
+	do {
+		vpaDestAddr = intuniform(0,numberVPA-1);
+		cModule *vpa = systemModule->getSubmodule("VPA", vpaDestAddr);
+		if (vpa!=NULL){
+			DtnNetwLayer *netw = FindModule<DtnNetwLayer*>::findSubModule(vpa);
+			if (netw!=NULL){
+				vpaDestAddr = netw->getMyNetwAddr();
+			}
+		}
+	}while (vpaDestAddr == netwAddr);
+
+	if (vpaDestAddr == -2){
+		opp_error("Impossible to determine VPA address");
+	}
+
+	return vpaDestAddr;
 }
-
-
-
 /*
     // TRACI GET SUMO DATA
 	MYDEBUG << "DEBUG getRoadId: " << traci->getRoadId() <<endl;

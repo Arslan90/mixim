@@ -22,25 +22,21 @@
 #define VPApOpp_H_
 
 #include "BaseModule.h"
-#include <BaseWaveApplLayer.h>
+//#include <BaseWaveApplLayer.h>
 #include <NetwPkt_m.h>
+#include "DtnApplLayer.h"
 
 #ifndef DBG
 #define DBG EV
 #endif
 //#define DBG std::cerr << "[" << simTime().raw() << "] " << getParentModule()->getFullPath()
 
-class VPApOpp  : 	public BaseWaveApplLayer {
+class VPApOpp  : 	public DtnApplLayer {
 	public:
 
 		virtual ~VPApOpp();
 
 		virtual void initialize(int stage);
-
-    std::map<unsigned long ,WaveShortMessage*> getReceivedBundles() const
-    {
-        return receivedBundles;
-    }
 
     /**ARTURO  @brief Message kinds used by this layer */
     enum MyTestApplMessageKinds{ SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
@@ -68,34 +64,34 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  /*
 		   * bool variable for enabling dtnTestMode
 		   */
-		  bool dtnTestMode;
+//		  bool dtnTestMode;
 		  /*
 		   * bool variable for enabling silentMode for VPA, VPA are only receiving messages
 		   */
-		  bool silentMode;
-		  int nbrBundleSent;
-		  int nbrBundleReceived;
-		  int nbrUniqueBundleReceived;
+//		  bool silentMode;
+//		  int nbrBundleSent;
+//		  int nbrBundleReceived;
+//		  int nbrUniqueBundleReceived;
 
-		  int nbrUniqueForAxe1;
-		  int nbrUniqueForAxe2;
-		  int nbrUniqueForAxe3;
-		  int nbrUniqueForAxe4;
-		  int nbrUniqueForAxe5;
-		  int nbrUniqueForAxe6;
+//		  int nbrUniqueForAxe1;
+//		  int nbrUniqueForAxe2;
+//		  int nbrUniqueForAxe3;
+//		  int nbrUniqueForAxe4;
+//		  int nbrUniqueForAxe5;
+//		  int nbrUniqueForAxe6;
 
-		  bool anyVPA;
-
-		  double avgDelay;
-		  double totalDelay;
+//		  bool anyVPA;
+//
+//		  double avgDelay;
+//		  double totalDelay;
 
 		  cOutVector delays;
-		  cDoubleHistogram delayStats;
+//		  cDoubleHistogram delayStats;
 
-		cLongHistogram hopCountStats;
+//		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;
 
-		std::map<unsigned long ,WaveShortMessage*> receivedBundles;
+//		std::map<unsigned long ,WaveShortMessage*> receivedBundles;
 
 		std::set<int> vehiclesAddr;
 		int updateSectorCycle;
@@ -115,6 +111,9 @@ class VPApOpp  : 	public BaseWaveApplLayer {
 		  bool bundleExistUnderOtherVPA(unsigned long serial);
 
 		  virtual void finish();
+
+		  void sendDtnMessage();
+		  int randomVPADestAddr();
 };
 
 #endif /* VPApOpp_H_ */

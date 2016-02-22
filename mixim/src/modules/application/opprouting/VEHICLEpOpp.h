@@ -30,12 +30,12 @@
 #include <math.h> // for euclidian distance
 #include <cstring> // for spliting strings
 #include <NetwPkt_m.h>
-#include "BaseNetwLayer.h"
+#include "DtnApplLayer.h"
 
 /**
  * Small IVC Demo using 11p
  */
-class VEHICLEpOpp : public BaseWaveApplLayer {
+class VEHICLEpOpp : public DtnApplLayer {
 	public:
 
 	 	virtual int numInitStages() const {
@@ -85,8 +85,8 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		double timeToSend; // Flag used to send one time the print logs of number of vehicles
 		int counterRx; //This is a counter of messages reception (Rx).
 		int neighbors; //this keep the value of the neighbors detected pending a determined period of time (e.g. 1sg)
-		int currentSector; //This maintain the current sector where the vehicle is transit.
-		int lastSector; //This maintain the last sector where the vehicle transited.
+//		int currentSector; //This maintain the current sector where the vehicle is transit.
+//		int lastSector; //This maintain the last sector where the vehicle transited.
 		int currentSectorTimer; //This is used to time the vehicle message reception and sectorId's.
 		bool receivedSectorId; //This check in case I've received the VPAid of the sector.
 	    bool appCW; //wheter I'll use or not the APP WC.
@@ -97,9 +97,9 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		int currentCW; //Mac80211p currentCW
 		int Tupdate; //periodic time to obtain the dropped packets.
 
-	    int offsetX; // I've to adjust adding the X axis value
-		int offsetY; // I've to adjust adding the Y axis value
-		int maxY; //This is the Maximun Y axis value of the MAP.
+//	    int offsetX; // I've to adjust adding the X axis value
+//		int offsetY; // I've to adjust adding the Y axis value
+//		int maxY; //This is the Maximun Y axis value of the MAP.
 		simtime_t vehTimeIn; //Time the vehicle enter into the simulation
 		simtime_t vehTimeOut; //Time the vehicle get out of the simulation
 		int vehRx; //Vehicle total Receptions.
@@ -108,23 +108,24 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 		/*
 		 * bool variable for enabling dtnTestMode
 		 */
-		bool dtnTestMode;
-		cMessage *dtnTestMsg;
-		int dtnTestCycle;
-		int dtnTestMaxTime;
-		int nbrBundleSent;
-		int nbrBundleReceived;
-		bool dtnSynchronized;
-
-		bool sectorMode;
-		int oldSector;
-
-		bool anyVPA;
-
-		bool isEquiped;
+//		bool dtnTestMode;
+//		cMessage *dtnTestMsg;
+//		int dtnTestCycle;
+//		int dtnTestMaxTime;
+//		int nbrBundleSent;
+//		int nbrBundleReceived;
+//		bool dtnSynchronized;
+//
+//		bool sectorMode;
+//		int oldSector;
+//
+//		bool anyVPA;
+//
+//		bool isEquiped;
 
 		void sendDtnMessage();
-		int vpaDestAddr();
+
+		int randomVPADestAddr();
 		/*
 		 * Warning: In this function, we considerate that the sectorID is the same as the vpaID, so Sector 0 => VPA 0
 		 */
@@ -168,15 +169,10 @@ class VEHICLEpOpp : public BaseWaveApplLayer {
 
 		std::string currentAxe;
 
-		int netwAddr;
-		int nbrMsgSent;
-		bool isNetwAddrInit;
-
 	protected:
 		virtual void onBeacon(WaveShortMessage* wsm);
 		virtual void onData(WaveShortMessage* wsm);
 		void sendMessage();
-		int generateUniqueSerial(const int netwAddr, const int nbrMsgSent);
 
 
 

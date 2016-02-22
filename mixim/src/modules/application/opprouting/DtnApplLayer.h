@@ -31,6 +31,11 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 			return 3;
 		}
 
+	    std::map<unsigned long ,WaveShortMessage*> getReceivedBundles() const
+	    {
+	        return receivedBundles;
+	    }
+
 		~DtnApplLayer();
 		virtual void initialize(int stage);
 		virtual void finish();
@@ -45,7 +50,7 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
 			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
 			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
-			DTN_MSG_MODE = 70,									// Added by Arslan HAMZA CHERIF
+			DTN_TEST_MODE = 70,									// Added by Arslan HAMZA CHERIF
 		};
 
 /***************** Scenario Model *****************/
@@ -78,6 +83,11 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		 * bool variable for enabling DtnMsg;
 		 */
 		bool withDtnMsg;
+
+		/*
+		 * bool variable for enabling OtherMsg;
+		 */
+		bool withOtherMsg;
 
 		/*
 		 * the Dtn Msg that will be exchanged among App Layer
@@ -157,12 +167,32 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		 */
 		t_dtnMsgReceptionType receivingStrategy;
 
+		int destAddr;
+
 		// Different stats for Bundle Sending/Reception
-		int nbrBundleSent;
-		int nbrBundleReceived;
-		int nbrUniqueBundleReceived;
+		long nbrBundleSent;
+		long nbrBundleReceived;
+		long nbrUniqueBundleReceived;
+
+		long nbrMsgSent;
+		long nbrMsgReceived;
+
+		double avgDelay;
+		double totalDelay;
+
+		cOutVector delays;
+		cDoubleHistogram delayStats;
+
+		cLongHistogram hopCountStats;
+		cOutVector hopCountVector;
+
+		std::map<unsigned long ,WaveShortMessage*> receivedBundles;
 
 		bool isEquiped;
+
+		bool isNetwAddrInit;
+
+		int netwAddr;
 
 //		/** @brief handle messages from below */
 //		virtual void handleLowerMsg(cMessage* msg);

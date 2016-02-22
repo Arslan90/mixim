@@ -15,13 +15,18 @@
 
 package org.mixim.modules.application.opprouting;
 
-import org.mixim.base.modules.BaseNetwLayer;
+import org.mixim.base.modules.IBaseApplLayer;
+import org.mixim.modules.application.ieee80211p.BaseWaveApplLayer;
+
 //
 // TODO auto-generated module
 //
-simple DtnApplLayer
+simple DtnApplLayer extends BaseWaveApplLayer
 {
+    parameters:
+        @class(DtnApplLayer);
     	bool withDtnMsg = default(true); // wheter we are testing the sent of DTN Msg
+    	bool withOtherMsg = default(true); // wheter we are testing the sent of DTN Msg
 		
 		string scenarioType = default("Free");
 		// Parameters related to Sector scenarioType only
@@ -31,21 +36,18 @@ simple DtnApplLayer
 		double sectorSizeY = default(-1);
 		bool useNegativeValues = default(false);  
 		double sectorOffsetX = default(-1);
-		double sectorOffsetY = default(-1); 
-		
+		double sectorOffsetY = default(-1);
 		
 		string dataGeneration = default("VEH2VPA");
 		string dataForwarding = default("ALL");
 		
 		string dtnMsgSending = default("Periodic");
 		string dtnMsgReception = default("Unique");
+		int destAddr = default(9); // Address of first VPA
+		
 
-		double dtnMsgPeriod = default(-1); // period for sending dtnMessage
-		double dtnMsgMaxTime = default(-1);     
-		double dtnMsgMinTime = default(-1);     
+		double dtnMsgPeriod = default(30); // period for sending dtnMessage
+		double dtnMsgMaxTime = default(7200);     
+		double dtnMsgMinTime = default(0);     
 		bool dtnMsgSynchronized = default(true);  
-		
-		
-		bool sectorMode = default(false);
-		bool updateMode = default(false);
 }

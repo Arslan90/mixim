@@ -127,6 +127,7 @@ class TraCIScenarioManager : public cSimpleModule
 		}
 
 		bool isALoopVehicle(std::string vehicleId);
+
 protected:
     /**
 		 * Coord equivalent for storing TraCI coordinates
@@ -335,16 +336,6 @@ protected:
 		std::string receiveTraCIMessage();
 
 		/**
-		 * convert TraCI coordinates to OMNeT++ coordinates
-		 */
-		Coord traci2omnet(TraCICoord coord) const;
-
-		/**
-		 * convert OMNeT++ coordinates to TraCI coordinates
-		 */
-		TraCICoord omnet2traci(Coord coord) const;
-
-		/**
 		 * convert TraCI angle to OMNeT++ angle (in rad)
 		 */
 		double traci2omnetAngle(double angle) const;
@@ -375,6 +366,17 @@ protected:
 
 		std::vector<std::string> allVehiclesId;
 		cOutVector nbrVehicleVector;
+public:
+
+		/**
+		 * convert TraCI coordinates to OMNeT++ coordinates
+		 */
+		Coord traci2omnet(TraCICoord coord) const;
+
+		/**
+		 * convert OMNeT++ coordinates to TraCI coordinates
+		 */
+		TraCICoord omnet2traci(Coord coord) const;
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);

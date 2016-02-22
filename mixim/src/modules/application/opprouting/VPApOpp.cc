@@ -8,13 +8,16 @@
  */
 
 #include "VPApOpp.h"
+#include "multiFunctions.h"
+//#include "ApplOppControlInfo.h"
+#include "DtnNetwLayer.h"
 
 Define_Module(VPApOpp);
 
 void VPApOpp::initialize(int stage) {
 	/*OK, here I'm trying to initialize everything in this part instead of using upper classes initialization */
 	//BaseWaveApplLayer::initialize(stage);
-	BaseApplLayer::initialize(stage); //IMPORTANT, It seems that I've to include upper class to avoid a crash.
+	DtnApplLayer::initialize(stage); //IMPORTANT, It seems that I've to include upper class to avoid a crash.
 
 	if (stage==0) {
 		myMac = FindModule<WaveAppToMac1609_4Interface*>::findSubModule(
@@ -51,57 +54,83 @@ void VPApOpp::initialize(int stage) {
     		opp_error("updateSectorCycle value cannot be negative(VPApOpp::initialize)");
     	}
 
-    	anyVPA = par("updateMode").boolValue();
+//    	anyVPA = par("updateMode").boolValue();
 
 
     	/*
     	 * Section created by me for initializing dtnTestMode & silentMode booleans
     	 */
 
-    	delayStats.setName("DelayStats for 1st Copy");
+//    	delayStats.setName("DelayStats for 1st Copy");
     	delays.setName("Delays");
 
-	    hopCountStats.setName("HopCountStats for 1st Copy");
+//	    hopCountStats.setName("HopCountStats for 1st Copy");
 	    hopCountVector.setName("HopCount");
 
 	    vehicleDensity.setName("Vehicle Density");
 
-    	dtnTestMode = par("dtnTestMode").boolValue();
-    	silentMode = par("silentMode").boolValue();
+//    	dtnTestMode = par("dtnTestMode").boolValue();
+//    	silentMode = par("silentMode").boolValue();
 
     	/*
     	 * End of section
     	 */
 
 		sendBeaconEvt = new cMessage("beacon evt", SEND_BEACON_EVT);
-		nbrBundleSent = 0;
-		nbrBundleReceived = 0;
-		nbrUniqueBundleReceived = 0;
+//		nbrBundleSent = 0;
+//		nbrBundleReceived = 0;
+//		nbrUniqueBundleReceived = 0;
 
 //		dtnSynchronized = par("dtnSynchronized").boolValue();
-		if (dtnTestMode){
-			avgDelay = 0;
-			totalDelay = 0;
-			/*
-			 * we are in dtnTestMode
-			 */
-			if (silentMode){
-				/*
-				 * we are in silentMode, VPA will not send any messages, it only receive
-				 */
+//		if (dtnTestMode){
+//			avgDelay = 0;
+//			totalDelay = 0;
+//			/*
+//			 * we are in dtnTestMode
+//			 */
+//			if (silentMode){
+//				/*
+//				 * we are in silentMode, VPA will not send any messages, it only receive
+//				 */
+//
+//			}else {
+//				//Schedule the next first VPA TX
+//
+//				scheduleAt(simTime() + 1, sendBeaconEvt);
+//
+//				/*NOTE: The VPAs can have overlap zones and vehicles may lost their updates due to
+//				 * the hidden node problem. But if I add a CW the  VPAS will contend with the
+//				 * vehicles for the TX/RX resource allocation. Maybe if the problem is so big
+//				 * I'll give a lower CW for the VPAs.
+//				 * BUT!, Base on the testing I've made with 802.11/802.11p, 80211p start to loss packets with ten
+//				 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
+//			}
+//		}
 
-			}else {
-				//Schedule the next first VPA TX
-
-				scheduleAt(simTime() + 1, sendBeaconEvt);
-
-				/*NOTE: The VPAs can have overlap zones and vehicles may lost their updates due to
-				 * the hidden node problem. But if I add a CW the  VPAS will contend with the
-				 * vehicles for the TX/RX resource allocation. Maybe if the problem is so big
-				 * I'll give a lower CW for the VPAs.
-				 * BUT!, Base on the testing I've made with 802.11/802.11p, 80211p start to loss packets with ten
-				 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
+		if (isEquiped && withDtnMsg && ((getDataSrcFromStrategy(strategy)=="ALL") || (getDataSrcFromStrategy(strategy)=="VPA"))){
+			// we have to send bundles
+			if (sendingStrategy == SectorEntry){
+				opp_error("SectorEntry sending strategy not supported for VPA");
+			}else if(sendingStrategy == Periodic){
+				double tmp = (dtnMsgSynchronized)? 0: uniform(0,dtnMsgPeriod);
+				if ((dtnMsgMinTime <= simTime().dbl() + tmp) && (simTime().dbl() + tmp <= dtnMsgMaxTime)) {
+					scheduleAt(simTime() + tmp, dtnMsg);
+					nbrMsgSent++;
+				}
 			}
+		}
+
+		if (withOtherMsg){
+			//Schedule the next first VPA TX
+
+			scheduleAt(simTime() + 1, sendBeaconEvt);
+
+			/*NOTE: The VPAs can have overlap zones and vehicles may lost their updates due to
+			 * the hidden node problem. But if I add a CW the  VPAS will contend with the
+			 * vehicles for the TX/RX resource allocation. Maybe if the problem is so big
+			 * I'll give a lower CW for the VPAs.
+			 * BUT!, Base on the testing I've made with 802.11/802.11p, 80211p start to loss packets with ten
+			 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
 		}
 
 	}
@@ -110,12 +139,18 @@ void VPApOpp::initialize(int stage) {
 
 //handle self-Messages
 void VPApOpp::handleSelfMsg(cMessage* msg) {
+
+	if (isEquiped){
+
 	switch (msg->getKind()) {
 		case DTN_TEST_MODE:
-			if (dtnTestMode){
-				/*
-				 * Nothing to do for the moment
-				 */
+			if (withDtnMsg){
+				sendDtnMessage();
+	    		// Finally reschedule message
+				if(withDtnMsg && (sendingStrategy == Periodic) && ((dtnMsgMinTime <= simTime().dbl() + dtnMsgPeriod) && (simTime().dbl() + dtnMsgPeriod <= dtnMsgMaxTime))) {
+					scheduleAt(simTime() + dtnMsgPeriod, dtnMsg);
+					nbrMsgSent++;
+				}
 			}
 			break;
 		case SEND_BEACON_EVT: {
@@ -126,7 +161,7 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 			//Reschedule the self-message
 			scheduleAt(simTime() + T, sendBeaconEvt);
 	        EV <<"logs, T time: " << T <<endl;
-	        nbrBundleSent++;
+	        nbrMsgSent++;
 			break;
 		}
 		case UPDATE: {
@@ -144,6 +179,8 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 			break;
 		}
 	}
+
+	}
 }
 
 
@@ -153,6 +190,11 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 	NetwPkt* netw = dynamic_cast<NetwPkt*>(msg);
 	ASSERT(netw);
 	WaveShortMessage*  wsm =  dynamic_cast<WaveShortMessage*>(netw->decapsulate());
+
+	if (isEquiped) {
+
+	nbrMsgSent++;
+
 	if (wsm != NULL) {
 		EV << "logs, Receiving packet " << wsm->getName() <<endl;
 	}
@@ -162,7 +204,7 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 
 		bool existUnderOtherVPA = false;
 
-		if (anyVPA){
+		if (receivingStrategy == Any){
 			existUnderOtherVPA = bundleExistUnderOtherVPA(wsm->getSerial());
 		}
 
@@ -193,6 +235,8 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 		}
 	}
 
+	}
+
 	delete(msg);
 	delete wsm;
 }
@@ -209,7 +253,7 @@ void VPApOpp::sendVPApBroadcast(int messageSequence) {
 	//Anyway I do not have time to check it out. I'll stay tuned with CCH.
 	t_channel channel = dataOnSch ? type_SCH : type_CCH;
 //	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,2));
-	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,intrand(INT32_MAX)));
+	sendWSM(prepareWSM(result, beaconLengthBits, channel, beaconPriority, 0,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 	//sendWSM(prepareWSM("beacon", beaconLengthBits, type_CCH, beaconPriority, 0, -1));
 
 	//EV << "logs,tx,"<< simTime() <<",Sending VPA broadcast packet!" <<","<< endl;
@@ -229,12 +273,17 @@ WaveShortMessage*  VPApOpp::prepareWSM(std::string name, int lengthBits, t_chann
 		case type_SCH: wsm->setChannelNumber(Channels::SCH1); break; //will be rewritten at Mac1609_4 to actual Service Channel. This is just so no controlInfo is needed
 		case type_CCH: wsm->setChannelNumber(Channels::CCH); break;
 	}
-	wsm->setKind(BROADCAST_VPA_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
+	if (withDtnMsg){
+		wsm->setKind(DTN_TEST_MODE);
+	}else {
+		wsm->setKind(BROADCAST_VPA_WMS);//30=BROADCAST_VPA_WMS, 40=BROADCAST_VEH_WMS
+	}
+
 	wsm->setPsid(0);
 	wsm->setPriority(priority);
 	wsm->setWsmVersion(1);
 	wsm->setTimestamp(simTime());
-	wsm->setSenderAddress(myId);
+	wsm->setSenderAddress(netwAddr);
 	wsm->setRecipientAddress(rcvId);
 	wsm->setSenderPos(curPosition);
 	wsm->setSerial(serial);
@@ -277,6 +326,90 @@ bool VPApOpp::bundleExistUnderOtherVPA(unsigned long  serial)
 	return exist;
 }
 
+void VPApOpp::sendDtnMessage()
+{
+	if (scenarioModel == Sector){
+		opp_error("Sending strategy behaviour undefined from VPA to VPA when in Sector Model");
+	}
+
+	if (getDataDestFromStrategy(strategy)=="VPA"){
+		int addr = 0;
+		switch (receivingStrategy) {
+			case Unique:
+				addr = destAddr;
+				break;
+			case Random:
+				addr = randomVPADestAddr();
+				break;
+			case Any:
+				opp_error("Must Define an anycast addr for Free model");
+				break;
+			default:
+				opp_error("Undefined behavior when selecting destinated VPA");
+				break;
+		}
+	//	MYDEBUG <<"logs, VEH," <<simTime() <<",From," << myApplAddr() << "," << traci->getExternalId()  <<",tx," <<  junctionID << ", messageSequence, " <<  messageSequence << ", messageSequenceVPA, " << messageSequenceVPA << ","<< vehPos.x <<","<<  axeY<<"," <<endl;
+		//MYDEBUG <<"logs, backoff,tx,"<< currentSector <<","<< traci->getExternalId()<< ","  << simTime() << "," <<endl;
+
+
+	//	char numstr[6]; // Numbered Message
+	//	sprintf(numstr, "%d+%d", messageSequenceVPA,messageSequence); // convert INT to STRING. VPAId+SequenceNumber
+	//	char* result = numstr; //concatenate in VPAiD,messageSequence
+
+		//Sending message
+		t_channel channel = dataOnSch ? type_SCH : type_CCH;
+		//	sendWSM(prepareWSM(result, dataLengthBits, channel, dataPriority, 0,2));
+
+		DBG <<"periodic DtnMessage sent at " <<simTime() <<",From," << netwAddr << " to address "<< addr <<endl;
+		std::string s = "Periodic DTN message sent from :"+netwAddr;
+		std::string tmp = "to the current netw addr : "+addr;
+		s = s+tmp;
+		if (isNetwAddrInit){
+		sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
+		nbrBundleSent++;
+		}else {
+			opp_error("netw address not yet initialized");
+		}
+	}else{
+		opp_error("Sending DtnMsg to VEH & ALL mode is not supported");
+	}
+}
+
+int VPApOpp::randomVPADestAddr()
+{
+	int vpaDestAddr = -2;
+	cModule *systemModule = this->getParentModule();
+	while (systemModule->getParentModule() !=NULL){
+		systemModule = systemModule->getParentModule();
+	}
+	int numberVPA = 0;
+	if (systemModule->hasPar("numeroNodes")){
+		numberVPA = systemModule->par("numeroNodes");
+	}
+	if (!systemModule->hasPar("numeroNodes") || (0 <= numberVPA)){
+		opp_error("Impossible to determine number of VPA");
+	}
+
+	do {
+		vpaDestAddr = intuniform(0,numberVPA-1);
+		cModule *vpa = systemModule->getSubmodule("VPA", vpaDestAddr);
+		if (vpa!=NULL){
+			DtnNetwLayer *netw = FindModule<DtnNetwLayer*>::findSubModule(vpa);
+			if (netw!=NULL){
+				vpaDestAddr = netw->getMyNetwAddr();
+			}
+		}
+	}while (vpaDestAddr == netwAddr);
+
+	if (vpaDestAddr == -2){
+		opp_error("Impossible to determine VPA address");
+	}
+
+	return vpaDestAddr;
+}
+
+
+
 
 /************** TO DELETE / TESTING AREA *************/
 /************** TO DELETE / TESTING AREA *************/
@@ -292,16 +425,7 @@ VPApOpp::~VPApOpp() {
 
 void VPApOpp::finish()
 {
-	// Added by Arslan HAMZA CHERIF
-		recordScalar("# Bundle Sent", nbrBundleSent);
-		recordScalar("# Bundle Received", nbrBundleReceived);
-		recordScalar("# Unique Bundle Received", nbrUniqueBundleReceived);
-
-		delayStats.recordAs("Delays for 1st Copy");
-
-		hopCountStats.recordAs("HopCount for 1st Copy");
-
-	BaseWaveApplLayer::finish();
+	DtnApplLayer::finish();
 }
 
 
