@@ -358,6 +358,8 @@ private:
 	std::map<LAddress::L3Type, std::list<double> > interContactDurByAddr;
 	cLongHistogram interContactDurHist;
 
+	cDoubleHistogram interContactDuration;
+
 	/*******************************************************************
 	** 							end of metrics variables section
 	********************************************************************/

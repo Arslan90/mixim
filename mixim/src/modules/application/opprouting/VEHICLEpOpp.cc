@@ -502,11 +502,11 @@ void VEHICLEpOpp::whatSectorIm() {
 
 		//step 2
 		col= int( (vehiclePosSumo.x - sectorOffsetX) / sectorSizeX); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
-		if (!((0 < col)&&(col < colSectorGrid))){
+		if (!((0 <= col)&&(col < colSectorGrid))){
 			opp_error("Error with column index calculation");
 		}
 		row= int( (vehiclePosSumo.y - sectorOffsetY) / sectorSizeY); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
-		if (!((0 < row)&&(row < rowSectorGrid))){
+		if (!((0 <= row)&&(row < rowSectorGrid))){
 			opp_error("Error with row index calculation");
 		}
 		inSector= (col * rowSectorGrid) + row; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
@@ -895,7 +895,7 @@ int VEHICLEpOpp::vpaDestAddr(int sectorID)
 	if (systemModule->hasPar("numeroNodes")){
 		numberVPA = systemModule->par("numeroNodes");
 	}
-	if (!systemModule->hasPar("numeroNodes") || (0 <= numberVPA)){
+	if (!systemModule->hasPar("numeroNodes") || (0 >= numberVPA)){
 		opp_error("Impossible to determine number of VPA");
 	}
 	if ((sectorID < 0) || (sectorID > numberVPA)){

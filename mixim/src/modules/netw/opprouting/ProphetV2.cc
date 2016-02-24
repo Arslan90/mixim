@@ -1672,10 +1672,12 @@ void ProphetV2::finish()
 			double totalDuration = 0;
 			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
 				totalDuration+=*it3;
+				interContactDuration.collect(*it3);
 			}
 			interContactDurHist.collect(totalDuration);
 		}
 		interContactDurHist.recordAs("Histogram for total interContact duration");
+		interContactDuration.recordAs("Duration between RC");
 	}
 }
 
