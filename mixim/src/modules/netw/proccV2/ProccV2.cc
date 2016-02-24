@@ -81,6 +81,13 @@ void ProccV2::initialize(int stage)
 
         delayed = par("delayed");
 
+        delayedRIB = par("delayedRIB").boolValue();
+        delayedBndlOffer = par("delayedBndlOffer").boolValue();
+        delayedBndlResp = par("delayedBndlResp").boolValue();
+        delayedBundle = par("delayedBundle").boolValue();
+        delayedBndlAck = par("delayedBndlAck").boolValue();
+        delayedForFrag = par("delayedForFrag").boolValue();
+
 	}
 	else if (stage==1){
 //		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
@@ -421,8 +428,6 @@ void ProccV2::handleLowerControl(cMessage* msg)
 					if (myClass == Vehicle_Type_I){
 						canIAge = true;
 						autorizeToAgeEvolution.record(1.0);
-					} else {
-						opp_error("if the encountered node is the convergeCastNode, current node must be a Type_I");
 					}
 				}
 
@@ -524,7 +529,7 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 				ribPkt->setContactID(prophetPkt->getContactID());
 				ribPkt->setFragmentFlag(false);
 				if (canITransmit){
-					if (delayed == 0){
+					if ((delayed == 0)|| !delayedRIB){
 						sendDown(ribPkt);
 					}else{
 						sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
@@ -592,7 +597,7 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-						if (delayed == 0){
+						if ((delayed == 0)|| !(delayedRIB && delayedForFrag)){
 							sendDown(ribPkt);
 						}else{
 							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
@@ -717,11 +722,11 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
 			responsePkt->setContactID(prophetPkt->getContactID());
 			if (canITransmit){
-//				if (delayed == 0){
+				if ((delayed == 0)|| !delayedBndlResp){
 					sendDown(responsePkt);
-//				}else{
-//					sendDelayed(responsePkt,dblrand()*delayed,"lowerLayerOut");
-//				}
+				}else{
+					sendDelayed(responsePkt,dblrand()*delayed,"lowerLayerOut");
+				}
 
 				/*
 				 * Collecting data
@@ -810,11 +815,11 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 				ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, prophetPkt->getSrcAddr(), &acksMeta);
 				ackPkt->setContactID(prophetPkt->getContactID());
 				if (canITransmit){
-//					if (delayed == 0){
+					if ((delayed == 0)|| !delayedBndlAck){
 						sendDown(ackPkt);
-//					}else{
-//						sendDelayed(ackPkt,dblrand()*delayed,"lowerLayerOut");
-//					}
+					}else{
+						sendDelayed(ackPkt,dblrand()*delayed,"lowerLayerOut");
+					}
 					/*
 					 * Collecting data
 					 */
@@ -964,7 +969,7 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 				offerPkt->setContactID(prophetPkt->getContactID());
 				offerPkt->setFragmentFlag(false);
 				if (canITransmit){
-					if (delayed == 0){
+					if ((delayed == 0)|| !delayedBndlOffer){
 						sendDown(offerPkt);
 					}else{
 						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
@@ -1027,7 +1032,7 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 					offerPkt->setFragmentNum(fragmentNum);
 					offerPkt->setTotalFragment(nbrFragment);
 					if (canITransmit){
-						if (delayed == 0){
+						if ((delayed == 0)|| !(delayedBndlOffer && delayedForFrag)){
 							sendDown(offerPkt);
 						}else{
 							sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
@@ -1112,11 +1117,11 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 				bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,NULL);
 				bundlePkt->setContactID(prophetPkt->getContactID());
 				if (canITransmit){
-//					if (delayed == 0){
+					if ((delayed == 0)|| !delayedBundle){
 						sendDown(bundlePkt);
-//					}else{
-//						sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
-//					}
+					}else{
+						sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
+					}
 					/*
 					 * Collecting data
 					 */
@@ -1142,11 +1147,11 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 							bundlePkt->setContactID(prophetPkt->getContactID());
 
 							if (canITransmit){
-//								if (delayed == 0){
+								if ((delayed == 0)|| !delayedBundle){
 									sendDown(bundlePkt);
-//								}else{
-//									sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
-//								}
+								}else{
+									sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
+								}
 								/*
 								 * Collecting data
 								 */

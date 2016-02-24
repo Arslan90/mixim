@@ -160,6 +160,15 @@ protected:
 	 */
 	double I_Preds;
 
+
+    bool delayedRIB;
+    bool delayedBndlOffer;
+    bool delayedBndlResp;
+    bool delayedBundle;
+    bool delayedBndlAck;
+    bool delayedForFrag;
+
+
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
