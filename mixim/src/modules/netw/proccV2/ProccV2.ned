@@ -42,10 +42,12 @@ simple ProccV2 extends DtnNetwLayer
     	        bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
         
         bool delayedRIB = default(true);
-        bool delayedBndlOffer = default(false);
+        bool delayedBndlOffer = default(true);
         bool delayedBndlResp = default(false);
         bool delayedBundle = default(false);
         bool delayedBndlAck = default(false);
-        bool delayedForFrag = default(false);
+        bool delayedForFrag = default(true);
+        
+        bool withRestartWhenMAJCCN = default(true);
         
 }       

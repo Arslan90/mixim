@@ -49,5 +49,5 @@ simple ProphetV2 extends DtnNetwLayer
     	bool withFailBndlAckClassifier = default(false);
     	
         bool CDFForFailRIBClassifier = default(false);        bool CDFForFailBndlOfferClassifier = default(false);        bool CDFForFailBndlRespClassifier = default(false);        bool CDFForFailBndlClassifier = default(false);        bool CDFForFailBndlAckClassifier = default(false);
-
+        
 }       

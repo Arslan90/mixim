@@ -126,6 +126,8 @@ protected:
 
 	LAddress::L3Type convergeCastTo;
 
+	LAddress::L3Type oldConvergeCastTo;
+
 	/** delivery predictability min value */
 	double PMinThreshold;
 
@@ -168,6 +170,10 @@ protected:
     bool delayedBndlAck;
     bool delayedForFrag;
 
+    bool withRestartWhenMAJCCN;
+
+	/** convergeCastNode for neighborhood  */
+	std::map<LAddress::L3Type, LAddress::L3Type> convergeCastNeighborhood;
 
 	/*******************************************************************
 	** 							Metrics variables section
@@ -253,6 +259,8 @@ protected:
 
 	std::map<LAddress::L3Type, std::list<double> > interContactDurByAddr;
 	cLongHistogram interContactDurHist;
+
+	cDoubleHistogram interContactDuration;
 
 	/*******************************************************************
 	** 							end of metrics variables section
@@ -353,8 +361,8 @@ protected:
 	/** @brief Handle control messages from lower layer */
 	virtual void handleLowerControl(cMessage* msg);
 
-//	/** @brief Handle control messages from lower layer */
-//	virtual void handleUpperControl(cMessage* msg);
+	/** @brief Handle control messages from lower layer */
+	virtual void handleUpperControl(cMessage* msg);
 
 //	virtual cObject *const setDownControlInfo(cMessage *const pMsg, const LAddress::L2Type& pDestAddr);
 //

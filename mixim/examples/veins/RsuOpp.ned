@@ -68,5 +68,7 @@ module RsuOpp
         nic.upperControlIn <-- netw.lowerControlOut;
 
         radioIn --> nic.radioIn;
+        
+
 
 }

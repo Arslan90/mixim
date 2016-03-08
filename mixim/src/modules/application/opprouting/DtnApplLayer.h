@@ -39,128 +39,98 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		~DtnApplLayer();
 		virtual void initialize(int stage);
 		virtual void finish();
+    int getCurrentSector() const
+    {
+        return currentSector;
+    }
 
-	protected:
-		/**ARTURO/Arslan  @brief Message kinds used by Dtn Appl Layer */
-		enum MyTestApplMessageKinds{
-			SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
-			BROADCAST_MESSAGE = 10,								//simple broadcast
-			BROADCAST_REPLY_MESSAGE = 20,						//simple reply
-			BROADCAST_VPA_WMS = 30,								//identified VPA beacon
-			BROADCAST_VEH_WMS = 40,								//identified Vehicular beacon
-			DO_THINGS_EVERY_SECOND = 50,						//internal timer for vehicular stuffs
-			LAST_TEST_APPL_MESSAGE_KIND = 60,					//I do not..
-			DTN_TEST_MODE = 70,									// Added by Arslan HAMZA CHERIF
-		};
 
-/***************** Scenario Model *****************/
-		/**
+protected:
+    /**ARTURO/Arslan  @brief Message kinds used by Dtn Appl Layer */
+    enum MyTestApplMessageKinds{ SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
+    BROADCAST_MESSAGE = 10, //simple broadcast
+    BROADCAST_REPLY_MESSAGE = 20, //simple reply
+    BROADCAST_VPA_WMS = 30, //identified VPA beacon
+    BROADCAST_VEH_WMS = 40, //identified Vehicular beacon
+    DO_THINGS_EVERY_SECOND = 50, //internal timer for vehicular stuffs
+    LAST_TEST_APPL_MESSAGE_KIND = 60, //I do not..
+    DTN_TEST_MODE = 70};
+    // Added by Arslan HAMZA CHERIF
+    /***************** Scenario Model *****************/
+    /**
 		 * Scenario Model Type (Cologne -Koln- like) or Free
 		 */
-		enum t_scenarioType {
-			Free	= 1,
-			Sector	= 2,
-		};
-
-		/*
+    enum t_scenarioType{ Free = 1, Sector = 2};
+    /*
 		 * Variable for specifying Scenario Model Type
 		 */
-		t_scenarioType scenarioModel;
-
-		// Parameters related to Sector Mode
-		int oldSector;
-		int currentSector;
-		int rowSectorGrid;
-		int colSectorGrid;
-		double sectorSizeX;
-		double sectorSizeY;
-		bool useNegativeValues; // Allow us the use of negative values for Offset - Coord(0.0) of sector[0]
-		double sectorOffsetX;  // Traci Coord X for - Coord(0.0) of sector[0]
-		double sectorOffsetY;  // Traci Coord Y for - Coord(0.0) of sector[0]
-
-/***************** Data Traffic *****************/
-		/*
+    t_scenarioType scenarioModel;
+    // Parameters related to Sector Mode
+    int oldSector;
+    int currentSector;
+    int rowSectorGrid;
+    int colSectorGrid;
+    double sectorSizeX;
+    double sectorSizeY;
+    bool useNegativeValues; // Allow us the use of negative values for Offset - Coord(0.0) of sector[0]
+    double sectorOffsetX; // Traci Coord X for - Coord(0.0) of sector[0]
+    double sectorOffsetY; // Traci Coord Y for - Coord(0.0) of sector[0]
+    /***************** Data Traffic *****************/
+    /*
 		 * bool variable for enabling DtnMsg;
 		 */
-		bool withDtnMsg;
-
-		/*
+    bool withDtnMsg;
+    /*
 		 * bool variable for enabling OtherMsg;
 		 */
-		bool withOtherMsg;
-
-		/*
+    bool withOtherMsg;
+    /*
 		 * the Dtn Msg that will be exchanged among App Layer
 		 */
-		cMessage *dtnMsg;
-
-		/**
+    cMessage *dtnMsg;
+    /**
 		 * Enumeration for Data Traffic Generator Mode (Dtn Msgs)
 		 */
-		enum t_data_generatorMode {
-			ALL2ALL	= 1,
-			ALL2VEH	= 2,
-			ALL2VPA	= 3,
-			VPA2ALL = 4,
-			VPA2VEH = 5,
-			VPA2VPA = 6,
-			VEH2ALL	= 7,
-			VEH2VEH	= 8,
-			VEH2VPA	= 9,
-		};
-
-		/*
+    enum t_data_generatorMode{ ALL2ALL = 1, ALL2VEH = 2, ALL2VPA = 3, VPA2ALL = 4, VPA2VEH = 5, VPA2VPA = 6, VEH2ALL = 7, VEH2VEH = 8, VEH2VPA = 9};
+    /*
 		 * Variable for specifying data traffic generation mode (Dtn Msgs)
 		 */
-		t_data_generatorMode genStrategy;
-
-		/*
+    t_data_generatorMode genStrategy;
+    /*
 		 * Variable for storing data traffic generation mode (Dtn Msgs) as a string
 		 */
-		std::string strategy;
-
-		/**
+    std::string strategy;
+    /**
 		 * Enumeration for Data Traffic Forwarder Mode (Mule)
 		 */
-		enum t_data_forwarderMode {
-			ALL = 1,
-			VPA = 2,
-			VEH = 3,
-		};
-
-		/*
+    enum t_data_forwarderMode{ ALL = 1, VPA = 2, VEH = 3};
+    /*
 		 * Variable for specifying data traffic forwarding mode (Mule)
 		 */
-		t_data_forwarderMode fwdStrategy;
-
-/***************** Sending/Receiving Strategies *****************/
-		/**
+    t_data_forwarderMode fwdStrategy;
+    /***************** Sending/Receiving Strategies *****************/
+    /**
 		 * Enumeration for Data Traffic Sending type (SectorMode or PeriodicMode) - Typically used by Veh
 		 */
-		enum t_dtnMsgSendingType {
-			SectorEntry 	 = 1, // At sector entrance (like in Cologne)
-			Periodic = 2, // Generate periodically DtnMsg
-		};
-
-		// Parameters related to Periodic Mode
-		double dtnMsgPeriod;
-		double dtnMsgMaxTime;
-		double dtnMsgMinTime;
-		bool dtnMsgSynchronized;
-
-		/*
+    enum t_dtnMsgSendingType{ SectorEntry = 1, // At sector entrance (like in Cologne)
+    Periodic = 2};
+    // Generate periodically DtnMsg
+    // Parameters related to Periodic Mode
+    double dtnMsgPeriod;
+    double dtnMsgMaxTime;
+    double dtnMsgMinTime;
+    bool dtnMsgSynchronized;
+    /*
 		 * Variable for specifying Data Traffic Sending type
 		 */
-		t_dtnMsgSendingType sendingStrategy;
-
-		/**
+    t_dtnMsgSendingType sendingStrategy;
+    /**
 		 * Enumeration for Data Traffic Reception type (Unique vs Random vs Any) - Typically used by VPA
 		 */
-		enum t_dtnMsgReceptionType {
-			Unique = 1, // Unique receipt for generated data traffic (have to specify the recipient) - By default VPA[0]
-			Random = 2, // Choose randomly the recipient
-			Any    = 3, // Recipient is the current VPA, which changes every time we switch to another sector
-		};
+    enum t_dtnMsgReceptionType{ Unique = 1, // Unique receipt for generated data traffic (have to specify the recipient) - By default VPA[0]
+    Random = 2, // Choose randomly the recipient
+    Any = 3};
+    // Recipient is the current VPA, which changes every time we switch to another sector
 
 		/*
 		 * Variable for specifying Data Traffic Receiving type
@@ -215,6 +185,12 @@ class DtnApplLayer : public BaseWaveApplLayer	{
 		 *	Method to get the Data Destination string from strategy
 		 */
 		virtual std::string getDataDestFromStrategy(std::string currentStrategy);
+
+public:
+		t_scenarioType getScenarioModel() const
+		{
+			return scenarioModel;
+		}
 
 };
 

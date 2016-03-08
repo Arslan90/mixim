@@ -60,6 +60,12 @@ class VEHICLEpOpp : public DtnApplLayer {
 			UPDATE = 80									// Added by Arslan HAMZA CHERIF
 	    };
 
+		void whatSectorIm(); //Check in which sector is the vehicle located.
+
+		/*
+		 * Warning: In this function, we considerate that the sectorID is the same as the vpaID, so Sector 0 => VPA 0
+		 */
+		int vpaDestAddr(int sectorID);
 	protected:
 		static const simsignalwrap_t mobilityStateChangedSignal;
 
@@ -126,10 +132,6 @@ class VEHICLEpOpp : public DtnApplLayer {
 		void sendDtnMessage();
 
 		int randomVPADestAddr();
-		/*
-		 * Warning: In this function, we considerate that the sectorID is the same as the vpaID, so Sector 0 => VPA 0
-		 */
-		int vpaDestAddr(int sectorID);
 
 		void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
@@ -138,7 +140,7 @@ class VEHICLEpOpp : public DtnApplLayer {
 		//void splitMessagesReceived(std::string n); //Split the string: const char* "VPAId+sequenceNumber"
 		double CW; //Contention Window value.
 		void vpaPosition(); //this contain The list of VPA positions.
-		void whatSectorIm(); //Check in which sector is the vehicle located.
+
 		void vehicleVideos(); //This is to generate videos, CAUTION it generates copious logs.
 		void WMS(); //Gather the Weight Map Sector.
 		WaveShortMessage* prepareWSM(std::string name, int lengthBits, t_channel channel, int priority, int rcvId, unsigned long serial); //overrinding with my modified own function

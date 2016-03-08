@@ -18,6 +18,8 @@
 #include "VPApOpp.h"
 #include "VEHICLEpOpp.h"
 #include "algorithm"
+#include "ApplOppControlInfo.h"
+#include "DtnApplLayer.h"
 
 Define_Module(ProccV2);
 
@@ -79,14 +81,16 @@ void ProccV2::initialize(int stage)
 
         predsForRC.setName("Evolution of Preds for RC GQ Max");
 
-        delayed = par("delayed");
-
         delayedRIB = par("delayedRIB").boolValue();
         delayedBndlOffer = par("delayedBndlOffer").boolValue();
         delayedBndlResp = par("delayedBndlResp").boolValue();
         delayedBundle = par("delayedBundle").boolValue();
         delayedBndlAck = par("delayedBndlAck").boolValue();
         delayedForFrag = par("delayedForFrag").boolValue();
+
+        withRestartWhenMAJCCN = par("withRestartWhenMAJCCN").boolValue();
+
+        oldConvergeCastTo = -1;
 
 	}
 	else if (stage==1){
@@ -169,7 +173,11 @@ void ProccV2::updateDataFor(const LAddress::L3Type convergeCastAddr, const nodeC
 				preds[convergeCastTo] = myPredsForCCN;
 			}
 		}else{
-			opp_error("preds for ConvergeCast addr must be previously setted");
+			if (!Bpreds.empty()) {
+				bool shouldAbort = true;
+			}else {
+				opp_error("preds for ConvergeCast addr must be previously setted");
+			}
 		}
 	}
 }
@@ -194,19 +202,46 @@ void ProccV2::DefineNodeClass()
 int ProccV2::vpaDestAddr()
 {
 	int vpaDestAddr = -2;
-	cModule *systemModule = this->getParentModule();
-	while (systemModule->getParentModule() !=NULL){
-		systemModule = systemModule->getParentModule();
-	}
-	int numberVPA = systemModule->par("numeroNodes");
-	cModule *vpa = systemModule->getSubmodule("VPA", numberVPA-1);
-	if (vpa!=NULL){
-		cModule *netw = vpa->getSubmodule("netw");
-		if (netw!=NULL){
-			BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
-			vpaDestAddr = baseNetw->getMyNetwAddr();
+
+	int scenarioModel = 0; //1:Free; 2:Sector
+
+	cModule* parentModule = this->getParentModule();
+	if (parentModule->findSubmodule("appl")!=-1){
+		DtnApplLayer* ApplModule = FindModule<DtnApplLayer*>::findSubModule(parentModule);
+
+		if (ApplModule != NULL){
+			scenarioModel = ApplModule->getScenarioModel();
+		} else {
+			opp_error("ProccV2::vpaDestAddr() - Unable to find DtnApplLayer based module, please check existence of the convenient appl module in NED file");
 		}
 	}
+
+	if (scenarioModel == 1) {
+		cModule *systemModule = this->getParentModule();
+		while (systemModule->getParentModule() !=NULL){
+			systemModule = systemModule->getParentModule();
+		}
+		int numberVPA = systemModule->par("numeroNodes");
+		cModule *vpa = systemModule->getSubmodule("VPA", numberVPA-1);
+		if (vpa!=NULL){
+			cModule *netw = vpa->getSubmodule("netw");
+			if (netw!=NULL){
+				BaseNetwLayer *baseNetw = check_and_cast<BaseNetwLayer*>(netw);
+				vpaDestAddr = baseNetw->getMyNetwAddr();
+			}
+		}
+	}else if (scenarioModel == 2){
+		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
+
+		if (VehicleModule != NULL){
+			VehicleModule->whatSectorIm();
+			vpaDestAddr = VehicleModule->vpaDestAddr(VehicleModule->getCurrentSector());
+		} else {
+			opp_error("ProccV2::vpaDestAddr() - Unable to find VEHICLEpOpp module, please check existence of the convenient appl module in NED file");
+		}
+	}
+
+
 
 	if (vpaDestAddr == -2){
 		opp_error("Unable to get address of ConvergeCastNode");
@@ -291,7 +326,7 @@ void ProccV2::handleLowerMsg(cMessage* msg)
 
     Procc *prophetPkt = check_and_cast<Procc *>(m->decapsulate());
 
-    if (isEquiped){
+    if ((isEquiped) && !((myClass == VPA) && (prophetPkt->getNodeClass()== VPA))){
 
     if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
 
@@ -432,6 +467,8 @@ void ProccV2::handleLowerControl(cMessage* msg)
 				}
 
 				lastBundleProposal.erase(addr);
+
+				convergeCastNeighborhood.erase(addr);
 			}
 			break;
 	}
@@ -482,6 +519,41 @@ void ProccV2::handleSelfMsg(cMessage *msg)
 	}
 }
 
+void ProccV2::handleUpperControl(cMessage* msg)
+{
+	/*
+	 * Note: Currently ProccV2 is compatible with scenario with
+	 * multiple VPA only when AnyVPA receiving strategy is enabled
+	 */
+
+	DtnNetwLayer::handleUpperControl(msg);
+	
+	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
+	int newAddr = controlInfo->getNewSectorNetwAddr();
+
+	oldConvergeCastTo = convergeCastTo;
+	preds.erase(oldConvergeCastTo);
+
+	canIAge = false;
+	convergeCastTo = newAddr;
+	preds.insert(std::pair<LAddress::L3Type, double>(convergeCastTo,0));
+	classEvolution.record(-1.0);
+	autorizeToAgeEvolution.record(-1.0);
+
+//	if (withRestartWhenMAJCCN){
+//		for (std::map<LAddress::L3Type, LAddress::L3Type>::iterator it = convergeCastNeighborhood.begin(); it != convergeCastNeighborhood.end(); it++){
+//			if (it->second == convergeCastTo){
+//				stringstream ss;
+//				ss << it->first;
+//				restartIEP = new cMessage(ss.str().c_str(), RESTART);
+//				scheduleAt(simTime(),restartIEP);
+//
+//				nbrRestartedIEP++;
+//			}
+//		}
+//	}
+}
+
 void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 {
 	/*
@@ -517,7 +589,7 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
-			int predSize = ((sizeof(int) + sizeof(double) + 16 ) * predToSend.size()) * 8; // to express the size in bits unit
+			int predSize = ((sizeof(int) + sizeof(double)) * predToSend.size()) * 8; // to express the size in bits unit
 
 			if (predSize > dataLength) {
 				shouldFragment = true;
@@ -554,7 +626,7 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 			}else{
 				// we have to send fragment of predictions separately
 
-				int entrySize = (sizeof(int) + sizeof(double) + 16 ) * 8;
+				int entrySize = (sizeof(int) + sizeof(double)) * 8;
 				int maxEntriesParFrag = dataLength / entrySize;
 				int totalEntries = predSize / entrySize;
 
@@ -597,10 +669,10 @@ void ProccV2::executeInitiatorRole(short  kind, Procc *prophetPkt)
 					ribPkt->setTotalFragment(nbrFragment);
 
 					if (canITransmit){
-						if ((delayed == 0)|| !(delayedRIB && delayedForFrag)){
+						if ((delayedFrag == 0)|| !(delayedRIB && delayedForFrag)){
 							sendDown(ribPkt);
 						}else{
-							sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
+							sendDelayed(ribPkt,dblrand()*delayedFrag,"lowerLayerOut");
 						}
 
 						/*
@@ -900,6 +972,11 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 				updateContactWhenList(prophetPkt, contactID, contact, kind);
 			}
 
+			for (predsIterator it = prophetPkt->getPreds().begin(); it != prophetPkt->getPreds().end(); it++) {
+
+			}
+
+
 			if (!abortConnection(RIB,prophetPkt)){
 				update(prophetPkt);
 			}
@@ -952,7 +1029,7 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 
 			// Decide if we have to fragment predictions in order to send them
 			bool shouldFragment = false;
-			int bundleMetaSize = ((sizeof(BundleMeta) + 8 ) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
+			int bundleMetaSize = ((sizeof(BundleMeta)) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
 
 			if (bundleMetaSize > dataLength) {
 				shouldFragment = true;
@@ -993,7 +1070,7 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 			}else{
 				// we have to send fragment of predictions separately
 
-				int entrySize = (sizeof(BundleMeta) + 8 ) * 8;
+				int entrySize = (sizeof(BundleMeta)) * 8;
 				int maxEntriesParFrag = dataLength / entrySize;
 				int totalEntries = bundleMetaSize / entrySize;
 
@@ -1032,10 +1109,10 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 					offerPkt->setFragmentNum(fragmentNum);
 					offerPkt->setTotalFragment(nbrFragment);
 					if (canITransmit){
-						if ((delayed == 0)|| !(delayedBndlOffer && delayedForFrag)){
+						if ((delayedFrag == 0)|| !(delayedBndlOffer && delayedForFrag)){
 							sendDown(offerPkt);
 						}else{
-							sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
+							sendDelayed(offerPkt,dblrand()*delayedFrag,"lowerLayerOut");
 						}
 
 						/*
@@ -1145,7 +1222,6 @@ void ProccV2::executeListenerRole(short  kind, Procc *prophetPkt)
 						if (it3!=it2->second.end()){
 							bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
 							bundlePkt->setContactID(prophetPkt->getContactID());
-
 							if (canITransmit){
 								if ((delayed == 0)|| !delayedBundle){
 									sendDown(bundlePkt);
@@ -1216,12 +1292,12 @@ Procc *ProccV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L
 	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
 	if (meta!=NULL){
 		prophetMsg->setBndlmeta(*meta);
-		metaLength = (sizeof(BundleMeta) + 8 ) * meta->size();
+		metaLength = (sizeof(BundleMeta)) * meta->size();
 		realPktLength += metaLength;
 	}
 	if (preds!=NULL){
 		prophetMsg->setPreds(*preds);
-		predsLength = (sizeof(int ) + sizeof(double) + 16 ) * preds->size();
+		predsLength = (sizeof(int ) + sizeof(double)) * preds->size();
 		realPktLength+= predsLength;
 	}
 	if (msg!=NULL){
@@ -1242,6 +1318,8 @@ std::vector<std::list<BundleMeta> >ProccV2::defineBundleOffer(Procc *prophetPkt)
 	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
 	nodeClass BClass = static_cast<nodeClass>(prophetPkt->getNodeClass());
 	double BpredsForCCN, mypredsForCCN;
+
+	bool shouldAbort = false;
 
 	predsIterator predsIt = prophetPkt->getPreds().find(convergeCastTo);
 	if (predsIt != prophetPkt->getPreds().end()){
@@ -1266,6 +1344,8 @@ std::vector<std::list<BundleMeta> >ProccV2::defineBundleOffer(Procc *prophetPkt)
 	std::list<BundleMeta> directBundleToOffer = std::list<BundleMeta>();
 	std::list<BundleMeta> otherBundleToOffer = std::list<BundleMeta>();
 	std::list<BundleMeta> ackToOffer = std::list<BundleMeta>();
+
+	if (!shouldAbort){
 
 	if (myClass != VPA){
 		// step 1 : check if we have any bundle that are addressed to @encouterdNode
@@ -1345,6 +1425,8 @@ std::vector<std::list<BundleMeta> >ProccV2::defineBundleOffer(Procc *prophetPkt)
 		}
 	}
 
+	}
+
 	allBundleMeta.push_back(directBundleToOffer);
 	allBundleMeta.push_back(otherBundleToOffer);
 	allBundleMeta.push_back(ackToOffer);
@@ -1369,8 +1451,20 @@ bool ProccV2::abortConnection(short  kind, Procc *prophetPkt)
 			break;
 		case RIB:
 		{
+			if (prophetPkt->getPreds().size() != 1){
+				opp_error("the encountered node must have only one prediction, corresponding to its CCN Node");
+			}
+
 			if (prophetPkt->getPreds().size() == 0){
 				abort = true;
+			}
+
+			for (predsIterator it = prophetPkt->getPreds().begin(); it != prophetPkt->getPreds().end(); it++) {
+				convergeCastNeighborhood.insert(std::pair<LAddress::L3Type,LAddress::L3Type>(prophetPkt->getSrcAddr(), it->first));
+
+				if (it->first != convergeCastTo){
+					abort = true;
+				}
 			}
 		}
 			break;
@@ -1680,10 +1774,12 @@ void ProccV2::finish()
 			double totalDuration = 0;
 			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
 				totalDuration+=*it3;
+				interContactDuration.collect(*it3);
 			}
 			interContactDurHist.collect(totalDuration);
 		}
 		interContactDurHist.recordAs("Histogram for total interContact duration");
+		interContactDuration.recordAs("Duration between RC");
 	}
 }
 
