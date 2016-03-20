@@ -63,6 +63,8 @@ class TraCIMobility : public BaseMobility
 		virtual void initialize(int);
 		virtual void finish();
 
+		virtual void simulateAccident();
+
 		virtual void handleSelfMsg(cMessage *msg);
 		virtual void preInitialize(std::string external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
 		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);

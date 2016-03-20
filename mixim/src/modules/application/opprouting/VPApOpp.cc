@@ -191,8 +191,6 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 	ASSERT(netw);
 	WaveShortMessage*  wsm =  dynamic_cast<WaveShortMessage*>(netw->decapsulate());
 
-	if (isEquiped) {
-
 	nbrMsgSent++;
 
 	if (wsm != NULL) {
@@ -233,8 +231,6 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 			hopCountStats.collect(wsm->getHopCount());
 
 		}
-	}
-
 	}
 
 	delete(msg);

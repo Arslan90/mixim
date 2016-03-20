@@ -60,4 +60,6 @@ simple DtnNetwLayer extends BaseNetwLayer
 		double delayedFrag = default(0.0);
 		
 		bool withRestart = default(true);
+		
+		bool withConnectionRestart = default(false);
 }       

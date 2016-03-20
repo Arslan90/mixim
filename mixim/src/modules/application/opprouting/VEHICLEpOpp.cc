@@ -256,7 +256,6 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
 	char* y;//I'll use this to do the cast_down
 	char* pch;//I'll use this to receive the split data
 
-	if (isEquiped) {
 
 	nbrMsgReceived++;
 
@@ -423,7 +422,6 @@ void VEHICLEpOpp::handleLowerMsg(cMessage* msg) {
         break;
     }
 
-	}
     delete msg; //finally delete the message
     delete wsm;
 }
@@ -773,7 +771,7 @@ void VEHICLEpOpp::finish() {
 	 * courbas sin tener que procesar demasiado los logs.
 	 * COOL! Crear de datos finales por cada vehiculo al termino de la simulacion.
 	 */
-	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
+//	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
 
 	DtnApplLayer::finish();
 }

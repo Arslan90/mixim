@@ -16,6 +16,9 @@
 #include "ProphetV2.h"
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
+#include "NetwOppControlInfo.h"
+#include "FindModule.h"
+#include "TraCIMobility.h"
 
 Define_Module(ProphetV2);
 
@@ -244,6 +247,21 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
     if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
 
+    	cObject* cInfo = prophetPkt->removeControlInfo();
+
+		if(cInfo != NULL){
+			NetwOppControlInfo* controlInfo = check_and_cast<NetwOppControlInfo*>(cInfo);
+			int controlKind = controlInfo->getControlKind();
+			if (controlKind == RESTART){
+				forceRestartIEP(prophetPkt->getSrcAddr());
+			}
+		}
+		delete cInfo;
+
+		if (prophetPkt->getRestartIEP()){
+			forceRestartIEP(prophetPkt->getSrcAddr());
+		}
+
 		switch (prophetPkt->getKind()) {
 			case HELLO:
 				break;
@@ -295,6 +313,11 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
 void ProphetV2::handleLowerControl(cMessage* msg)
 {
+//	TraCIMobility* mobility = FindModule<TraCIMobility*>::findSubModule(this->getParentModule());
+//	if (mobility != NULL){
+//		mobility->simulateAccident();
+//	}
+
 
 	if (isEquiped) {
 
@@ -339,6 +362,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 					 */
 					executeInitiatorRole(RIB,emulatedPkt);
 					delete emulatedPkt;
+
+					neighborsAddress.insert(addr);
 				}
 			}
 			break;
@@ -366,6 +391,8 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 				recordEndContactStats(addr,time);
 
 				lastBundleProposal.erase(addr);
+
+				neighborsAddress.erase(addr);
 			}
 			break;
 	}
@@ -377,6 +404,7 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 void ProphetV2::handleSelfMsg(cMessage* msg)
 {
+
 	switch (msg->getKind()) {
 		case RESTART:
 			if (canITransmit){
@@ -408,8 +436,54 @@ void ProphetV2::handleSelfMsg(cMessage* msg)
 			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
 			 * calculated by startRecoringContact
 			 */
+			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
+			emulatedPkt->setControlInfo(controlInfo);
+
+			emulatedPkt->setRestartIEP(true);
+
 			executeInitiatorRole(RIB,emulatedPkt);
 			delete emulatedPkt;
+
+
+			}
+			break;
+		case FORCED_RESTART:
+			if (canITransmit){
+
+			/*
+			 * Extracting destAddress and Time from controlMsgName
+			 */
+			char* msgName = strdup(msg->getName());
+
+			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
+
+			Prophet* emulatedPkt;
+			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
+
+			if (recordContactStats){
+				unsigned long contactID;
+				iteratorContactID iterator1 = indexContactID.find(addr);
+				if (iterator1 != indexContactID.end()){
+					contactID = iterator1->second.back();
+				}else{
+					opp_error("contact does not exist");
+				}
+				emulatedPkt->setContactID(contactID);
+			}
+
+			/** Starting IEP Phase					*/
+
+			/*
+			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
+			 * calculated by startRecoringContact
+			 */
+			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
+			emulatedPkt->setControlInfo(controlInfo);
+
+			executeInitiatorRole(RIB,emulatedPkt);
+			delete emulatedPkt;
+
+
 			}
 			break;
 		default:
@@ -511,6 +585,14 @@ void ProphetV2::executeInitiatorRole(short  kind, Prophet *prophetPkt)
 				ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predToSend);
 				ribPkt->setContactID(prophetPkt->getContactID());
 				ribPkt->setFragmentFlag(false);
+
+		    	cObject* cInfo = prophetPkt->removeControlInfo();
+				if(cInfo != NULL){
+					ribPkt->setControlInfo(cInfo);
+				}
+
+				ribPkt->setRestartIEP(prophetPkt->getRestartIEP());
+
 				if (canITransmit){
 					if (delayed == 0){
 						sendDown(ribPkt);

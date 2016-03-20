@@ -20,6 +20,7 @@
 #include <cassert>
 
 #include <map>
+#include <set>
 #include <iterator>
 
 #include "BaseNetwLayer.h"
@@ -99,6 +100,7 @@ class DtnNetwLayer : public BaseNetwLayer {
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
 		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
 		RESTART = NEWLY_CONNECTED + 40,
+		FORCED_RESTART = NEWLY_CONNECTED + 50,
 	};
 
 	long nbrL3Sent;
@@ -188,6 +190,10 @@ class DtnNetwLayer : public BaseNetwLayer {
     // self message to restart IEP after reception of new Bundles
     cMessage* restartIEP;
 
+    std::set<LAddress::L3Type> neighborsAddress;
+
+    bool withConnectionRestart;
+
 
 	/*******************************************************************
 	** 							Methods section
@@ -197,6 +203,8 @@ class DtnNetwLayer : public BaseNetwLayer {
     virtual void initialize(int stage);
 
     virtual void finish();
+
+    virtual bool forceRestartIEP(LAddress::L3Type addr);
 
   protected:
   	/**

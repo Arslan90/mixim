@@ -283,6 +283,14 @@ void TraCIMobility::fixIfHostGetsOutside()
 	handleIfOutside( RAISEERROR, dummy, dummy, dummy, dum);
 }
 
+void TraCIMobility::simulateAccident()
+{
+	Enter_Method_Silent("simulateAccident()");
+	startAccidentMsg = new cMessage("scheduledAccident");
+	stopAccidentMsg = new cMessage("scheduledAccidentResolved");
+	scheduleAt(simTime(), startAccidentMsg);
+}
+
 double TraCIMobility::calculateCO2emission(double v, double a) const {
 	// Calculate CO2 emission parameters according to:
 	// Cappiello, A. and Chabini, I. and Nam, E.K. and Lue, A. and Abou Zeid, M., "A statistical model of vehicle emissions and fuel consumption," IEEE 5th International Conference on Intelligent Transportation Systems (IEEE ITSC), pp. 801-809, 2002

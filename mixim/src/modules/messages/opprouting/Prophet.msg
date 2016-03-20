@@ -48,4 +48,5 @@ packet Prophet extends NetwPkt {
     predictions preds;
     bndlMeta bndlmeta = std::list<BundleMeta>();
     int hopCount = 0;
+    bool restartIEP = false;
 }

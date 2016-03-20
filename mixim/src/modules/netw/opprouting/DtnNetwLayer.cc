@@ -128,6 +128,8 @@ void DtnNetwLayer::initialize(int stage)
         nbrCancelRestartedIEP = 0;
 
         withRestart = par("withRestart").boolValue();
+
+        withConnectionRestart = par("withConnectionRestart").boolValue();
 	}
 }
 
@@ -554,7 +556,40 @@ bool DtnNetwLayer::haveToRestartIEP(simtime_t t)
 				nbrRestartedIEP++;
 			}
 		}
+		if (withConnectionRestart){
+			for (std::set<LAddress::L3Type>::iterator it = neighborsAddress.begin(); it != neighborsAddress.end(); it++){
+				int addr = *it;
+				std::map<LAddress::L3Type, double>::iterator it2 = lastBundleProposal.find(*it);
+				if (it2 == lastBundleProposal.end()){
+					stringstream ss;
+					ss << *it;
+					restartIEP = new cMessage(ss.str().c_str(), RESTART);
+					scheduleAt(simTime(),restartIEP);
+
+					haveToRestartIEP = true;
+					nbrRestartedIEP++;
+				}
+			}
+		}
 	}
+
+	return haveToRestartIEP;
+}
+
+bool DtnNetwLayer::forceRestartIEP(LAddress::L3Type addr)
+{
+	bool haveToRestartIEP = false;
+	stringstream ss;
+	ss << addr;
+	//				if (restartIEP->isScheduled()){
+	//					cancelEvent(restartIEP);
+	//					nbrCancelRestartedIEP++;
+	//				}
+	restartIEP = new cMessage(ss.str().c_str(), FORCED_RESTART);
+	scheduleAt(simTime(),restartIEP);
+
+	haveToRestartIEP = true;
+	nbrRestartedIEP++;
 
 	return haveToRestartIEP;
 }
@@ -883,6 +918,33 @@ bool DtnNetwLayer::erase(WaveShortMessage *msg)
 				delete wsm;
 			}
 			found = true;
+		}else {
+			opp_warning("Unable to locate the bundle, must do a global research to found it");
+			bundlesIndexIterator it1;
+			innerIndexIterator it2;
+
+			for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+				innerIndexMap inner_map = it1->second;
+				innerIndexIterator it2 = inner_map.find(serial);
+				if (it2 !=inner_map.end()){
+					WaveShortMessage* wsm = it2->second;
+					bundles.remove(wsm);
+					inner_map.erase(serial);
+					if (inner_map.empty()){
+						bundlesIndex.erase(addr);
+					}else {
+						bundlesIndex[addr] = inner_map;
+					}
+					if (wsm->getOwner()==this){
+						delete wsm;
+					}
+					found = true;
+				}
+			}
+
+			if (!found){
+				opp_error("bundle doesn't exist in the index");
+			}
 		}
 	}else{
 		opp_error("bundle exist but not found in the index");
@@ -944,6 +1006,8 @@ void DtnNetwLayer::recordAllClassifier()
 		recordClassifier(Fail);
 	}
 }
+
+
 
 void DtnNetwLayer::recordAllScalars()
 {
