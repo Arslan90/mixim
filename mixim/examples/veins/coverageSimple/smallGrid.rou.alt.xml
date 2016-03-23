@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<!-- generated on Thu Mar 17 17:21:44 2016 by SUMO duarouter Version 0.13.1
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/duarouterConfiguration.xsd">
+
+    <input>
+        <net-file value="smallGrid.net.xml"/>
+        <flow-files value="flow.xml"/>
+    </input>
+
+    <output>
+        <output-file value="smallGrid.rou.xml"/>
+    </output>
+
+</configuration>
+-->
+
+<route-alternatives xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.sf.net/xsd/routes_file.xsd">
+    <vType id="1" length="4.00">
+        <carFollowing-Krauss sigma="0.00"/>
+    </vType>
+    <vehicle id="0_0" type="1" depart="0.00" departPos="base" departSpeed="max">
+        <routeDistribution last="0">
+            <route cost="70.58" probability="1.00000000" edges="0/1to1/1 1/1to2/1"/>
+        </routeDistribution>
+    </vehicle>
+</route-alternatives>

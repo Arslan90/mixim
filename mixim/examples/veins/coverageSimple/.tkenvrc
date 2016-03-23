@@ -1,0 +1,5 @@
+# Partial Tkenv config file -- see $HOME/.tkenvrc as well
+inspector "simpleScenario" "simpleScenario" "2" "607x337+64+236:normal"
+inspector "scenarioProCC" "scenarioProCC" "2" "607x337+749+24:normal"
+inspector "scenarioOpp" "scenarioOpp" "2" "650x716+64+-4:normal"
+

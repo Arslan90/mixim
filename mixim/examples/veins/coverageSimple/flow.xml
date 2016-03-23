@@ -1,0 +1,7 @@
+<flows>
+<vType id="1" sigma="0" length="4"/>
+<interval begin="0" end="7200">
+<flow id="0" from="0/1to1/1" to="1/1to2/1" number="1" type="1" departSpeed="max" departPos="base"/>
+</interval>
+</flows>
+

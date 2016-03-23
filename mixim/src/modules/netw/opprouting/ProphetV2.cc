@@ -313,10 +313,10 @@ void ProphetV2::handleLowerMsg(cMessage* msg)
 
 void ProphetV2::handleLowerControl(cMessage* msg)
 {
-//	TraCIMobility* mobility = FindModule<TraCIMobility*>::findSubModule(this->getParentModule());
-//	if (mobility != NULL){
-//		mobility->simulateAccident();
-//	}
+	TraCIMobility* mobility = FindModule<TraCIMobility*>::findSubModule(this->getParentModule());
+	if (mobility != NULL){
+		mobility->simulateAccident();
+	}
 
 
 	if (isEquiped) {
