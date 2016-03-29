@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- debug config -->
+<launch>
+	<copy file="smallGrid.net.xml" />
+	<copy file="smallGrid.rou.xml" />
+	<copy file="smallGrid.sumo.cfg" type="config" />
+	<copy file="my_configuration.cfg" type="gui-settings" />
+</launch>
+

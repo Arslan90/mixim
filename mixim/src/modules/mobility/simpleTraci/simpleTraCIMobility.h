@@ -247,6 +247,8 @@ class simpleTraCIMobility : public TraCIMobility //, simpleListener
 
 		simsignal_t vehStopped;
 
+		simsignal_t connected;
+
 	    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l);
 	    virtual void receiveSignal(cComponent *source, simsignal_t signalID, double d);
 

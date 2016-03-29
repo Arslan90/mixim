@@ -126,6 +126,8 @@ void simpleTraCIMobility::initialize(int stage)
 
 		vehStopped = registerSignal("vehStopped");
 
+		connected = registerSignal("connected");
+
 	}
 	else if (stage == 1)
 	{
@@ -258,7 +260,9 @@ void simpleTraCIMobility::changePosition()
 		if (mayHaveListeners(vehStopped)){
 			emit(vehStopped,lanePos);
 		}
+		emit(connected,1);
 	}else if ((speed > 0) && stoppedVeh){
+		emit(connected,0);
 		stoppedVeh = false;
 //		emit(vehStopped,cmdGetVehiclelanePosition());
 	}
