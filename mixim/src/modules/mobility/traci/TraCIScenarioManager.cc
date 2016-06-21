@@ -827,6 +827,33 @@ double TraCIScenarioManager::cmdGetLaneLength(std::string laneId) {
 
 /* ARTURO END  my FUNCTIONS*/
 
+double TraCIScenarioManager::cmdGetLaneMaxSpeed(std::string laneId) {
+	double res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_LANE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_MAXSPEED) << laneId);
+
+	// read additional CMD_GET_EDGE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_LANE_VARIABLE);
+
+	uint8_t varId; buf >> varId; //ubyte
+	ASSERT(varId == VAR_MAXSPEED);
+
+	std::string polyId_r; buf >> polyId_r; //string
+	ASSERT(polyId_r == laneId);
+
+	uint8_t resType_r; buf >> resType_r;  //ubyte
+	ASSERT(resType_r == TYPE_DOUBLE);
+	buf >> res; //return response
+
+	ASSERT(buf.eof());
+	return res;
+}
 
 
 std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId) {
@@ -1333,6 +1360,35 @@ std::string TraCIScenarioManager::commandGetRouteId(std::string nodeId)
 	return res;
 }
 
+std::string TraCIScenarioManager::commandGetLaneId(std::string nodeId)
+{
+	std::string res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_LANE_ID) << nodeId);
+
+	// read additional CMD_GET_VEHICLE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_VEHICLE_VARIABLE);
+
+	uint8_t varId; buf >> varId; //ubyte
+	ASSERT(varId == VAR_LANE_ID);
+
+	std::string polyId_r; buf >> polyId_r; //string
+	ASSERT(polyId_r == nodeId);
+
+	uint8_t resType_r; buf >> resType_r;  //ubyte
+	ASSERT(resType_r == TYPE_STRING);
+	buf >> res; //return response
+
+	ASSERT(buf.eof());
+	return res;
+}
+
 std::string TraCIScenarioManager::commandGetVehicleTypeId(std::string nodeId)
 {
 	std::string res;
@@ -1356,6 +1412,36 @@ std::string TraCIScenarioManager::commandGetVehicleTypeId(std::string nodeId)
 
 	uint8_t resType_r; buf >> resType_r;  //ubyte
 	ASSERT(resType_r == TYPE_STRING);
+	buf >> res; //return response
+
+	ASSERT(buf.eof());
+	return res;
+}
+
+
+double TraCIScenarioManager::commandGetEdgeCurrentTravelTime(std::string edgeId)
+{
+	double res;
+
+	TraCIBuffer buf = queryTraCI(CMD_GET_EDGE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_CURRENT_TRAVELTIME) << edgeId);
+
+	// read additional CMD_GET_EDGE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_EDGE_VARIABLE);
+
+	uint8_t varId; buf >> varId; //ubyte
+	ASSERT(varId == VAR_CURRENT_TRAVELTIME);
+
+	std::string polyId_r; buf >> polyId_r; //string
+	ASSERT(polyId_r == edgeId);
+
+	uint8_t resType_r; buf >> resType_r;  //ubyte
+	ASSERT(resType_r == TYPE_DOUBLE);
 	buf >> res; //return response
 
 	ASSERT(buf.eof());

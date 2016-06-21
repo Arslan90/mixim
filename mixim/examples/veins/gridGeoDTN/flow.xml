@@ -1,0 +1,7 @@
+<flows>
+<interval begin="0" end="7200">
+<flow id="0" from="start" to="end" number="200" />
+<flow id="1" from="B4R" to="B0R" number="200" />
+</interval>
+</flows>
+

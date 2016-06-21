@@ -83,8 +83,11 @@ class TraCIScenarioManager : public cSimpleModule
         void commandChangeTarget(std::string nodeId, std::string edgeId);
         std::list<std::string> commandGetRouteIds();
         std::string commandGetRouteId(std::string nodeId);
+        std::string commandGetLaneId(std::string nodeId);
         std::string commandGetVehicleTypeId(std::string nodeId);
         std::list<std::string> commandGetEdgesOfRoute(std::string routeId);
+        double commandGetEdgeCurrentTravelTime(std::string edgeId);
+        double cmdGetLaneMaxSpeed(std::string laneId);
 
         int getStepForVehiclesLoop() const
 		{
