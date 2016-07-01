@@ -54,6 +54,7 @@ packet GeoDtnNetwPkt extends NetwPkt {
     Neighbors knownNeighbors;
     E2EAcks e2eAcks;
     H2PAcks h2hAcks;
+    int nbrReplica;
     
     int result_Field @enum(t_result_field);
     int identifier;

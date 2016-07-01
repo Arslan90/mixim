@@ -761,6 +761,8 @@ WaveShortMessage*  VEHICLEpOpp::prepareWSM(std::string name, int lengthBits, t_c
 	wsm->setSenderPos(traci->getCurrentPosition());
 	wsm->setSerial(serial);
 
+//	cout << "Node @ " << netwAddr << "generate bundle with serial " << serial << std::endl;
+
 	return wsm;
 }
 
