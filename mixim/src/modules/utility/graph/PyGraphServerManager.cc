@@ -16,6 +16,8 @@
 #include "PyGraphServerManager.h"
 #include <unistd.h>
 #include "stdio.h"
+//#include <sys/socket.h> // Needed for the socket functions
+//#include <netdb.h>      // Needed for the socket functions
 
 Define_Module(PyGraphServerManager);
 
@@ -35,6 +37,46 @@ void PyGraphServerManager::initialize(int stage)
 		waitingTime = par("waitingTime");
 
 
+		std::string HOST = "127.0.0.1";
+		int PORT = 19999;
+
+		memset(&servAddr, 0, sizeof(servAddr));
+		servAddr.sin_family = AF_INET;
+		servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
+		servAddr.sin_port = htons(PORT);
+
+
+		memset(&localAddr, 0, sizeof(localAddr));
+		localAddr.sin_family = AF_INET;
+		localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		localAddr.sin_port = htons(0);
+
+		// Create socket
+		connectionFd = socket(AF_INET, SOCK_STREAM, 0);
+
+
+
+		int returnCode = 0;
+
+//		returnCode = bind(connectionFd,
+//		  (struct sockaddr *) &localAddr, sizeof(localAddr));
+//		if (returnCode == -1){
+//			std::stringstream ss;
+//			ss << errno;
+//			std::string errorMsg = "(BIND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+//			opp_error(errorMsg.c_str());
+//		}
+
+		// Connect to Server
+		returnCode = connect(connectionFd,(struct sockaddr *)&servAddr, sizeof(servAddr));
+		if (returnCode == -1){
+			std::stringstream ss;
+			ss << errno;
+			std::string errorMsg = "(CONNECT) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+			opp_error(errorMsg.c_str());
+		}
+
+
 //		std::string command = "pkill -f ProdServer.py";
 //		system(command.c_str());
 
@@ -52,6 +94,43 @@ void PyGraphServerManager::initialize(int stage)
 	}
 }
 
+std::string PyGraphServerManager::sendRequestToPyServer(std::string buf)
+{
+	std::string rep;
+
+	std::string HOST = "127.0.0.1";
+	int PORT = 19999;
+	int MAX_BUFFER = 4096;
+
+	int rc, index = 0, limit = MAX_BUFFER;
+	char buffer[MAX_BUFFER+1];
+
+	int returnCode = 0;
+	// Sending request
+	sprintf( buffer, "%s", buf.c_str() );
+	returnCode = ::send(connectionFd, buffer, strlen(buffer), 0 );
+	if (returnCode == -1){
+		std::stringstream ss;
+		ss << errno;
+		std::string errorMsg = "(SEND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+		opp_error(errorMsg.c_str());
+	}
+
+	// Receiving request
+	memset(&buffer[0], 0, sizeof(buffer));
+	returnCode = recv(connectionFd, buffer, MAX_BUFFER, 0);
+	if (returnCode == -1){
+		std::stringstream ss;
+		ss << errno;
+		std::string errorMsg = "(RECV) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+		opp_error(errorMsg.c_str());
+	}
+	rep = std::string(buffer);
+
+	return rep;
+
+}
+
 void PyGraphServerManager::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
@@ -61,4 +140,23 @@ void PyGraphServerManager::handleMessage(cMessage *msg)
 void PyGraphServerManager::finish(){
 //	std::string command = "pkill -f ProdServer.py";
 //	system(command.c_str());
+
+	int MAX_BUFFER = 4096;
+
+	int rc, index = 0, limit = MAX_BUFFER;
+	char buffer[MAX_BUFFER+1];
+
+	int returnCode = 0;
+	// Sending a close request
+	sprintf( buffer, "%s", "CLOSE");
+	returnCode = ::send(connectionFd, buffer, strlen(buffer), 0 );
+	if (returnCode == -1){
+		std::stringstream ss;
+		ss << errno;
+		std::string errorMsg = "(SEND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+		opp_error(errorMsg.c_str());
+	}
+
+	// Closing connection to Server
+	close(connectionFd);
 }

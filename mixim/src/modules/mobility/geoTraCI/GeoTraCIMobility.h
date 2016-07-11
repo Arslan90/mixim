@@ -31,6 +31,10 @@
 #include "FindModule.h"
 #include "mobility/traci/TraCIScenarioManager.h"
 #include "NearestPoint.h"
+//#include <sys/socket.h>
+//#include <arpa/inet.h>
+//#include "myConstants.h"
+#include "PyGraphServerManager.h"
 
 const double maxDbl = std::numeric_limits<double>::max();
 
@@ -156,6 +160,8 @@ class GeoTraCIMobility : public TraCIMobility
 		mutable TraCIScenarioManager* manager;
 		double last_speed;
 
+		PyGraphServerManager* pyManager;
+
 
 		std::string lastRoadId; /**< updated by nextPosition() */
 		std::list<std::string> initialRoute;  /** Edge of the initial route */
@@ -217,6 +223,8 @@ class GeoTraCIMobility : public TraCIMobility
 		double currentMETD;
 
 		double currentETA_NP_VPA;
+
+		struct sockaddr_in servAddr, localAddr;
 };
 
 class GeoTraCIMobilityAccess

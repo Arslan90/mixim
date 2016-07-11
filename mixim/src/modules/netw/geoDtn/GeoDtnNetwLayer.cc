@@ -125,81 +125,6 @@ void GeoDtnNetwLayer::handleSelfMsg(cMessage *msg)
 	}
 }
 
-
-
-void GeoDtnNetwLayer::handleLowerControl(cMessage *msg)
-{
-	if (isEquiped) {
-
-	switch (msg->getKind()) {
-		case NEWLY_CONNECTED:
-			canITransmit = true;
-			break;
-		case NEW_NEIGHBOR:
-			{
-				if (canITransmit){
-
-					/*
-					 * Extracting destAddress and Time from controlMsgName
-					 */
-					char* msgName = strdup(msg->getName());
-
-					LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-					msgName = strtok(NULL,":");
-
-					double time = getTimeFromName((const char*) msgName);
-
-					/** Repeated contacts stats			*/
-					recordRecontactStats(addr,time);
-
-					/** Contacts duration stats				*/
-					recordBeginContactStats(addr,time);
-
-					if (recordContactStats){
-						unsigned long contactID = startRecordingContact(addr,time);
-					}
-
-					neighborsAddress.insert(addr);
-					NBHAddressNbrInsert++;
-				}
-			}
-			break;
-		case NO_NEIGHBOR_AND_DISCONNECTED:
-			canITransmit = false;
-			break;
-		case NEW_NEIGHBOR_GONE:
-			{
-				/*
-				 * Extracting destAddress and Time from controlMsgName
-				 */
-				char* msgName = strdup(msg->getName());
-
-				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-				msgName = strtok(NULL,":");
-
-				double time = getTimeFromName((const char*) msgName);
-
-				if (recordContactStats){
-					endRecordingContact(addr,time);
-				}
-
-				/** Contacts duration stats				 */
-				recordEndContactStats(addr,time);
-
-				lastBundleProposal.erase(addr);
-
-				neighborsAddress.erase(addr);
-				NBHAddressNbrDelete++;
-			}
-			break;
-	}
-
-	}
-	delete msg;
-}
-
 void GeoDtnNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
@@ -229,129 +154,6 @@ void GeoDtnNetwLayer::finish()
 	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
 
 	recordAllScalars();
-}
-
-std::set<LAddress::L3Type> GeoDtnNetwLayer::getKnownNeighbors()
-{
-	std::set<LAddress::L3Type> currentNeighbors;
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if (it->second.getDestAddr() == myNetwAddr){ continue;}
-		if (it->second.isStatus()){
-			// if entry is currently active we add it to the list
-			currentNeighbors.insert(it->second.getDestAddr());
-		}
-	}
-	return currentNeighbors;
-}
-
-void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
-{
-	double currentTime = simTime().dbl();
-	std::set<LAddress::L3Type> entriesToDelete;
-	std::set<LAddress::L3Type> entriesToPend;
-
-	// Check entries to delete or to set as Pending
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if ((netwRouteExpirency > 0) && (!it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRouteExpirency)){
-			// if entry is currently pending and has expired we delete it
-			if (it->first != neighbor){
-				entriesToDelete.insert(it->second.getDestAddr());
-			}
-			if (it->second.getNodeType() == VPA){
-				meetVPA = true;
-			}
-		}
-
-		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
-			// if entry is currently active and has not been update since an amount of time =>>> set it as pending
-			if (it->first != neighbor){
-				entriesToPend.insert(it->second.getDestAddr());
-			}
-		}
-	}
-
-	// Update table entries (Deleting/Pending)
-	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
-		neighborhoodTable.erase(*it);
-		neighborhoodSession.erase(*it);
-		NBHTableNbrDelete++;
-	}
-
-	for (std::set<LAddress::L3Type>::iterator it = entriesToPend.begin(); it != entriesToPend.end(); it++){
-		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
-		if (it2 == neighborhoodTable.end()){
-			opp_error("NeighboorhoodTable entry not found");
-		}else{
-			it2->second.setStatus(false);
-		}
-	}
-
-	// Adding the new entry
-	std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(neighbor);
-	if (it == neighborhoodTable.end()){
-		// neighbor doesn't exist, add a new entry
-		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
-		NBHTableNbrInsert++;
-	}else{
-		// neighbor exists, update the old entry
-		neighborhoodTable[neighbor] = neighborEntry;
-	}
-
-}
-
-std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
-{
-	LAddress::L3Type bestForwarder = LAddress::L3NULL;
-	double bestMETD = maxDbl;
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		NetwRoute entry = it->second;
-		if ((entry.isStatus())&&(entry.getDestMetd() < maxDbl)){
-//		if ((entry.getDestMetd() < maxDbl)){
-			bestMETD = entry.getDestMetd();
-			bestForwarder = entry.getDestAddr();
-		}
-	}
-	if (bestForwarder != LAddress::L3NULL){
-		coreEV << "Node:" << myNetwAddr << " BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
-//		std::cout << "Node:" << myNetwAddr <<" BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
-	}
-	return std::pair<LAddress::L3Type, double>(bestForwarder, bestMETD);
-}
-
-std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
-{
-	LAddress::L3Type bestForwarder = LAddress::L3NULL;
-	double bestDist = maxDbl;
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		NetwRoute entry = it->second;
-		if ((entry.isStatus())&&(entry.getDestDist() < maxDbl)){
-//		if ((entry.getDestDist() < maxDbl)){
-			bestDist = entry.getDestDist();
-			bestForwarder = entry.getDestAddr();
-		}
-	}
-	if (bestForwarder != LAddress::L3NULL){
-		coreEV << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
-//		std::cout << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
-	}
-	return std::pair<LAddress::L3Type, double>(bestForwarder, bestDist);
-}
-
-void GeoDtnNetwLayer::DefineNodeType()
-{
-	cModule* parentModule = this->getParentModule();
-	if (parentModule->findSubmodule("appl")!=-1){
-		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
-		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
-
-		if (VPAModule != NULL){
-			nodeType = VPA;
-		} else if (VehicleModule != NULL){
-			nodeType = Veh;
-		} else {
-			opp_error("GeoDtnNetwLayer::DefineNodeType() - Unable to define NodeType please check existence of appl module in NED file");
-		}
-	}
 }
 
 void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, double METD)
@@ -893,4 +695,201 @@ void GeoDtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::
 		}
 		neighborhoodSession[srcAddr] = newSession;
 	}
+}
+
+
+std::set<LAddress::L3Type> GeoDtnNetwLayer::getKnownNeighbors()
+{
+	std::set<LAddress::L3Type> currentNeighbors;
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		if (it->second.getDestAddr() == myNetwAddr){ continue;}
+		if (it->second.isStatus()){
+			// if entry is currently active we add it to the list
+			currentNeighbors.insert(it->second.getDestAddr());
+		}
+	}
+	return currentNeighbors;
+}
+
+void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
+{
+	double currentTime = simTime().dbl();
+	std::set<LAddress::L3Type> entriesToDelete;
+	std::set<LAddress::L3Type> entriesToPend;
+
+	// Check entries to delete or to set as Pending
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		if ((netwRouteExpirency > 0) && (!it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRouteExpirency)){
+			// if entry is currently pending and has expired we delete it
+			if (it->first != neighbor){
+				entriesToDelete.insert(it->second.getDestAddr());
+			}
+			if (it->second.getNodeType() == VPA){
+				meetVPA = true;
+			}
+		}
+
+		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
+			// if entry is currently active and has not been update since an amount of time =>>> set it as pending
+			if (it->first != neighbor){
+				entriesToPend.insert(it->second.getDestAddr());
+			}
+		}
+	}
+
+	// Update table entries (Deleting/Pending)
+	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+		neighborhoodTable.erase(*it);
+		neighborhoodSession.erase(*it);
+		NBHTableNbrDelete++;
+	}
+
+	for (std::set<LAddress::L3Type>::iterator it = entriesToPend.begin(); it != entriesToPend.end(); it++){
+		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
+		if (it2 == neighborhoodTable.end()){
+			opp_error("NeighboorhoodTable entry not found");
+		}else{
+			it2->second.setStatus(false);
+		}
+	}
+
+	// Adding the new entry
+	std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(neighbor);
+	if (it == neighborhoodTable.end()){
+		// neighbor doesn't exist, add a new entry
+		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
+		NBHTableNbrInsert++;
+	}else{
+		// neighbor exists, update the old entry
+		neighborhoodTable[neighbor] = neighborEntry;
+	}
+
+}
+
+std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
+{
+	LAddress::L3Type bestForwarder = LAddress::L3NULL;
+	double bestMETD = maxDbl;
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		NetwRoute entry = it->second;
+		if ((entry.isStatus())&&(entry.getDestMetd() < maxDbl)){
+//		if ((entry.getDestMetd() < maxDbl)){
+			bestMETD = entry.getDestMetd();
+			bestForwarder = entry.getDestAddr();
+		}
+	}
+	if (bestForwarder != LAddress::L3NULL){
+		coreEV << "Node:" << myNetwAddr << " BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
+//		std::cout << "Node:" << myNetwAddr <<" BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
+	}
+	return std::pair<LAddress::L3Type, double>(bestForwarder, bestMETD);
+}
+
+std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
+{
+	LAddress::L3Type bestForwarder = LAddress::L3NULL;
+	double bestDist = maxDbl;
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		NetwRoute entry = it->second;
+		if ((entry.isStatus())&&(entry.getDestDist() < maxDbl)){
+//		if ((entry.getDestDist() < maxDbl)){
+			bestDist = entry.getDestDist();
+			bestForwarder = entry.getDestAddr();
+		}
+	}
+	if (bestForwarder != LAddress::L3NULL){
+		coreEV << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
+//		std::cout << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
+	}
+	return std::pair<LAddress::L3Type, double>(bestForwarder, bestDist);
+}
+
+void GeoDtnNetwLayer::DefineNodeType()
+{
+	cModule* parentModule = this->getParentModule();
+	if (parentModule->findSubmodule("appl")!=-1){
+		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
+		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
+
+		if (VPAModule != NULL){
+			nodeType = VPA;
+		} else if (VehicleModule != NULL){
+			nodeType = Veh;
+		} else {
+			opp_error("GeoDtnNetwLayer::DefineNodeType() - Unable to define NodeType please check existence of appl module in NED file");
+		}
+	}
+}
+
+void GeoDtnNetwLayer::handleLowerControl(cMessage *msg)
+{
+	if (isEquiped) {
+
+	switch (msg->getKind()) {
+		case NEWLY_CONNECTED:
+			canITransmit = true;
+			break;
+		case NEW_NEIGHBOR:
+			{
+				if (canITransmit){
+
+					/*
+					 * Extracting destAddress and Time from controlMsgName
+					 */
+					char* msgName = strdup(msg->getName());
+
+					LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
+
+					msgName = strtok(NULL,":");
+
+					double time = getTimeFromName((const char*) msgName);
+
+					/** Repeated contacts stats			*/
+					recordRecontactStats(addr,time);
+
+					/** Contacts duration stats				*/
+					recordBeginContactStats(addr,time);
+
+					if (recordContactStats){
+						unsigned long contactID = startRecordingContact(addr,time);
+					}
+
+					neighborsAddress.insert(addr);
+					NBHAddressNbrInsert++;
+				}
+			}
+			break;
+		case NO_NEIGHBOR_AND_DISCONNECTED:
+			canITransmit = false;
+			break;
+		case NEW_NEIGHBOR_GONE:
+			{
+				/*
+				 * Extracting destAddress and Time from controlMsgName
+				 */
+				char* msgName = strdup(msg->getName());
+
+				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
+
+				msgName = strtok(NULL,":");
+
+				double time = getTimeFromName((const char*) msgName);
+
+				if (recordContactStats){
+					endRecordingContact(addr,time);
+				}
+
+				/** Contacts duration stats				 */
+				recordEndContactStats(addr,time);
+
+				lastBundleProposal.erase(addr);
+
+				neighborsAddress.erase(addr);
+				NBHAddressNbrDelete++;
+			}
+			break;
+	}
+
+	}
+	delete msg;
 }

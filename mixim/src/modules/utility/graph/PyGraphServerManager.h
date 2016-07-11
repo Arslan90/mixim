@@ -19,12 +19,18 @@
 #include <omnetpp.h>
 #include "stdlib.h"
 #include "iostream"
+#include <unistd.h>
+#include "errno.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 /**
  * TODO - Generated class
  */
 class PyGraphServerManager : public cSimpleModule
 {
+  public:
+	std::string sendRequestToPyServer(std::string buf);
   protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
@@ -40,6 +46,8 @@ class PyGraphServerManager : public cSimpleModule
     std::string vpaFile;
     int margin;
     int waitingTime;
+	struct sockaddr_in servAddr, localAddr;
+	int connectionFd;
 };
 
 #endif

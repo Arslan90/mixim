@@ -24,10 +24,9 @@
 //#include <cstring>      // Needed for memset
 //#include <sys/socket.h> // Needed for the socket functions
 //#include <netdb.h>      // Needed for the socket functions
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include "myConstants.h"
+#include "errno.h"
 
 #include "mobility/geoTraCI/GeoTraCIMobility.h"
 
@@ -155,6 +154,24 @@ void GeoTraCIMobility::initialize(int stage)
 		currentMETD = currentNP.getMetd();
 
 		updateCurrentSector();
+
+		pyManager = FindModule<PyGraphServerManager*>::findGlobalModule();
+		ASSERT(pyManager);
+
+		std::string HOST = "127.0.0.1";
+		int PORT = 19999;
+
+		memset(&servAddr, 0, sizeof(servAddr));
+		servAddr.sin_family = AF_INET;
+		servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
+		servAddr.sin_port = htons(PORT);
+
+
+		memset(&localAddr, 0, sizeof(localAddr));
+		localAddr.sin_family = AF_INET;
+		localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+		localAddr.sin_port = htons(0);
+
 	}
 	else
 	{
@@ -618,7 +635,8 @@ double GeoTraCIMobility::getEdgeBestTravelTime(std::string edgeId)
 
 	// Checking if received data are correct
 	if (reponse_tokens.empty() || (reponse_tokens.size() != 4)){
-		opp_error("RESPONSE_EDGE_BEST_TRAVEL_TIME not correctly computed");
+		std::string errorMsg = "RESPONSE_EDGE_BEST_TRAVEL_TIME not correctly computed: "+queryRep+" Sent msg"+msg;
+		opp_error(errorMsg.c_str());
 	}
 	bool abort = false;
 	if (reponse_tokens[0] != MY_CONST::convertToStr(MY_CONST::RESPONSE)) {abort = true;}
@@ -667,7 +685,8 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 
 	// Checking if received data are correct
 	if (reponse_tokens.empty() || (reponse_tokens.size() != 14)){
-		opp_error("RESPONSE_NP_ALL not correctly computed");
+		std::string errorMsg = "RESPONSE_NP_ALL not correctly computed: "+queryRep+" Sent msg"+msg;
+		opp_error(errorMsg.c_str());
 	}
 
 	// Checking if received data are correct
@@ -702,53 +721,81 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 
 std::string GeoTraCIMobility::sendRequestToPyServer(std::string buf)
 {
-	std::string rep;
+//	std::string rep;
+//
+//	std::string HOST = "127.0.0.1";
+//	int PORT = 19999;
+//	int MAX_BUFFER = 4096;
+//
+//	int connectionFd, rc, index = 0, limit = MAX_BUFFER;
+////	struct sockaddr_in servAddr, localAddr;
+//	char buffer[MAX_BUFFER+1];
+//
+//
+////	memset(&servAddr, 0, sizeof(servAddr));
+////	servAddr.sin_family = AF_INET;
+////	servAddr.sin_port = htons(PORT);
+////	servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
+//
+//	// Create socket
+//	connectionFd = socket(AF_INET, SOCK_STREAM, 0);
+//
+////	/* bind any port number */
+////	memset(&localAddr, 0, sizeof(localAddr));
+////	localAddr.sin_family = AF_INET;
+////	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+////	localAddr.sin_port = htons(0);
+//
+//	int returnCode = 0;
+//
+//	returnCode = bind(connectionFd,
+//	  (struct sockaddr *) &localAddr, sizeof(localAddr));
+//	if (returnCode == -1){
+//		std::stringstream ss;
+//		ss << errno;
+//		std::string errorMsg = "(BIND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+//		opp_error(errorMsg.c_str());
+//	}
+//
+//
+//	// Connect to Server
+//	returnCode = connect(connectionFd,(struct sockaddr *)&servAddr, sizeof(servAddr));
+//	if (returnCode == -1){
+//		std::stringstream ss;
+//		ss << errno;
+//		std::string errorMsg = "(CONNECT) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+//		opp_error(errorMsg.c_str());
+//	}
+//
+//	// Sending request
+//	sprintf( buffer, "%s", buf.c_str() );
+//	returnCode = ::send(connectionFd, buffer, strlen(buffer), 0 );
+////	printf("Client send to Server %s\n", buffer);
+//	if (returnCode == -1){
+//		std::stringstream ss;
+//		ss << errno;
+//		std::string errorMsg = "(SEND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+//		opp_error(errorMsg.c_str());
+//	}
+//
+//	// Receiving request
+//	memset(&buffer[0], 0, sizeof(buffer));
+//	returnCode = recv(connectionFd, buffer, MAX_BUFFER, 0);
+////	printf("Client read from Server %s\n", buffer);
+//
+//	if (returnCode == -1){
+//		std::stringstream ss;
+//		ss << errno;
+//		std::string errorMsg = "(RECV) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
+//		opp_error(errorMsg.c_str());
+//	}
+//	rep = std::string(buffer);
+//
+//	// Closing connection to Server
+//	close(connectionFd);
 
-	std::string HOST = "127.0.0.1";
-	int PORT = 19999;
-	int MAX_BUFFER = 4096;
 
-	int connectionFd, rc, index = 0, limit = MAX_BUFFER;
-	struct sockaddr_in servAddr, localAddr;
-	char buffer[MAX_BUFFER+1];
-
-
-	memset(&servAddr, 0, sizeof(servAddr));
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_port = htons(PORT);
-	servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
-
-	// Create socket
-	connectionFd = socket(AF_INET, SOCK_STREAM, 0);
-
-	/* bind any port number */
-	localAddr.sin_family = AF_INET;
-	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	localAddr.sin_port = htons(0);
-
-	rc = bind(connectionFd,
-	  (struct sockaddr *) &localAddr, sizeof(localAddr));
-
-	// Connect to Server
-	connect(connectionFd,(struct sockaddr *)&servAddr, sizeof(servAddr));
-
-	// Sending request
-	sprintf( buffer, "%s", buf.c_str() );
-	::send(connectionFd, buffer, strlen(buffer), 0 );
-//	printf("Client send to Server %s\n", buffer);
-
-	// Receiving request
-	memset(&buffer[0], 0, sizeof(buffer));
-	recv(connectionFd, buffer, MAX_BUFFER, 0);
-//	printf("Client read from Server %s\n", buffer);
-
-	rep = std::string(buffer);
-
-	// Closing connection to Server
-	close(connectionFd);
-
-
-	return rep;
+	return pyManager->sendRequestToPyServer(buf);
 
 }
 
