@@ -32,6 +32,13 @@ void GeoDtnNetwLayer::initialize(int stage)
 		netwRoutePending = par("netwRoutePending").doubleValue();
 		heartBeatMsgPeriod = par("heartBeatMsgPeriod").doubleValue();
 
+		withMETDFwd = par("withMETDFwd").boolValue();
+		withDistFwd = par("withDistFwd").boolValue();
+
+		if (!(withMETDFwd || withDistFwd)) {
+			opp_error("No valid forwarder, please choose either one of them or both");
+		}
+
 		NBHTableNbrInsert    = 0;
 		NBHTableNbrDelete    = 0;
 		NBHAddressNbrInsert  = 0;
@@ -45,6 +52,9 @@ void GeoDtnNetwLayer::initialize(int stage)
 		totalBundlesReceived = 0;
 		bndlSentToVPA = 0;
 		totalBndlSentToVPA = 0;
+
+		currentNbrIsrt = 0;
+		lastNbrIsrt = 0;
 
 		firstSentToVPA = false;
 
@@ -133,6 +143,7 @@ void GeoDtnNetwLayer::handleUpperMsg(cMessage *msg)
 	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
 	if (it == bundlesReplicaIndex.end()){
 		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
+		currentNbrIsrt++;
 	}
 }
 
@@ -167,20 +178,28 @@ void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, d
 	}else {
 		opp_error("Undefined NodeType");
 	}
-	if (!getKnownNeighbors().empty()){
-		netwPkt->setKnownNeighbors(getKnownNeighbors());
-	}
 	netwPkt->setSrcMETD(METD);
 	netwPkt->setSrcDist_NP_VPA(distance);
-	netwPkt->setE2eAcks(ackSerial);
-	std::set<unsigned long > storedBundle;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		storedBundle.insert((*it)->getSerial());
-	}
-	netwPkt->setH2hAcks(storedBundle);
-	int length = sizeof(unsigned long) * (ackSerial.size()+ storedBundle.size())+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+	bool newData = false;
+//	if (currentNbrIsrt != lastNbrIsrt){
+		netwPkt->setE2eAcks(ackSerial);
+		std::set<unsigned long > storedBundle;
+		for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+			storedBundle.insert((*it)->getSerial());
+		}
+		netwPkt->setH2hAcks(storedBundle);
+		int nbrEntries = ackSerial.size()+ storedBundle.size();
+		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+		netwPkt->setBitLength(length);
+		newData = true;
+		lastNbrIsrt = currentNbrIsrt;
+//		cout << "Sending Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " length " << netwPkt->getBitLength() << " with New Data (Ack+Stored)" << " (Nbr Entries) " << nbrEntries << std::endl;
+//	}else{
+//		cout << "Sending Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " length " << netwPkt->getBitLength() << std::endl;
+//	}
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+
+
 	sendDown(netwPkt);
 }
 
@@ -191,60 +210,21 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		return;
 	}else{
 		/*************************** Handling Hello Msg **********/
+//	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
 	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-	    storeAckSerial(receivedE2eAcks);
+	    if (!receivedE2eAcks.empty()){
+	    	storeAckSerial(receivedE2eAcks);
+	    }
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
-		updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
-//		if(( netwPkt->getSrcDist_NP_VPA() == 0) && (netwPkt->getSrcType() == Veh)){
+	    if (!storedBundle.empty()){
+	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+	    }
+		/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
 		if(( netwPkt->getSrcDist_NP_VPA() == 0)){
 			for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
 				erase(*it);
-			}
-		}
-
-		std::pair<LAddress::L3Type, double> fwdDist = getBestFwdDist();
-		std::pair<LAddress::L3Type, double> fwdMETD = getBestFwdMETD();
-
-//		if ((fwdDist.first == myNetwAddr) || (fwdMETD.first == myNetwAddr)){
-		if ((fwdDist.first == myNetwAddr)){
-			std::set<unsigned long> interestingBndl;
-			for (std::map<LAddress::L3Type, NetwSession>::iterator it = neighborhoodSession.begin(); it != neighborhoodSession.end(); it++){
-				if (it->first == myNetwAddr){continue;}
-				NetwSession session = it->second;
-				std::set<unsigned long> delivredBndl = session.getDelivredToBndl();
-				if (!delivredBndl.empty()){
-					for (std::set<unsigned long >::iterator it2 = delivredBndl.begin(); it2 != delivredBndl.end(); it2++){
-						unsigned long serial = (*it2);
-						bool found = false;
-						if ((!ackSerial.empty()) && (ackSerial.count(serial) > 0)){
-							found = true;
-						}
-						if ((!found) && (!bundles.empty())){
-							for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-								if (serial == (*it3)->getSerial()){
-									found = true;
-									break;
-								}
-							}
-						}
-						if (!found){
-							interestingBndl.insert(serial);
-							if ((fwdDist.second == 0) && (!meetVPA)){
-								missedOpportunities.insert(serial);
-							}
-						}
-					}
-				}
-			}
-			if (!interestingBndl.empty()){
-//				cout << "Current @: " << myNetwAddr << " neighboors contains " << interestingBndl.size() << " that interest me" << endl;
-				bndlInterestVec.record(interestingBndl.size());
-			}
-
-			if (!missedOpportunities.empty()  && (!meetVPA)){
-				missedOpprVec.record(missedOpportunities.size());
 			}
 		}
 
@@ -252,84 +232,99 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    	return;
 	    }else{
 	    	/*************************** Sending Bundle Msg **********/
-	    	sendingBundleMsg();
 
-//			std::vector<WaveShortMessage*> bundleToSent = bundleForNode(netwPkt->getSrcAddr());
-//	//		cout << "Current@: " << myNetwAddr << " nbrToSent: " << bundleToSent.size() << " current time: " << simTime().dbl() << endl;
-//
-//			for (std::vector<WaveShortMessage* >::iterator it = bundleToSent.begin(); it != bundleToSent.end(); it++){
-//				GeoDtnNetwPkt* bundleMsg;
-//				if (nodeType == Veh){
-//					sectorId = geoTraci->getCurrentSector();
-//					bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, netwPkt->getSrcAddr() , sectorId ,LAddress::L3BROADCAST);
-//				}else{
-//					opp_error("Undefined NodeType");
-//				}
-//				bundleMsg->encapsulate((*it)->dup());
-//				sendDown(bundleMsg);
-//				bundlesReplicaIndex[(*it)->getSerial()]++;
-//			}
+		    if (netwPkt->getSrcType() == VPA){
+		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+		    }else if (netwPkt->getSrcType() == Veh){
+		    	sendingBundleMsg();
+		    }
 	    }
 	}
 }
 
 void GeoDtnNetwLayer::sendingBundleMsg()
 {
-	// Check if VPA is a neighbor
-	bool vpaInNeighborhood = false;
-	std::pair<LAddress::L3Type, NetwRoute> vpaEntry;
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if (it->second.getNodeType() == VPA){
-			vpaInNeighborhood = true;
-			vpaEntry = *it;
-			break;
+	// step 1 : define forwarders than bundle to forward to them
+	std::pair<LAddress::L3Type, double> fwdDist = getBestFwdDist();
+	std::pair<LAddress::L3Type, double> fwdMETD = getBestFwdMETD();
+	recordStatsFwds(fwdDist, fwdMETD);
+	std::vector<WaveShortMessage*> bundleToSent = bundleForFwds(fwdDist.first, fwdMETD.first);
+	bool haveToSend = true;
+	if ((fwdDist.first == myNetwAddr) && (fwdDist.second == 0.0)){
+		haveToSend = false;
+		cout << "@" << myNetwAddr << " Current Node will pass by the VPA, no need to forward until finding a better forwarder" << endl;
+		if (fwdMETD.first != myNetwAddr){
+			std::map<LAddress::L3Type, NetwRoute>::iterator itMETD = neighborhoodTable.find(fwdMETD.first);
+			if (itMETD != neighborhoodTable.end()){
+				std::map<LAddress::L3Type, NetwRoute>::iterator itDist = neighborhoodTable.find(myNetwAddr);
+				if (itDist != neighborhoodTable.end()){
+					if ((itMETD->second.getDestDist() == 0.0) && (itMETD->second.getDestMetd() <= itDist->second.getDestMetd())){
+						cout << "@" << fwdMETD.first << " Is a good forwarder, so forward even if both will pass by the VPA" << endl;
+						haveToSend = true;
+					}
+				}else{
+					opp_error("Dist Forwarder not found in Neighborhood Table");
+				}
+			}else{
+				opp_error("METD Forwarder not found in Neighborhood Table");
+			}
 		}
 	}
-	std::vector<WaveShortMessage*> bundleToSent;
-	if (vpaInNeighborhood){
-		bundleToSent = bundleForVPA(vpaEntry.second.getDestAddr());
-//		cout << "Current@: " << myNetwAddr << " nbrToSent: " << bundleToSent.size() << " current time: " << simTime().dbl() << endl;
-		if (!firstSentToVPA){
-			bndlSentToVPA+=bundleToSent.size();
-			firstSentToVPA = true;
-		}
-		totalBndlSentToVPA+=bundleToSent.size();
 
+	bool haveToCustody = false;
+	if ((fwdDist.first != myNetwAddr) && (fwdDist.second == 0.0)){
+		std::map<LAddress::L3Type, NetwRoute>::iterator itDist = neighborhoodTable.find(fwdDist.first);
+		if ((itDist != neighborhoodTable.end()) && (itDist->second.getNodeType() != VPA)){
+			cout << "@" << myNetwAddr << " must transfer custody of bundle to this node @" << fwdDist.first << endl;
+			haveToCustody = true;
+		}else{
+			opp_error("METD Forwarder not found in Neighborhood Table");
+		}
+	}
+
+	// step 2 : send bundles
+	if (haveToSend){
 		for (std::vector<WaveShortMessage* >::iterator it = bundleToSent.begin(); it != bundleToSent.end(); it++){
+			WaveShortMessage* wsm = *it;
 			GeoDtnNetwPkt* bundleMsg;
-			if (nodeType == Veh){
-				sectorId = geoTraci->getCurrentSector();
-				bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, vpaEntry.second.getDestAddr(), sectorId ,LAddress::L3BROADCAST);
-			}else{
-				opp_error("Undefined NodeType");
+			sectorId = geoTraci->getCurrentSector();
+			bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
+			if (haveToCustody){
+				bundleMsg->setCustodyTransfert(true);
 			}
-			bundleMsg->encapsulate((*it)->dup());
+			bundleMsg->setFwdDist(fwdDist.first);
+			bundleMsg->setFwdMETD(fwdMETD.first);
+			bundleMsg->encapsulate(wsm->dup());
+	//		cout << "Sending Bundle packet from " << bundleMsg->getSrcAddr() << " addressed to 2Fwds " << fwdDist.first << " & " << fwdMETD.first << std::endl;
 			sendDown(bundleMsg);
 			bundlesReplicaIndex[(*it)->getSerial()]++;
 		}
+	}
+}
 
-	}else{
-		// Define bundle to Forward to selected forwarders
-		std::pair<LAddress::L3Type, double> fwdDist = getBestFwdDist();
-		std::pair<LAddress::L3Type, double> fwdMETD = getBestFwdMETD();
+void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
+{
+	// step 1 : check if we have any bundle that are addressed to @vpaAddr
+//	std::vector<WaveShortMessage* > wsmToSend = bundleForVPA(vpaAddr);
+	std::vector<WaveShortMessage* > wsmToSend = bundleForNode(vpaAddr);
+	if (!firstSentToVPA){
+		bndlSentToVPA+=wsmToSend.size();
+		firstSentToVPA = true;
+	}
+	totalBndlSentToVPA+=wsmToSend.size();
+//	cout << "Current@: " << myNetwAddr << " nbrToSent: " << wsmToSend.size() << " current time: " << simTime().dbl() << endl;
 
-		recordStatsFwds(fwdDist, fwdMETD);
-		bundleToSent = bundleForFwds(fwdDist.first, fwdMETD.first);
 
-		for (std::vector<WaveShortMessage* >::iterator it = bundleToSent.begin(); it != bundleToSent.end(); it++){
-			GeoDtnNetwPkt* bundleMsg;
-			if (nodeType == Veh){
-				sectorId = geoTraci->getCurrentSector();
-				bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
-				bundleMsg->setFwdDist(fwdDist.first);
-				bundleMsg->setFwdMETD(fwdMETD.first);
-			}else{
-				opp_error("Undefined NodeType");
-			}
-			bundleMsg->encapsulate((*it)->dup());
-			sendDown(bundleMsg);
-			bundlesReplicaIndex[(*it)->getSerial()]++;
-		}
+	// step 2 : send bundles
+	for (std::vector<WaveShortMessage*>::iterator it = wsmToSend.begin(); it!= wsmToSend.end(); it++){
+		WaveShortMessage* wsm = *it;
+		GeoDtnNetwPkt* bundleForVPA;
+		sectorId = geoTraci->getCurrentSector();
+		bundleForVPA = prepareNetwPkt(Bundle,myNetwAddr, nodeType, vpaAddr, sectorId ,LAddress::L3BROADCAST);
+		bundleForVPA->encapsulate(wsm->dup());
+//		cout << "Sending Bundle packet from " << bundleForVPA->getSrcAddr() << " addressed to VPA " << bundleForVPA->getDestAddr() << std::endl;
+		sendDown(bundleForVPA);
+		bundlesReplicaIndex[(*it)->getSerial()]++;
 	}
 }
 
@@ -347,6 +342,11 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		std::list<unsigned long> receivedWSM;
 		std::list<unsigned long> finalReceivedWSM;
 
+		bool receivedCustody = netwPkt->getCustodyTransfert();
+		if ((receivedCustody) && (netwPkt->getFwdDist() == myNetwAddr)){
+			cout << "@" << myNetwAddr << " received custody transfer " << endl;
+		}
+
 		if (wsm->getRecipientAddress() == myNetwAddr){
 			netwPkt->encapsulate(wsm);
 			sendUp(netwPkt->dup());
@@ -354,22 +354,22 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			storeAckSerial(wsm->getSerial());
 //			cout << "(VPA) Node@: " << myNetwAddr << " NodeType: " << nodeType << "received WSM with serial: " << wsm->getSerial() << endl;
-			missedOpportunities.erase(wsm->getSerial());
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-//			if ( ! (exist(wsm)||(ackSerial.count(wsm->getSerial()) > 0))){
 			if ((!exist(wsm)) && (ackSerial.count(wsm->getSerial()) == 0)){
 				storeBundle(wsm);
 				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
 				if (it == bundlesReplicaIndex.end()){
 					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
+					currentNbrIsrt++;
 				}
 				bundlesReceived++;
-				missedOpportunities.erase(wsm->getSerial());
 			}
-			receivedWSM.push_back(wsm->getSerial());
+			if (receivedCustody){
+				receivedWSM.push_back(wsm->getSerial());
+			}
 //			cout << "(Other) Node@: " << myNetwAddr << " NodeType: " << nodeType << "received WSM with serial: " << wsm->getSerial() << endl;
 		}
 		if (!receivedWSM.empty() || !finalReceivedWSM.empty()){
@@ -413,6 +413,9 @@ void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 			newSession.insertInDelivredToBndl(*it);
 		}
 		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
+	}
+	for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
+		erase(*it);
 	}
 
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
@@ -655,6 +658,7 @@ void GeoDtnNetwLayer::storeAckSerial(std::set<unsigned long > setOfSerials)
 {
     for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
     	storeAckSerial(*it);
+    	currentNbrIsrt++;
     }
 }
 
@@ -773,7 +777,6 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
 	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
 		NetwRoute entry = it->second;
 		if ((entry.isStatus())&&(entry.getDestMetd() < maxDbl)){
-//		if ((entry.getDestMetd() < maxDbl)){
 			bestMETD = entry.getDestMetd();
 			bestForwarder = entry.getDestAddr();
 		}
@@ -792,7 +795,6 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
 	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
 		NetwRoute entry = it->second;
 		if ((entry.isStatus())&&(entry.getDestDist() < maxDbl)){
-//		if ((entry.getDestDist() < maxDbl)){
 			bestDist = entry.getDestDist();
 			bestForwarder = entry.getDestAddr();
 		}

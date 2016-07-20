@@ -79,6 +79,18 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 	int totalBndlSentToVPA;
 
 	/**
+	 * Current Number of Insert operation in ACKSerial & Bundle storage
+	 * (in order to allow us to check if something new have been added)
+	 */
+	int currentNbrIsrt;
+
+	/**
+	 * Last Number of Insert operation in ACKSerial & Bundle storage
+	 * (in order to allow us to check if something new have been added)
+	 */
+	int lastNbrIsrt;
+
+	/**
 	 * @brief The same as used by Prophetv2 in order to stay consistent with it
 	 */
 	enum GeoDtnMsgKinds {
@@ -93,6 +105,10 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 	};
 
 	std::map<unsigned long, int> bundlesReplicaIndex;
+
+	bool withMETDFwd;
+
+	bool withDistFwd;
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -175,6 +191,8 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 //  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, std::pair<LAddress::L3Type, double> FwdDist, std::pair<LAddress::L3Type, double> FwdMETD);
 
   	void sendingBundleMsg();
+
+  	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
 
   	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
 

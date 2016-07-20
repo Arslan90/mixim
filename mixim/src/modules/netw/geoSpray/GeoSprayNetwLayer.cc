@@ -191,9 +191,9 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 //	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 
-	    if (netwPkt->getSrcType() == VPA){
-	    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-	    }else{
+//	    if (netwPkt->getSrcType() == VPA){
+//	    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+//	    }else{
 		    GeoDtnNetwPkt* bundleAckMsg;
 		    std::list<unsigned long> wsmFinalDeliverd;
 		    sendingBundleAckMsg(bundleAckMsg, netwPkt->getSrcAddr(), wsmFinalDeliverd);
@@ -203,7 +203,7 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 			    std::list<unsigned long> wsmStoredBndl;
 			    sendingBundleOfferMsg(bundleOfferMsg, netwPkt->getSrcAddr(), wsmStoredBndl);
 		    }
-	    }
+//	    }
 	}
 }
 
@@ -247,6 +247,10 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 		storeAckSerial(*it);
 		erase(*it);
+	}
+
+	if (netwPkt->getSrcType() == VPA){
+		sendingBundleMsgToVPA(netwPkt->getSrcAddr());
 	}
 }
 

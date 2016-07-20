@@ -26,5 +26,8 @@ simple GeoDtnNetwLayer extends DtnNetwLayer
     	@class(GeoDtnNetwLayer);
     	double heartBeatMsgPeriod = default(0.5);
     	double netwRouteExpirency = default(2.0);
-    	double netwRoutePending = default(1.0); 
+    	double netwRoutePending = default(1.0);
+    	
+    	bool withMETDFwd = default(true);
+    	bool withDistFwd = default(true); 
 }
