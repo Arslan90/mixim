@@ -107,8 +107,17 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 	std::map<unsigned long, int> bundlesReplicaIndex;
 
 	bool withMETDFwd;
-
 	bool withDistFwd;
+
+	enum CustodyModeEnum {
+		No,
+		Yes_WithoutACK,
+		Yes_WithACK,
+	};
+	int custodyMode;
+
+	// CBH: CheckBeforeHello
+	bool withCBH;
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -204,9 +213,11 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 
   	std::vector<WaveShortMessage*> bundleForVPA(LAddress::L3Type vpaAddr);
 
+  	std::vector<WaveShortMessage*> bundleForNode(LAddress::L3Type node);
+
   	std::vector<WaveShortMessage*> bundleForFwds(LAddress::L3Type fwdDist, LAddress::L3Type fwdMETD);
 
-  	std::vector<WaveShortMessage*> bundleForNode(LAddress::L3Type node);
+  	std::vector<std::pair<WaveShortMessage*, int> > bundleFor1Fwd(LAddress::L3Type fwd);
 
   	bool existInNetwSession(WaveShortMessage* wsm);
 

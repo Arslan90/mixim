@@ -30,4 +30,11 @@ simple GeoDtnNetwLayer extends DtnNetwLayer
     	
     	bool withMETDFwd = default(true);
     	bool withDistFwd = default(true); 
+    	
+    	// 0: No Custody, 
+    	// 1: Custody for Dist with No Active Clearance of theses bundles, 
+    	// 2: Custody for Dist with Active Clearence of these bundles
+    	int custodyMode = default(0);
+    	// CBH: CheckBeforeHello
+    	bool withCBH = default(false);
 }
