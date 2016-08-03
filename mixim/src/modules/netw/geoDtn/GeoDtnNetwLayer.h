@@ -61,6 +61,8 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 	// E2E Acks serial
 	std::set<unsigned long > ackSerial;
 
+	std::set<unsigned long> custodyAckSerial;
+
 	std::set<unsigned long > missedOpportunities;
 
 	enum NodeType {
@@ -223,7 +225,11 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 
   	void storeAckSerial(unsigned long serial);
 
+  	void storeCustodyAckSerial(unsigned long serial);
+
   	void storeAckSerial(std::set<unsigned long> setOfSerials);
+
+  	void storeCustodyAckSerial(std::set<unsigned long> setOfSerials);
 
   	bool erase(unsigned long serial);
 

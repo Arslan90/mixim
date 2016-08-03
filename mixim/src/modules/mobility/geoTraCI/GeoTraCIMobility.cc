@@ -207,7 +207,16 @@ void GeoTraCIMobility::handleSelfMsg(cMessage *msg)
 			scheduleAt(simTime() + accidentInterval, startAccidentMsg);
 		}
 	}else if (msg == computeNPMsg){
+	    std::string Old_NP_node = currentNP.getNpNode();
+	    double oldMETD = currentNP.getMetd();
+	    double oldEtaNpVpa = currentNP.getEtaNpVpa();
 		currentNP = getNearestPoint(currentSector, remainingRoute);
+		if (currentNP.getNpNode() == Old_NP_node){
+			currentNP.setMetd(oldMETD);
+			currentNP.setEtaNpVpa(oldEtaNpVpa);
+		}else{
+			std::cout << "Module ID: " << this->getId() << endl;
+		}
 		updateMETD(true);
 		currentMETD = currentNP.getMetd();
 		currentETA_NP_VPA = currentNP.getEtaNpVpa();
@@ -434,16 +443,23 @@ void GeoTraCIMobility::updateMETD(bool reComputeETA_NP_VPA)
 			currentRmgRoadBestTT = calculateRmgRoadBestTT();
 			currentETA_NP = calculateETA_NP(false);
 			if (currentETA_NP != -1){
+				double currentETA_NP_VPA = maxDbl;
 				if (!reComputeETA_NP_VPA){
 					// It is only an update of METD, with ETA_NP_VPA previously calculated
 					if (currentNP.getEtaNpVpa() == maxDbl){
 						// but if previously with get a maxDbl value for it, then we recalculate it
-						currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+						currentETA_NP_VPA = calculateETA_NP_VPA();
+						if (currentETA_NP_VPA != maxDbl){
+							currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+						}
 //						opp_error("Calling updateMETD without previous calculation of ETA_NP_VPA");
 					}
 				}else {
 					// It is a full compute of METD, with calculation of both ETA_NP and ETA_NP_VPA
-					currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+					currentETA_NP_VPA = calculateETA_NP_VPA();
+					if (currentETA_NP_VPA != maxDbl){
+						currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+					}
 				}
 				currentNP.setMetd(currentRmgRoadBestTT+currentETA_NP+currentNP.getEtaNpVpa());
 				if ((currentNP.getMetd() == maxDbl) && (currentNP.isValid())){
@@ -505,7 +521,7 @@ double GeoTraCIMobility::calculateRmgRoadBestTT()
 		double laneMaxSpeed = cmdGetLaneMaxSpeed(laneId);
 		if (laneTotalLength < currentVehLanePos){
 			std::string warning_str = "LanePos for Veh "+this->external_id+" is higher than max length of LaneId "+laneId;
-			opp_warning(warning_str.c_str());
+			opp_error(warning_str.c_str());
 		}
 		if (laneMaxSpeed == 0.0){
 			std::string warning_str = "Max Speed for LaneIdPos "+laneId+" equals 0.0";
@@ -523,7 +539,10 @@ double GeoTraCIMobility::calculateETA_NP(bool includeCurrentRoad)
 	if (currentNP.isValid()){
 		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute);
 		if (indexNP_edgeTo != -1){
-			if ((indexRoadId == -1) || (indexRoadId > indexNP_edgeTo)){
+//			if ((indexRoadId == -1) || (indexRoadId > indexNP_edgeTo)){
+			if (indexRoadId > indexNP_edgeTo){
+				ETA_NP = -1;
+			}else if(indexRoadId == -1){
 				ETA_NP = -1;
 			}else if ((indexRoadId <= indexNP_edgeTo)){
 				ETA_NP = 0.0;

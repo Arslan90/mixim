@@ -21,6 +21,7 @@ typedef std::list<BundleMeta> bndlMeta;
 typedef std::set<LAddress::L3Type> Neighbors;
 typedef std::set<unsigned long> E2EAcks;
 typedef std::set<unsigned long> H2PAcks;
+typedef std::set<unsigned long> CustodyAcks;
 }}
 packet NetwPkt;
 
@@ -31,20 +32,21 @@ class LAddress::L3Type extends void;
 class noncobject Neighbors;
 class noncobject E2EAcks;
 class noncobject H2PAcks;
+class noncobject CustodyAcks;
 //
 // TODO generated message class
 //
 packet GeoDtnNetwPkt extends NetwPkt {
-    LAddress::L3Type fwdMETD;
-    LAddress::L3Type fwdDist;
-    LAddress::L3Type vpaAddr;
+    LAddress::L3Type fwdMETD = 0; // LAddress::L3NULL = 0;
+    LAddress::L3Type fwdDist = 0;
+    LAddress::L3Type vpaAddr = 0;
     int vpaSectorId;
     int srcType;
     double vpaPosX;
     double vpaPosY;
     double vpaPosZ;
-    double srcMETD;
-    double srcDist_NP_VPA;
+    double srcMETD = 1.79769e+308;
+    double srcDist_NP_VPA = 1.79769e+308;
     bool custodyTransfert = false;
     bool df_Flag = false;
     short fragNbr = 0;
@@ -54,6 +56,7 @@ packet GeoDtnNetwPkt extends NetwPkt {
     Neighbors knownNeighbors;
     E2EAcks e2eAcks;
     H2PAcks h2hAcks;
+    CustodyAcks custodyAcks;
     int nbrReplica;
     
     int result_Field @enum(t_result_field);

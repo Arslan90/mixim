@@ -17,6 +17,7 @@
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
 #include "istream"
+#include "algorithm"
 
 
 Define_Module(DtnNetwLayer);
@@ -320,6 +321,13 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 		bundlesIndex[msg->getRecipientAddress()] = inner_map;
 
 		haveToRestartIEP(simTime());
+
+	  	std::list<WaveShortMessage*> bundlesCopy = std::list<WaveShortMessage*>(bundles.begin(),bundles.end());
+	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
+
+	  	if (bundles.size() != bundlesCopy.size()){
+	  		opp_error("Double insertion in bundles Index");
+	  	}
 	}
 }
 
