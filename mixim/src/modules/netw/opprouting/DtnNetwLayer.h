@@ -37,6 +37,9 @@
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
 #include "iterator"
+#include "BaseMobility.h"
+#include "fstream"
+
 
 
 /**
@@ -194,6 +197,14 @@ class DtnNetwLayer : public BaseNetwLayer {
 
     bool withConnectionRestart;
 
+	std::ofstream ioFile;
+
+	simtime_t updateInterval;
+
+	cMessage* updateTraceMsg;
+
+	BaseMobility *mobility;
+
 
 	/*******************************************************************
 	** 							Methods section
@@ -343,12 +354,20 @@ class DtnNetwLayer : public BaseNetwLayer {
 
   	virtual void recordAllScalars();
 
+  	virtual void updateTraceFile(LAddress::L3Type addr, double time, char* type);
+
+  	virtual void periodicUpdateTraceFile();
+
   public:
 	/*
 	 * Getter for isEquiped boolean
 	 */
 	bool isAnEquipedVehicle(){
 		return isEquiped;
+	}
+
+	virtual int numInitStages() const {
+		return 3;
 	}
 };
 

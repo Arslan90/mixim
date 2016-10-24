@@ -1478,3 +1478,10 @@ template<> std::string TraCIScenarioManager::TraCIBuffer::read() {
 	return std::string(obuf, length);
 }
 
+simtime_t TraCIScenarioManager::getUpdateInterval() const
+{
+    return updateInterval;
+}
+
+
+

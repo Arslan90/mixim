@@ -27,6 +27,7 @@
 #include "BaseLayer.h"
 
 #include <assert.h>
+#include <iomanip>
 
 const simsignalwrap_t BaseLayer::catPassedMsgSignal     = simsignalwrap_t(MIXIM_SIGNAL_PASSEDMSG_NAME);
 const simsignalwrap_t BaseLayer::catPacketSignal        = simsignalwrap_t(MIXIM_SIGNAL_PACKET_NAME);
@@ -156,6 +157,7 @@ void BaseLayer::enForceExecution(short  controlKind, int destAddr)
 	if (destAddr != 0){
 		std::ostringstream flux1, flux2;
 		flux1 << destAddr;
+		flux2.precision(4);
 		flux2 << time;
 		std::string s = flux1.str()+":"+flux2.str();
 		msg->setName(s.c_str());

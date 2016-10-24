@@ -19,6 +19,8 @@
 #include "NetwOppControlInfo.h"
 #include "FindModule.h"
 #include "TraCIMobility.h"
+#include <iomanip>
+#include "Coord.h"
 
 Define_Module(ProphetV2);
 
@@ -404,90 +406,94 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 void ProphetV2::handleSelfMsg(cMessage* msg)
 {
+	if (strcmp(msg->getName(),"TraceFile") == 0){
+		periodicUpdateTraceFile();
+		scheduleAt(simTime()+updateInterval*3, updateTraceMsg);
+	}else{
+		switch (msg->getKind()) {
+			case RESTART:
+				if (canITransmit){
 
-	switch (msg->getKind()) {
-		case RESTART:
-			if (canITransmit){
+				/*
+				 * Extracting destAddress and Time from controlMsgName
+				 */
+				char* msgName = strdup(msg->getName());
 
-			/*
-			 * Extracting destAddress and Time from controlMsgName
-			 */
-			char* msgName = strdup(msg->getName());
+				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
 
-			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
+				Prophet* emulatedPkt;
+				emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
 
-			Prophet* emulatedPkt;
-			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
-
-			if (recordContactStats){
-				unsigned long contactID;
-				iteratorContactID iterator1 = indexContactID.find(addr);
-				if (iterator1 != indexContactID.end()){
-					contactID = iterator1->second.back();
-				}else{
-					opp_error("contact does not exist");
+				if (recordContactStats){
+					unsigned long contactID;
+					iteratorContactID iterator1 = indexContactID.find(addr);
+					if (iterator1 != indexContactID.end()){
+						contactID = iterator1->second.back();
+					}else{
+						opp_error("contact does not exist");
+					}
+					emulatedPkt->setContactID(contactID);
 				}
-				emulatedPkt->setContactID(contactID);
-			}
 
-			/** Starting IEP Phase					*/
+				/** Starting IEP Phase					*/
 
-			/*
-			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
-			 * calculated by startRecoringContact
-			 */
-			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
-			emulatedPkt->setControlInfo(controlInfo);
+				/*
+				 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
+				 * calculated by startRecoringContact
+				 */
+				NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
+				emulatedPkt->setControlInfo(controlInfo);
 
-			emulatedPkt->setRestartIEP(true);
+				emulatedPkt->setRestartIEP(true);
 
-			executeInitiatorRole(RIB,emulatedPkt);
-			delete emulatedPkt;
+				executeInitiatorRole(RIB,emulatedPkt);
+				delete emulatedPkt;
 
 
-			}
-			break;
-		case FORCED_RESTART:
-			if (canITransmit){
-
-			/*
-			 * Extracting destAddress and Time from controlMsgName
-			 */
-			char* msgName = strdup(msg->getName());
-
-			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-			Prophet* emulatedPkt;
-			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
-
-			if (recordContactStats){
-				unsigned long contactID;
-				iteratorContactID iterator1 = indexContactID.find(addr);
-				if (iterator1 != indexContactID.end()){
-					contactID = iterator1->second.back();
-				}else{
-					opp_error("contact does not exist");
 				}
-				emulatedPkt->setContactID(contactID);
-			}
+				break;
+			case FORCED_RESTART:
+				if (canITransmit){
 
-			/** Starting IEP Phase					*/
+				/*
+				 * Extracting destAddress and Time from controlMsgName
+				 */
+				char* msgName = strdup(msg->getName());
 
-			/*
-			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
-			 * calculated by startRecoringContact
-			 */
-			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
-			emulatedPkt->setControlInfo(controlInfo);
+				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
 
-			executeInitiatorRole(RIB,emulatedPkt);
-			delete emulatedPkt;
+				Prophet* emulatedPkt;
+				emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
+
+				if (recordContactStats){
+					unsigned long contactID;
+					iteratorContactID iterator1 = indexContactID.find(addr);
+					if (iterator1 != indexContactID.end()){
+						contactID = iterator1->second.back();
+					}else{
+						opp_error("contact does not exist");
+					}
+					emulatedPkt->setContactID(contactID);
+				}
+
+				/** Starting IEP Phase					*/
+
+				/*
+				 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
+				 * calculated by startRecoringContact
+				 */
+				NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
+				emulatedPkt->setControlInfo(controlInfo);
+
+				executeInitiatorRole(RIB,emulatedPkt);
+				delete emulatedPkt;
 
 
-			}
-			break;
-		default:
-			break;
+				}
+				break;
+			default:
+				break;
+		}
 	}
 }
 
@@ -1871,9 +1877,12 @@ void ProphetV2::recordPredsStats()
 
 void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 {
-	double duration = time - contacts.find(addr)->second;
+	double duration = time - contacts.find(addr)->second;;
 	sumOfContactDur+=duration;
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
+
+	updateTraceFile(addr, time, "e");
+
 
 	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);
 	if (it != contactState.end()){

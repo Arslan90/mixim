@@ -50,6 +50,8 @@
 #include <omnetpp.h>
 #include "DtnNetwLayer.h"
 #include "Prophet_m.h"
+#include "fstream"
+#include "iostream"
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
