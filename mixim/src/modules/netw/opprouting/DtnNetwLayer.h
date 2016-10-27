@@ -197,13 +197,13 @@ class DtnNetwLayer : public BaseNetwLayer {
 
     bool withConnectionRestart;
 
-	std::ofstream ioFile;
-
-	simtime_t updateInterval;
-
-	cMessage* updateTraceMsg;
-
 	BaseMobility *mobility;
+
+	std::fstream contactTrFl;
+	double contactTrFlUpdatePeriod;
+	cMessage* contactTrFlMsg;
+	bool withContactTrFl;
+	string contactTrFlName;
 
 
 	/*******************************************************************

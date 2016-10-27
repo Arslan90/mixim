@@ -62,4 +62,8 @@ simple DtnNetwLayer extends BaseNetwLayer
 		bool withRestart = default(true);
 		
 		bool withConnectionRestart = default(false);
+		
+		bool withContactTraceFile = default(false);
+		string contactTraceFileName = default("netContact.trace");
+		double contactTrFlUpdatePeriod = default(5.0);
 }       

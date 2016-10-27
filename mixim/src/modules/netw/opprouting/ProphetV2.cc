@@ -21,6 +21,7 @@
 #include "TraCIMobility.h"
 #include <iomanip>
 #include "Coord.h"
+#include "simtime.h"
 
 Define_Module(ProphetV2);
 
@@ -406,9 +407,11 @@ void ProphetV2::handleLowerControl(cMessage* msg)
 
 void ProphetV2::handleSelfMsg(cMessage* msg)
 {
-	if (strcmp(msg->getName(),"TraceFile") == 0){
+	if ((withContactTrFl)&&(strcmp(msg->getName(),"TraceFile") == 0)){
 		periodicUpdateTraceFile();
-		scheduleAt(simTime()+updateInterval*3, updateTraceMsg);
+		int currentTime = floor(simTime().dbl());
+		double nextSchedule = (currentTime / int(contactTrFlUpdatePeriod) + 1) * contactTrFlUpdatePeriod;
+		scheduleAt(nextSchedule, contactTrFlMsg);
 	}else{
 		switch (msg->getKind()) {
 			case RESTART:
@@ -1880,8 +1883,9 @@ void ProphetV2::recordEndContactStats(LAddress::L3Type addr, double time)
 	double duration = time - contacts.find(addr)->second;;
 	sumOfContactDur+=duration;
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
-
-	updateTraceFile(addr, time, "e");
+	if (withContactTrFl){
+		updateTraceFile(addr, time, "e");
+	}
 
 
 	std::map<LAddress::L3Type, Prophetv2MessageKinds>::iterator it = contactState.find(addr);

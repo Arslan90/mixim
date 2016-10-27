@@ -20,12 +20,12 @@
 //#include "istream"
 #include "algorithm"
 #include "fstream"
-#include "TraCIScenarioManager.h"
 #include "TraCIMobility.h"
 #include "ConstSpeedMobility.h"
 #include "iostream"
 #include <unistd.h>
 #include <sys/types.h>
+#include "simtime.h"
 
 
 Define_Module(DtnNetwLayer);
@@ -139,37 +139,31 @@ void DtnNetwLayer::initialize(int stage)
         withRestart = par("withRestart").boolValue();
 
         withConnectionRestart = par("withConnectionRestart").boolValue();
+
+    	withContactTrFl = par("withContactTraceFile").boolValue();
+    	contactTrFlName = par("contactTraceFileName").stringValue();
 	}
 
 	if (stage == 2){
-        cModule* scenarioModule = this;
-        while (scenarioModule->getParentModule()!= NULL){
-        	scenarioModule = scenarioModule->getParentModule();
-        }
+		if (withContactTrFl){
+	        mobility = FindModule<BaseMobility*>::findSubModule(this->getParentModule());
+	    	if (mobility == NULL){
+	    		opp_error("Unable to find mobility subModule of currentParentModule");
+	    	}
 
-        if (scenarioModule != NULL){
-        	TraCIScenarioManager* manager = FindModule<TraCIScenarioManager*>::findSubModule(scenarioModule);
-        	if (manager != NULL){
-        		updateInterval = manager->getUpdateInterval();
-        		updateTraceMsg = new cMessage("TraceFile");
-        		scheduleAt(simTime()+updateInterval*3, updateTraceMsg);
-        	}else{
-        		opp_error("Unable to find TraCIScnearioManager module");
-        	}
-        }else{
-        	opp_error("Unable to find top one module");
-        }
+			ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
+			if (constMob != NULL) {
+		        if (this->getParentModule()->getIndex() == 0){
+		        	contactTrFl.open(contactTrFlName.c_str(), ios::out);
+		        	contactTrFl.close();
+		        }
+			}
 
-        mobility = FindModule<BaseMobility*>::findSubModule(this->getParentModule());
-    	if (mobility == NULL){
-    		opp_error("Unable to find mobility subModule of currentParentModule");
-    	}
-
-		ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
-		if (constMob != NULL) {
-	        if (this->getParentModule()->getIndex() == 0){
-	        	ioFile.open("testing.txt", ios::trunc);
-	        }
+    		contactTrFlUpdatePeriod = par("contactTrFlUpdatePeriod").doubleValue();
+    		contactTrFlMsg = new cMessage("TraceFile");
+    		int currentTime = floor(simTime().dbl());
+    		double nextSchedule = (currentTime / int(contactTrFlUpdatePeriod) + 1) * contactTrFlUpdatePeriod;
+    		scheduleAt(nextSchedule, contactTrFlMsg);
 		}
 	}
 }
@@ -802,7 +796,10 @@ void DtnNetwLayer::recordBeginContactStats(LAddress::L3Type addr, double time)
 	nbrContacts++;
 	// saving the starting time of the contact
 	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
-	updateTraceFile(addr, time, "b");
+	if (withContactTrFl){
+		updateTraceFile(addr, time, "b");
+	}
+
 }
 
 
@@ -814,7 +811,9 @@ void DtnNetwLayer::recordEndContactStats(LAddress::L3Type addr, double time)
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
 	contacts.erase(addr);
 	endContactTime[addr] = time;
-	updateTraceFile(addr, time, "e");
+	if (withContactTrFl){
+		updateTraceFile(addr, time, "e");
+	}
 }
 
 
@@ -1107,35 +1106,23 @@ void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* typ
 	int length = 0;
 	std::string lastLine, newLine;
 	char c = '\0';
-	std::fstream readFile;
 	int posNLChar = -1;
-	readFile.open("testing.txt");
 
-	std::ifstream inFile("testing.txt");
-	if (readFile.is_open()){
-//		readFile.seekg(0, readFile.end); // go to the end of file
-//			while(true)
-//			{
-//				readFile.unget(); //go back two chars
-//				readFile.unget();
-//				char in = readFile.get();
-//				if(in == '\n')
-//				{
-//		                        //get line from file until space is encountered and put it in data1
-//					std::getline(readFile, lastLine);//read last line
-//					break;
-//				}
-//			}
-		readFile.seekg(0, readFile.end); // go to the end of file
-        length = readFile.tellg();//Get file size
+	stringstream ss1, ss2, ss3;
+	ss1 << addr << ":" <<  myNetwAddr;
+	ss2 << "(" << type << ")" << time;
 
+	contactTrFl.open(contactTrFlName.c_str(), ios::app | ios::out | ios::in);
+	if (contactTrFl.is_open()){
+		contactTrFl.seekg(0, contactTrFl.end); // go to the end of file
+        length = contactTrFl.tellg();//Get file size
         // loop backward over the file
         if (length > 0 ){
         	int i = 0;
             for(i = length-2; i >= 0; i-- )
             {
-            	readFile.seekg(i, readFile.beg);
-                c = readFile.get();
+            	contactTrFl.seekg(i, contactTrFl.beg);
+                c = contactTrFl.get();
                 if(c == '\n' ){
                 	//new line?
                 	posNLChar = i;
@@ -1145,51 +1132,43 @@ void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* typ
             }
 
             if (i == -1){
-            	readFile.seekg(0, readFile.beg);
+            	contactTrFl.seekg(0, contactTrFl.beg);
             }
 
-            std::getline(readFile, lastLine);//read last line
-            std::cout << lastLine << std::endl; // print it
+            std::getline(contactTrFl, lastLine);//read last line
         }
-	}
+    	int pos = lastLine.find(ss2.str());
+    	if ((lastLine.find(ss1.str()) != std::string::npos) && (lastLine.find(ss2.str()) != std::string::npos)){
+    		// we can merge both lines
+    		newLine = lastLine;
+    		ss3 << "[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:";
+    		newLine.insert(pos,ss3.str());
+    		if (posNLChar == -1 ){
+    			truncate(contactTrFlName.c_str(), 0);
+    		} else if (posNLChar > 0){
+    			truncate(contactTrFlName.c_str(), posNLChar+1);
+    		}
 
-	ioFile.open("testing.txt", ios::app | ios::out);
-	stringstream ss1, ss2, ss3;
-	ss1 << addr << ":" <<  myNetwAddr;
-	ss2 << "(" << type << ")" << time;
-	int pos = lastLine.find(ss2.str());
-	if ((lastLine.find(ss1.str()) != std::string::npos) && (lastLine.find(ss2.str()) != std::string::npos)){
-		// we can merge both lines
-		newLine = lastLine;
-		ss3 << "[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:";
-		newLine.insert(pos,ss3.str());
-		if (posNLChar == -1 ){
-			truncate("testing.txt", 0);
-		} else if (posNLChar > 0){
-			truncate("testing.txt", posNLChar+1);
-		}
+    	}else {
+    		ss3 << myNetwAddr << ":" <<  addr << ":[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:(" << type << ")" << time; // << std::endl;
+    		newLine = ss3.str();
+    	}
 
-	}else {
-		ss3 << myNetwAddr << ":" <<  addr << ":[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:(" << type << ")" << time; // << std::endl;
-		newLine = ss3.str();
-	}
-
-
-
-	if (ioFile.is_open()){
-		ioFile << newLine << "\n"; // << std::endl;
-		ioFile.close();
+    	contactTrFl << newLine << "\n"; // << std::endl;
+		contactTrFl.close();
 	}
 }
 
 void DtnNetwLayer::periodicUpdateTraceFile()
 {
-	std::map<LAddress::L3Type, double>::iterator it;
-	if (!contacts.empty()){
-		for (it = contacts.begin(); it != contacts.end(); it++){
-			LAddress::L3Type addr = it->first;
-			double time = simTime().dbl();
-			updateTraceFile(addr,time,"u");
+	if (withContactTrFl){
+		std::map<LAddress::L3Type, double>::iterator it;
+		if (!contacts.empty()){
+			for (it = contacts.begin(); it != contacts.end(); it++){
+				LAddress::L3Type addr = it->first;
+				double time = simTime().dbl();
+				updateTraceFile(addr,time,"u");
+			}
 		}
 	}
 }
