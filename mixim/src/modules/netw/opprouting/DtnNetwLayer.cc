@@ -149,15 +149,33 @@ void DtnNetwLayer::initialize(int stage)
 	        mobility = FindModule<BaseMobility*>::findSubModule(this->getParentModule());
 	    	if (mobility == NULL){
 	    		opp_error("Unable to find mobility subModule of currentParentModule");
+	    	}else{
+				Coord currentPos = mobility->getCurrentPosition();
+				std::string id = "";
+				ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
+				if (constMob != NULL) {
+			        if (constMob->getParentModule()->getIndex() == 0){
+			        	contactTrFl.open(contactTrFlName.c_str(), ios::out);
+			        	contactTrFl.close();
+			        }
+					std::ostringstream flux;
+					flux << constMob->getParentModule()->getIndex();
+					id = "r_"+flux.str();
+				}else{
+					TraCIMobility* traciMob = dynamic_cast<TraCIMobility*>(mobility);
+					if (traciMob != NULL) {
+						id = "v_"+traciMob->getExternalId();
+					}
+					if ((constMob == NULL) && (traciMob == NULL)){
+						opp_error("Unable to correctly identify whether the node is a VPA or Veh");
+					}
+				}
+				contactTrFl.open(contactTrFlName.c_str(), ios::out | ios::app);
+				if (contactTrFl.is_open()){
+					contactTrFl << myNetwAddr << ":" << id <<":[(" << currentPos.x << "," << currentPos.y << ")]:(s)" << simTime().dbl() << "\n"; // << std::endl;
+					contactTrFl.close();
+				}
 	    	}
-
-			ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
-			if (constMob != NULL) {
-		        if (this->getParentModule()->getIndex() == 0){
-		        	contactTrFl.open(contactTrFlName.c_str(), ios::out);
-		        	contactTrFl.close();
-		        }
-			}
 
     		contactTrFlUpdatePeriod = par("contactTrFlUpdatePeriod").doubleValue();
     		contactTrFlMsg = new cMessage("TraceFile");
@@ -1087,21 +1105,6 @@ void DtnNetwLayer::recordAllScalars()
 void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* type)
 {
 	Coord currentPos = mobility->getCurrentPosition();
-	TraCIMobility* traciMob = dynamic_cast<TraCIMobility*>(mobility);
-
-	std::string id = "";
-	if (traciMob != NULL) {
-		id = "v_"+traciMob->getExternalId();
-	}else{
-		ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
-		if (constMob != NULL) {
-			std::ostringstream flux;
-			flux << constMob->getParentModule()->getIndex();
-			id = "r_"+flux.str();
-		}else{
-			opp_error("Unable to correctly identify whether the node is a VPA or Veh");
-		}
-	}
 
 	int length = 0;
 	std::string lastLine, newLine;
@@ -1116,7 +1119,7 @@ void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* typ
 	if (contactTrFl.is_open()){
 		contactTrFl.seekg(0, contactTrFl.end); // go to the end of file
         length = contactTrFl.tellg();//Get file size
-        // loop backward over the file
+//        // loop backward over the file
         if (length > 0 ){
         	int i = 0;
             for(i = length-2; i >= 0; i-- )
@@ -1128,20 +1131,17 @@ void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* typ
                 	posNLChar = i;
                 	break;
                 }
-
             }
-
             if (i == -1){
             	contactTrFl.seekg(0, contactTrFl.beg);
             }
-
             std::getline(contactTrFl, lastLine);//read last line
         }
     	int pos = lastLine.find(ss2.str());
     	if ((lastLine.find(ss1.str()) != std::string::npos) && (lastLine.find(ss2.str()) != std::string::npos)){
     		// we can merge both lines
     		newLine = lastLine;
-    		ss3 << "[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:";
+    		ss3 << "[" << currentPos.x << "," << currentPos.y << "]:";
     		newLine.insert(pos,ss3.str());
     		if (posNLChar == -1 ){
     			truncate(contactTrFlName.c_str(), 0);
@@ -1150,10 +1150,29 @@ void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* typ
     		}
 
     	}else {
-    		ss3 << myNetwAddr << ":" <<  addr << ":[" << id <<",(" << currentPos.x << "," << currentPos.y << ")]:(" << type << ")" << time; // << std::endl;
+    		ss3 << myNetwAddr << ":" <<  addr << ":["  << currentPos.x << "," << currentPos.y << "]:(" << type << ")" << time; // << std::endl;
     		newLine = ss3.str();
     	}
 
+    	contactTrFl << newLine << "\n"; // << std::endl;
+		contactTrFl.close();
+	}
+}
+
+void DtnNetwLayer::updateTraceFile(std::list<LAddress::L3Type> listAddr, double time, char* type)
+{
+	Coord currentPos = mobility->getCurrentPosition();
+
+	stringstream ss1, ss2;
+	for (std::list<LAddress::L3Type>::iterator it = listAddr.begin(); it != listAddr.end();it++){
+		int i = *it;
+		ss1 << i << ":";
+	}
+	ss2 << myNetwAddr << ":" <<  ss1.str() << "["  << currentPos.x << "," << currentPos.y << "]:(" << type << ")" << time; // << std::endl;
+
+	contactTrFl.open(contactTrFlName.c_str(), ios::app | ios::out | ios::in);
+	if (contactTrFl.is_open()){
+    	std::string newLine = ss2.str();
     	contactTrFl << newLine << "\n"; // << std::endl;
 		contactTrFl.close();
 	}
@@ -1163,12 +1182,13 @@ void DtnNetwLayer::periodicUpdateTraceFile()
 {
 	if (withContactTrFl){
 		std::map<LAddress::L3Type, double>::iterator it;
+		std::list<LAddress::L3Type> addrList;
 		if (!contacts.empty()){
 			for (it = contacts.begin(); it != contacts.end(); it++){
-				LAddress::L3Type addr = it->first;
-				double time = simTime().dbl();
-				updateTraceFile(addr,time,"u");
+				addrList.push_back(it->first);
 			}
+			double time = simTime().dbl();
+			updateTraceFile(addrList,time,"u");
 		}
 	}
 }

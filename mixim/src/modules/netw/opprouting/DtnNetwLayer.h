@@ -356,6 +356,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 
   	virtual void updateTraceFile(LAddress::L3Type addr, double time, char* type);
 
+  	virtual void updateTraceFile(std::list<LAddress::L3Type> listAddr, double time, char* type);
+
   	virtual void periodicUpdateTraceFile();
 
   public:
