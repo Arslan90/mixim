@@ -33,7 +33,7 @@ NearestPoint::NearestPoint(std::string edgeToNP, std::string nodeNP, std::string
 	METD = std::numeric_limits<double>::max();
 	ETA_NP_VPA = std::numeric_limits<double>::max();
 	initialized = true;
-	if (NP_node != " "){
+	if ((NP_node != " ") and (NP_node != "ND")){
 		valid = true;
 	}else{
 		valid = false;

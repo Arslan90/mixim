@@ -142,9 +142,13 @@ void GeoTraCIMobility::initialize(int stage)
 	{
 		// don't call BaseMobility::initialize(stage) -- our parent will take care to call changePosition later
 
+		pyManager = FindModule<PyGraphServerManager*>::findGlobalModule();
+		ASSERT(pyManager);
+
 		this->initialRoute = commandGetEdgesOfRoute(commandGetRouteId());
+		addRouteToEdgeBTTIndex(initialRoute);
 		this->remainingRoute = initialRoute;
-		this->indexRoadId = roadIndexInRoute(road_id,initialRoute);
+		this->indexRoadId = roadIndexInRoute(road_id,initialRoute, this->indexLastRoadId);
 
 		computeNPMsg = new cMessage("computeNPMsg");
 		scheduleAt(simTime(), computeNPMsg);
@@ -154,23 +158,6 @@ void GeoTraCIMobility::initialize(int stage)
 		currentMETD = currentNP.getMetd();
 
 		updateCurrentSector();
-
-		pyManager = FindModule<PyGraphServerManager*>::findGlobalModule();
-		ASSERT(pyManager);
-
-		std::string HOST = "127.0.0.1";
-		int PORT = 19999;
-
-		memset(&servAddr, 0, sizeof(servAddr));
-		servAddr.sin_family = AF_INET;
-		servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
-		servAddr.sin_port = htons(PORT);
-
-
-		memset(&localAddr, 0, sizeof(localAddr));
-		localAddr.sin_family = AF_INET;
-		localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-		localAddr.sin_port = htons(0);
 
 	}
 	else
@@ -215,7 +202,7 @@ void GeoTraCIMobility::handleSelfMsg(cMessage *msg)
 			currentNP.setMetd(oldMETD);
 			currentNP.setEtaNpVpa(oldEtaNpVpa);
 		}else{
-			std::cout << "Module ID: " << this->getId() << endl;
+//			std::cout << "Module ID: " << this->getId() << endl;
 		}
 		updateMETD(true);
 		currentMETD = currentNP.getMetd();
@@ -249,7 +236,7 @@ void GeoTraCIMobility::nextPosition(const Coord& position, std::string road_id, 
 	nextPos = position;
 	// Check if current edge changed
 	if (road_id != this->road_id){
-		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute);
+		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId);
 		if ((currentNP.isValid()) && (indexNP_edgeTo != -1) && (indexNP_edgeTo < indexRoadId)){
 			scheduleAt(simTime(), computeNPMsg);
 		}
@@ -260,7 +247,7 @@ void GeoTraCIMobility::nextPosition(const Coord& position, std::string road_id, 
 		}
 
 		this->road_id = road_id;
-		this->indexRoadId = roadIndexInRoute(this->road_id, initialRoute);
+		this->indexRoadId = roadIndexInRoute(this->road_id, initialRoute,this->indexLastRoadId);
 		updateRemainingRoute();
 		updateMETD(false);
 		currentMETD = currentNP.getMetd();
@@ -389,20 +376,37 @@ void GeoTraCIMobility::initScenarioType() {
 	}
 }
 
-int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string> route)
+int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId)
 {
 	bool found = false;
-	int index = -1;
+	int index = -1, i = -1;
+	std::list<int> indexes;
 	if (!route.empty()){
 		for (std::list<std::string>::iterator it = route.begin(); it != route.end(); it++){
-			index+=1;
-			if (*it == roadId){
+			i+=1;
+			if ((*it == roadId)&&(i> indexLastRoadId)){
 				found = true;
+				index = i;
 				break;
+//				indexes.push_back(index);
 			}
 		}
 		if (!found){
 			index = -1;
+		}else{
+//			std::cout << "Index of " << roadId << " in current route ";
+//			for (std::list<int>::iterator it2 = indexes.begin(); it2 != indexes.end(); it2++){
+//				std::cout << *it2 << ",";
+//				if (*it2 > indexLastRoadId){
+//					found = true;
+//					index = *it2;
+//				}
+//			}
+//			std::cout<<endl;
+//			if (!found){
+//				std::cout << "Index of " << roadId << " is too old ";
+//				index = -1;
+//			}
 		}
 	}
 	return index;
@@ -537,7 +541,7 @@ double GeoTraCIMobility::calculateETA_NP(bool includeCurrentRoad)
 {
 	double ETA_NP = maxDbl;
 	if (currentNP.isValid()){
-		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute);
+		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId);
 		if (indexNP_edgeTo != -1){
 //			if ((indexRoadId == -1) || (indexRoadId > indexNP_edgeTo)){
 			if (indexRoadId > indexNP_edgeTo){
@@ -570,7 +574,8 @@ double GeoTraCIMobility::calculateETA_NP(bool includeCurrentRoad)
 				opp_error("Invalid IndexRoadId");
 			}
 		}else{
-			opp_error("Valid NP but unable to get NP_EdgeTo Index");
+			ETA_NP = -1;
+//			opp_error("Valid NP but unable to get NP_EdgeTo Index");
 		}
 	}
 	return ETA_NP;
@@ -634,39 +639,45 @@ double GeoTraCIMobility::calculateETA_NP_VPA()
 
 double GeoTraCIMobility::getEdgeBestTravelTime(std::string edgeId)
 {
-	double travelTime = 0.0;
-	// Creating the command
-	int msg_type = MY_CONST::QUERY;
-	int cmd = MY_CONST::CMD_EDGE_BEST_TRAVEL_TIME;
+	double travelTime = maxDbl;
 
-	int arg1 = MY_CONST::EDGE_ID;
-	std::string arg1_value = edgeId;
-
-	std::string msg = "";
-	msg+= MY_CONST::convertToStr(msg_type)+":"+MY_CONST::convertToStr(cmd)+";";
-	msg+= MY_CONST::convertToStr(arg1)+":"+arg1_value+"#";
-
-	// Sending request to server
-	std::string queryRep = sendRequestToPyServer(msg);
-
-	// Tokenizing request result
-	std::vector<std::string> reponse_tokens = MY_CONST::tokenizeMSG(queryRep);
-
-	// Checking if received data are correct
-	if (reponse_tokens.empty() || (reponse_tokens.size() != 4)){
-		std::string errorMsg = "RESPONSE_EDGE_BEST_TRAVEL_TIME not correctly computed: "+queryRep+" Sent msg"+msg;
-		opp_error(errorMsg.c_str());
-	}
-	bool abort = false;
-	if (reponse_tokens[0] != MY_CONST::convertToStr(MY_CONST::RESPONSE)) {abort = true;}
-	if (reponse_tokens[1] != MY_CONST::convertToStr(MY_CONST::RESPONSE_EDGE_BEST_TRAVEL_TIME)) {abort = true;}
-	if (reponse_tokens[2] != MY_CONST::convertToStr(MY_CONST::EDGE_BEST_TRAVEL_TIME)) {abort = true;}
-
-	if (abort){
-		opp_warning("Bad format for reponse_EDGE_BEST_TRAVEL_TIME");
+	if (edgesBTTIndex.find(edgeId) != edgesBTTIndex.end()){
+		travelTime = edgesBTTIndex[edgeId];
 	}else{
-		travelTime = MY_CONST::convertToDbl(reponse_tokens[3]);
+		// Creating the command
+		int msg_type = MY_CONST::QUERY;
+		int cmd = MY_CONST::CMD_EDGE_BEST_TRAVEL_TIME;
+
+		int arg1 = MY_CONST::EDGE_ID;
+		std::string arg1_value = edgeId;
+
+		std::string msg = "";
+		msg+= MY_CONST::convertToStr(msg_type)+":"+MY_CONST::convertToStr(cmd)+";";
+		msg+= MY_CONST::convertToStr(arg1)+":"+arg1_value+"?";
+
+		// Sending request to server
+		std::string queryRep = sendRequestToPyServer(msg);
+
+		// Tokenizing request result
+		std::vector<std::string> reponse_tokens = MY_CONST::tokenizeMSG(queryRep);
+
+		// Checking if received data are correct
+		if (reponse_tokens.empty() || (reponse_tokens.size() != 4)){
+			std::string errorMsg = "RESPONSE_EDGE_BEST_TRAVEL_TIME not correctly computed: "+queryRep+" Sent msg"+msg;
+			opp_error(errorMsg.c_str());
+		}
+		bool abort = false;
+		if (reponse_tokens[0] != MY_CONST::convertToStr(MY_CONST::RESPONSE)) {abort = true;}
+		if (reponse_tokens[1] != MY_CONST::convertToStr(MY_CONST::RESPONSE_EDGE_BEST_TRAVEL_TIME)) {abort = true;}
+		if (reponse_tokens[2] != MY_CONST::convertToStr(MY_CONST::EDGE_BEST_TRAVEL_TIME)) {abort = true;}
+
+		if (abort){
+			opp_warning("Bad format for reponse_EDGE_BEST_TRAVEL_TIME");
+		}else{
+			travelTime = MY_CONST::convertToDbl(reponse_tokens[3]);
+		}
 	}
+
 	return travelTime;
 }
 
@@ -694,7 +705,7 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 	std::string msg = "";
 	msg+= MY_CONST::convertToStr(msg_type)+":"+MY_CONST::convertToStr(cmd)+";";
 	msg+= MY_CONST::convertToStr(arg1)+":"+MY_CONST::convertToStr(arg1_value)+";";
-	msg+= MY_CONST::convertToStr(arg2)+":"+arg2_value+"#";
+	msg+= MY_CONST::convertToStr(arg2)+":"+arg2_value+"?";
 
 	// Sending request to server
 	std::string queryRep = sendRequestToPyServer(msg);
@@ -727,7 +738,8 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 		std::list<std::string> route;
 		char* edges = strtok(strdup(reponse_tokens[11].c_str())," ");
 		while (edges != NULL){
-			route.push_back(std::string(edges));
+			std::pair<std::string, double> pair = addEntryToEdgeBTTIndex(std::string(edges));
+			route.push_back(pair.first);
 			edges = strtok(NULL," ");
 		}
 		distance = MY_CONST::convertToDbl(reponse_tokens[13]);
@@ -736,6 +748,41 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 	}
 
 	return returnedNP;
+}
+
+std::pair<std::string, double>  GeoTraCIMobility::addEntryToEdgeBTTIndex(std::string edgeAndValue)
+{
+	char* edge =  strtok(strdup(edgeAndValue.c_str()),"=");
+	std::string edgeAsStr = std::string(edge);
+	char* value = strtok(NULL,"=");
+	double valueAsFloat = maxDbl;
+	if (std::string(value) != ""){
+		if (edgeAsStr != "ND"){
+			valueAsFloat = MY_CONST::convertToDbl(value);
+		}
+		if (edgesBTTIndex.find(edgeAsStr) == edgesBTTIndex.end()){
+			edgesBTTIndex.insert(std::pair<std::string,double>(edgeAsStr,valueAsFloat));
+		}
+	}
+	return std::pair<std::string, double>(edgeAsStr,valueAsFloat);
+}
+
+void GeoTraCIMobility::addRouteToEdgeBTTIndex(std::list<std::string> route)
+{
+	double travelTime;
+	std::string edge ="";
+	for (std::list<std::string>::iterator it = route.begin(); it != route.end(); it++){
+		 travelTime = maxDbl;
+		 edge = *it;
+		 if (edge == "ND"){
+			 edgesBTTIndex.insert(std::pair<std::string,double>(edge,travelTime));
+		 }else{
+			 if (edgesBTTIndex.find(edge) == edgesBTTIndex.end()){
+				 travelTime = getEdgeBestTravelTime(edge);
+				 edgesBTTIndex.insert(std::pair<std::string,double>(edge,travelTime));
+			 }
+		 }
+	}
 }
 
 std::string GeoTraCIMobility::sendRequestToPyServer(std::string buf)

@@ -104,6 +104,9 @@ std::string PyGraphServerManager::sendRequestToPyServer(std::string buf)
 
 	int rc, index = 0, limit = MAX_BUFFER;
 	char buffer[MAX_BUFFER+1];
+	if (buf.size() > limit){
+		opp_warning("Buffer size smaller than the request to send");
+	}
 
 	int returnCode = 0;
 	// Sending request

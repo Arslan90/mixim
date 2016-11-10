@@ -126,7 +126,7 @@ void GeoDtnNetwLayer::handleSelfMsg(cMessage *msg)
 			if (withMETDFwd){
 				currentMETD = geoTraci->getCurrentNp().getMetd();
 				if (currentMETD == maxDbl){
-					cout << "@: " << myNetwAddr << " METD value is the highest" << endl;
+//					cout << "@: " << myNetwAddr << " METD value is the highest" << endl;
 				}else{
 //					cout << "@: " << myNetwAddr << "METD value is normal" << endl;
 				}
@@ -323,14 +323,14 @@ void GeoDtnNetwLayer::sendingBundleMsg()
 	if ((custodyMode == Yes_WithACK) || (custodyMode == Yes_WithoutACK)){
 		if ((fwdDist.first == myNetwAddr) && (fwdDist.second == 0.0)){
 			haveToSend = false;
-			cout << "@" << myNetwAddr << " Current Node will pass by the VPA, no need to forward until finding a better forwarder" << endl;
+//			cout << "@" << myNetwAddr << " Current Node will pass by the VPA, no need to forward until finding a better forwarder" << endl;
 			if (fwdMETD.first != myNetwAddr){
 				std::map<LAddress::L3Type, NetwRoute>::iterator itMETD = neighborhoodTable.find(fwdMETD.first);
 				if (itMETD != neighborhoodTable.end()){
 					std::map<LAddress::L3Type, NetwRoute>::iterator itDist = neighborhoodTable.find(myNetwAddr);
 					if (itDist != neighborhoodTable.end()){
 						if ((itMETD->second.getDestDist() == 0.0) && (itMETD->second.getDestMetd() <= itDist->second.getDestMetd())){
-							cout << "@" << fwdMETD.first << " Is a good forwarder, so forward even if both will pass by the VPA" << endl;
+//							cout << "@" << fwdMETD.first << " Is a good forwarder, so forward even if both will pass by the VPA" << endl;
 							haveToSend = true;
 						}
 					}else{
@@ -345,7 +345,7 @@ void GeoDtnNetwLayer::sendingBundleMsg()
 			std::map<LAddress::L3Type, NetwRoute>::iterator itDist = neighborhoodTable.find(fwdDist.first);
 			if (itDist != neighborhoodTable.end()) {
 				if (itDist->second.getNodeType() != VPA){
-					cout << "@" << myNetwAddr << " must transfer custody of bundle to this node @" << fwdDist.first << endl;
+//					cout << "@" << myNetwAddr << " must transfer custody of bundle to this node @" << fwdDist.first << endl;
 					haveToCustody = true;
 				}
 			}else{
@@ -421,7 +421,7 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 		bool receivedCustody = netwPkt->getCustodyTransfert();
 		if ((receivedCustody) && (netwPkt->getFwdDist() == myNetwAddr)){
-			cout << "@" << myNetwAddr << " received custody transfer " << endl;
+//			cout << "@" << myNetwAddr << " received custody transfer " << endl;
 		}
 
 		if (wsm->getRecipientAddress() == myNetwAddr){
@@ -925,10 +925,10 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
 	std::multimap<double, LAddress::L3Type >bestForwarders;
 	LAddress::L3Type bestForwarder = LAddress::L3NULL;
 	double bestMETD = maxDbl;
-	cout << "Current Node @: " << myNetwAddr << " METDs: " << endl;
+//	cout << "Current Node @: " << myNetwAddr << " METDs: " << endl;
 	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
 		NetwRoute entry = it->second;
-		cout << "@: " << it->first << " value " <<  entry.getDestMetd() << endl;
+//		cout << "@: " << it->first << " value " <<  entry.getDestMetd() << endl;
 		if ((bestMETD != maxDbl)&&(entry.isStatus())&&(entry.getDestMetd() == bestMETD)){
 			bestForwarders.insert(std::pair<double, LAddress::L3Type>(entry.getDestMetd(), entry.getDestAddr()));
 		}
@@ -946,14 +946,14 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
 
 	for(std::vector<double>::iterator it = bestValues.begin(); it != bestValues.end(); it++){
 		double value = *it;
-		cout << "Value: " << value;
+//		cout << "Value: " << value;
 		std::pair<std::multimap<double, LAddress::L3Type >::iterator, std::multimap<double, LAddress::L3Type >::iterator >  pairIterator = bestForwarders.equal_range(value);
 		for (std::multimap<double, LAddress::L3Type >::iterator it2 = pairIterator.first; it2 != pairIterator.second; it2++){
-			cout << " @:" << it2->second << " ";
+//			cout << " @:" << it2->second << " ";
 		}
-		cout << endl;
+//		cout << endl;
 	}
-	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestMETD << endl;
+//	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestMETD << endl;
 
 
 	return std::pair<LAddress::L3Type, double>(bestForwarder, bestMETD);
@@ -965,10 +965,10 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
 	std::multimap<double, LAddress::L3Type >bestForwarders;
 	LAddress::L3Type bestForwarder = LAddress::L3NULL;
 	double bestDist = maxDbl;
-	cout << "Current Node @: " << myNetwAddr << " Dists: " << endl;
+//	cout << "Current Node @: " << myNetwAddr << " Dists: " << endl;
 	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
 		NetwRoute entry = it->second;
-		cout << "@: " << it->first << " value " <<  entry.getDestDist() << endl;
+//		cout << "@: " << it->first << " value " <<  entry.getDestDist() << endl;
 		if ((bestDist != maxDbl)&&(entry.isStatus())&&(entry.getDestDist() == bestDist)){
 			bestForwarders.insert(std::pair<double, LAddress::L3Type>(entry.getDestDist(), entry.getDestAddr()));
 		}
@@ -986,14 +986,14 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
 
 	for(std::vector<double>::iterator it = bestValues.begin(); it != bestValues.end(); it++){
 		double value = *it;
-		cout << "Value: " << value;
+//		cout << "Value: " << value;
 		std::pair<std::multimap<double, LAddress::L3Type >::iterator, std::multimap<double, LAddress::L3Type >::iterator >  pairIterator = bestForwarders.equal_range(value);
 		for (std::multimap<double, LAddress::L3Type >::iterator it2 = pairIterator.first; it2 != pairIterator.second; it2++){
-			cout << " @:" << it2->second << " ";
+//			cout << " @:" << it2->second << " ";
 		}
-		cout << endl;
+//		cout << endl;
 	}
-	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestDist << endl;
+//	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestDist << endl;
 
 	return std::pair<LAddress::L3Type, double>(bestForwarder, bestDist);
 }

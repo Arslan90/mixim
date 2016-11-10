@@ -116,6 +116,7 @@ void VEHICLEpOpp::initialize(int stage) {
 //			}
 //		}
 
+
 		if (isEquiped && withDtnMsg && ((getDataSrcFromStrategy(strategy)=="ALL") || (getDataSrcFromStrategy(strategy)=="VEH"))){
 			// we have to send bundles
 			bool haveToSent = false;

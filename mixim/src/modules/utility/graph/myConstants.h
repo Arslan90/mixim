@@ -130,11 +130,11 @@ double convertToDbl(std::string strToConvert){
 std::vector<std::string> tokenizeMSG(char* msg_data){
 	std::vector<std::string> tokens, one_entryTokens, one_tupleTokens;
 	char* copyOfMsgData = strdup((const char*) msg_data);
-	char* one_entry= strtok (copyOfMsgData,"#");
+	char* one_entry= strtok (copyOfMsgData,"?");
 	while (one_entry != NULL)
 	{
 		one_entryTokens.push_back(std::string(one_entry));
-		one_entry = strtok (NULL, "#");
+		one_entry = strtok (NULL, "?");
 	}
 
 	for (std::vector<std::string>::iterator it = one_entryTokens.begin(); it != one_entryTokens.end(); it++){
@@ -165,11 +165,11 @@ std::vector<std::string> tokenizeMSG(char* msg_data){
 std::vector<std::string> tokenizeMSG(std::string msg_data){
 	std::vector<std::string> tokens, one_entryTokens, one_tupleTokens;
 	char* copyOfMsgData = strdup(msg_data.c_str());
-	char* one_entry= strtok (copyOfMsgData,"#");
+	char* one_entry= strtok (copyOfMsgData,"?");
 	while (one_entry != NULL)
 	{
 		one_entryTokens.push_back(std::string(one_entry));
-		one_entry = strtok (NULL, "#");
+		one_entry = strtok (NULL, "?");
 	}
 
 	for (std::vector<std::string>::iterator it = one_entryTokens.begin(); it != one_entryTokens.end(); it++){

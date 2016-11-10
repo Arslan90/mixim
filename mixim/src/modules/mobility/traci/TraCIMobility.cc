@@ -286,9 +286,11 @@ void TraCIMobility::fixIfHostGetsOutside()
 void TraCIMobility::simulateAccident()
 {
 	Enter_Method_Silent("simulateAccident()");
-	startAccidentMsg = new cMessage("scheduledAccident");
-	stopAccidentMsg = new cMessage("scheduledAccidentResolved");
-	scheduleAt(simTime(), startAccidentMsg);
+	if (accidentCount > 0){
+		startAccidentMsg = new cMessage("scheduledAccident");
+		stopAccidentMsg = new cMessage("scheduledAccidentResolved");
+		scheduleAt(simTime(), startAccidentMsg);
+	}
 }
 
 double TraCIMobility::calculateCO2emission(double v, double a) const {

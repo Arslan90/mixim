@@ -196,7 +196,7 @@ class GeoTraCIMobility : public TraCIMobility
 		/**
 		 * Returns -1 if @param roadId is not found in route @param route, otherwise return its index
 		 */
-		int roadIndexInRoute(std::string roadId, std::list<std::string> route);
+		int roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId);
 
 		bool roadInRoute(std::string roadId, std::list<std::string> route);
 
@@ -225,6 +225,17 @@ class GeoTraCIMobility : public TraCIMobility
 		double currentETA_NP_VPA;
 
 		struct sockaddr_in servAddr, localAddr;
+
+		/*
+		 * Map for storing Edge Best Travel Time (BTT) and
+		 * by the way avoiding sending multiples requests
+		 * to the server
+		 */
+		std::map<std::string, double> edgesBTTIndex;
+
+		void addRouteToEdgeBTTIndex(std::list<std::string> route);
+
+		std::pair<std::string, double> addEntryToEdgeBTTIndex(std::string edgeAndValue);
 };
 
 class GeoTraCIMobilityAccess

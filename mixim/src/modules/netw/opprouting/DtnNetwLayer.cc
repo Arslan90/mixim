@@ -264,12 +264,15 @@ std::vector<std::list<BundleMeta> > DtnNetwLayer::defineBundleOffer(NetwPkt *net
 bool DtnNetwLayer::exist(WaveShortMessage *msg)
 {
 	bool found = false;
-	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-	if (it != bundlesIndex.end()){
+	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end() ; it++){
+//	}
+//	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
+//	if (it != bundlesIndex.end()){
 		innerIndexMap innerMap(it->second);
 		innerIndexIterator it2 = innerMap.find(msg->getSerial());
 		if (it2 !=innerMap.end()){
 			found = true;
+			break;
 		}
 	}
 	return found;
@@ -280,12 +283,15 @@ bool DtnNetwLayer::exist(WaveShortMessage *msg)
 bool DtnNetwLayer::exist(BundleMeta bndlMeta)
 {
 	bool found = false;
-	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
-	if (it != bundlesIndex.end()){
+	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end() ; it++){
+//	}
+//	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
+//	if (it != bundlesIndex.end()){
 		innerIndexMap innerMap(it->second);
 		innerIndexIterator it2 = innerMap.find(bndlMeta.getSerial());
 		if (it2 !=innerMap.end()){
 			found = true;
+			break;
 		}
 	}
 	return found;
@@ -591,6 +597,14 @@ void DtnNetwLayer::handleUpperControl(cMessage *msg)
 	if (!innerMap.empty()){
 		bundlesIndex.clear();
 		bundlesIndex[newAddr] = innerMap;
+	}
+
+	int bundlesIndexSize = 0;
+	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+		bundlesIndexSize+= it1->second.size();
+	}
+	if (bundlesIndexSize != bundles.size()){
+		opp_warning("Size of Bundles and BundlesIndex data structurs are not the same");
 	}
 }
 
