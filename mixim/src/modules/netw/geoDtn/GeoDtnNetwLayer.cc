@@ -324,7 +324,7 @@ void GeoDtnNetwLayer::sendingBundleMsg()
 		if ((fwdDist.first == myNetwAddr) && (fwdDist.second == 0.0)){
 			haveToSend = false;
 //			cout << "@" << myNetwAddr << " Current Node will pass by the VPA, no need to forward until finding a better forwarder" << endl;
-			if (fwdMETD.first != myNetwAddr){
+			if ((fwdMETD.first != myNetwAddr) && (fwdMETD.first != LAddress::L3NULL)){
 				std::map<LAddress::L3Type, NetwRoute>::iterator itMETD = neighborhoodTable.find(fwdMETD.first);
 				if (itMETD != neighborhoodTable.end()){
 					std::map<LAddress::L3Type, NetwRoute>::iterator itDist = neighborhoodTable.find(myNetwAddr);

@@ -97,6 +97,11 @@ void TraCIScenarioManager::initialize(int stage) {
 
 	nbrVehicleVector.setName("Evolution of vehicle density");
 
+	maxSpeedRatio = par("maxSpeedRatio").doubleValue();
+	if (!((0.0 < maxSpeedRatio) && (maxSpeedRatio <= 1.0))){
+		opp_error("Max Speed Ratio must be bounded between 0 and 1");
+	}
+
 	// end of this section
 
 	// parse roiRoads
@@ -1224,6 +1229,16 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 //	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
 
 	double angle = traci2omnetAngle(angle_traci);
+
+	if (maxSpeedRatio < 1.0){
+		std::string lane = commandGetLaneId(objectId);
+		double maxLaneSpeed = cmdGetLaneMaxSpeed(lane);
+		double virtualMaxLaneSpeed = maxLaneSpeed * maxSpeedRatio;
+		if (speed > (virtualMaxLaneSpeed)){
+			speed = virtualMaxLaneSpeed;
+			commandSetSpeed(objectId, speed);
+		}
+	}
 
 	cModule* mod = getManagedModule(objectId);
 

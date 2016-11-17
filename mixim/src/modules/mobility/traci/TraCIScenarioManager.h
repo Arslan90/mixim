@@ -348,6 +348,8 @@ protected:
     int stepForVehiclesLoop;
     std::vector<std::string> allVehiclesId;
     cOutVector nbrVehicleVector;
+
+    double maxSpeedRatio;
 public:
     /**
 		 * convert TraCI coordinates to OMNeT++ coordinates

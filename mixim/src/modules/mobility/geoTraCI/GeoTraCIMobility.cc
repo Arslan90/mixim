@@ -523,9 +523,14 @@ double GeoTraCIMobility::calculateRmgRoadBestTT()
 		double laneTotalLength = cmdGetLaneLength(laneId);
 		double currentVehLanePos = cmdGetVehiclelanePosition();
 		double laneMaxSpeed = cmdGetLaneMaxSpeed(laneId);
+		std::ostringstream iss1, iss2;
+		iss1 << currentVehLanePos;
+		iss2 << laneTotalLength;
 		if (laneTotalLength < currentVehLanePos){
-			std::string warning_str = "LanePos for Veh "+this->external_id+" is higher than max length of LaneId "+laneId;
-			opp_error(warning_str.c_str());
+			std::string warning_str = "LanePos for Veh "+this->external_id+" is higher than max length of LaneId "+laneId+"("+iss1.str()+" > "+iss2.str()+")";
+			opp_warning(warning_str.c_str());
+			opp_warning("Assuming that vehicle has traversed the current lane");
+			rmgRoadBestTT = 0;
 		}
 		if (laneMaxSpeed == 0.0){
 			std::string warning_str = "Max Speed for LaneIdPos "+laneId+" equals 0.0";

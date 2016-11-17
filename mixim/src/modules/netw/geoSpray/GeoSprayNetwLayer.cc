@@ -401,7 +401,7 @@ void GeoSprayNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Typ
 	netwPkt = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
 	netwPkt->encapsulate(wsm);
 	netwPkt->setNbrReplica(nbrReplica);
-	cout << "Bundle Pkt " << wsm->getSerial() << " send from  " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " nbr replica transfered " << nbrReplica << std::endl;
+//	cout << "Bundle Pkt " << wsm->getSerial() << " send from  " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " nbr replica transfered " << nbrReplica << std::endl;
 
 //	cout << "Sending Bundle packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
@@ -461,7 +461,7 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		GeoDtnNetwPkt* bundleForVPA;
 		bundleForVPA = prepareNetwPkt(Bundle,myNetwAddr, nodeType, vpaAddr, sectorId ,LAddress::L3BROADCAST);
 		bundleForVPA->encapsulate(wsm->dup());
-		cout << "Sending Bundle packet from " << bundleForVPA->getSrcAddr() << " addressed to VPA " << bundleForVPA->getDestAddr() << std::endl;
+//		cout << "Sending Bundle packet from " << bundleForVPA->getSrcAddr() << " addressed to VPA " << bundleForVPA->getDestAddr() << std::endl;
 		sendDown(bundleForVPA);
 
 		unsigned long serial = wsm->getSerial();

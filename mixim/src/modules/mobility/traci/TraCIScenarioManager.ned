@@ -46,6 +46,8 @@ simple TraCIScenarioManager
         int totalVehicles = default(0);
 		int loopVehiclesInPourcentage= default (0);
 		string prefixForLoopRoute = default("virtual_loop");
+		
+		double maxSpeedRatio = default(1.0);
         
 }
 
