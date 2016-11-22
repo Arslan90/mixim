@@ -236,7 +236,7 @@ void GeoTraCIMobility::nextPosition(const Coord& position, std::string road_id, 
 	nextPos = position;
 	// Check if current edge changed
 	if (road_id != this->road_id){
-		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId);
+		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId, true);
 		if ((currentNP.isValid()) && (indexNP_edgeTo != -1) && (indexNP_edgeTo < indexRoadId)){
 			scheduleAt(simTime(), computeNPMsg);
 		}
@@ -376,7 +376,7 @@ void GeoTraCIMobility::initScenarioType() {
 	}
 }
 
-int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId)
+int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId, bool canEquals)
 {
 	bool found = false;
 	int index = -1, i = -1;
@@ -384,29 +384,20 @@ int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string
 	if (!route.empty()){
 		for (std::list<std::string>::iterator it = route.begin(); it != route.end(); it++){
 			i+=1;
-			if ((*it == roadId)&&(i> indexLastRoadId)){
-				found = true;
-				index = i;
-				break;
-//				indexes.push_back(index);
+			if (*it == roadId){
+				if ((canEquals) && (i>= indexLastRoadId)){
+					   found = true;
+					   index = i;
+					   break;
+				}else if (i> indexLastRoadId){
+					   found = true;
+					   index = i;
+					   break;
+				}
 			}
 		}
 		if (!found){
 			index = -1;
-		}else{
-//			std::cout << "Index of " << roadId << " in current route ";
-//			for (std::list<int>::iterator it2 = indexes.begin(); it2 != indexes.end(); it2++){
-//				std::cout << *it2 << ",";
-//				if (*it2 > indexLastRoadId){
-//					found = true;
-//					index = *it2;
-//				}
-//			}
-//			std::cout<<endl;
-//			if (!found){
-//				std::cout << "Index of " << roadId << " is too old ";
-//				index = -1;
-//			}
 		}
 	}
 	return index;
@@ -546,9 +537,8 @@ double GeoTraCIMobility::calculateETA_NP(bool includeCurrentRoad)
 {
 	double ETA_NP = maxDbl;
 	if (currentNP.isValid()){
-		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId);
+		int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute, this->indexLastRoadId, true);
 		if (indexNP_edgeTo != -1){
-//			if ((indexRoadId == -1) || (indexRoadId > indexNP_edgeTo)){
 			if (indexRoadId > indexNP_edgeTo){
 				ETA_NP = -1;
 			}else if(indexRoadId == -1){
@@ -742,11 +732,16 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 		double distance = maxDbl;
 		std::list<std::string> route;
 		char* edges = strtok(strdup(reponse_tokens[11].c_str())," ");
+		std::list<std::string> keysValues;
 		while (edges != NULL){
-			std::pair<std::string, double> pair = addEntryToEdgeBTTIndex(std::string(edges));
-			route.push_back(pair.first);
-			edges = strtok(NULL," ");
+				   keysValues.push_back(std::string(edges));
+				edges = strtok(NULL," ");
 		}
+	   for (std::list<std::string>::iterator it = keysValues.begin(); it != keysValues.end(); it++){
+			   std::string tmp = *it;
+			   std::pair<std::string, double> pair = addEntryToEdgeBTTIndex(tmp);
+			   route.push_back(pair.first);
+        }
 		distance = MY_CONST::convertToDbl(reponse_tokens[13]);
 
 		returnedNP = NearestPoint(reponse_tokens[3], reponse_tokens[5], reponse_tokens[7], reponse_tokens[9], route, distance);
@@ -761,7 +756,7 @@ std::pair<std::string, double>  GeoTraCIMobility::addEntryToEdgeBTTIndex(std::st
 	std::string edgeAsStr = std::string(edge);
 	char* value = strtok(NULL,"=");
 	double valueAsFloat = maxDbl;
-	if (std::string(value) != ""){
+	if ((value != NULL) && (std::string(value) != "")){
 		if (edgeAsStr != "ND"){
 			valueAsFloat = MY_CONST::convertToDbl(value);
 		}

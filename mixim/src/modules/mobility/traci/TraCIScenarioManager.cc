@@ -98,7 +98,7 @@ void TraCIScenarioManager::initialize(int stage) {
 	nbrVehicleVector.setName("Evolution of vehicle density");
 
 	maxSpeedRatio = par("maxSpeedRatio").doubleValue();
-	if (!((0.0 < maxSpeedRatio) && (maxSpeedRatio <= 1.0))){
+	if (!((0 < maxSpeedRatio) && (maxSpeedRatio <= 1))){
 		opp_error("Max Speed Ratio must be bounded between 0 and 1");
 	}
 
@@ -1230,7 +1230,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 
 	double angle = traci2omnetAngle(angle_traci);
 
-	if (maxSpeedRatio < 1.0){
+	if (maxSpeedRatio < 1){
 		std::string lane = commandGetLaneId(objectId);
 		double maxLaneSpeed = cmdGetLaneMaxSpeed(lane);
 		double virtualMaxLaneSpeed = maxLaneSpeed * maxSpeedRatio;

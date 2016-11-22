@@ -49,5 +49,12 @@ simple DtnApplLayer extends BaseWaveApplLayer
 		double dtnMsgPeriod = default(30); // period for sending dtnMessage
 		double dtnMsgMaxTime = default(7200);     
 		double dtnMsgMinTime = default(0);     
-		bool dtnMsgSynchronized = default(true);  
+		bool dtnMsgSynchronized = default(true);
+		
+		@signal[sentBndl](type = "int");
+		@statistic[sentBundle](title="SentBundle";source=sentBndl;record=count,mean,last,vector);
+		
+		@signal[receivedBndl](type = "int");
+		@statistic[receivedBundle](title="ReceivedBundle";source=receivedBndl;record=count,mean,last,vector);
+		  
 }

@@ -230,6 +230,8 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 			hopCountVector.record(wsm->getHopCount());
 			hopCountStats.collect(wsm->getHopCount());
 
+			emit(receiveSignalId, nbrUniqueBundleReceived);
+
 		}
 	}
 

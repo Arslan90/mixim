@@ -27,10 +27,13 @@
 /**
  * TODO - Generated class
  */
-class PyGraphServerManager : public cSimpleModule
+class PyGraphServerManager : public cSimpleModule, cListener
 {
   public:
 	std::string sendRequestToPyServer(std::string buf);
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l);
+
   protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
@@ -48,6 +51,18 @@ class PyGraphServerManager : public cSimpleModule
     int waitingTime;
 	struct sockaddr_in servAddr, localAddr;
 	int connectionFd;
+
+	// Different stats for Bundle Sending/Reception
+	long nbrBundleSent;
+	long nbrBundleReceived;
+	long nbrUniqueBundleReceived;
+	long nbrL3BundleReceived;
+
+	simsignal_t sentSignalId, receiveSignalId, receiveL3SignalId ,tSentSignalId, tReceiveSignalId, tReceiveL3SignalId;
+
+	simsignal_t dR;
+
+	simsignal_t oT;
 };
 
 #endif

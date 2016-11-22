@@ -429,6 +429,7 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			sendUp(netwPkt->dup());
 			finalReceivedWSM.push_back(wsm->getSerial());
 			bundlesReceived++;
+			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
 //			cout << "(VPA) Node@: " << myNetwAddr << " NodeType: " << nodeType << "received WSM with serial: " << wsm->getSerial() << endl;
 		}else {
@@ -443,6 +444,7 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 					currentNbrIsrt++;
 				}
 				bundlesReceived++;
+				emit(receiveL3SignalId,bundlesReceived);
 			}
 			if (receivedCustody){
 				receivedWSM.push_back(wsm->getSerial());

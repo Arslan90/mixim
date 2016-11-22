@@ -624,6 +624,7 @@ void VEHICLEpOpp::sendDtnMessage()
 		if (isNetwAddrInit){
 		sendWSM(prepareWSM(s, dataLengthBits, channel, dataPriority, addr,multiFunctions::cantorPairingFunc(netwAddr,nbrMsgSent)));
 		nbrBundleSent++;
+		emit(sentSignalId, nbrBundleSent);
 		}else {
 			opp_error("netw address not yet initialized");
 		}

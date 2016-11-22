@@ -142,6 +142,8 @@ void DtnNetwLayer::initialize(int stage)
 
     	withContactTrFl = par("withContactTraceFile").boolValue();
     	contactTrFlName = par("contactTraceFileName").stringValue();
+
+		receiveL3SignalId = registerSignal("receivedL3Bndl");
 	}
 
 	if (stage == 2){

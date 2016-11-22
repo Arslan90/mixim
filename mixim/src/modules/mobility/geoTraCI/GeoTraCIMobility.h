@@ -196,7 +196,7 @@ class GeoTraCIMobility : public TraCIMobility
 		/**
 		 * Returns -1 if @param roadId is not found in route @param route, otherwise return its index
 		 */
-		int roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId);
+		int roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId, bool canEquals = false);
 
 		bool roadInRoute(std::string roadId, std::list<std::string> route);
 

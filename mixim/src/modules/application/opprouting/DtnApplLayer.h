@@ -186,6 +186,9 @@ protected:
 		 */
 		virtual std::string getDataDestFromStrategy(std::string currentStrategy);
 
+		simsignal_t sentSignalId, receiveSignalId;
+
+
 public:
 		t_scenarioType getScenarioModel() const
 		{

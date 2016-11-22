@@ -146,6 +146,10 @@ void DtnApplLayer::initialize(int stage)
 		}
 
 		destAddr = par("destAddr");
+
+		sentSignalId = registerSignal("sentBndl");
+		receiveSignalId = registerSignal("receivedBndl");
+
 	}
 	if(stage==1){
 		isNetwAddrInit = false;

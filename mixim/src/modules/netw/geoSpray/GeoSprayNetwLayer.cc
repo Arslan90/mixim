@@ -420,6 +420,7 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			netwPkt->encapsulate(wsm);
 			sendUp(netwPkt->dup());
 			bundlesReceived++;
+			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
 			missedOpportunities.erase(wsm->getSerial());
 		}else {
@@ -434,6 +435,7 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 					bundlesRmgReplica.insert(std::pair<unsigned long, int>(wsm->getSerial(), netwPkt->getNbrReplica()));
 				}
 				bundlesReceived++;
+				emit(receiveL3SignalId,bundlesReceived);
 				missedOpportunities.erase(wsm->getSerial());
 			}
 		}

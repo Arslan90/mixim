@@ -16,6 +16,7 @@
 #include "PyGraphServerManager.h"
 #include <unistd.h>
 #include "stdio.h"
+#include "clistener.h"
 //#include <sys/socket.h> // Needed for the socket functions
 //#include <netdb.h>      // Needed for the socket functions
 
@@ -54,6 +55,29 @@ void PyGraphServerManager::initialize(int stage)
 		// Create socket
 		connectionFd = socket(AF_INET, SOCK_STREAM, 0);
 
+		sentSignalId = registerSignal("sentBndl");
+		simulation.getSystemModule()->subscribe(sentSignalId, this);
+
+		receiveSignalId = registerSignal("receivedBndl");
+		simulation.getSystemModule()->subscribe(receiveSignalId, this);
+
+		receiveL3SignalId = registerSignal("receivedL3Bndl");
+		simulation.getSystemModule()->subscribe(receiveL3SignalId, this);
+
+		tSentSignalId = registerSignal("TotalSentBndl");
+		tReceiveSignalId = registerSignal("TotalReceivedBndl");
+		tReceiveL3SignalId = registerSignal("TotalL3ReceivedBndl");
+
+		dR = registerSignal("deliveryRatio");
+		oT = registerSignal("totalOverhead");
+
+		emit(dR, 0.0);
+		emit(oT, 0.0);
+
+		nbrBundleSent = 0;
+		nbrBundleReceived = 0;
+		nbrUniqueBundleReceived = 0;
+		nbrL3BundleReceived = 0;
 
 
 		int returnCode = 0;
@@ -138,6 +162,22 @@ void PyGraphServerManager::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
 
+}
+
+void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalID, long l)
+{
+	Enter_Method_Silent();
+	if (strcmp(getSignalName(signalID),"sentBndl") == 0){
+		nbrBundleSent++;
+	}
+	if (strcmp(getSignalName(signalID),"receivedBndl") == 0){
+		nbrUniqueBundleReceived++;
+		emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
+	}
+	if (strcmp(getSignalName(signalID),"receivedL3Bndl") == 0){
+		nbrL3BundleReceived++;
+		emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
+	}
 }
 
 void PyGraphServerManager::finish(){

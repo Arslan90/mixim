@@ -33,4 +33,7 @@ simple PyGraphServerManager
         int margin = default(0);  // margin to add to all received vehicle positions
         int waitingTime = default(200);
         
+		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=count,mean,last,vector);
+		@statistic[totalOverhead](title="OT";source="totalOverhead";record=count,mean,last,vector);
+        
 }

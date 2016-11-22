@@ -205,6 +205,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 	bool withContactTrFl;
 	string contactTrFlName;
 
+	simsignal_t receiveL3SignalId;
+
 
 	/*******************************************************************
 	** 							Methods section
