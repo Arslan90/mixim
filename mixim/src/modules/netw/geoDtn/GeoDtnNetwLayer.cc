@@ -19,6 +19,7 @@
 #include "VPApOpp.h"
 #include "algorithm"
 #include "list"
+#include "Coord.h"
 
 Define_Module(GeoDtnNetwLayer);
 
@@ -69,6 +70,8 @@ void GeoDtnNetwLayer::initialize(int stage)
 		missedOpprVec.setName("Evolve of missed opportunities");
 
 		meetVPA = false;
+
+		inRadioWithVPA = registerSignal("InContact");
 
 	}else if (stage == 1){
 
@@ -147,9 +150,15 @@ void GeoDtnNetwLayer::handleSelfMsg(cMessage *msg)
 		if (nodeType == Veh){
 			sectorId = geoTraci->getCurrentSector();
 		}
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,currentDist, simTime(), true, nodeType));
+
+		BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
+		if (mobilityMod == NULL){
+			opp_error("No mobility module found");
+		}
+		Coord currentPos = mobilityMod->getCurrentPosition();
+		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,currentDist, simTime(), true, nodeType, currentPos));
 		GeoDtnNetwPkt* netwPkt;
-		sendingHelloMsg(netwPkt, currentDist, currentMETD);
+		sendingHelloMsg(netwPkt, currentDist, currentMETD, currentPos);
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
 }
@@ -186,7 +195,7 @@ void GeoDtnNetwLayer::finish()
 	recordAllScalars();
 }
 
-void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, double METD)
+void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, double METD, Coord currentPos)
 {
 
 	if (nodeType == Veh){
@@ -199,6 +208,7 @@ void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, d
 	}
 	netwPkt->setSrcMETD(METD);
 	netwPkt->setSrcDist_NP_VPA(distance);
+	netwPkt->setCurrentPos(currentPos);
 	bool newData = false;
 	if (withCBH){
 		// check if we have new data before sending ACK+Bundle list in Hello msg
@@ -243,7 +253,7 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	}else{
 		/*************************** Handling Hello Msg **********/
 //	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " current address " << myNetwAddr << std::endl;
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType());
+	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
 	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
 	    if (!receivedE2eAcks.empty()){
@@ -275,6 +285,12 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 		    if (netwPkt->getSrcType() == VPA){
 		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+				BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
+				if (mobilityMod == NULL){
+					opp_error("No mobility module found");
+				}
+				Coord currentPos = mobilityMod->getCurrentPosition();
+				vpaContactDistance.push_back(currentPos.distance(netwPkt->getCurrentPos()));
 		    }else if (netwPkt->getSrcType() == Veh){
 		    	sendingBundleMsg();
 		    }
@@ -402,6 +418,7 @@ void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 //		cout << "Sending Bundle packet from " << bundleForVPA->getSrcAddr() << " addressed to VPA " << bundleForVPA->getDestAddr() << std::endl;
 		sendDown(bundleForVPA);
 		bundlesReplicaIndex[(*it)->getSerial()]++;
+		bundleSentPerVPA.insert(wsm->getSerial());
 	}
 }
 
@@ -522,6 +539,7 @@ void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 		storeAckSerial(*it);
 		erase(*it);
+		ackReceivedPerVPA.insert(*it);
 	}
 }
 
@@ -879,9 +897,6 @@ void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRou
 			if (it->first != neighbor){
 				entriesToDelete.insert(it->second.getDestAddr());
 			}
-			if (it->second.getNodeType() == VPA){
-				meetVPA = true;
-			}
 		}
 
 		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
@@ -894,6 +909,31 @@ void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRou
 
 	// Update table entries (Deleting/Pending)
 	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
+		if ((nodeType == Veh) && (it2 != neighborhoodTable.end()) && (it2->second.getNodeType() == VPA) ){
+			std::stringstream ss1,ss2,ss3;
+			ss1 << it2->first;
+			ss2 << -1;
+//			if (bundles.empty()){
+//				ss3 << 0;
+//			}else{
+//				ss3 << 1;
+//			}
+			std::string str = ss1.str()+":"+ss2.str();
+			emit(inRadioWithVPA,str.c_str());
+
+//			if (!vpaContactDuration.empty()){
+//				double lastContactTime = vpaContactDuration.back();
+//				if (lastContactTime <= 0){
+//					double contactDuration = simTime().dbl() - (-lastContactTime);
+//					vpaContactDuration.pop_back();
+//					vpaContactDuration.push_back(contactDuration);
+//				}else{
+//					opp_error("Error value is negative");
+//				}
+//			}
+		}
+
 		neighborhoodTable.erase(*it);
 		neighborhoodSession.erase(*it);
 		NBHTableNbrDelete++;
@@ -906,6 +946,18 @@ void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRou
 		}else{
 			it2->second.setStatus(false);
 		}
+		if ((nodeType == Veh) && (it2 != neighborhoodTable.end()) && (it2->second.getNodeType() == VPA) ){
+			if (!vpaContactDuration.empty()){
+				double lastContactTime = vpaContactDuration.back();
+				if (lastContactTime <= 0){
+					double contactDuration = simTime().dbl() - (-lastContactTime);
+					vpaContactDuration.pop_back();
+					vpaContactDuration.push_back(contactDuration);
+				}else{
+					opp_error("Error value is negative");
+				}
+			}
+		}
 	}
 
 	// Adding the new entry
@@ -914,10 +966,32 @@ void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRou
 		// neighbor doesn't exist, add a new entry
 		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
 		NBHTableNbrInsert++;
+		if (neighborEntry.getNodeType() == VPA){
+			meetVPA = true;
+		}
+		if ((nodeType == Veh)&&(neighborEntry.getNodeType() == VPA)){
+			std::stringstream ss1,ss2;
+			ss1 << neighbor;
+			ss2 << 1;
+			std::string str = ss1.str()+":"+ss2.str();
+			emit(inRadioWithVPA,str.c_str());
+			vpaContactDuration.push_back(-simTime().dbl());
+		}
 	}else{
 		// neighbor exists, update the old entry
 		neighborhoodTable[neighbor] = neighborEntry;
+		if ((nodeType == Veh)&&(neighborEntry.getNodeType() == VPA)){
+			std::stringstream ss1,ss2;
+			ss1 << neighbor;
+			ss2 << 1;
+			std::string str = ss1.str()+":"+ss2.str();
+			emit(inRadioWithVPA,str.c_str());
+			vpaContactDuration.push_back(-simTime().dbl());
+		}
 	}
+
+	nbrNeighors += neighborhoodTable.size()-1;
+	nbrCountForMeanNeighbors++;
 
 }
 

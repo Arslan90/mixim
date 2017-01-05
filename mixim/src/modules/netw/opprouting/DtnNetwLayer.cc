@@ -144,6 +144,11 @@ void DtnNetwLayer::initialize(int stage)
     	contactTrFlName = par("contactTraceFileName").stringValue();
 
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
+
+		nbrNeighors = 0;
+		nbrCountForMeanNeighbors = 0;
+
+		hadBundles = false;
 	}
 
 	if (stage == 2){
@@ -388,6 +393,10 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  	if (bundles.size() != bundlesCopy.size()){
 	  		opp_error("Double insertion in bundles Index");
 	  	}
+	}
+
+	if (bundles.size() > 0){
+		hadBundles = true;
 	}
 }
 
@@ -1192,6 +1201,116 @@ void DtnNetwLayer::updateTraceFile(std::list<LAddress::L3Type> listAddr, double 
     	contactTrFl << newLine << "\n"; // << std::endl;
 		contactTrFl.close();
 	}
+}
+
+bool DtnNetwLayer::hasBundlesToSend()
+{
+	if (bundles.empty()){
+		return false;
+	}else{
+		return true;
+	}
+}
+
+bool DtnNetwLayer::resetStatPerVPA()
+{
+	bundleSentPerVPA.clear();
+	ackReceivedPerVPA.clear();
+	meetVPA = false;
+	nbrNeighors = 0;
+	nbrCountForMeanNeighbors = 0;
+	hadBundles = false;
+	if (bundles.size() > 0){
+		hadBundles = true;
+	}
+	vpaContactDuration.clear();
+	vpaContactDistance.clear();
+}
+
+unsigned long DtnNetwLayer::nbrAckReceivedPerVpa() const
+{
+    return ackReceivedPerVPA.size();
+}
+
+unsigned long DtnNetwLayer::nbrBundleSentPerVpa() const
+{
+    return bundleSentPerVPA.size();
+}
+
+bool DtnNetwLayer::isMeetVpa() const
+{
+    return meetVPA;
+}
+
+std::string DtnNetwLayer::BundleSentPerVpaSerialToString() const
+{
+	std::string serialsAsStr ="";
+	for(std::set<unsigned long>::const_iterator it = bundleSentPerVPA.begin(); it != bundleSentPerVPA.end(); it++){
+		std::stringstream ss;
+		ss << *it;
+		serialsAsStr = serialsAsStr+ss.str()+",";
+	}
+//	if (serialsAsStr.size() > 1){
+//		serialsAsStr.erase(serialsAsStr.size()-1);
+//	}
+	if (serialsAsStr.size() == 0){
+		serialsAsStr = serialsAsStr+",";
+	}
+	return serialsAsStr;
+}
+
+
+
+unsigned long DtnNetwLayer::nbrBundles() const
+{
+	return bundles.size();
+}
+
+long DtnNetwLayer::getNbrCountForMeanNeighbors() const
+{
+    return nbrCountForMeanNeighbors;
+}
+
+long DtnNetwLayer::getNbrNeighors() const
+{
+    return nbrNeighors;
+}
+
+bool DtnNetwLayer::isHadBundles() const
+{
+    return hadBundles;
+}
+
+std::pair<double,double> DtnNetwLayer::VPAContactDuration()
+{
+	double total = 0.0;
+	double count = 0.0;
+
+	for (std::list<double>::iterator it = vpaContactDuration.begin(); it != vpaContactDuration.end(); it++){
+		double tmp = *it;
+		if (tmp >= 0){
+			total +=tmp;
+			count++;
+		}
+	}
+
+	return std::pair<double,double>(total,count);
+}
+
+std::pair<double,double> DtnNetwLayer::VPAContactDistance()
+{
+	double total = 0.0;
+	double count = 0.0;
+
+	for (std::list<double>::iterator it = vpaContactDistance.begin(); it != vpaContactDistance.end(); it++){
+		double tmp = *it;
+		if (tmp >= 0){
+			total +=tmp;
+			count++;
+		}
+	}
+
+	return std::pair<double,double>(total,count);
 }
 
 void DtnNetwLayer::periodicUpdateTraceFile()

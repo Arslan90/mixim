@@ -56,8 +56,6 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 
 	int totalBundlesReceived;
 
-	bool meetVPA;
-
 	// E2E Acks serial
 	std::set<unsigned long > ackSerial;
 
@@ -120,6 +118,8 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 
 	// CBH: CheckBeforeHello
 	bool withCBH;
+
+	simsignal_t inRadioWithVPA;
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -195,7 +195,7 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, double METD);
+  	void sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, double METD, Coord currentPos);
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 

@@ -103,121 +103,103 @@ class DtnNetwLayer : public BaseNetwLayer {
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
 		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
 		RESTART = NEWLY_CONNECTED + 40,
-		FORCED_RESTART = NEWLY_CONNECTED + 50,
-	};
-
-	long nbrL3Sent;
-	long nbrL3Received;
-
-  	double delayed;
-
-  	double delayedFrag;
-
-  	/**
+		FORCED_RESTART = NEWLY_CONNECTED + 50};
+    long nbrL3Sent;
+    long nbrL3Received;
+    double delayed;
+    double delayedFrag;
+    /**
   	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
-  	bool withAck;
-
-	int demandedAckedBundle;
-
-	int bundlesReceived;
-
-  	/**
+    bool withAck;
+    int demandedAckedBundle;
+    int bundlesReceived;
+    /**
   	 * Map structures for ACKs
   	 */
-  	std::list<BundleMeta> acks;
-
-  	bool withTTL;
-  	int ttl;
-  	int nbrDeletedWithTTL;
-
-  	/**
+    std::list<BundleMeta> acks;
+    bool withTTL;
+    int ttl;
+    int nbrDeletedWithTTL;
+    /**
    	 * Specific map with K as serial of WSM &
   	 * V as a bndl_meta struct.
   	 * This structure simplify the search of ACKs
   	 */
-  	std::map<unsigned long,BundleMeta> acksIndex;
-
-  	/**
+    std::map<unsigned long ,BundleMeta> acksIndex;
+    /**
   	 * Size of acks structure
   	 */
-  	int ackStructureSize;
-
-  	/** Size of the WMS Storage structure */
-  	int bundlesStructureSize;
-
-  	/** Fifo structure for WMS Storage*/
-  	std::list<WaveShortMessage*> bundles;
-
-  	/** Specific map with K as recipient address of WSMessage &
+    int ackStructureSize;
+    /** Size of the WMS Storage structure */
+    int bundlesStructureSize;
+    /** Fifo structure for WMS Storage*/
+    std::list<WaveShortMessage*> bundles;
+    /** Specific map with K as recipient address of WSMessage &
   	 * V as a pointer to WSMessage.
   	 * This structure simplify the search of WSMessage destinated
   	 * to a specific node
   	 * */
-  	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
-
-  	/** Boolean to verify if the transmission is possible */
-  	bool canITransmit;
-
-  	/**
+    std::map<LAddress::L3Type,innerIndexMap> bundlesIndex;
+    /** Boolean to verify if the transmission is possible */
+    bool canITransmit;
+    /**
   	 * Equiped vehicle in pourcentage, by default all vehicles
   	 * are equiped (100% = 1)
   	 */
-  	double equipedVehPc;
-
-  	/**
+    double equipedVehPc;
+    /**
   	 * Determine if this vehicle is equiped or not
   	 */
-  	bool isEquiped;
-
-  	int maxPcktLength;
-
-  	bool dontFragment;
-
-  	int dataLength;
-
-  	std::vector<double> cutPoitsCDF;
-
-  	int deletedBundlesWithAck;
-
-  	double lastBundleUpdate;
-
-  	bool withRestart;
-
-  	int nbrRestartedIEP;
-
-  	int nbrCancelRestartedIEP;
-
-  	std::map<LAddress::L3Type, double> lastBundleProposal;
-
+    bool isEquiped;
+    int maxPcktLength;
+    bool dontFragment;
+    int dataLength;
+    std::vector<double> cutPoitsCDF;
+    int deletedBundlesWithAck;
+    double lastBundleUpdate;
+    bool withRestart;
+    int nbrRestartedIEP;
+    int nbrCancelRestartedIEP;
+    std::map<LAddress::L3Type,double> lastBundleProposal;
     // self message to restart IEP after reception of new Bundles
-    cMessage* restartIEP;
-
+    cMessage *restartIEP;
     std::set<LAddress::L3Type> neighborsAddress;
-
     bool withConnectionRestart;
-
-	BaseMobility *mobility;
-
-	std::fstream contactTrFl;
-	double contactTrFlUpdatePeriod;
-	cMessage* contactTrFlMsg;
-	bool withContactTrFl;
-	string contactTrFlName;
-
-	simsignal_t receiveL3SignalId;
-
-
-	/*******************************************************************
+    BaseMobility *mobility;
+    std::fstream contactTrFl;
+    double contactTrFlUpdatePeriod;
+    cMessage *contactTrFlMsg;
+    bool withContactTrFl;
+    string contactTrFlName;
+    simsignal_t receiveL3SignalId;
+    std::set<unsigned long > bundleSentPerVPA;
+    std::set<unsigned long > ackReceivedPerVPA;
+    bool meetVPA;
+    long nbrNeighors;
+    long nbrCountForMeanNeighbors;
+    bool hadBundles;
+    std::list<double> vpaContactDuration;
+    std::list<double> vpaContactDistance;
+    /*******************************************************************
 	** 							Methods section
 	********************************************************************/
-
-  public:
+public:
     virtual void initialize(int stage);
-
     virtual void finish();
-
     virtual bool forceRestartIEP(LAddress::L3Type addr);
+    virtual bool hasBundlesToSend();
+    virtual bool resetStatPerVPA();
+    unsigned long nbrBundles() const;
+    unsigned long  nbrAckReceivedPerVpa() const;
+    unsigned long  nbrBundleSentPerVpa() const;
+    std::string  BundleSentPerVpaSerialToString() const;
+    bool isMeetVpa() const;
+    long getNbrCountForMeanNeighbors() const;
+    long getNbrNeighors() const;
+    bool isHadBundles() const;
+    std::pair<double,double> VPAContactDuration();
+    std::pair<double,double> VPAContactDistance();
 
   protected:
   	/**

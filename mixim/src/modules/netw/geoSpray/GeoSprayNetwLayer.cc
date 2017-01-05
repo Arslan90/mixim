@@ -19,6 +19,7 @@
 #include "VPApOpp.h"
 #include "algorithm"
 #include "list"
+#include "Coord.h"
 
 Define_Module(GeoSprayNetwLayer);
 
@@ -126,7 +127,12 @@ void GeoSprayNetwLayer::handleSelfMsg(cMessage *msg)
 		if (nodeType == Veh){
 			sectorId = geoTraci->getCurrentSector();
 		}
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,0, simTime(), true, nodeType));
+//		BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
+//		if (mobilityMod == NULL){
+//			opp_error("No mobility module found");
+//		}
+//		Coord currentPos = mobilityMod->getCurrentPosition();
+		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,0, simTime(), true, nodeType, Coord()));
 		GeoDtnNetwPkt* netwPkt;
 		sendingHelloMsg(netwPkt);
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
@@ -186,7 +192,7 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		return;
 	}else{
 		/*************************** Handling Hello Msg **********/
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), 0, 0, simTime() , true, netwPkt->getSrcType());
+	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), 0, 0, simTime() , true, netwPkt->getSrcType(),Coord());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
 
 //	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;

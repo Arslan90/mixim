@@ -11,6 +11,7 @@
 #include "multiFunctions.h"
 //#include "ApplOppControlInfo.h"
 #include "DtnNetwLayer.h"
+#include "clistener.h"
 
 Define_Module(VPApOpp);
 
@@ -53,6 +54,11 @@ void VPApOpp::initialize(int stage) {
     	}else{
     		opp_error("updateSectorCycle value cannot be negative(VPApOpp::initialize)");
     	}
+    	currentVehDensity = 0;
+
+    	currentVehInContact = 0;
+
+    	vehHasBndls = 0;
 
 //    	anyVPA = par("updateMode").boolValue();
 
@@ -68,6 +74,145 @@ void VPApOpp::initialize(int stage) {
 	    hopCountVector.setName("HopCount");
 
 	    vehicleDensity.setName("Vehicle Density");
+
+	    vehicleInContact.setName("Vehicle In Contact");
+
+		vehPassedBy = 0;
+		vehInRadio = 0;
+		vehInRadioHasBndls = 0;
+		vehHasBndls = 0;
+		vehNotSentBndl = 0;
+		vehSent0Bndl = 0;
+		vehSentFewBndl = 0;
+		vehSentAllBndl = 0;
+		vehMeanBndlSent = 0;
+		nbrMeanBndlSent = 0;
+		vehMeanBndlSuccSent = 0;
+		nbrMeanBndlSuccSent = 0;
+
+		vVehPassedBy.setName("total vehs");
+		vVehInRadio.setName("total vehs in contact");
+		vVehHasBndls.setName("total vehs have bndls");
+		vVehInRadioHasBndls.setName("total vehs in radio and have bndls");
+		vVehNotSentBndl.setName("total vehNotSentBndls");
+		vVehSent0Bndl.setName("total vehSent0Bndls");
+		vVehSentFewBndl.setName("total vehSentFewBndls");
+		vVehSentAllBndl.setName("total vehSentAllBndls");
+		vVehMeanBndlSent.setName("Mean Bndls Sents");
+		vVehMeanBndlSuccSent.setName("Mean Bndls Receiveds");
+
+		totalMeanNeighborNotSent = 0;
+		nbrMeanNeighborNotSent = 0;
+		vVehMeanNeighborsNotSent.setName("Mean Neighbors NotSent");
+
+		totalMeanNeighbor0Sent = 0;
+		nbrMeanNeighbor0Sent = 0;
+		vVehMeanNeighbors0Sent.setName("Mean Neighbors 0 Sent");
+
+		totalMeanNeighborFewSent = 0;
+		nbrMeanNeighborFewSent = 0;
+		vVehMeanNeighborsFewSent.setName("Mean Neighbors Few Sent");
+
+		totalMeanNeighborAllSent = 0;
+		nbrMeanNeighborAllSent = 0;
+		vVehMeanNeighborsAllSent.setName("Mean Neighbors All Sent");
+
+		totalMeanVPAContactNotSent = 0;
+		nbrMeanVPAContactNotSent = 0;
+		vVehMeanVPAContactsNotSent.setName("Mean VPA Contacts NotSent");
+
+		totalMeanVPAContact0Sent = 0;
+		nbrMeanVPAContact0Sent = 0;
+		vVehMeanVPAContacts0Sent.setName("Mean VPA Contacts 0 Sent");
+
+		totalMeanVPAContactFewSent = 0;
+		nbrMeanVPAContactFewSent = 0;
+		vVehMeanVPAContactsFewSent.setName("Mean VPA Contacts Few Sent");
+
+		totalMeanVPAContactAllSent = 0;
+		nbrMeanVPAContactAllSent = 0;
+		vVehMeanVPAContactsAllSent.setName("Mean VPA Contacts All Sent");
+
+		totalMeanVPADistanceNotSent = 0;
+		nbrMeanVPADistanceNotSent = 0;
+		vVehMeanVPADistancesNotSent.setName("Mean VPA Distances NotSent");
+
+		totalMeanVPADistance0Sent = 0;
+		nbrMeanVPADistance0Sent = 0;
+		vVehMeanVPADistances0Sent.setName("Mean VPA Distances 0 Sent");
+
+		totalMeanVPADistanceFewSent = 0;
+		nbrMeanVPADistanceFewSent = 0;
+		vVehMeanVPADistancesFewSent.setName("Mean VPA Distances Few Sent");
+
+		totalMeanVPADistanceAllSent = 0;
+		nbrMeanVPADistanceAllSent = 0;
+		vVehMeanVPADistancesAllSent.setName("Mean VPA Distances All Sent");
+
+		vehCustody = 0;
+		vehCusInRadio = 0;
+		vehCusInRadioHasBndls = 0;
+		vehCusNotSentBndl = 0;
+		vehCusSent0Bndl = 0;
+		vehCusSentFewBndl = 0;
+		vehCusSentAllBndl = 0;
+
+		vVehCustody.setName("total vehs with dist 0");
+		vVehCusInRadio.setName("total VehCus in contact");
+		vVehCusInRadioHasBndls.setName("total VehCus in radio and have bndls");
+		vVehCusNotSentBndl.setName("total VehCus NotSentBndls");
+		vVehCusSent0Bndl.setName("total VehCus Sent0Bndls");
+		vVehCusSentFewBndl.setName("total VehCus SentFewBndls");
+		vVehCusSentAllBndl.setName("total VehCus SentAllBndls");
+
+		totalMeanCusNeighborNotSent = 0;
+		nbrMeanCusNeighborNotSent = 0;
+		vVehMeanCusNeighborsNotSent.setName("MeanCus Neighbors NotSent");
+
+		totalMeanCusNeighbor0Sent = 0;
+		nbrMeanCusNeighbor0Sent = 0;
+		vVehMeanCusNeighbors0Sent.setName("MeanCus Neighbors 0 Sent");
+
+		totalMeanCusNeighborFewSent = 0;
+		nbrMeanCusNeighborFewSent = 0;
+		vVehMeanCusNeighborsFewSent.setName("MeanCus Neighbors Few Sent");
+
+		totalMeanCusNeighborAllSent = 0;
+		nbrMeanCusNeighborAllSent = 0;
+		vVehMeanCusNeighborsAllSent.setName("MeanCus Neighbors All Sent");
+
+		totalMeanCusVPAContactNotSent = 0;
+		nbrMeanCusVPAContactNotSent = 0;
+		vVehMeanCusVPAContactsNotSent.setName("MeanCus VPA Contacts NotSent");
+
+		totalMeanCusVPAContact0Sent = 0;
+		nbrMeanCusVPAContact0Sent = 0;
+		vVehMeanCusVPAContacts0Sent.setName("MeanCus VPA Contacts 0 Sent");
+
+		totalMeanCusVPAContactFewSent = 0;
+		nbrMeanCusVPAContactFewSent = 0;
+		vVehMeanCusVPAContactsFewSent.setName("MeanCus VPA Contacts Few Sent");
+
+		totalMeanCusVPAContactAllSent = 0;
+		nbrMeanCusVPAContactAllSent = 0;
+		vVehMeanCusVPAContactsAllSent.setName("MeanCus VPA Contacts All Sent");
+
+		totalMeanCusVPADistanceNotSent = 0;
+		nbrMeanCusVPADistanceNotSent = 0;
+		vVehMeanCusVPADistancesNotSent.setName("MeanCus VPA Distances NotSent");
+
+		totalMeanCusVPADistance0Sent = 0;
+		nbrMeanCusVPADistance0Sent = 0;
+		vVehMeanCusVPADistances0Sent.setName("MeanCus VPA Distances 0 Sent");
+
+		totalMeanCusVPADistanceFewSent = 0;
+		nbrMeanCusVPADistanceFewSent = 0;
+		vVehMeanCusVPADistancesFewSent.setName("MeanCus VPA Distances Few Sent");
+
+		totalMeanCusVPADistanceAllSent = 0;
+		nbrMeanCusVPADistanceAllSent = 0;
+		vVehMeanCusVPADistancesAllSent.setName("MeanCus VPA Distances All Sent");
+
 
 //    	dtnTestMode = par("dtnTestMode").boolValue();
 //    	silentMode = par("silentMode").boolValue();
@@ -133,6 +278,10 @@ void VPApOpp::initialize(int stage) {
 			 * nodes TX at same time. for the 802.11 big problems arise with only 2 nodes.  */
 		}
 
+		simulation.getSystemModule()->subscribe("sectorChanged", this);
+
+		simulation.getSystemModule()->subscribe("InContact", this);
+
 	}
 }
 
@@ -168,6 +317,99 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 			vehiclesAddr.clear();
 	    	if (updateSectorCycle >=0){
 	    		scheduleAt(simTime()+updateSectorCycle,update);
+	    		vehicleDensity.record(currentVehDensity);
+	    		vehicleInContact.record(currentVehInContact);
+	    		vVehPassedBy.record(vehPassedBy);
+	    		vVehHasBndls.record(vehHasBndls);
+	    		vVehInRadio.record(vehInRadio);
+	    		vVehInRadioHasBndls.record(vehInRadioHasBndls);
+	    		vVehNotSentBndl.record(vehNotSentBndl);
+	    		vVehSent0Bndl.record(vehSent0Bndl);
+	    		vVehSentFewBndl.record(vehSentFewBndl);
+	    		vVehSentAllBndl.record(vehSentAllBndl);
+//	    		double meanBndlSent = (vehMeanBndlSent == 0) ? 0:double(vehMeanBndlSent)/double(nbrMeanBndlSent);
+//	    		vVehMeanBndlSent.record(meanBndlSent);
+//	    		double meanBndlSuccSent = (vehMeanBndlSuccSent == 0) ? 0:double(vehMeanBndlSuccSent)/double(nbrMeanBndlSuccSent);
+//	    		vVehMeanBndlSuccSent.record(meanBndlSuccSent);
+	    		double meanNeighborsNotSent = (nbrMeanNeighborNotSent == 0) ? 0: double(double(totalMeanNeighborNotSent)/double(nbrMeanNeighborNotSent));
+	    		vVehMeanNeighborsNotSent.record(meanNeighborsNotSent);
+
+	    		double meanNeighbors0Sent = (nbrMeanNeighbor0Sent == 0) ? 0: double(double(totalMeanNeighbor0Sent)/double(nbrMeanNeighbor0Sent));
+	    		vVehMeanNeighbors0Sent.record(meanNeighbors0Sent);
+
+	    		double meanNeighborsFewSent = (nbrMeanNeighborFewSent == 0) ? 0: double(double(totalMeanNeighborFewSent)/double(nbrMeanNeighborFewSent));
+	    		vVehMeanNeighborsFewSent.record(meanNeighborsFewSent);
+
+	    		double meanNeighborsAllSent = (nbrMeanNeighborAllSent == 0) ? 0: double(double(totalMeanNeighborAllSent)/double(nbrMeanNeighborAllSent));
+	    		vVehMeanNeighborsAllSent.record(meanNeighborsAllSent);
+
+	    		double MeanVPAContactsNotSent = (nbrMeanVPAContactNotSent == 0) ? 0: double(double(totalMeanVPAContactNotSent)/double(nbrMeanVPAContactNotSent));
+	    		vVehMeanVPAContactsNotSent.record(MeanVPAContactsNotSent);
+
+	    		double MeanVPAContacts0Sent = (nbrMeanVPAContact0Sent == 0) ? 0: double(double(totalMeanVPAContact0Sent)/double(nbrMeanVPAContact0Sent));
+	    		vVehMeanVPAContacts0Sent.record(MeanVPAContacts0Sent);
+
+	    		double MeanVPAContactsFewSent = (nbrMeanVPAContactFewSent == 0) ? 0: double(double(totalMeanVPAContactFewSent)/double(nbrMeanVPAContactFewSent));
+	    		vVehMeanVPAContactsFewSent.record(MeanVPAContactsFewSent);
+
+	    		double MeanVPAContactsAllSent = (nbrMeanVPAContactAllSent == 0) ? 0: double(double(totalMeanVPAContactAllSent)/double(nbrMeanVPAContactAllSent));
+	    		vVehMeanVPAContactsAllSent.record(MeanVPAContactsAllSent);
+
+	    		double MeanVPADistancesNotSent = (nbrMeanVPADistanceNotSent == 0) ? 0: double(double(totalMeanVPADistanceNotSent)/double(nbrMeanVPADistanceNotSent));
+	    		vVehMeanVPADistancesNotSent.record(MeanVPADistancesNotSent);
+
+	    		double MeanVPADistances0Sent = (nbrMeanVPADistance0Sent == 0) ? 0: double(double(totalMeanVPADistance0Sent)/double(nbrMeanVPADistance0Sent));
+	    		vVehMeanVPADistances0Sent.record(MeanVPADistances0Sent);
+
+	    		double MeanVPADistancesFewSent = (nbrMeanVPADistanceFewSent == 0) ? 0: double(double(totalMeanVPADistanceFewSent)/double(nbrMeanVPADistanceFewSent));
+	    		vVehMeanVPADistancesFewSent.record(MeanVPADistancesFewSent);
+
+	    		double MeanVPADistancesAllSent = (nbrMeanVPADistanceAllSent == 0) ? 0: double(double(totalMeanVPADistanceAllSent)/double(nbrMeanVPADistanceAllSent));
+	    		vVehMeanVPADistancesAllSent.record(MeanVPADistancesAllSent);
+
+	    		vVehCustody.record(vehCustody);
+	    		vVehCusInRadio.record(vehCusInRadio);
+	    		vVehCusInRadioHasBndls.record(vehCusInRadioHasBndls);
+	    		vVehCusNotSentBndl.record(vehCusNotSentBndl);
+	    		vVehCusSent0Bndl.record(vehCusSent0Bndl);
+	    		vVehCusSentFewBndl.record(vehCusSentFewBndl);
+	    		vVehCusSentAllBndl.record(vehCusSentAllBndl);
+
+	    		double MeanCusNeighborsNotSent = (nbrMeanCusNeighborNotSent == 0) ? 0: double(double(totalMeanCusNeighborNotSent)/double(nbrMeanCusNeighborNotSent));
+	    		vVehMeanCusNeighborsNotSent.record(MeanCusNeighborsNotSent);
+
+	    		double MeanCusNeighbors0Sent = (nbrMeanCusNeighbor0Sent == 0) ? 0: double(double(totalMeanCusNeighbor0Sent)/double(nbrMeanCusNeighbor0Sent));
+	    		vVehMeanCusNeighbors0Sent.record(MeanCusNeighbors0Sent);
+
+	    		double MeanCusNeighborsFewSent = (nbrMeanCusNeighborFewSent == 0) ? 0: double(double(totalMeanCusNeighborFewSent)/double(nbrMeanCusNeighborFewSent));
+	    		vVehMeanCusNeighborsFewSent.record(MeanCusNeighborsFewSent);
+
+	    		double MeanCusNeighborsAllSent = (nbrMeanCusNeighborAllSent == 0) ? 0: double(double(totalMeanCusNeighborAllSent)/double(nbrMeanCusNeighborAllSent));
+	    		vVehMeanCusNeighborsAllSent.record(MeanCusNeighborsAllSent);
+
+	    		double MeanCusVPAContactsNotSent = (nbrMeanCusVPAContactNotSent == 0) ? 0: double(double(totalMeanCusVPAContactNotSent)/double(nbrMeanCusVPAContactNotSent));
+	    		vVehMeanCusVPAContactsNotSent.record(MeanCusVPAContactsNotSent);
+
+	    		double MeanCusVPAContacts0Sent = (nbrMeanCusVPAContact0Sent == 0) ? 0: double(double(totalMeanCusVPAContact0Sent)/double(nbrMeanCusVPAContact0Sent));
+	    		vVehMeanCusVPAContacts0Sent.record(MeanCusVPAContacts0Sent);
+
+	    		double MeanCusVPAContactsFewSent = (nbrMeanCusVPAContactFewSent == 0) ? 0: double(double(totalMeanCusVPAContactFewSent)/double(nbrMeanCusVPAContactFewSent));
+	    		vVehMeanCusVPAContactsFewSent.record(MeanCusVPAContactsFewSent);
+
+	    		double MeanCusVPAContactsAllSent = (nbrMeanCusVPAContactAllSent == 0) ? 0: double(double(totalMeanCusVPAContactAllSent)/double(nbrMeanCusVPAContactAllSent));
+	    		vVehMeanCusVPAContactsAllSent.record(MeanCusVPAContactsAllSent);
+
+	    		double MeanCusVPADistancesNotSent = (nbrMeanCusVPADistanceNotSent == 0) ? 0: double(double(totalMeanCusVPADistanceNotSent)/double(nbrMeanCusVPADistanceNotSent));
+	    		vVehMeanCusVPADistancesNotSent.record(MeanCusVPADistancesNotSent);
+
+	    		double MeanCusVPADistances0Sent = (nbrMeanCusVPADistance0Sent == 0) ? 0: double(double(totalMeanCusVPADistance0Sent)/double(nbrMeanCusVPADistance0Sent));
+	    		vVehMeanCusVPADistances0Sent.record(MeanCusVPADistances0Sent);
+
+	    		double MeanCusVPADistancesFewSent = (nbrMeanCusVPADistanceFewSent == 0) ? 0: double(double(totalMeanCusVPADistanceFewSent)/double(nbrMeanCusVPADistanceFewSent));
+	    		vVehMeanCusVPADistancesFewSent.record(MeanCusVPADistancesFewSent);
+
+	    		double MeanCusVPADistancesAllSent = (nbrMeanCusVPADistanceAllSent == 0) ? 0: double(double(totalMeanCusVPADistanceAllSent)/double(nbrMeanCusVPADistanceAllSent));
+	    		vVehMeanCusVPADistancesAllSent.record(MeanCusVPADistancesAllSent);
 	    	}else{
 	    		opp_error("updateSectorCycle value cannot be negative(VPApOpp::handleSelfMsg)");
 	    	}
@@ -214,8 +456,8 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 			nbrUniqueBundleReceived++;
 
 			vehiclesAddr.insert(wsm->getSenderAddress());
-			int currentVehDensity = vehiclesAddr.size();
-			vehicleDensity.record(currentVehDensity);
+//			int currentVehDensity = vehiclesAddr.size();
+//			vehicleDensity.record(currentVehDensity);
 
 			totalDelay = totalDelay + time.dbl();
 			if (nbrUniqueBundleReceived>0){
@@ -373,6 +615,258 @@ void VPApOpp::sendDtnMessage()
 	}
 }
 
+void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char *s)
+{
+	Enter_Method_Silent();
+	if (strcmp(getSignalName(signalID),"sectorChanged") == 0){
+		int oldSectorId,newSectorId,nbrBndls,inContact,isDistZero,totalNeighbors,nbrCountNeighbors;
+		double totalVPAContactDur, nbrVPAContactDur, totalVPADistanceDur, nbrVPADistanceDur;
+		char* oldSectorChar = strtok(strdup(s),":");
+		std::stringstream ss1 (oldSectorChar);
+		ss1 >> oldSectorId;
+		char* newSectorChar = strtok(NULL,":");
+		std::stringstream ss2 (newSectorChar);
+		ss2 >> newSectorId;
+		std::stringstream ss5 (strtok(NULL,":"));
+		ss5 >> nbrBndls;
+		std::stringstream ss3 (strtok(NULL,":"));
+		ss3 >> inContact;
+		std::stringstream ss4 (strtok(NULL,":"));
+		ss4 >> isDistZero;
+		char* bndleSentSerials = strtok(NULL,":");
+		std::stringstream ss6 (strtok(NULL,":"));
+		ss6 >> totalNeighbors;
+		std::stringstream ss7 (strtok(NULL,":"));
+		ss7 >> nbrCountNeighbors;
+		std::stringstream ss8 (strtok(NULL,":"));
+		ss8 >> totalVPAContactDur;
+		std::stringstream ss9 (strtok(NULL,":"));
+		ss9 >> nbrVPAContactDur;
+		std::stringstream ss10 (strtok(NULL,":"));
+		ss10 >> totalVPADistanceDur;
+		std::stringstream ss11 (strtok(NULL,":"));
+		ss11 >> nbrVPADistanceDur;
+
+		int sentToVPA = 0;
+		int receivedByVPA = 0;
+		char* serial = strtok(strdup(bndleSentSerials),",");
+		while (serial != NULL){
+			if (strcmp(serial,"")!=0){
+				sentToVPA++;
+			}
+			if ((strcmp(serial,"")!=0)&&(receivedBundles.find(atoi(serial)) != receivedBundles.end())){
+				receivedByVPA++;
+			}
+			serial = strtok(NULL,",");
+		}
+
+		bool contactedVPA;
+		if (inContact == 1){
+			contactedVPA = true;
+		}else if (inContact == 0){
+			contactedVPA = false;
+		}else {
+			opp_error("unable to recognize if veh contacted vpa or not");
+		}
+
+		bool custodyVeh;
+		if ( isDistZero == 1){
+			custodyVeh = true;
+		}else if (isDistZero == 0){
+			custodyVeh = false;
+		}else {
+			opp_error("unable to recognize if veh is a possible custody veh or not");
+		}
+
+		if (this->getParentModule()->getIndex() == oldSectorId){
+			currentVehDensity--;
+			vehPassedBy++;
+			if (nbrBndls > 0){ vehHasBndls++;}
+			if (contactedVPA){
+				vehInRadio++;
+				if (nbrBndls > 0){
+					vehInRadioHasBndls++;
+					if (sentToVPA == 0){
+						totalMeanNeighborNotSent+=totalNeighbors;
+						nbrMeanNeighborNotSent+=nbrCountNeighbors;
+						totalMeanVPAContactNotSent+=totalVPAContactDur;
+						nbrMeanVPAContactNotSent+=nbrVPAContactDur;
+						totalMeanVPADistanceNotSent+=totalVPADistanceDur;
+						nbrMeanVPADistanceNotSent+=nbrVPADistanceDur;
+						vehNotSentBndl++;
+					}else if (sentToVPA > 0){
+						if (receivedByVPA == 0){
+							totalMeanNeighbor0Sent+=totalNeighbors;
+							nbrMeanNeighbor0Sent+=nbrCountNeighbors;
+							totalMeanVPAContact0Sent+=totalVPAContactDur;
+							nbrMeanVPAContact0Sent+=nbrVPAContactDur;
+							totalMeanVPADistance0Sent+=totalVPADistanceDur;
+							nbrMeanVPADistance0Sent+=nbrVPADistanceDur;
+							vehSent0Bndl++;
+						}else if (receivedByVPA > 0){
+							if (receivedByVPA < sentToVPA){
+								totalMeanNeighborFewSent+=totalNeighbors;
+								nbrMeanNeighborFewSent+=nbrCountNeighbors;
+								totalMeanVPAContactFewSent+=totalVPAContactDur;
+								nbrMeanVPAContactFewSent+=nbrVPAContactDur;
+								totalMeanVPADistanceFewSent+=totalVPADistanceDur;
+								nbrMeanVPADistanceFewSent+=nbrVPADistanceDur;
+								vehSentFewBndl++;
+							}else if (receivedByVPA == sentToVPA){
+								totalMeanNeighborAllSent+=totalNeighbors;
+								nbrMeanNeighborAllSent+=nbrCountNeighbors;
+								totalMeanVPAContactAllSent+=totalVPAContactDur;
+								nbrMeanVPAContactAllSent+=nbrVPAContactDur;
+								totalMeanVPADistanceAllSent+=totalVPADistanceDur;
+								nbrMeanVPADistanceAllSent+=nbrVPADistanceDur;
+								vehSentAllBndl++;
+							}else {
+								opp_error("Nbr msg received cannot be higher than those sent");
+							}
+						}else{
+							opp_error("Unable to recognize if veh sent successfully bndls to VPA");
+						}
+					}else {
+						opp_error("Unable to recognize if veh sent bndls to VPA");
+					}
+				}else if (nbrBndls ==0){
+					// veh in radio but had not bndls
+				}else {
+					opp_error("Unable to recognize if veh had bndls");
+				}
+			}
+
+			if (custodyVeh){
+				vehCustody++;
+				if (contactedVPA){
+					vehCusInRadio++;
+					if (nbrBndls > 0){
+						vehCusInRadioHasBndls++;
+						if (sentToVPA == 0){
+							totalMeanCusNeighborNotSent+=totalNeighbors;
+							nbrMeanCusNeighborNotSent+=nbrCountNeighbors;
+							totalMeanCusVPAContactNotSent+=totalVPAContactDur;
+							nbrMeanCusVPAContactNotSent+=nbrVPAContactDur;
+							totalMeanCusVPADistanceNotSent+=totalVPADistanceDur;
+							nbrMeanCusVPADistanceNotSent+=nbrVPADistanceDur;
+							vehCusNotSentBndl++;
+						}else if (sentToVPA > 0){
+							if (receivedByVPA == 0){
+								totalMeanCusNeighbor0Sent+=totalNeighbors;
+								nbrMeanCusNeighbor0Sent+=nbrCountNeighbors;
+								totalMeanCusVPAContact0Sent+=totalVPAContactDur;
+								nbrMeanCusVPAContact0Sent+=nbrVPAContactDur;
+								totalMeanCusVPADistance0Sent+=totalVPADistanceDur;
+								nbrMeanCusVPADistance0Sent+=nbrVPADistanceDur;
+								vehCusSent0Bndl++;
+							}else if (receivedByVPA > 0){
+								if (receivedByVPA < sentToVPA){
+									totalMeanCusNeighborFewSent+=totalNeighbors;
+									nbrMeanCusNeighborFewSent+=nbrCountNeighbors;
+									totalMeanCusVPAContactFewSent+=totalVPAContactDur;
+									nbrMeanCusVPAContactFewSent+=nbrVPAContactDur;
+									totalMeanCusVPADistanceFewSent+=totalVPADistanceDur;
+									nbrMeanCusVPADistanceFewSent+=nbrVPADistanceDur;
+									vehCusSentFewBndl++;
+								}else if (receivedByVPA == sentToVPA){
+									totalMeanCusNeighborAllSent+=totalNeighbors;
+									nbrMeanCusNeighborAllSent+=nbrCountNeighbors;
+									totalMeanCusVPAContactAllSent+=totalVPAContactDur;
+									nbrMeanCusVPAContactAllSent+=nbrVPAContactDur;
+									totalMeanCusVPADistanceAllSent+=totalVPADistanceDur;
+									nbrMeanCusVPADistanceAllSent+=nbrVPADistanceDur;
+									vehCusSentAllBndl++;
+								}else {
+									opp_error("Nbr msg received cannot be higher than those sent");
+								}
+							}else{
+								opp_error("Unable to recognize if veh sent successfully bndls to VPA");
+							}
+						}else {
+							opp_error("Unable to recognize if veh sent bndls to VPA");
+						}
+					}else if (nbrBndls ==0){
+						// veh in radio but had not bndls
+					}else {
+						opp_error("Unable to recognize if veh had bndls");
+					}
+				}
+			}
+
+
+
+//			vehInRadio = vehInRadio+inContact;
+//			if (inContact == 1){
+////				if((sentToVPA > 0) || (nbrBndls > 0)){
+//				if((nbrBndls > 0)){
+//					vehInRadioHasBndls++;
+//					vehHasBndls ++;
+//				}
+//				if (sentToVPA > 0){
+//					if (receivedByVPA != 0){
+//						totalMeanNeighborSent+=totalNeighbors;
+//						nbrMeanNeighborSent+=nbrCountNeighbors;
+//					}else {
+//						totalMeanNeighborNotSent+=totalNeighbors;
+//						nbrMeanNeighborNotSent+=nbrCountNeighbors;
+//					}
+//				}
+//			}else{
+//				if (nbrBndls > 0){
+//					vehHasBndls ++;
+//				}
+//			}
+//			if (sentToVPA > 0){
+//				if ((receivedByVPA == 0)&&(receivedByVPA < sentToVPA)){
+//					vehSent0Bndl++;
+//				}
+//				if ((receivedByVPA > 0)&&(receivedByVPA < sentToVPA)){
+//					vehSentFewBndl++;
+//				}
+//				if (receivedByVPA == sentToVPA){
+//					vehSentAllBndl++;
+//				}
+//
+//				vehMeanBndlSent+=sentToVPA;
+//				nbrMeanBndlSent++;
+//				if (receivedByVPA > 0){
+//					vehMeanBndlSuccSent+=receivedByVPA;
+//					nbrMeanBndlSuccSent++;
+//				}
+//			}
+//			if ((inContact ==1) && (nbrBndls > 0) && (sentToVPA ==0)){
+//				vehNotSentBndl++;
+//			}
+		}
+
+		if (this->getParentModule()->getIndex() == newSectorId){
+			currentVehDensity++;
+//			vehicleDensity.record(currentVehDensity);
+		}
+//		cout << "Received signal with string: " << s << " old sector char: " << oldSectorChar << " new sector char: "<< newSectorChar << endl;
+
+	}
+
+	if (strcmp(getSignalName(signalID),"InContact") == 0){
+		int SectorAddr,value,  haveBndlsId;
+		char* SectorAddrChar = strtok(strdup(s),":");
+		std::stringstream ss1 (SectorAddrChar);
+		ss1 >> SectorAddr;
+		char* valueChar = strtok(NULL,":");
+		std::stringstream ss2 (valueChar);
+		ss2 >> value;
+//		char* haveBndlsChar = strtok(NULL,":");
+//		std::stringstream ss3 (haveBndlsChar);
+//		ss3 >> haveBndlsId;
+		if (netwAddr == SectorAddr){
+			currentVehInContact = currentVehInContact + value;
+//			currentVehHaveBndls = currentVehHaveBndls + haveBndlsId;
+		}
+//		cout << "Received signal with string: " << s << " old sector char: " << oldSectorChar << " new sector char: "<< newSectorChar << endl;
+
+	}
+}
+
 int VPApOpp::randomVPADestAddr()
 {
 	int vpaDestAddr = -2;
@@ -424,6 +918,8 @@ VPApOpp::~VPApOpp() {
 void VPApOpp::finish()
 {
 	DtnApplLayer::finish();
+	simulation.getSystemModule()->unsubscribe("sectorChanged", this);
+	simulation.getSystemModule()->unsubscribe("InContact", this);
 }
 
 

@@ -17,6 +17,7 @@ cplusplus {{
 #include "NetwPkt_m.h"
 #include "SimpleAddress.h"
 #include "BundleMeta.h"
+#include "Coord.h"
 typedef std::list<BundleMeta> bndlMeta;
 typedef std::set<LAddress::L3Type> Neighbors;
 typedef std::set<unsigned long> E2EAcks;
@@ -33,6 +34,7 @@ class noncobject Neighbors;
 class noncobject E2EAcks;
 class noncobject H2PAcks;
 class noncobject CustodyAcks;
+class Coord extends cObject;
 //
 // TODO generated message class
 //
@@ -58,6 +60,7 @@ packet GeoDtnNetwPkt extends NetwPkt {
     H2PAcks h2hAcks;
     CustodyAcks custodyAcks;
     int nbrReplica;
+    Coord currentPos;
     
     int result_Field @enum(t_result_field);
     int identifier;

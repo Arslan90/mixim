@@ -9,6 +9,7 @@
 #define NETWROUTE_H_
 
 #include "SimpleAddress.h"
+#include "Coord.h"
 
 class NetwRoute {
 protected:
@@ -18,11 +19,12 @@ protected:
 	simtime_t timestamp;
 	bool status;
 	int nodeType;
+	Coord currentPos;
 public:
-	NetwRoute():destAddr(LAddress::L3NULL), destMETD(0.0), destDist(0.0), timestamp(0), status(false), nodeType(-1){};
+	NetwRoute():destAddr(LAddress::L3NULL), destMETD(0.0), destDist(0.0), timestamp(0), status(false), nodeType(-1), currentPos(Coord()){};
 //	NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDist, simtime_t creationTime, bool currentStatus):
 //		destAddr(addr), destMETD(currentMETD), destDist(currentDist), timestamp(creationTime), status(currentStatus){};
-	NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDist, simtime_t creationTime, bool currentStatus, int nodType);
+	NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDist, simtime_t creationTime, bool currentStatus, int nodType, Coord pos);
 	virtual ~NetwRoute();
 
     LAddress::L3Type getDestAddr() const;
@@ -37,6 +39,8 @@ public:
     void setTimestamp(simtime_t timestamp);
     int getNodeType() const;
     void setNodeType(int nodeType);
+    Coord getCurrentPos() const;
+    void setCurrentPos(Coord currentPos);
 };
 
 #endif /* NETWROUTE_H_ */

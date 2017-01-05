@@ -12,7 +12,7 @@
 //
 //}
 
-NetwRoute::NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDist, simtime_t creationTime, bool currentStatus, int nodType)
+NetwRoute::NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDist, simtime_t creationTime, bool currentStatus, int nodType, Coord pos)
 {
 	destAddr = addr;
 	destMETD = currentMETD;
@@ -27,7 +27,7 @@ NetwRoute::NetwRoute(LAddress::L3Type addr, double currentMETD, double currentDi
 		opp_error("Dist_NP_VPA for this route is negative");
 	}
 	nodeType = nodType;
-
+	currentPos = pos;
 }
 
 LAddress::L3Type NetwRoute::getDestAddr() const
@@ -78,6 +78,16 @@ void NetwRoute::setStatus(bool status)
 int NetwRoute::getNodeType() const
 {
     return nodeType;
+}
+
+Coord NetwRoute::getCurrentPos() const
+{
+    return currentPos;
+}
+
+void NetwRoute::setCurrentPos(Coord currentPos)
+{
+    this->currentPos = currentPos;
 }
 
 void NetwRoute::setNodeType(int nodeType)

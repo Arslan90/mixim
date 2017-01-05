@@ -31,12 +31,14 @@
 #endif
 //#define DBG std::cerr << "[" << simTime().raw() << "] " << getParentModule()->getFullPath()
 
-class VPApOpp  : 	public DtnApplLayer {
+class VPApOpp  : 	public DtnApplLayer{
 	public:
 
 		virtual ~VPApOpp();
 
 		virtual void initialize(int stage);
+
+		virtual void receiveSignal(cComponent *source, simsignal_t signalID, const char *s);
 
     /**ARTURO  @brief Message kinds used by this layer */
     enum MyTestApplMessageKinds{ SEND_BROADCAST_TIMER = LAST_BASE_APPL_MESSAGE_KIND, //internal timer
@@ -97,6 +99,136 @@ class VPApOpp  : 	public DtnApplLayer {
 		int updateSectorCycle;
 		cMessage* update;
 		cOutVector vehicleDensity;
+		int currentVehDensity;
+
+		cOutVector vehicleInContact;
+		int currentVehInContact;
+
+		int vehPassedBy;
+		int vehHasBndls;
+		int vehInRadio;
+		int vehInRadioHasBndls;
+		int vehNotSentBndl;
+		int vehSent0Bndl;
+		int vehSentFewBndl;
+		int vehSentAllBndl;
+		int vehMeanBndlSent;
+		int nbrMeanBndlSent;
+		int vehMeanBndlSuccSent;
+		int nbrMeanBndlSuccSent;
+
+		cOutVector vVehPassedBy;
+		cOutVector vVehInRadio;
+		cOutVector vVehHasBndls;
+		cOutVector vVehInRadioHasBndls;
+		cOutVector vVehNotSentBndl;
+		cOutVector vVehSent0Bndl;
+		cOutVector vVehSentFewBndl;
+		cOutVector vVehSentAllBndl;
+		cOutVector vVehMeanBndlSent;
+		cOutVector vVehMeanBndlSuccSent;
+
+		long totalMeanNeighborAllSent;
+		long nbrMeanNeighborAllSent;
+		long totalMeanNeighborNotSent;
+		long nbrMeanNeighborNotSent;
+		cOutVector vVehMeanNeighborsAllSent;
+		cOutVector vVehMeanNeighborsNotSent;
+
+		long totalMeanNeighbor0Sent;
+		long nbrMeanNeighbor0Sent;
+		long totalMeanNeighborFewSent;
+		long nbrMeanNeighborFewSent;
+		cOutVector vVehMeanNeighbors0Sent;
+		cOutVector vVehMeanNeighborsFewSent;
+
+		double totalMeanVPAContactAllSent;
+		double nbrMeanVPAContactAllSent;
+		double totalMeanVPAContactNotSent;
+		double nbrMeanVPAContactNotSent;
+		cOutVector vVehMeanVPAContactsAllSent;
+		cOutVector vVehMeanVPAContactsNotSent;
+
+		double totalMeanVPAContact0Sent;
+		double nbrMeanVPAContact0Sent;
+		double totalMeanVPAContactFewSent;
+		double nbrMeanVPAContactFewSent;
+		cOutVector vVehMeanVPAContacts0Sent;
+		cOutVector vVehMeanVPAContactsFewSent;
+
+		double totalMeanVPADistanceAllSent;
+		double nbrMeanVPADistanceAllSent;
+		double totalMeanVPADistanceNotSent;
+		double nbrMeanVPADistanceNotSent;
+		cOutVector vVehMeanVPADistancesAllSent;
+		cOutVector vVehMeanVPADistancesNotSent;
+
+		double totalMeanVPADistance0Sent;
+		double nbrMeanVPADistance0Sent;
+		double totalMeanVPADistanceFewSent;
+		double nbrMeanVPADistanceFewSent;
+		cOutVector vVehMeanVPADistances0Sent;
+		cOutVector vVehMeanVPADistancesFewSent;
+
+		////////////////////Custody Section ////////////////
+		int vehCustody;
+		cOutVector vVehCustody;
+
+		int vehCusInRadio;
+		int vehCusInRadioHasBndls;
+		int vehCusNotSentBndl;
+		int vehCusSent0Bndl;
+		int vehCusSentFewBndl;
+		int vehCusSentAllBndl;
+
+		cOutVector vVehCusInRadio;
+		cOutVector vVehCusInRadioHasBndls;
+		cOutVector vVehCusNotSentBndl;
+		cOutVector vVehCusSent0Bndl;
+		cOutVector vVehCusSentFewBndl;
+		cOutVector vVehCusSentAllBndl;
+
+		long totalMeanCusNeighborAllSent;
+		long nbrMeanCusNeighborAllSent;
+		long totalMeanCusNeighborNotSent;
+		long nbrMeanCusNeighborNotSent;
+		cOutVector vVehMeanCusNeighborsAllSent;
+		cOutVector vVehMeanCusNeighborsNotSent;
+
+		long totalMeanCusNeighbor0Sent;
+		long nbrMeanCusNeighbor0Sent;
+		long totalMeanCusNeighborFewSent;
+		long nbrMeanCusNeighborFewSent;
+		cOutVector vVehMeanCusNeighbors0Sent;
+		cOutVector vVehMeanCusNeighborsFewSent;
+
+		double totalMeanCusVPAContactAllSent;
+		double nbrMeanCusVPAContactAllSent;
+		double totalMeanCusVPAContactNotSent;
+		double nbrMeanCusVPAContactNotSent;
+		cOutVector vVehMeanCusVPAContactsAllSent;
+		cOutVector vVehMeanCusVPAContactsNotSent;
+
+		double totalMeanCusVPAContact0Sent;
+		double nbrMeanCusVPAContact0Sent;
+		double totalMeanCusVPAContactFewSent;
+		double nbrMeanCusVPAContactFewSent;
+		cOutVector vVehMeanCusVPAContacts0Sent;
+		cOutVector vVehMeanCusVPAContactsFewSent;
+
+		double totalMeanCusVPADistanceAllSent;
+		double nbrMeanCusVPADistanceAllSent;
+		double totalMeanCusVPADistanceNotSent;
+		double nbrMeanCusVPADistanceNotSent;
+		cOutVector vVehMeanCusVPADistancesAllSent;
+		cOutVector vVehMeanCusVPADistancesNotSent;
+
+		double totalMeanCusVPADistance0Sent;
+		double nbrMeanCusVPADistance0Sent;
+		double totalMeanCusVPADistanceFewSent;
+		double nbrMeanCusVPADistanceFewSent;
+		cOutVector vVehMeanCusVPADistances0Sent;
+		cOutVector vVehMeanCusVPADistancesFewSent;
 
 
 		  void sendVPApBroadcast(int messageSequenced);//send numerated broadcast.

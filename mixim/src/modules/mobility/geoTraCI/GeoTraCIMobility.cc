@@ -27,6 +27,8 @@
 //#include <unistd.h>
 #include "myConstants.h"
 #include "errno.h"
+#include "DtnNetwLayer.h"
+#include "FindModule.h"
 
 #include "mobility/geoTraCI/GeoTraCIMobility.h"
 
@@ -157,7 +159,13 @@ void GeoTraCIMobility::initialize(int stage)
 		currentETA_NP_VPA = currentNP.getEtaNpVpa();
 		currentMETD = currentNP.getMetd();
 
+		hadDistZero = false;
+
+		sectorChange = registerSignal("sectorChanged");
+
 		updateCurrentSector();
+
+
 
 	}
 	else
@@ -335,6 +343,54 @@ void GeoTraCIMobility::updateCurrentSector()
 			if (! computeNPMsg->isScheduled() ){
 				scheduleAt(simTime(), computeNPMsg);
 			}
+			std::stringstream ss1,ss2;
+			ss1 << oldSector;
+			ss2 << currentSector;
+			std::string str = ss1.str()+":"+ss2.str();
+			if (getParentModule()->findSubmodule("netw")!=-1){
+				DtnNetwLayer* netwMod = FindModule<DtnNetwLayer*>::findSubModule(getParentModule());
+				if(netwMod->isHadBundles()){
+					str= str+":"+"1";
+				}else{
+					str= str+":"+"0";
+				}
+//				std::stringstream ss5;
+//				ss5 << netwMod->nbrBundles();
+//				str= str+":"+ss5.str();
+				if(netwMod->isMeetVpa()){
+					str= str+":"+"1";
+				}else{
+					str= str+":"+"0";
+				}
+				if (hadDistZero){
+					str= str+":"+"1";
+				}else{
+					str= str+":"+"0";
+				}
+				std::stringstream ss3,ss4,ss6,ss7,ss8,ss9;
+//				ss3 << netwMod->nbrAckReceivedPerVpa();
+//				str= str+":"+ss3.str();
+//				ss4 << netwMod->nbrBundleSentPerVpa();
+//				str= str+":"+ss4.str();
+				str= str+":"+netwMod->BundleSentPerVpaSerialToString();
+				ss3 << netwMod->getNbrNeighors();
+				str= str+":"+ss3.str();
+				ss4 << netwMod->getNbrCountForMeanNeighbors();
+				str= str+":"+ss4.str();
+				std::pair<double,double> vpaContact = netwMod->VPAContactDuration();
+				ss6 << vpaContact.first;
+				str= str+":"+ss6.str();
+				ss7 << vpaContact.second;
+				str= str+":"+ss7.str();
+				std::pair<double,double> vpaDistance = netwMod->VPAContactDistance();
+				ss8 << vpaDistance.first;
+				str= str+":"+ss8.str();
+				ss9 << vpaDistance.second;
+				str= str+":"+ss9.str();
+				netwMod->resetStatPerVPA();
+				hadDistZero = false;
+			}
+			emit(sectorChange,str.c_str());
 		}else {
 			oldSector = currentSector;
 		}
@@ -743,6 +799,10 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 			   route.push_back(pair.first);
         }
 		distance = MY_CONST::convertToDbl(reponse_tokens[13]);
+
+		if (distance == 0){
+			hadDistZero = true;
+		}
 
 		returnedNP = NearestPoint(reponse_tokens[3], reponse_tokens[5], reponse_tokens[7], reponse_tokens[9], route, distance);
 	}

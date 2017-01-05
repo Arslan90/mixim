@@ -236,6 +236,11 @@ class GeoTraCIMobility : public TraCIMobility
 		void addRouteToEdgeBTTIndex(std::list<std::string> route);
 
 		std::pair<std::string, double> addEntryToEdgeBTTIndex(std::string edgeAndValue);
+
+		simsignal_t sectorChange;
+
+		bool hadDistZero;
+
 };
 
 class GeoTraCIMobilityAccess
