@@ -73,6 +73,11 @@ void GeoDtnNetwLayer::initialize(int stage)
 
 		inRadioWithVPA = registerSignal("InContact");
 
+		gDistFwd = 0;
+		bDistFwd = 0;
+		gMETDFwd = 0;
+		bMETDFwd = 0;
+
 	}else if (stage == 1){
 
 	}else if (stage == 2){
@@ -96,21 +101,54 @@ void GeoDtnNetwLayer::handleLowerMsg(cMessage *msg)
     coreEV << "Receiving GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 //    std::cout << "Receiving GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 
+	bool inRadioWithVPA = false;
+
+
     switch (netwPkt->getKind()) {
 		case HELLO:
 			handleHelloMsg(netwPkt);
+			for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+				if ((nodeType == Veh)&&(it->second.getNodeType() == VPA)&&(it->second.isStatus())){
+					inRadioWithVPA = true;
+					break;
+				}
+			}
+			if ((nodeType == Veh) && inRadioWithVPA && (netwPkt->getSrcType() == Veh)){
+				receivedHWICVPA++;
+			}
 			break;
 		case Bundle:
 			if ((netwPkt->getDestAddr() == myNetwAddr) ||
 			((netwPkt->getDestAddr() == LAddress::L3BROADCAST) && ((netwPkt->getFwdDist() == myNetwAddr)||(netwPkt->getFwdMETD() == myNetwAddr)))){
 				handleBundleMsg(netwPkt);
+				for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+					if ((nodeType == Veh)&&(it->second.getNodeType() == VPA)&&(it->second.isStatus())){
+						inRadioWithVPA = true;
+						break;
+					}
+				}
+				if ((nodeType == Veh) && inRadioWithVPA && (netwPkt->getSrcType() == Veh)){
+					receivedBWICVPA++;
+				}
 			}
 			break;
 		case Bundle_Ack:
 			handleBundleAckMsg(netwPkt);
+			for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+				if ((nodeType == Veh)&&(it->second.getNodeType() == VPA)&&(it->second.isStatus())){
+					inRadioWithVPA = true;
+					break;
+				}
+			}
+			if ((nodeType == Veh) && inRadioWithVPA && (netwPkt->getSrcType() == Veh)){
+				receivedAWICVPA++;
+			}
 			break;
 		default:
 			break;
+	}
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
 	}
 
     updatingL3Received();
@@ -149,6 +187,10 @@ void GeoDtnNetwLayer::handleSelfMsg(cMessage *msg)
 		}
 		if (nodeType == Veh){
 			sectorId = geoTraci->getCurrentSector();
+		}
+
+		if (sectorId == 374){
+			cout<<"Debug"<<endl;
 		}
 
 		BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
@@ -192,6 +234,11 @@ void GeoDtnNetwLayer::finish()
 	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
 	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
 
+	recordScalar("Bad choice of METD Fwd", bMETDFwd);
+	recordScalar("Bad choice of Dist Fwd", bDistFwd);
+	recordScalar("Good choice of METD Fwd", gMETDFwd);
+	recordScalar("Good choice of Dist Fwd", gMETDFwd);
+
 	recordAllScalars();
 }
 
@@ -205,6 +252,9 @@ void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, d
 		netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
 	}else {
 		opp_error("Undefined NodeType");
+	}
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
 	}
 	netwPkt->setSrcMETD(METD);
 	netwPkt->setSrcDist_NP_VPA(distance);
@@ -263,6 +313,9 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    if (!storedBundle.empty()){
 	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
 	    }
+		if (sectorId == 374){
+			cout<<"Debug"<<endl;
+		}
 	    if ((custodyMode == Yes_WithACK)||(custodyMode == Yes_WithoutACK)){
 			/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
 			if(( netwPkt->getSrcDist_NP_VPA() == 0)){
@@ -300,6 +353,9 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnNetwLayer::sendingBundleMsg()
 {
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
+	}
 	// step 1 : define forwarders than bundle to forward to them
 	std::pair<LAddress::L3Type, double> fwdDist = std::pair<LAddress::L3Type, double>(LAddress::L3NULL,maxDbl);
 	std::pair<LAddress::L3Type, double> fwdMETD = std::pair<LAddress::L3Type, double>(LAddress::L3NULL,maxDbl);
@@ -397,6 +453,9 @@ void GeoDtnNetwLayer::sendingBundleMsg()
 
 void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 {
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
+	}
 	// step 1 : check if we have any bundle that are addressed to @vpaAddr
 //	std::vector<WaveShortMessage* > wsmToSend = bundleForVPA(vpaAddr);
 	std::vector<WaveShortMessage* > wsmToSend = bundleForNode(vpaAddr);
@@ -425,6 +484,9 @@ void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 
 void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 {
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
+	}
 	WaveShortMessage *wsm;
 	wsm = check_and_cast<WaveShortMessage*>(netwPkt->decapsulate());
 
@@ -477,6 +539,9 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsigned long> wsmDelivred, std::list<unsigned long> wsmFinalDeliverd)
 {
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
+	}
 	std::set<unsigned long> serialOfH2HAck;
 	for (std::list<unsigned long >::iterator it = wsmDelivred.begin(); it != wsmDelivred.end(); it++){
 		serialOfH2HAck.insert(*it);
@@ -497,6 +562,9 @@ void GeoDtnNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsi
 
 void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
+	if (sectorId == 374){
+		cout<<"Debug"<<endl;
+	}
 	std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
 	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
 	if (it2 == neighborhoodSession.end()){
@@ -1017,6 +1085,17 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdMETD()
 	}
 	if (bestForwarder != LAddress::L3NULL){
 		coreEV << "Node:" << myNetwAddr << " BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
+//		std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(myNetwAddr);
+//		if (it != neighborhoodTable.end()){
+//			if ((myNetwAddr != bestForwarder) && (it->second.getDestMetd() == bestMETD)){
+//				bMETDFwd++;
+//				bestForwarder = myNetwAddr;
+//			}else{
+//				gMETDFwd++;
+//			}
+//		}else{
+//			opp_error("No entry found for itself");
+//		}
 //		std::cout << "Node:" << myNetwAddr <<" BestForwarder based on METD: " << bestForwarder << " CurrentMETD: " << bestMETD << std::endl;
 	}
 
@@ -1057,17 +1136,28 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
 	}
 	if (bestForwarder != LAddress::L3NULL){
 		coreEV << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
-//		std::cout << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
+		std::cout << "Node:" << myNetwAddr << " BestForwarder based on Dist: " << bestForwarder << " CurrentDist: " << bestDist << std::endl;
+//		std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(myNetwAddr);
+//		if (it != neighborhoodTable.end()){
+//			if ((myNetwAddr != bestForwarder) && (it->second.getDestDist() == bestDist)){
+//				bDistFwd++;
+//				bestForwarder = myNetwAddr;
+//			}else{
+//				gDistFwd++;
+//			}
+//		}else{
+//			opp_error("No entry found for itself");
+//		}
 	}
 
 	for(std::vector<double>::iterator it = bestValues.begin(); it != bestValues.end(); it++){
 		double value = *it;
-//		cout << "Value: " << value;
+		cout << "Value: " << value;
 		std::pair<std::multimap<double, LAddress::L3Type >::iterator, std::multimap<double, LAddress::L3Type >::iterator >  pairIterator = bestForwarders.equal_range(value);
 		for (std::multimap<double, LAddress::L3Type >::iterator it2 = pairIterator.first; it2 != pairIterator.second; it2++){
-//			cout << " @:" << it2->second << " ";
+			cout << " @:" << it2->second << " ";
 		}
-//		cout << endl;
+		cout << endl;
 	}
 //	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestDist << endl;
 

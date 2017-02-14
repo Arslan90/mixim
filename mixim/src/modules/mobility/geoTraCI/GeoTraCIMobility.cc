@@ -29,6 +29,7 @@
 #include "errno.h"
 #include "DtnNetwLayer.h"
 #include "FindModule.h"
+#include "Mac80211p.h"
 
 #include "mobility/geoTraCI/GeoTraCIMobility.h"
 
@@ -336,6 +337,11 @@ void GeoTraCIMobility::updateCurrentSector()
 		}
 		inSector= (col * rowSectorGrid) + row; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
 
+		//if (((vehiclePosSumo.x < 150) || (vehiclePosSumo.x > 1500))
+		//		|| ((vehiclePosSumo.y < 150) || (vehiclePosSumo.y > 1500))){
+		//	inSector = -1;
+		//}
+
 		//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.
 		//Note: this counter is complemented with the counter in received messages by VPAs or Vehicles.
 		if (inSector != currentSector){
@@ -367,7 +373,7 @@ void GeoTraCIMobility::updateCurrentSector()
 				}else{
 					str= str+":"+"0";
 				}
-				std::stringstream ss3,ss4,ss6,ss7,ss8,ss9;
+				std::stringstream ss3,ss4,ss6,ss7,ss8,ss9,ss10,ss11,ss12;
 //				ss3 << netwMod->nbrAckReceivedPerVpa();
 //				str= str+":"+ss3.str();
 //				ss4 << netwMod->nbrBundleSentPerVpa();
@@ -387,6 +393,24 @@ void GeoTraCIMobility::updateCurrentSector()
 				str= str+":"+ss8.str();
 				ss9 << vpaDistance.second;
 				str= str+":"+ss9.str();
+				ss10 << netwMod->getReceivedHwicvpa();
+				ss11 << netwMod->getReceivedBwicvpa();
+				ss12 << netwMod->getReceivedAwicvpa();
+				if ((netwMod->getReceivedHwicvpa() != 0) ||(netwMod->getReceivedBwicvpa() != 0)||(netwMod->getReceivedAwicvpa() != 0)){
+					cout << "debug found" << endl;
+				}
+				str= str+":"+ss10.str()+":"+ss11.str()+":"+ss12.str();
+
+				if (getParentModule()->findSubmodule("nic")!=-1){
+					cModule* nicMod = this->getParentModule()->getSubmodule("nic");
+					if ((nicMod != NULL) && (nicMod->findSubmodule("mac80211p") != -1)){
+						Mac80211p* macMod = FindModule<Mac80211p*>::findSubModule(nicMod);
+						str= str+":"+getL2Stats((cModule*) macMod);
+					}else{
+						opp_error("Unable to found mac module to collect L2 Stats");
+					}
+				}
+
 				netwMod->resetStatPerVPA();
 				hadDistZero = false;
 			}
@@ -980,6 +1004,21 @@ void GeoTraCIMobility::updateDisplayString() {
 		getParentModule()->getDisplayString().setTagArg("b", 1, "2");
 	}
 }
+
+std::string GeoTraCIMobility::getL2Stats(cModule* macMod)
+{
+	std::string str;
+	Mac80211p* mac = check_and_cast<Mac80211p*>(macMod);
+	str = str+":"+mac->getLastStatsSent();
+	str = str+":"+mac->getLastStatsDropped();
+	str = str+":"+mac->getLastStatsReceivedBroadcast();
+	str = str+":"+mac->getLastStatsLost();
+	str = str+":"+mac->getLastStatsNumBackoffs();
+	str = str+":"+mac->getLastStatsBackoffDuration();
+	return str;
+}
+
+
 
 //int GeoTraCIMobility::cmd_NP_ALL(){
 //	int dist = 0;

@@ -54,6 +54,12 @@ class GeoDtnNetwLayer : public DtnNetwLayer
 	int nbr0ValidFwds;
 	int nbr1ValidFwds;
 
+	int gDistFwd;
+	int bDistFwd;
+
+	int gMETDFwd;
+	int bMETDFwd;
+
 	int totalBundlesReceived;
 
 	// E2E Acks serial

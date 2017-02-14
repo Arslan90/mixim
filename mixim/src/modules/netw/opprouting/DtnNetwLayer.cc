@@ -149,6 +149,10 @@ void DtnNetwLayer::initialize(int stage)
 		nbrCountForMeanNeighbors = 0;
 
 		hadBundles = false;
+
+		receivedHWICVPA = 0;
+		receivedBWICVPA = 0;
+		receivedAWICVPA = 0;
 	}
 
 	if (stage == 2){
@@ -1225,6 +1229,10 @@ bool DtnNetwLayer::resetStatPerVPA()
 	}
 	vpaContactDuration.clear();
 	vpaContactDistance.clear();
+
+	receivedHWICVPA = 0;
+	receivedBWICVPA = 0;
+	receivedAWICVPA = 0;
 }
 
 unsigned long DtnNetwLayer::nbrAckReceivedPerVpa() const

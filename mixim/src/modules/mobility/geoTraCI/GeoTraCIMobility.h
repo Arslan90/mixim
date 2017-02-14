@@ -241,6 +241,8 @@ class GeoTraCIMobility : public TraCIMobility
 
 		bool hadDistZero;
 
+		std::string getL2Stats(cModule* macMod);
+
 };
 
 class GeoTraCIMobilityAccess

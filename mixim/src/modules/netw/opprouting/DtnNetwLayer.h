@@ -181,6 +181,9 @@ class DtnNetwLayer : public BaseNetwLayer {
     bool hadBundles;
     std::list<double> vpaContactDuration;
     std::list<double> vpaContactDistance;
+    long receivedHWICVPA;
+    long receivedBWICVPA;
+    long receivedAWICVPA;
     /*******************************************************************
 	** 							Methods section
 	********************************************************************/
@@ -200,6 +203,25 @@ public:
     bool isHadBundles() const;
     std::pair<double,double> VPAContactDuration();
     std::pair<double,double> VPAContactDistance();
+    long getReceivedAwicvpa() const
+    {
+        return receivedAWICVPA;
+    }
+
+    long getReceivedBwicvpa() const
+    {
+        return receivedBWICVPA;
+    }
+
+    long getReceivedHwicvpa() const
+    {
+        return receivedHWICVPA;
+    }
+
+    void setReceivedAwicvpa(long  receivedAwicvpa)
+    {
+        receivedAWICVPA = receivedAwicvpa;
+    }
 
   protected:
   	/**

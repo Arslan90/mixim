@@ -77,6 +77,15 @@ void Mac80211p::initialize(int stage) {
 		statsNumTooLittleTime = 0;
 		statsTotalBackoffDuration = 0;
 
+		statsPrevReceivedPackets = 0;
+		statsPrevReceivedBroadcasts = 0;
+		statsPrevSentPackets = 0;
+		statsPrevLostPackets = 0;
+		statsPrevNumBackoffs = 0;
+		statsPrevDroppedPackets = 0;
+		statsPrevNumTooLittleTime = 0;
+		statsPrevTotalBackoffDuration = 0;
+
 		/*
 		 * Taken from Table 7-73a of IEEE P802.11pTM/D10.0 Draft Standard for Information Technology —
 		 */
@@ -121,6 +130,15 @@ void Mac80211p::finish() {
 	recordScalar("statsDroppedPackets",statsDroppedPackets);
 	recordScalar("statsNumTooLittleTime",statsNumTooLittleTime);
 	recordScalar("statsTotalBackoffDuration",statsTotalBackoffDuration);
+
+	recordScalar("statsLastReceivedPackets",		statsReceivedPackets-statsPrevReceivedPackets);
+	recordScalar("statsLastReceivedBroadcasts",	statsReceivedBroadcasts-statsPrevReceivedBroadcasts);
+	recordScalar("statsLastSentPackets",			statsSentPackets-statsPrevSentPackets);
+	recordScalar("statsLastLostPackets",			statsLostPackets-statsPrevLostPackets);
+	recordScalar("statsLastNumBackoffs",			statsNumBackoffs-statsPrevNumBackoffs);
+	recordScalar("statsLastDroppedPackets",		statsDroppedPackets-statsPrevDroppedPackets);
+	recordScalar("statsLastNumTooLittleTime",		statsNumTooLittleTime-statsPrevNumTooLittleTime);
+	recordScalar("statsLastTotalBackoffDuration", statsTotalBackoffDuration-statsPrevTotalBackoffDuration);
 
 	//DBG << "logs, Mac80211p," << myNicId <<",dropped,"<<  statsDroppedPackets<<",CW,"<< currentCW <<std::endl;//Arturo.
 }
@@ -281,6 +299,11 @@ void Mac80211p::updateStatusCCA(t_mac_event event, cMessage* msg) {
 					// give time for the radio to be in Tx state before transmitting
 					sendDelayed(mac, RADIODELAY_11P, lowerLayerOut);
 					statsSentPackets++;
+//					if ((mac->getEncapsulatedMsg() != NULL) && (mac->getEncapsulatedMsg()->getKind() == 0xFF) && (strstr(mac->getEncapsulatedMsg()->getName(),"WSM To VPA")!=NULL)){
+//					if ((mac->getEncapsulatedMsg() != NULL) && (mac->getEncapsulatedMsg()->getKind() == 0xD0)){
+//					if ((mac->getEncapsulatedMsg() != NULL) && (mac->getEncapsulatedMsg()->getKind() >= 0x00) && (mac->getEncapsulatedMsg()->getKind() <= 0xFF)){
+//						statsPrevSentPackets++;
+//					}
 				}
 				else {   //not enough time left now
 					DBG << "This packet cannot be send in this slot. deleting it from queue (Should not happen here) " << std::endl;
@@ -311,7 +334,11 @@ void Mac80211p::updateStatusCCA(t_mac_event event, cMessage* msg) {
 					//DBG <<"logs, Mac80211p, statsDroppedPackets:"<<  statsDroppedPackets <<",time,"<< simTime()
 					//		<< ",myMacAddr, " << myMacAddr<<",myMacAddress,"<< myMacAddress<<",myNicId," <<myNicId  <<std::endl;
 
-
+//					if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() == 0xFF) && (strstr(packetToSend->getEncapsulatedMsg()->getName(),"WSM To VPA")!=NULL) && (strstr(packetToSend->getEncapsulatedMsg()->getName(),"WSM To VPA")!=NULL)){
+//					if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() == 0xD0)){
+//					if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() >= 0x00) && (packetToSend->getEncapsulatedMsg()->getKind() <= 0xFF)){
+//						statsPrevDroppedPackets++;
+//					}
 					cMessage* mac = packetToSend;
 					packetToSend = NULL;
 
@@ -533,6 +560,78 @@ double Mac80211p::calculateAIFS() const {
 	return aifsn * SLOTLENGTH_11P + SIFS_11P; //according to 802.11p standard
 }
 
+std::string Mac80211p::getLastStatsSent()
+{
+	long lastStats = statsSentPackets - statsPrevSentPackets;
+	statsPrevSentPackets = statsSentPackets;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsDropped()
+{
+	long lastStats = statsDroppedPackets - statsPrevDroppedPackets;
+	statsPrevDroppedPackets = statsDroppedPackets;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsReceivedBroadcast()
+{
+	long lastStats = statsReceivedBroadcasts - statsPrevReceivedBroadcasts;
+	statsPrevReceivedBroadcasts = statsReceivedBroadcasts;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsReceived()
+{
+	long lastStats = statsReceivedPackets - statsPrevReceivedPackets;
+	statsPrevReceivedPackets = statsReceivedPackets;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsLost()
+{
+	long lastStats = statsLostPackets - statsPrevLostPackets;
+	statsPrevLostPackets = statsLostPackets;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsNumBackoffs()
+{
+	long lastStats = statsNumBackoffs - statsPrevNumBackoffs;
+	statsPrevNumBackoffs = statsNumBackoffs;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsLittleTime()
+{
+	long lastStats = statsNumTooLittleTime - statsPrevNumTooLittleTime;
+	statsPrevNumTooLittleTime = statsNumTooLittleTime;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
+std::string Mac80211p::getLastStatsBackoffDuration()
+{
+	double lastStats = statsTotalBackoffDuration - statsPrevTotalBackoffDuration;
+	statsPrevTotalBackoffDuration = statsTotalBackoffDuration;
+	std::stringstream ss;
+	ss << lastStats;
+	return ss.str();
+}
+
 double Mac80211p::calculateBackoff() {
 
 	double backoffTime;
@@ -589,6 +688,12 @@ double Mac80211p::calculateBackoff() {
 
 	backoffTime = slots * SLOTLENGTH_11P;
 
+//	if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() == 0xFF) && (strstr(packetToSend->getEncapsulatedMsg()->getName(),"WSM To VPA")!=NULL)){
+//	if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() == 0xD0)){
+//	if ((packetToSend->getEncapsulatedMsg() != NULL) && (packetToSend->getEncapsulatedMsg()->getKind() >= 0x00) && (packetToSend->getEncapsulatedMsg()->getKind() <= 0xFF)){
+//		statsPrevNumBackoffs++;
+//		statsPrevTotalBackoffDuration += backoffTime;
+//	}
 	statsNumBackoffs++;
 	statsTotalBackoffDuration += backoffTime;
 
@@ -631,6 +736,11 @@ void Mac80211p::handleLowerMsg(cMessage* msg) {
 	else if (dest == LAddress::L2BROADCAST) {
 		statsReceivedBroadcasts++;
 		executeMac(EV_BROADCAST_RECEIVED, macPkt);
+//		if ((macPkt->getEncapsulatedMsg() != NULL) && (macPkt->getEncapsulatedMsg()->getKind() == 0xFF) && (strstr(macPkt->getEncapsulatedMsg()->getName(),"WSM To VPA")!=NULL)){
+//		if ((macPkt->getEncapsulatedMsg() != NULL) && (macPkt->getEncapsulatedMsg()->getKind() == 0xD0)){
+//		if ((macPkt->getEncapsulatedMsg() != NULL) && (macPkt->getEncapsulatedMsg()->getKind() >= 0x00) && (macPkt->getEncapsulatedMsg()->getKind() <= 0xFF)){
+//			statsPrevReceivedBroadcasts++;
+//		}
 	}
 	else {
 		DBG << "Packet not for me, deleting...\n";

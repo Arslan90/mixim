@@ -112,6 +112,15 @@ class  Mac80211p : public BaseMacLayer {
 		/** @brief Handle control messages from lower layer */
 		virtual void handleLowerControl(cMessage* msg);
 
+		std::string getLastStatsSent();
+		std::string getLastStatsDropped();
+		std::string getLastStatsReceivedBroadcast();
+		std::string getLastStatsReceived();
+		std::string getLastStatsLost();
+		std::string getLastStatsNumBackoffs();
+		std::string getLastStatsLittleTime();
+		std::string getLastStatsBackoffDuration();
+
 	protected:
 	//public://ARTURO
 
@@ -125,6 +134,15 @@ class  Mac80211p : public BaseMacLayer {
 		long statsDroppedPackets;
 		long statsNumTooLittleTime;
 		double statsTotalBackoffDuration;
+
+		long statsPrevReceivedPackets;
+		long statsPrevReceivedBroadcasts;
+		long statsPrevSentPackets;
+		long statsPrevLostPackets;
+		long statsPrevNumBackoffs;
+		long statsPrevDroppedPackets;
+		long statsPrevNumTooLittleTime;
+		double statsPrevTotalBackoffDuration;
 		//int arturostatsDropPackets;//Arturo, MINE
 		/*@}*/
 
@@ -244,6 +262,7 @@ class  Mac80211p : public BaseMacLayer {
 		void startTimer(t_mac_timer timer);
 		void checkBitrate(int bitrate) const;
 		virtual double calculateBackoff();
+
 
 		Mac80211pToMac1609_4Interface* _1609_Mac;
 

@@ -213,6 +213,91 @@ void VPApOpp::initialize(int stage) {
 		nbrMeanCusVPADistanceAllSent = 0;
 		vVehMeanCusVPADistancesAllSent.setName("MeanCus VPA Distances All Sent");
 
+		countRcvH = 0;
+		countRcvB = 0;
+		countRcvA = 0;
+
+		totalRcvH = 0;
+		totalRcvB = 0;
+		totalRcvA = 0;
+
+		vMeanRcvH.setName("Mean RcvH InRadio VPA");
+		vMeanRcvB.setName("Mean RcvB InRadio VPA");
+		vMeanRcvA.setName("Mean RcvA InRadio VPA");
+
+		total0RcvH = 0;
+		total0RcvB = 0;
+		total0RcvA = 0;
+		vMean0RcvH.setName("Mean RcvH0 InRadio VPA");
+		vMean0RcvB.setName("Mean RcvB0 InRadio VPA");
+		vMean0RcvA.setName("Mean RcvA0 InRadio VPA");
+		total1RcvH = 0;
+		total1RcvB = 0;
+		total1RcvA = 0;
+		vMean1RcvH.setName("Mean RcvH1 InRadio VPA");
+		vMean1RcvB.setName("Mean RcvB1 InRadio VPA");
+		vMean1RcvA.setName("Mean RcvA1 InRadio VPA");
+		total2RcvH = 0;
+		total2RcvB = 0;
+		total2RcvA = 0;
+		vMean2RcvH.setName("Mean RcvH2 InRadio VPA");
+		vMean2RcvB.setName("Mean RcvB2 InRadio VPA");
+		vMean2RcvA.setName("Mean RcvA2 InRadio VPA");
+		total3RcvH = 0;
+		total3RcvB = 0;
+		total3RcvA = 0;
+		vMean3RcvH.setName("Mean RcvH3 InRadio VPA");
+		vMean3RcvB.setName("Mean RcvB3 InRadio VPA");
+		vMean3RcvA.setName("Mean RcvA3 InRadio VPA");
+		L20Sent = 0;
+		L20Dropped = 0;
+		L20Received = 0;
+		L20Lost = 0;
+		L20BackOff = 0;
+		L20Duration = 0;
+		vL20Sent.setName("total L20Sent");
+		vL20Dropped.setName("total L20Dropped");
+		vL20Received.setName("total L20Received");
+		vL20Lost.setName("total L20Lost");
+		vL20BackOff.setName("total L20BackOff");
+		vL20Duration.setName("total L20Duration");
+		L21Sent = 0;
+		L21Dropped = 0;
+		L21Received = 0;
+		L21Lost = 0;
+		L21BackOff = 0;
+		L21Duration = 0;
+		vL21Sent.setName("total L21Sent");
+		vL21Dropped.setName("total L21Dropped");
+		vL21Received.setName("total L21Received");
+		vL21Lost.setName("total L21Lost");
+		vL21BackOff.setName("total L21BackOff");
+		vL21Duration.setName("total L21Duration");
+		L22Sent = 0;
+		L22Dropped = 0;
+		L22Received = 0;
+		L22Lost = 0;
+		L22BackOff = 0;
+		L22Duration = 0;
+		vL22Sent.setName("total L22Sent");
+		vL22Dropped.setName("total L22Dropped");
+		vL22Received.setName("total L22Received");
+		vL22Lost.setName("total L22Lost");
+		vL22BackOff.setName("total L22BackOff");
+		vL22Duration.setName("total L22Duration");
+		L23Sent = 0;
+		L23Dropped = 0;
+		L23Received = 0;
+		L23Lost = 0;
+		L23BackOff = 0;
+		L23Duration = 0;
+		vL23Sent.setName("total L23Sent");
+		vL23Dropped.setName("total L23Dropped");
+		vL23Received.setName("total L23Received");
+		vL23Lost.setName("total L23Lost");
+		vL23BackOff.setName("total L23BackOff");
+		vL23Duration.setName("total L23Duration");
+
 
 //    	dtnTestMode = par("dtnTestMode").boolValue();
 //    	silentMode = par("silentMode").boolValue();
@@ -410,6 +495,22 @@ void VPApOpp::handleSelfMsg(cMessage* msg) {
 
 	    		double MeanCusVPADistancesAllSent = (nbrMeanCusVPADistanceAllSent == 0) ? 0: double(double(totalMeanCusVPADistanceAllSent)/double(nbrMeanCusVPADistanceAllSent));
 	    		vVehMeanCusVPADistancesAllSent.record(MeanCusVPADistancesAllSent);
+
+	    		double MeanRcvH = (countRcvH == 0) ? 0: double(double(totalRcvH)/double(countRcvH));
+	    		vMeanRcvH.record(MeanRcvH);
+
+	    		double MeanRcvB = (countRcvB == 0) ? 0: double(double(totalRcvB)/double(countRcvB));
+	    		vMeanRcvB.record(MeanRcvB);
+
+	    		double MeanRcvA = (countRcvA == 0) ? 0: double(double(totalRcvA)/double(countRcvA));
+	    		vMeanRcvA.record(MeanRcvA);
+
+	    		recordL2Stats();
+	    		resetL20Stats();
+	    		resetL21Stats();
+	    		resetL22Stats();
+	    		resetL23Stats();
+
 	    	}else{
 	    		opp_error("updateSectorCycle value cannot be negative(VPApOpp::handleSelfMsg)");
 	    	}
@@ -620,7 +721,8 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 	Enter_Method_Silent();
 	if (strcmp(getSignalName(signalID),"sectorChanged") == 0){
 		int oldSectorId,newSectorId,nbrBndls,inContact,isDistZero,totalNeighbors,nbrCountNeighbors;
-		double totalVPAContactDur, nbrVPAContactDur, totalVPADistanceDur, nbrVPADistanceDur;
+		double totalVPAContactDur, nbrVPAContactDur, totalVPADistanceDur, nbrVPADistanceDur, L2BackoffDur;
+		long rcvB, rcvH, rcvA, L2Sent, L2Drop, L2Rcv, L2Lost, L2Backoff;
 		char* oldSectorChar = strtok(strdup(s),":");
 		std::stringstream ss1 (oldSectorChar);
 		ss1 >> oldSectorId;
@@ -646,6 +748,24 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 		ss10 >> totalVPADistanceDur;
 		std::stringstream ss11 (strtok(NULL,":"));
 		ss11 >> nbrVPADistanceDur;
+		std::stringstream ss12 (strtok(NULL,":"));
+		ss12 >> rcvH;
+		std::stringstream ss13 (strtok(NULL,":"));
+		ss13 >> rcvB;
+		std::stringstream ss14 (strtok(NULL,":"));
+		ss14 >> rcvA;
+		std::stringstream ss15 (strtok(NULL,":"));
+		ss15 >> L2Sent;
+		std::stringstream ss16 (strtok(NULL,":"));
+		ss16 >> L2Drop;
+		std::stringstream ss17 (strtok(NULL,":"));
+		ss17 >> L2Rcv;
+		std::stringstream ss18 (strtok(NULL,":"));
+		ss18 >> L2Lost;
+		std::stringstream ss19 (strtok(NULL,":"));
+		ss19 >> L2Backoff;
+		std::stringstream ss20 (strtok(NULL,":"));
+		ss20 >> L2BackoffDur;
 
 		int sentToVPA = 0;
 		int receivedByVPA = 0;
@@ -681,11 +801,17 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 		if (this->getParentModule()->getIndex() == oldSectorId){
 			currentVehDensity--;
 			vehPassedBy++;
+			if ((rcvH >0) || (rcvB >0) || (rcvA >0)){
+				cout << "debug found" << endl;
+			}
 			if (nbrBndls > 0){ vehHasBndls++;}
 			if (contactedVPA){
 				vehInRadio++;
 				if (nbrBndls > 0){
 					vehInRadioHasBndls++;
+					if (rcvH >0){countRcvH++; totalRcvH+=rcvH;}
+					if (rcvB >0){countRcvB++; totalRcvB+=rcvB;}
+					if (rcvA >0){countRcvA++; totalRcvA+=rcvA;}
 					if (sentToVPA == 0){
 						totalMeanNeighborNotSent+=totalNeighbors;
 						nbrMeanNeighborNotSent+=nbrCountNeighbors;
@@ -694,6 +820,7 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 						totalMeanVPADistanceNotSent+=totalVPADistanceDur;
 						nbrMeanVPADistanceNotSent+=nbrVPADistanceDur;
 						vehNotSentBndl++;
+						updateL20Stats(rcvH,rcvB,rcvA,L2Sent,L2Drop,L2Rcv,L2Lost,L2Backoff,L2BackoffDur);
 					}else if (sentToVPA > 0){
 						if (receivedByVPA == 0){
 							totalMeanNeighbor0Sent+=totalNeighbors;
@@ -703,6 +830,7 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 							totalMeanVPADistance0Sent+=totalVPADistanceDur;
 							nbrMeanVPADistance0Sent+=nbrVPADistanceDur;
 							vehSent0Bndl++;
+							updateL21Stats(rcvH,rcvB,rcvA,L2Sent,L2Drop,L2Rcv,L2Lost,L2Backoff,L2BackoffDur);
 						}else if (receivedByVPA > 0){
 							if (receivedByVPA < sentToVPA){
 								totalMeanNeighborFewSent+=totalNeighbors;
@@ -712,6 +840,7 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 								totalMeanVPADistanceFewSent+=totalVPADistanceDur;
 								nbrMeanVPADistanceFewSent+=nbrVPADistanceDur;
 								vehSentFewBndl++;
+								updateL22Stats(rcvH,rcvB,rcvA,L2Sent,L2Drop,L2Rcv,L2Lost,L2Backoff,L2BackoffDur);
 							}else if (receivedByVPA == sentToVPA){
 								totalMeanNeighborAllSent+=totalNeighbors;
 								nbrMeanNeighborAllSent+=nbrCountNeighbors;
@@ -720,6 +849,7 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 								totalMeanVPADistanceAllSent+=totalVPADistanceDur;
 								nbrMeanVPADistanceAllSent+=nbrVPADistanceDur;
 								vehSentAllBndl++;
+								updateL23Stats(rcvH,rcvB,rcvA,L2Sent,L2Drop,L2Rcv,L2Lost,L2Backoff,L2BackoffDur);
 							}else {
 								opp_error("Nbr msg received cannot be higher than those sent");
 							}
@@ -918,9 +1048,179 @@ VPApOpp::~VPApOpp() {
 void VPApOpp::finish()
 {
 	DtnApplLayer::finish();
+	recordScalar("TotalRcvH",totalRcvH);
+	recordScalar("TotalRcvB",totalRcvB);
+	recordScalar("TotalRcvA",totalRcvA);
+
+	recordScalar("CountRcvH",countRcvH);
+	recordScalar("CountRcvB",countRcvB);
+	recordScalar("CountRcvA",countRcvA);
 	simulation.getSystemModule()->unsubscribe("sectorChanged", this);
 	simulation.getSystemModule()->unsubscribe("InContact", this);
 }
+
+void VPApOpp::resetL20Stats()
+{
+	total0RcvH = 0;
+	total0RcvB = 0;
+	total0RcvA = 0;
+	L20Sent 	= 0;
+	L20Dropped 	= 0;
+	L20Received = 0;
+	L20Lost 	= 0;
+	L20BackOff 	= 0;
+	L20Duration = 0;
+}
+
+
+
+void VPApOpp::updateL20Stats(long  rcvH, long  rcvB, long  rcvA, long  L2S, long  L2D, long  L2R, long  L2L, long  L2Back, long  L2BackDur)
+{
+	total0RcvH += rcvH;
+	total0RcvB += rcvB;
+	total0RcvA += rcvA;
+	L20Sent 	+= L2S;
+	L20Dropped 	+= L2D;
+	L20Received += L2R;
+	L20Lost 	+= L2L;
+	L20BackOff 	+= L2Back;
+	L20Duration += L2BackDur;
+}
+
+
+
+void VPApOpp::resetL21Stats()
+{
+	total1RcvH = 0;
+	total1RcvB = 0;
+	total1RcvA = 0;
+	L21Sent 	= 0;
+	L21Dropped 	= 0;
+	L21Received = 0;
+	L21Lost 	= 0;
+	L21BackOff 	= 0;
+	L21Duration = 0;
+}
+
+
+
+void VPApOpp::updateL21Stats(long  rcvH, long  rcvB, long  rcvA, long  L2S, long  L2D, long  L2R, long  L2L, long  L2Back, long  L2BackDur)
+{
+	total1RcvH += rcvH;
+	total1RcvB += rcvB;
+	total1RcvA += rcvA;
+	L21Sent 	+= L2S;
+	L21Dropped 	+= L2D;
+	L21Received += L2R;
+	L21Lost 	+= L2L;
+	L21BackOff 	+= L2Back;
+	L21Duration += L2BackDur;
+}
+
+
+
+void VPApOpp::resetL22Stats()
+{
+	total2RcvH = 0;
+	total2RcvB = 0;
+	total2RcvA = 0;
+	L22Sent 	= 0;
+	L22Dropped 	= 0;
+	L22Received = 0;
+	L22Lost 	= 0;
+	L22BackOff 	= 0;
+	L22Duration = 0;
+}
+
+
+
+void VPApOpp::updateL22Stats(long  rcvH, long  rcvB, long  rcvA, long  L2S, long  L2D, long  L2R, long  L2L, long  L2Back, long  L2BackDur)
+{
+	total2RcvH += rcvH;
+	total2RcvB += rcvB;
+	total2RcvA += rcvA;
+	L22Sent 	+= L2S;
+	L22Dropped 	+= L2D;
+	L22Received += L2R;
+	L22Lost 	+= L2L;
+	L22BackOff 	+= L2Back;
+	L22Duration += L2BackDur;
+}
+
+
+
+void VPApOpp::resetL23Stats()
+{
+	total3RcvH = 0;
+	total3RcvB = 0;
+	total3RcvA = 0;
+	L23Sent 	= 0;
+	L23Dropped 	= 0;
+	L23Received = 0;
+	L23Lost 	= 0;
+	L23BackOff 	= 0;
+	L23Duration = 0;
+}
+
+
+
+void VPApOpp::updateL23Stats(long  rcvH, long  rcvB, long  rcvA, long  L2S, long  L2D, long  L2R, long  L2L, long  L2Back, long  L2BackDur)
+{
+	total3RcvH += rcvH;
+	total3RcvB += rcvB;
+	total3RcvA += rcvA;
+	L23Sent 	+= L2S;
+	L23Dropped 	+= L2D;
+	L23Received += L2R;
+	L23Lost 	+= L2L;
+	L23BackOff 	+= L2Back;
+	L23Duration += L2BackDur;
+}
+
+void VPApOpp::recordL2Stats()
+{
+	vMean0RcvH.record(total0RcvH);
+	vMean0RcvB.record(total0RcvB);
+	vMean0RcvA.record(total0RcvA);
+	vMean1RcvH.record(total1RcvH);
+	vMean1RcvB.record(total1RcvB);
+	vMean1RcvA.record(total1RcvA);
+	vMean2RcvH.record(total2RcvH);
+	vMean2RcvB.record(total2RcvB);
+	vMean2RcvA.record(total2RcvA);
+	vMean3RcvH.record(total3RcvH);
+	vMean3RcvB.record(total3RcvB);
+	vMean3RcvA.record(total3RcvA);
+
+	vL20Sent	.record(	L20Sent 	);
+	vL20Dropped	.record(	L20Dropped 	);
+	vL20Received.record(	L20Received );
+	vL20Lost	.record(	L20Lost 	);
+	vL20BackOff	.record(	L20BackOff 	);
+	vL20Duration.record(	L20Duration );
+	vL21Sent	.record(	L21Sent 	);
+	vL21Dropped	.record(	L21Dropped 	);
+	vL21Received.record(	L21Received );
+	vL21Lost	.record(	L21Lost 	);
+	vL21BackOff	.record(	L21BackOff 	);
+	vL21Duration.record(	L21Duration );
+	vL22Sent	.record(	L22Sent 	);
+	vL22Dropped	.record(	L22Dropped 	);
+	vL22Received.record(	L22Received );
+	vL22Lost	.record(	L22Lost 	);
+	vL22BackOff	.record(	L22BackOff 	);
+	vL22Duration.record(	L22Duration );
+	vL23Sent	.record(	L23Sent 	);
+	vL23Dropped	.record(	L23Dropped 	);
+	vL23Received.record(	L23Received );
+	vL23Lost	.record(	L23Lost 	);
+	vL23BackOff	.record(	L23BackOff 	);
+	vL23Duration.record(	L23Duration );
+}
+
+
+
+
 
 
 
