@@ -170,7 +170,8 @@ class TraCIMobility : public BaseMobility
 		std::list<std::string> commandGetEdgesOfRoute(std::string routeId) {
 			return getManager()->commandGetEdgesOfRoute(routeId);
 		}
-
+	    virtual int getCurrentSector() const;
+		virtual void updateCurrentSector();
 
 	protected:
 		bool debug; /**< whether to emit debug messages */
@@ -198,6 +199,27 @@ class TraCIMobility : public BaseMobility
 		cMessage* stopAccidentMsg;
 		mutable TraCIScenarioManager* manager;
 		double last_speed;
+
+	    /**
+		 * Scenario Model Type (Cologne -Koln- like) or Free
+		 */
+	    enum t_scenarioType{ Free = 1, Sector = 2};
+	    /*
+		 * Variable for specifying Scenario Model Type
+		 */
+	    t_scenarioType scenarioModel;
+	    // Parameters related to Sector Mode
+	    int oldSector;
+	    int currentSector;
+	    int rowSectorGrid;
+	    int colSectorGrid;
+	    double sectorSizeX;
+	    double sectorSizeY;
+	    bool useNegativeValues; // Allow us the use of negative values for Offset - Coord(0.0) of sector[0]
+	    double sectorOffsetX; // Traci Coord X for - Coord(0.0) of sector[0]
+	    double sectorOffsetY; // Traci Coord Y for - Coord(0.0) of sector[0]
+
+		virtual void initScenarioType();
 
 		virtual void fixIfHostGetsOutside(); /**< called after each read to check for (and handle) invalid positions */
 

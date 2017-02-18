@@ -39,8 +39,11 @@
 #include "iterator"
 #include "BaseMobility.h"
 #include "fstream"
+#include "NetwSession.h"
+#include "NetwRoute.h"
+#include "TraCIMobility.h"
 
-
+const double maxDbl = std::numeric_limits<double>::max();
 
 /**
  * TODO - Generated class
@@ -59,6 +62,25 @@ class DtnNetwLayer : public BaseNetwLayer {
 	** 							Variables section
 	********************************************************************/
   protected:
+	TraCIMobility* traci;
+	double heartBeatMsgPeriod;
+	double netwRouteExpirency;
+	double netwRoutePending;
+	cMessage* heartBeatMsg;
+	std::map<LAddress::L3Type, NetwRoute> neighborhoodTable;
+	std::map<LAddress::L3Type, NetwSession> neighborhoodSession;
+
+	int NBHTableNbrInsert;
+	int NBHTableNbrDelete;
+
+	enum NodeType {
+		VPA = 0x0A,
+		Veh = 0x01,
+	};
+
+	NodeType nodeType;
+
+	int sectorId;
 
 	double sumOfContactDur;
 
@@ -94,6 +116,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	bool recordContactStats;
 
+	std::map<unsigned long, int> bundlesReplicaIndex;
+
 	/**
 	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
 	 */
@@ -108,6 +132,20 @@ class DtnNetwLayer : public BaseNetwLayer {
     long nbrL3Received;
     double delayed;
     double delayedFrag;
+
+	/**
+	 * @brief The same as used by Prophetv2 in order to stay consistent with it
+	 */
+	enum DtnNetwMsgKinds {
+		HELLO = 0x00,
+		ERROR = 0x01,
+		RIBD  = 0xA0,
+		RIB   = 0xA1,
+		Bundle_Offer = 0xA4,
+		Bundle_Response = 0xA5,
+		Bundle_Ack = 0xD0,
+		Bundle = 0xFF,
+	};
     /**
   	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
@@ -167,11 +205,6 @@ class DtnNetwLayer : public BaseNetwLayer {
     std::set<LAddress::L3Type> neighborsAddress;
     bool withConnectionRestart;
     BaseMobility *mobility;
-    std::fstream contactTrFl;
-    double contactTrFlUpdatePeriod;
-    cMessage *contactTrFlMsg;
-    bool withContactTrFl;
-    string contactTrFlName;
     simsignal_t receiveL3SignalId;
     std::set<unsigned long > bundleSentPerVPA;
     std::set<unsigned long > ackReceivedPerVPA;
@@ -360,12 +393,20 @@ public:
 
   	virtual void recordAllScalars();
 
-  	virtual void updateTraceFile(LAddress::L3Type addr, double time, char* type);
+  	virtual void DefineNodeType();
 
-  	virtual void updateTraceFile(std::list<LAddress::L3Type> listAddr, double time, char* type);
+  	virtual int getCurrentSector();
 
-  	virtual void periodicUpdateTraceFile();
+  	virtual Coord getCurrentPos();
 
+  	/** Build KnownNeighbors set based on neighborhood table*/
+  	std::set<LAddress::L3Type> getKnownNeighbors();
+
+  	virtual void updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry);
+
+  	virtual void updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle);
+
+  	void sendDown(cMessage* msg);
   public:
 	/*
 	 * Getter for isEquiped boolean

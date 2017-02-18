@@ -28,10 +28,6 @@ void GeoSprayNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		DefineNodeType();
-		netwRouteExpirency = par("netwRouteExpirency").doubleValue();
-		netwRoutePending = par("netwRoutePending").doubleValue();
-		heartBeatMsgPeriod = par("heartBeatMsgPeriod").doubleValue();
 		nbrReplica = par("nbrReplica");
 		withSentTrack = par("withSentTrack").boolValue();
 
@@ -67,8 +63,6 @@ void GeoSprayNetwLayer::initialize(int stage)
 			geoTraci = NULL;
 			sectorId = this->getParentModule()->getIndex();
 		}
-		heartBeatMsg = new cMessage("heartBeatMsg");
-		scheduleAt(simTime(), heartBeatMsg);
 	}
 }
 
@@ -552,23 +546,6 @@ GeoDtnNetwPkt *GeoSprayNetwLayer::prepareNetwPkt(short  kind, LAddress::L3Type s
 	myNetwPkt->setBitLength(realPktLength);
 
 	return myNetwPkt;
-}
-
-void GeoSprayNetwLayer::DefineNodeType()
-{
-	cModule* parentModule = this->getParentModule();
-	if (parentModule->findSubmodule("appl")!=-1){
-		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
-		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
-
-		if (VPAModule != NULL){
-			nodeType = VPA;
-		} else if (VehicleModule != NULL){
-			nodeType = Veh;
-		} else {
-			opp_error("GeoSprayNetwLayer::DefineNodeType() - Unable to define NodeType please check existence of appl module in NED file");
-		}
-	}
 }
 
 void GeoSprayNetwLayer::storeAckSerial(unsigned long  serial)

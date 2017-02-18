@@ -34,10 +34,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 ********************************************************************/
   protected:
 	GeoTraCIMobility* geoTraci;
-	double heartBeatMsgPeriod;
-	double netwRouteExpirency;
-	double netwRoutePending;
-	cMessage* heartBeatMsg;
 	std::map<LAddress::L3Type, NetwRoute> neighborhoodTable;
 	std::map<LAddress::L3Type, NetwSession> neighborhoodSession;
 
@@ -64,13 +60,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 	std::set<unsigned long > ackSerial;
 
 	std::set<unsigned long > missedOpportunities;
-
-	enum NodeType {
-		VPA = 0x0A,
-		Veh = 0x01,
-	};
-
-	NodeType nodeType;
 
 	int sectorId;
 
@@ -213,8 +202,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
   	GeoDtnNetwPkt* prepareNetwPkt(short kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr);
 
   	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
-
-  	void DefineNodeType();
 
   	void storeAckSerial(unsigned long serial);
 

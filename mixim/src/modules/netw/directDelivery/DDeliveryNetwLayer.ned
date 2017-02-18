@@ -13,24 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package org.mixim.modules.netw.geoDtn;
+package org.mixim.modules.netw.directDelivery;
 
 import org.mixim.modules.netw.opprouting.DtnNetwLayer;
 
 //
 // TODO auto-generated module
 //
-simple GeoDtnNetwLayer extends DtnNetwLayer
+simple DDeliveryNetwLayer extends DtnNetwLayer
 {
     parameters:
-    	@class(GeoDtnNetwLayer);
-    	bool withMETDFwd = default(true);
-    	bool withDistFwd = default(true); 
-    	
-    	// 0: No Custody, 
-    	// 1: Custody for Dist with No Active Clearance of theses bundles, 
-    	// 2: Custody for Dist with Active Clearence of these bundles
-    	int custodyMode = default(0);
-    	// CBH: CheckBeforeHello
-    	bool withCBH = default(false);
+    	@class(DDeliveryNetwLayer);
+    	int nbrReplica = default(20);
+    	bool withSentTrack = default(false); 
 }

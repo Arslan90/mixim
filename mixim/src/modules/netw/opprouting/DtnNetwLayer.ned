@@ -37,6 +37,10 @@ simple DtnNetwLayer extends BaseNetwLayer
     	int MTU = default(2304); // MTU for WIFI 802.11P in bytes (octets)
     	headerLength @unit(bit) = default(272bit);
     	
+	    double heartBeatMsgPeriod = default(0.5);
+    	double netwRouteExpirency = default(2.0);
+    	double netwRoutePending = default(1.0);
+    	
     	double I_Preds = default(5);
     	
     	bool recordContactStats = default(true);

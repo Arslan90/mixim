@@ -26,6 +26,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "simtime.h"
+#include "VEHICLEpOpp.h"
+#include "VPApOpp.h"
 
 
 Define_Module(DtnNetwLayer);
@@ -34,6 +36,14 @@ void DtnNetwLayer::initialize(int stage)
 {
 	BaseNetwLayer::initialize(stage);
 	if (stage==0){
+
+		DefineNodeType();
+		netwRouteExpirency = par("netwRouteExpirency").doubleValue();
+		netwRoutePending = par("netwRoutePending").doubleValue();
+		heartBeatMsgPeriod = par("heartBeatMsgPeriod").doubleValue();
+
+		NBHTableNbrInsert    = 0;
+		NBHTableNbrDelete    = 0;
 		/*
 		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
 		 */
@@ -140,9 +150,6 @@ void DtnNetwLayer::initialize(int stage)
 
         withConnectionRestart = par("withConnectionRestart").boolValue();
 
-    	withContactTrFl = par("withContactTraceFile").boolValue();
-    	contactTrFlName = par("contactTraceFileName").stringValue();
-
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
 
 		nbrNeighors = 0;
@@ -156,44 +163,8 @@ void DtnNetwLayer::initialize(int stage)
 	}
 
 	if (stage == 2){
-		if (withContactTrFl){
-	        mobility = FindModule<BaseMobility*>::findSubModule(this->getParentModule());
-	    	if (mobility == NULL){
-	    		opp_error("Unable to find mobility subModule of currentParentModule");
-	    	}else{
-				Coord currentPos = mobility->getCurrentPosition();
-				std::string id = "";
-				ConstSpeedMobility* constMob = dynamic_cast<ConstSpeedMobility*>(mobility);
-				if (constMob != NULL) {
-			        if (constMob->getParentModule()->getIndex() == 0){
-			        	contactTrFl.open(contactTrFlName.c_str(), ios::out);
-			        	contactTrFl.close();
-			        }
-					std::ostringstream flux;
-					flux << constMob->getParentModule()->getIndex();
-					id = "r_"+flux.str();
-				}else{
-					TraCIMobility* traciMob = dynamic_cast<TraCIMobility*>(mobility);
-					if (traciMob != NULL) {
-						id = "v_"+traciMob->getExternalId();
-					}
-					if ((constMob == NULL) && (traciMob == NULL)){
-						opp_error("Unable to correctly identify whether the node is a VPA or Veh");
-					}
-				}
-				contactTrFl.open(contactTrFlName.c_str(), ios::out | ios::app);
-				if (contactTrFl.is_open()){
-					contactTrFl << myNetwAddr << ":" << id <<":[(" << currentPos.x << "," << currentPos.y << ")]:(s)" << simTime().dbl() << "\n"; // << std::endl;
-					contactTrFl.close();
-				}
-	    	}
-
-    		contactTrFlUpdatePeriod = par("contactTrFlUpdatePeriod").doubleValue();
-    		contactTrFlMsg = new cMessage("TraceFile");
-    		int currentTime = floor(simTime().dbl());
-    		double nextSchedule = (currentTime / int(contactTrFlUpdatePeriod) + 1) * contactTrFlUpdatePeriod;
-    		scheduleAt(nextSchedule, contactTrFlMsg);
-		}
+		heartBeatMsg = new cMessage("heartBeatMsg");
+		scheduleAt(simTime(), heartBeatMsg);
 	}
 }
 
@@ -843,10 +814,6 @@ void DtnNetwLayer::recordBeginContactStats(LAddress::L3Type addr, double time)
 	nbrContacts++;
 	// saving the starting time of the contact
 	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
-	if (withContactTrFl){
-		updateTraceFile(addr, time, "b");
-	}
-
 }
 
 
@@ -858,9 +825,6 @@ void DtnNetwLayer::recordEndContactStats(LAddress::L3Type addr, double time)
 	contactDurVector.record(sumOfContactDur/ double (nbrContacts));
 	contacts.erase(addr);
 	endContactTime[addr] = time;
-	if (withContactTrFl){
-		updateTraceFile(addr, time, "e");
-	}
 }
 
 
@@ -1131,81 +1095,6 @@ void DtnNetwLayer::recordAllScalars()
 	}
 }
 
-void DtnNetwLayer::updateTraceFile(LAddress::L3Type addr, double time, char* type)
-{
-	Coord currentPos = mobility->getCurrentPosition();
-
-	int length = 0;
-	std::string lastLine, newLine;
-	char c = '\0';
-	int posNLChar = -1;
-
-	stringstream ss1, ss2, ss3;
-	ss1 << addr << ":" <<  myNetwAddr;
-	ss2 << "(" << type << ")" << time;
-
-	contactTrFl.open(contactTrFlName.c_str(), ios::app | ios::out | ios::in);
-	if (contactTrFl.is_open()){
-		contactTrFl.seekg(0, contactTrFl.end); // go to the end of file
-        length = contactTrFl.tellg();//Get file size
-//        // loop backward over the file
-        if (length > 0 ){
-        	int i = 0;
-            for(i = length-2; i >= 0; i-- )
-            {
-            	contactTrFl.seekg(i, contactTrFl.beg);
-                c = contactTrFl.get();
-                if(c == '\n' ){
-                	//new line?
-                	posNLChar = i;
-                	break;
-                }
-            }
-            if (i == -1){
-            	contactTrFl.seekg(0, contactTrFl.beg);
-            }
-            std::getline(contactTrFl, lastLine);//read last line
-        }
-    	int pos = lastLine.find(ss2.str());
-    	if ((lastLine.find(ss1.str()) != std::string::npos) && (lastLine.find(ss2.str()) != std::string::npos)){
-    		// we can merge both lines
-    		newLine = lastLine;
-    		ss3 << "[" << currentPos.x << "," << currentPos.y << "]:";
-    		newLine.insert(pos,ss3.str());
-    		if (posNLChar == -1 ){
-    			truncate(contactTrFlName.c_str(), 0);
-    		} else if (posNLChar > 0){
-    			truncate(contactTrFlName.c_str(), posNLChar+1);
-    		}
-
-    	}else {
-    		ss3 << myNetwAddr << ":" <<  addr << ":["  << currentPos.x << "," << currentPos.y << "]:(" << type << ")" << time; // << std::endl;
-    		newLine = ss3.str();
-    	}
-
-    	contactTrFl << newLine << "\n"; // << std::endl;
-		contactTrFl.close();
-	}
-}
-
-void DtnNetwLayer::updateTraceFile(std::list<LAddress::L3Type> listAddr, double time, char* type)
-{
-	Coord currentPos = mobility->getCurrentPosition();
-
-	stringstream ss1, ss2;
-	for (std::list<LAddress::L3Type>::iterator it = listAddr.begin(); it != listAddr.end();it++){
-		int i = *it;
-		ss1 << i << ":";
-	}
-	ss2 << myNetwAddr << ":" <<  ss1.str() << "["  << currentPos.x << "," << currentPos.y << "]:(" << type << ")" << time; // << std::endl;
-
-	contactTrFl.open(contactTrFlName.c_str(), ios::app | ios::out | ios::in);
-	if (contactTrFl.is_open()){
-    	std::string newLine = ss2.str();
-    	contactTrFl << newLine << "\n"; // << std::endl;
-		contactTrFl.close();
-	}
-}
 
 bool DtnNetwLayer::hasBundlesToSend()
 {
@@ -1321,20 +1210,144 @@ std::pair<double,double> DtnNetwLayer::VPAContactDistance()
 	return std::pair<double,double>(total,count);
 }
 
-void DtnNetwLayer::periodicUpdateTraceFile()
+void DtnNetwLayer::DefineNodeType()
 {
-	if (withContactTrFl){
-		std::map<LAddress::L3Type, double>::iterator it;
-		std::list<LAddress::L3Type> addrList;
-		if (!contacts.empty()){
-			for (it = contacts.begin(); it != contacts.end(); it++){
-				addrList.push_back(it->first);
-			}
-			double time = simTime().dbl();
-			updateTraceFile(addrList,time,"u");
+	cModule* parentModule = this->getParentModule();
+	if (parentModule->findSubmodule("appl")!=-1){
+		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
+		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
+
+		if (VPAModule != NULL){
+			nodeType = VPA;
+		} else if (VehicleModule != NULL){
+			nodeType = Veh;
+		} else {
+			opp_error("DtnNetwLayer::DefineNodeType() - Unable to define NodeType please check existence of appl module in NED file");
 		}
 	}
 }
+
+int DtnNetwLayer::getCurrentSector()
+{
+	int currentSector = -1;
+	switch (nodeType) {
+		case Veh:
+			traci = TraCIMobilityAccess().get(getParentModule());
+			sectorId = traci->getCurrentSector();
+			break;
+		case VPA:
+			traci = NULL;
+			sectorId = this->getParentModule()->getIndex();
+			break;
+		default:
+			opp_error("DtnNetwLayer::getCurrentSector() - Unable to define CurrentSector due to unknown node type");
+			break;
+	}
+	return currentSector;
+}
+
+
+
+std::set<LAddress::L3Type> DtnNetwLayer::getKnownNeighbors()
+{
+	std::set<LAddress::L3Type> currentNeighbors;
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		if (it->second.getDestAddr() == myNetwAddr){ continue;}
+		if (it->second.isStatus()){
+			// if entry is currently active we add it to the list
+			currentNeighbors.insert(it->second.getDestAddr());
+		}
+	}
+	return currentNeighbors;
+}
+
+Coord DtnNetwLayer::getCurrentPos()
+{
+		BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
+		if (mobilityMod == NULL){
+			opp_error("No mobility module found");
+		}
+		return mobilityMod->getCurrentPosition();
+}
+
+void DtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
+{
+	double currentTime = simTime().dbl();
+	std::set<LAddress::L3Type> entriesToDelete;
+	std::set<LAddress::L3Type> entriesToPend;
+
+	// Check entries to delete or to set as Pending
+	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
+		if ((netwRouteExpirency > 0) && (!it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRouteExpirency)){
+			// if entry is currently pending and has expired we delete it
+			if (it->first != neighbor){
+				entriesToDelete.insert(it->second.getDestAddr());
+			}
+		}
+
+		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
+			// if entry is currently active and has not been update since an amount of time =>>> set it as pending
+			if (it->first != neighbor){
+				entriesToPend.insert(it->second.getDestAddr());
+			}
+		}
+	}
+
+	// Update table entries (Deleting/Pending)
+	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+		neighborhoodTable.erase(*it);
+		neighborhoodSession.erase(*it);
+		NBHTableNbrDelete++;
+	}
+
+	for (std::set<LAddress::L3Type>::iterator it = entriesToPend.begin(); it != entriesToPend.end(); it++){
+		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
+		if (it2 == neighborhoodTable.end()){
+			opp_error("NeighboorhoodTable entry not found");
+		}else{
+			it2->second.setStatus(false);
+		}
+	}
+
+	// Adding the new entry
+	std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(neighbor);
+	if (it == neighborhoodTable.end()){
+		// neighbor doesn't exist, add a new entry
+		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
+		NBHTableNbrInsert++;
+		if (neighborEntry.getNodeType() == VPA){
+			meetVPA = true;
+		}
+	}else{
+		// neighbor exists, update the old entry
+		neighborhoodTable[neighbor] = neighborEntry;
+	}
+}
+
+void DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle)
+{
+	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	if (it2 == neighborhoodSession.end()){
+		NetwSession newSession = NetwSession(srcAddr,0);
+		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+			newSession.insertInDelivredToBndl(*it);
+		}
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+	}else{
+		NetwSession newSession = it2->second;
+		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+			newSession.insertInDelivredToBndl(*it);
+		}
+		neighborhoodSession[srcAddr] = newSession;
+	}
+}
+
+void DtnNetwLayer::sendDown(cMessage *msg)
+{
+	BaseLayer::sendDown(msg);
+	updatingL3Sent();
+}
+
 
 
 

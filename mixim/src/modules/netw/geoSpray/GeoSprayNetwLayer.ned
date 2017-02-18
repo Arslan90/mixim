@@ -24,9 +24,6 @@ simple GeoSprayNetwLayer extends DtnNetwLayer
 {
     parameters:
     	@class(GeoSprayNetwLayer);
-    	double heartBeatMsgPeriod = default(0.5);
-    	double netwRouteExpirency = default(2.0);
-    	double netwRoutePending = default(1.0);
     	int nbrReplica = default(20);
     	bool withSentTrack = default(false); 
 }

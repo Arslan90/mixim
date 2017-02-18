@@ -32,6 +32,7 @@ simple PyGraphServerManager
         string vpaFile = default("TAPAS_VPA.txt");
         int margin = default(0);  // margin to add to all received vehicle positions
         int waitingTime = default(200);
+        bool collectStatOnly = default(false);
         
 		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=count,mean,last,vector);
 		@statistic[totalOverhead](title="OT";source="totalOverhead";record=count,mean,last,vector);

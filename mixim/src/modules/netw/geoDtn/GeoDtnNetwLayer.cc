@@ -28,11 +28,6 @@ void GeoDtnNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		DefineNodeType();
-		netwRouteExpirency = par("netwRouteExpirency").doubleValue();
-		netwRoutePending = par("netwRoutePending").doubleValue();
-		heartBeatMsgPeriod = par("heartBeatMsgPeriod").doubleValue();
-
 		withMETDFwd = par("withMETDFwd").boolValue();
 		withDistFwd = par("withDistFwd").boolValue();
 		if (!(withMETDFwd || withDistFwd)) {
@@ -46,8 +41,6 @@ void GeoDtnNetwLayer::initialize(int stage)
 
 		withCBH = par("withCBH").boolValue();
 
-		NBHTableNbrInsert    = 0;
-		NBHTableNbrDelete    = 0;
 		NBHAddressNbrInsert  = 0;
 		NBHAddressNbrDelete  = 0;
 
@@ -88,8 +81,6 @@ void GeoDtnNetwLayer::initialize(int stage)
 			geoTraci = NULL;
 			sectorId = this->getParentModule()->getIndex();
 		}
-		heartBeatMsg = new cMessage("heartBeatMsg");
-		scheduleAt(simTime(), heartBeatMsg);
 	}
 }
 
@@ -147,9 +138,6 @@ void GeoDtnNetwLayer::handleLowerMsg(cMessage *msg)
 		default:
 			break;
 	}
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 
     updatingL3Received();
 
@@ -189,9 +177,6 @@ void GeoDtnNetwLayer::handleSelfMsg(cMessage *msg)
 			sectorId = geoTraci->getCurrentSector();
 		}
 
-		if (sectorId == 374){
-			cout<<"Debug"<<endl;
-		}
 
 		BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
 		if (mobilityMod == NULL){
@@ -222,7 +207,7 @@ void GeoDtnNetwLayer::finish()
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
 	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
 	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
-	recordScalar("# delOper NBHTable", NBHTableNbrInsert);
+	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
 
 	recordScalar("# Distinct Forwarders", nbr2Fwds);
 	recordScalar("# Same Forwarders", nbr1Fwds);
@@ -252,9 +237,6 @@ void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, d
 		netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
 	}else {
 		opp_error("Undefined NodeType");
-	}
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
 	}
 	netwPkt->setSrcMETD(METD);
 	netwPkt->setSrcDist_NP_VPA(distance);
@@ -313,9 +295,6 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    if (!storedBundle.empty()){
 	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
 	    }
-		if (sectorId == 374){
-			cout<<"Debug"<<endl;
-		}
 	    if ((custodyMode == Yes_WithACK)||(custodyMode == Yes_WithoutACK)){
 			/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
 			if(( netwPkt->getSrcDist_NP_VPA() == 0)){
@@ -338,12 +317,7 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 		    if (netwPkt->getSrcType() == VPA){
 		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-				BaseMobility* mobilityMod = FindModule<BaseMobility*>::findSubModule(getParentModule());
-				if (mobilityMod == NULL){
-					opp_error("No mobility module found");
-				}
-				Coord currentPos = mobilityMod->getCurrentPosition();
-				vpaContactDistance.push_back(currentPos.distance(netwPkt->getCurrentPos()));
+		    	vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
 		    }else if (netwPkt->getSrcType() == Veh){
 		    	sendingBundleMsg();
 		    }
@@ -353,9 +327,6 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnNetwLayer::sendingBundleMsg()
 {
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 	// step 1 : define forwarders than bundle to forward to them
 	std::pair<LAddress::L3Type, double> fwdDist = std::pair<LAddress::L3Type, double>(LAddress::L3NULL,maxDbl);
 	std::pair<LAddress::L3Type, double> fwdMETD = std::pair<LAddress::L3Type, double>(LAddress::L3NULL,maxDbl);
@@ -453,9 +424,6 @@ void GeoDtnNetwLayer::sendingBundleMsg()
 
 void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 {
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 	// step 1 : check if we have any bundle that are addressed to @vpaAddr
 //	std::vector<WaveShortMessage* > wsmToSend = bundleForVPA(vpaAddr);
 	std::vector<WaveShortMessage* > wsmToSend = bundleForNode(vpaAddr);
@@ -484,9 +452,6 @@ void GeoDtnNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 
 void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 {
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 	WaveShortMessage *wsm;
 	wsm = check_and_cast<WaveShortMessage*>(netwPkt->decapsulate());
 
@@ -539,9 +504,6 @@ void GeoDtnNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsigned long> wsmDelivred, std::list<unsigned long> wsmFinalDeliverd)
 {
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 	std::set<unsigned long> serialOfH2HAck;
 	for (std::list<unsigned long >::iterator it = wsmDelivred.begin(); it != wsmDelivred.end(); it++){
 		serialOfH2HAck.insert(*it);
@@ -562,9 +524,6 @@ void GeoDtnNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsi
 
 void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	if (sectorId == 374){
-		cout<<"Debug"<<endl;
-	}
 	std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
 	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
 	if (it2 == neighborhoodSession.end()){
@@ -610,6 +569,8 @@ void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 		ackReceivedPerVPA.insert(*it);
 	}
 }
+
+////////////////////////////////////////// Others methods /////////////////////////
 
 GeoDtnNetwPkt *GeoDtnNetwLayer::prepareNetwPkt(short  kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr)
 {
@@ -920,38 +881,6 @@ bool GeoDtnNetwLayer::erase(unsigned long serial)
 	return found;
 }
 
-void GeoDtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle)
-{
-	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
-	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
-		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-			newSession.insertInDelivredToBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
-	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-			newSession.insertInDelivredToBndl(*it);
-		}
-		neighborhoodSession[srcAddr] = newSession;
-	}
-}
-
-
-std::set<LAddress::L3Type> GeoDtnNetwLayer::getKnownNeighbors()
-{
-	std::set<LAddress::L3Type> currentNeighbors;
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if (it->second.getDestAddr() == myNetwAddr){ continue;}
-		if (it->second.isStatus()){
-			// if entry is currently active we add it to the list
-			currentNeighbors.insert(it->second.getDestAddr());
-		}
-	}
-	return currentNeighbors;
-}
-
 void GeoDtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
 {
 	double currentTime = simTime().dbl();
@@ -1162,23 +1091,6 @@ std::pair<LAddress::L3Type, double> GeoDtnNetwLayer::getBestFwdDist()
 //	cout << "Chosen forwarder @: " << bestForwarder << " value: "<< bestDist << endl;
 
 	return std::pair<LAddress::L3Type, double>(bestForwarder, bestDist);
-}
-
-void GeoDtnNetwLayer::DefineNodeType()
-{
-	cModule* parentModule = this->getParentModule();
-	if (parentModule->findSubmodule("appl")!=-1){
-		VPApOpp* VPAModule = FindModule<VPApOpp*>::findSubModule(parentModule);
-		VEHICLEpOpp* VehicleModule = FindModule<VEHICLEpOpp*>::findSubModule(parentModule);
-
-		if (VPAModule != NULL){
-			nodeType = VPA;
-		} else if (VehicleModule != NULL){
-			nodeType = Veh;
-		} else {
-			opp_error("GeoDtnNetwLayer::DefineNodeType() - Unable to define NodeType please check existence of appl module in NED file");
-		}
-	}
 }
 
 void GeoDtnNetwLayer::handleLowerControl(cMessage *msg)

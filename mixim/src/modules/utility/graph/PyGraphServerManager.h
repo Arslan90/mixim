@@ -39,6 +39,10 @@ class PyGraphServerManager : public cSimpleModule, cListener
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+    virtual void initializeConnection();
+
+    virtual void finishConnection();
+
     bool debug;
     std::string host;
     int port;
@@ -63,6 +67,8 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	simsignal_t dR;
 
 	simsignal_t oT;
+
+	bool collectStatOnly;
 };
 
 #endif

@@ -36,7 +36,7 @@
 //#include "myConstants.h"
 #include "PyGraphServerManager.h"
 
-const double maxDbl = std::numeric_limits<double>::max();
+//const double maxDbl = std::numeric_limits<double>::max();
 
 /**
  * @brief
@@ -124,11 +124,10 @@ class GeoTraCIMobility : public TraCIMobility
 			return getManager()->cmdGetLaneMaxSpeed(laneId);
 		}
 
-		void updateCurrentSector();
     double getCurrentMetd() const;
     NearestPoint getCurrentNp() const;
-    int getCurrentSector() const;
     void setCurrentMetd(double currentMetd);
+	virtual void updateCurrentSector();
 
 
 
@@ -171,27 +170,6 @@ class GeoTraCIMobility : public TraCIMobility
 		int indexLastRoadId; /** Index of last RoadID in the initial route */
 
 		NearestPoint currentNP;
-
-	    /**
-		 * Scenario Model Type (Cologne -Koln- like) or Free
-		 */
-	    enum t_scenarioType{ Free = 1, Sector = 2};
-	    /*
-		 * Variable for specifying Scenario Model Type
-		 */
-	    t_scenarioType scenarioModel;
-	    // Parameters related to Sector Mode
-	    int oldSector;
-	    int currentSector;
-	    int rowSectorGrid;
-	    int colSectorGrid;
-	    double sectorSizeX;
-	    double sectorSizeY;
-	    bool useNegativeValues; // Allow us the use of negative values for Offset - Coord(0.0) of sector[0]
-	    double sectorOffsetX; // Traci Coord X for - Coord(0.0) of sector[0]
-	    double sectorOffsetY; // Traci Coord Y for - Coord(0.0) of sector[0]
-
-		void initScenarioType();
 
 		/**
 		 * Returns -1 if @param roadId is not found in route @param route, otherwise return its index

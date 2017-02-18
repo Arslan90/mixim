@@ -37,5 +37,15 @@ simple TraCIMobility extends BaseMobility
         double accidentStart @unit("s") = default(uniform(30s,60s));  // time until first accident, relative to departure time
         volatile double accidentDuration @unit("s") = default(uniform(30s,60s));  // duration of accident
         volatile double accidentInterval @unit("s") = default(uniform(30s,60s));  // time between accidents
+        
+        string scenarioType = default("Free");
+		// Parameters related to Sector scenarioType only
+		int rowSectorGrid = default(-1);
+		int colSectorGrid = default(-1);   
+		double sectorSizeX = default(-1);  
+		double sectorSizeY = default(-1);
+		bool useNegativeValues = default(false);  
+		double sectorOffsetX = default(-1);
+		double sectorOffsetY = default(-1);
 }
 

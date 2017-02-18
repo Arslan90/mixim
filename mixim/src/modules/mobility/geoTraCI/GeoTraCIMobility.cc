@@ -76,11 +76,6 @@ NearestPoint GeoTraCIMobility::getCurrentNp() const
     return currentNP;
 }
 
-int GeoTraCIMobility::getCurrentSector() const
-{
-    return currentSector;
-}
-
 void GeoTraCIMobility::setCurrentMetd(double currentMetd)
 {
     currentMETD = currentMetd;
@@ -421,40 +416,6 @@ void GeoTraCIMobility::updateCurrentSector()
 	}
 }
 
-void GeoTraCIMobility::initScenarioType() {
-
-	const char* scenario = par("scenarioType").stringValue();
-	if (strcmp(scenario,"Free")==0){
-		scenarioModel = Free;
-	}else if (strcmp(scenario,"Sector")==0){
-		scenarioModel = Sector;
-	}else {
-		opp_error("Unrecognized Scenario Model Type (Free, Sector, etc..)");
-	}
-
-	// Parameters related to Sector Mode
-	oldSector = -1;
-	currentSector = -1;
-	if (scenarioModel == Sector){
-		rowSectorGrid = par("rowSectorGrid");
-		colSectorGrid = par("colSectorGrid");
-		if ((rowSectorGrid <= 0) || (colSectorGrid <= 0)){
-			opp_error("Sector grid values invalid");
-		}
-		sectorSizeX = par("sectorSizeX").doubleValue();
-		sectorSizeY = par("sectorSizeY").doubleValue();
-		if ((sectorSizeX <= 0) || (sectorSizeY <= 0)){
-			opp_error("Sector sizes values invalid");
-		}
-		useNegativeValues = par("useNegativeValues").boolValue();
-		sectorOffsetX = par("sectorOffsetX").doubleValue();
-		sectorOffsetY = par("sectorOffsetY").doubleValue();
-
-		if ((!useNegativeValues) && ((sectorOffsetX < 0) || (sectorOffsetY < 0))){
-			opp_error("Sector offset values invalid");
-		}
-	}
-}
 
 int GeoTraCIMobility::roadIndexInRoute(std::string roadId, std::list<std::string> route, int indexLastRoadId, bool canEquals)
 {

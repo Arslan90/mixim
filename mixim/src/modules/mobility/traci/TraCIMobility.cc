@@ -109,10 +109,13 @@ void TraCIMobility::initialize(int stage)
 			stopAccidentMsg = new cMessage("scheduledAccidentResolved");
 			scheduleAt(simTime() + accidentStart, startAccidentMsg);
 		}
+
+		initScenarioType();
 	}
 	else if (stage == 1)
 	{
 		// don't call BaseMobility::initialize(stage) -- our parent will take care to call changePosition later
+		updateCurrentSector();
 	}
 	else
 	{
@@ -174,6 +177,7 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 	this->speed = speed;
 	this->angle = angle;
 	changePosition();
+	updateCurrentSector();
 }
 
 void TraCIMobility::changePosition()
@@ -323,5 +327,81 @@ double TraCIMobility::calculateCO2emission(double v, double a) const {
 
 	if (P_tract <= 0) return alpha1;
 	return alpha + beta*v*3.6 + delta*v*v*v*(3.6*3.6*3.6) + zeta*a*v;
+}
+
+void TraCIMobility::initScenarioType() {
+
+	const char* scenario = par("scenarioType").stringValue();
+	if (strcmp(scenario,"Free")==0){
+		scenarioModel = Free;
+	}else if (strcmp(scenario,"Sector")==0){
+		scenarioModel = Sector;
+	}else {
+		opp_error("Unrecognized Scenario Model Type (Free, Sector, etc..)");
+	}
+
+	// Parameters related to Sector Mode
+	oldSector = -1;
+	currentSector = -1;
+	if (scenarioModel == Sector){
+		rowSectorGrid = par("rowSectorGrid");
+		colSectorGrid = par("colSectorGrid");
+		if ((rowSectorGrid <= 0) || (colSectorGrid <= 0)){
+			opp_error("Sector grid values invalid");
+		}
+		sectorSizeX = par("sectorSizeX").doubleValue();
+		sectorSizeY = par("sectorSizeY").doubleValue();
+		if ((sectorSizeX <= 0) || (sectorSizeY <= 0)){
+			opp_error("Sector sizes values invalid");
+		}
+		useNegativeValues = par("useNegativeValues").boolValue();
+		sectorOffsetX = par("sectorOffsetX").doubleValue();
+		sectorOffsetY = par("sectorOffsetY").doubleValue();
+
+		if ((!useNegativeValues) && ((sectorOffsetX < 0) || (sectorOffsetY < 0))){
+			opp_error("Sector offset values invalid");
+		}
+	}
+}
+
+int TraCIMobility::getCurrentSector() const
+{
+    return currentSector;
+}
+
+void TraCIMobility::updateCurrentSector()
+{
+	if (scenarioModel == Sector){
+		Coord vehiclePosition;//actual XY vehicle position
+		Coord vehiclePosSumo;//actual XY vehicle position
+		int row; //row of sector
+		int col; //column of sector
+		int inSector; //the sector in.
+
+		//step 1
+		vehiclePosition = getCurrentPosition();
+		vehiclePosSumo.x = getManager()->omnet2traci(vehiclePosition).x;
+		vehiclePosSumo.y = getManager()->omnet2traci(vehiclePosition).y;
+		//MYDEBUG <<"logs, vehicle position," << traci->getExternalId() << ",x," << vehiclePosition.x <<",y,"<< axeY  <<endl;
+
+		//step 2
+		col= int( (vehiclePosSumo.x - sectorOffsetX) / sectorSizeX); //Substract the 4k X-axis offset. Divide by 1000 and get the integer.
+		if (!((0 <= col)&&(col < colSectorGrid))){
+			opp_error("Error with column index calculation");
+		}
+		row= int( (vehiclePosSumo.y - sectorOffsetY) / sectorSizeY); //Substract the 5k Y-axis offset. Divide by 1000 and get the integer.
+		if (!((0 <= row)&&(row < rowSectorGrid))){
+			opp_error("Error with row index calculation");
+		}
+		inSector= (col * rowSectorGrid) + row; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
+
+		//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.
+		//Note: this counter is complemented with the counter in received messages by VPAs or Vehicles.
+		if (inSector != currentSector){
+			currentSector= inSector; //update Veh sector transit
+		}else {
+			oldSector = currentSector;
+		}
+	}
 }
 
