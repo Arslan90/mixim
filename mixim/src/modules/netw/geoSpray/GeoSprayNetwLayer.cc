@@ -53,6 +53,8 @@ void GeoSprayNetwLayer::initialize(int stage)
 
 		meetVPA = false;
 
+        withEMethod = par("withEMethod").boolValue();
+
 	}else if (stage == 1){
 
 	}else if (stage == 2){
@@ -199,9 +201,19 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		    sendingBundleAckMsg(bundleAckMsg, netwPkt->getSrcAddr(), wsmFinalDeliverd);
 
 		    if (nodeType == Veh){
-			    GeoDtnNetwPkt* bundleOfferMsg;
-			    std::list<unsigned long> wsmStoredBndl;
-			    sendingBundleOfferMsg(bundleOfferMsg, netwPkt->getSrcAddr(), wsmStoredBndl);
+		    	if (withEMethod){
+				    GeoDtnNetwPkt* bundleOfferMsg;
+				    std::list<unsigned long> wsmStoredBndl;
+				    sendingBundleOfferMsg(bundleOfferMsg, netwPkt->getSrcAddr(), wsmStoredBndl);
+				}else{
+					if (netwPkt->getSrcType() == VPA){
+			    		sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+					}else if (netwPkt->getSrcType() == Veh){
+					    GeoDtnNetwPkt* bundleOfferMsg;
+					    std::list<unsigned long> wsmStoredBndl;
+					    sendingBundleOfferMsg(bundleOfferMsg, netwPkt->getSrcAddr(), wsmStoredBndl);
+					}
+				}
 		    }
 //	    }
 	}
@@ -249,9 +261,11 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 		erase(*it);
 	}
 
-	if (netwPkt->getSrcType() == VPA){
-		sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-	}
+    if (withEMethod){
+    	if (netwPkt->getSrcType() == VPA){
+    		sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+    	}
+    }
 }
 
 void GeoSprayNetwLayer::sendingBundleOfferMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Type destAddr, std::list<unsigned long> wsmStoredBndl)

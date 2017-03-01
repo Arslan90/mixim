@@ -13,18 +13,30 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package org.mixim.modules.netw.geoSpray;
+cplusplus {{
+#include "NetwPkt_m.h"
+#include "Coord.h"
+typedef std::set<unsigned long> E2EAcks;
+typedef std::set<unsigned long> H2PAcks;
+}}
+packet NetwPkt;
 
-import org.mixim.modules.netw.opprouting.DtnNetwLayer;
-
+class LAddress::L3Type extends void;
+class noncobject E2EAcks;
+class noncobject H2PAcks;
+class noncobject Coord;
 //
-// TODO auto-generated module
+// TODO generated message class
 //
-simple GeoSprayNetwLayer extends DtnNetwLayer
-{
-    parameters:
-    	@class(GeoSprayNetwLayer);
-    	int nbrReplica = default(20);
-    	bool withSentTrack = default(false);
-	    bool withEMethod = default(true);
+packet DtnNetwPkt extends NetwPkt {
+    int vpaSectorId;
+    int srcType;
+    bool df_Flag = false;
+    short fragNbr = 0;
+    short fragTotal = 0;
+    unsigned long contactID;
+    E2EAcks e2eAcks;
+    H2PAcks h2hAcks;
+    Coord currentPos;
+    int hopCount = 0;
 }

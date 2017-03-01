@@ -13,18 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package org.mixim.modules.netw.geoSpray;
+package org.mixim.modules.netw.epidemicV2;
 
 import org.mixim.modules.netw.opprouting.DtnNetwLayer;
 
 //
 // TODO auto-generated module
 //
-simple GeoSprayNetwLayer extends DtnNetwLayer
+simple EpidemicNetwLayerV2 extends DtnNetwLayer
 {
     parameters:
-    	@class(GeoSprayNetwLayer);
+    	@class(EpidemicNetwLayerV2);
     	int nbrReplica = default(20);
-    	bool withSentTrack = default(false);
-	    bool withEMethod = default(true);
+    	bool withSentTrack = default(false); 
 }

@@ -274,6 +274,8 @@ public:
   	 */
   	virtual bool exist(BundleMeta bndlMeta);
 
+  	virtual bool exist(unsigned long serial);
+
   	/**
   	 * @brief Function that erase the WaveShortMessage identified by
   	 * @param *msg

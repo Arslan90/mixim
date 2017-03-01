@@ -15,40 +15,27 @@
 
 cplusplus {{
 #include "DtnNetwPkt_m.h"
+#include <map>
 #include "SimpleAddress.h"
+#include "Prophet_Enum.h"
 #include "BundleMeta.h"
+typedef std::map<LAddress::L3Type, double> predictions;
 typedef std::list<BundleMeta> bndlMeta;
-typedef std::set<LAddress::L3Type> Neighbors;
-typedef std::set<unsigned long> CustodyAcks;
 }}
 packet DtnNetwPkt;
 
 enum t_result_field;
+class noncobject predictions;
 class noncobject BundleMeta;
 class noncobject bndlMeta;
-class LAddress::L3Type extends void;
-class noncobject Neighbors;
-class noncobject CustodyAcks;
 //
 // TODO generated message class
 //
-packet GeoDtnNetwPkt extends DtnNetwPkt {
-    LAddress::L3Type fwdMETD = 0; // LAddress::L3NULL = 0;
-    LAddress::L3Type fwdDist = 0;
-    LAddress::L3Type vpaAddr = 0;
-    double vpaPosX;
-    double vpaPosY;
-    double vpaPosZ;
-    double srcMETD = 1.79769e+308;
-    double srcDist_NP_VPA = 1.79769e+308;
-    bool custodyTransfert = false;
-    bndlMeta bndlmeta = std::list<BundleMeta>();
-    Neighbors knownNeighbors;
-    CustodyAcks custodyAcks;
-    int nbrReplica;
-    
+packet ProphetNCPkt extends DtnNetwPkt {
     int result_Field @enum(t_result_field);
     int identifier;
     int tlv_Flags;
+    predictions preds;
+    bndlMeta bndlmeta = std::list<BundleMeta>();
     bool restartIEP = false;
 }

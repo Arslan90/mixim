@@ -1342,6 +1342,22 @@ void DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set
 	}
 }
 
+bool DtnNetwLayer::exist(unsigned long  serial)
+{
+	bool found = false;
+
+	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
+		innerIndexMap innerMap = it->second;
+		for (innerIndexIterator it2 = innerMap.begin(); it2 != innerMap.end(); it2++){
+			if (serial == it2->first){
+				found = true;
+				break;
+			}
+		}
+	}
+	return found;
+}
+
 void DtnNetwLayer::sendDown(cMessage *msg)
 {
 	BaseLayer::sendDown(msg);
