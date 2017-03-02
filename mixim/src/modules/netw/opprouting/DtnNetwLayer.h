@@ -146,7 +146,22 @@ class DtnNetwLayer : public BaseNetwLayer {
 		Bundle_Ack = 0xD0,
 		Bundle = 0xFF,
 	};
-    /**
+
+	/**
+	 * @brief The same as used by Prophetv2 in order to stay consistent with it
+	 */
+	enum DtnNetwSchedulingPolicy {
+		RCAscRLDesc = 0,
+		RCAscRLAsc,
+		RCDescRLDesc,
+		RCDescRLAsc,
+		RLAsc,
+		RLDesc,
+	};
+
+	DtnNetwSchedulingPolicy scheduleStrategy;
+
+	/**
   	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
     bool withAck;
@@ -217,6 +232,85 @@ class DtnNetwLayer : public BaseNetwLayer {
     long receivedHWICVPA;
     long receivedBWICVPA;
     long receivedAWICVPA;
+
+	/**
+	 * Comparator used to sort Bundles to sent when using RC Asc strategy
+	 */
+    std::vector<std::pair<WaveShortMessage*, int> > compAsFn_schedulingStrategy(std::vector<std::pair<WaveShortMessage*, int> > vectorToSort);
+
+    static bool func_RCAscRLDesc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+	  if (i.second != j.second){
+		  return (i.second<j.second);
+	  }else {
+		  return (func_RLDesc(i,j));
+	  }
+	}
+
+    static bool func_RCAscRLAsc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+	  if (i.second != j.second){
+		  return (i.second<j.second);
+	  }else {
+		  return (func_RLAsc(i,j));
+	  }
+	}
+
+    static bool func_RCDescRLDesc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+	  if (i.second != j.second){
+		  return (i.second>j.second);
+	  }else {
+		  return (func_RLDesc(i,j));
+	  }
+	}
+
+    static bool func_RCDescRLAsc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+	  if (i.second != j.second){
+		  return (i.second>j.second);
+	  }else {
+		  return (func_RLAsc(i,j));
+	  }
+	}
+
+    static bool func_RLAsc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+    	simtime_t first_TTL = i.first->getTimestamp();
+		simtime_t second_TTL = j.first->getTimestamp();
+		return ( first_TTL <= second_TTL );
+	}
+
+    static bool func_RLDesc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+	{
+    	simtime_t first_TTL = i.first->getTimestamp();
+		simtime_t second_TTL = j.first->getTimestamp();
+		return ( first_TTL >= second_TTL );
+	}
+
+//	struct comparatorRCAsc {
+//		bool operator() (std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
+//		{
+//		  if (i.second != j.second){
+//			  return (i.second<j.second);
+//		  }else {
+//			  return (i.first->getTimestamp()>j.first->getTimestamp());
+//		  }
+//
+//		}
+//	} comparatorRCAscObject;
+//
+//	// comparison, not case sensitive.
+//	struct comparatorRLAsc {
+//		bool operator() (WaveShortMessage* first_TTL, WaveShortMessage* second_TTL)
+//		{
+//			simtime_t i = first_TTL->getTimestamp();
+//			simtime_t j = second_TTL->getTimestamp();
+//			return ( i <= j );
+//		}
+//	} comparatorRLAscObject;
+
+
     /*******************************************************************
 	** 							Methods section
 	********************************************************************/

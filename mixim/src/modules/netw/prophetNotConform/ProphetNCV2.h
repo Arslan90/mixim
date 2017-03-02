@@ -422,25 +422,12 @@ private:
 	/** Function for partially updating & exchanging probabilities */
 	void partialUpdate(ProphetNCPkt *prophetPkt);
 
-	/** Function for executing all actions of Initiator Role in the IEP Phase*/
-	void executeInitiatorRole(short  kind, ProphetNCPkt *prophetPkt);
-
-	/** Function for executing all actions of Listener Role in the IEP Phase*/
-	void executeListenerRole(short  kind, ProphetNCPkt *prophetPkt);
-
-	/** Function for checking if we must abord the communication due to no more things to do or due to an error	 */
-	bool abortConnection(short  kind, ProphetNCPkt *prophetPkt);
-
 	/** Function for preparing Prophet message */
 	ProphetNCPkt* prepareNetwPkt(short kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, Coord currentPos);
 
 	/** Function for preparing Prophet message */
 	ProphetNCPkt* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
 				std::list<BundleMeta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
-	/**
-	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
-	 */
-	std::vector<std::list<BundleMeta> >defineBundleOffer(ProphetNCPkt *prophetPkt);
 
 	/*
 	 * Function that store bundles according to the current Queuing Strategy
@@ -465,11 +452,6 @@ private:
 	/*******************************************************************
 	** 							Metrics methods section
 	********************************************************************/
-
-	void updateContactWhenInit(ProphetNCPkt* prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind);
-
-	void updateContactWhenList(ProphetNCPkt* prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind);
-
 	/*
 	 * Function for collecting data about predictions
 	 */
@@ -491,10 +473,6 @@ private:
 
   	void handleHelloMsg(ProphetNCPkt *netwPkt);
 
-  	void sendingRIBMsg(LAddress::L3Type nodeAddr);
-
-  	void handleRIBMsg(ProphetNCPkt *netwPkt);
-
   	void sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode);
 
   	void handleBndlOfferMsg(ProphetNCPkt *netwPkt);
@@ -507,8 +485,6 @@ private:
 
   	void handleBundleMsg(ProphetNCPkt *netwPkt);
 
-  	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
-
 	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmFinalDeliverd);
 
   	void handleBundleAckMsg(ProphetNCPkt *netwPkt);
@@ -518,6 +494,8 @@ private:
   	void storeAckSerial(std::set<unsigned long> setOfSerials);
 
   	bool erase(unsigned long serial);
+
+  	void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks);
 
 	/*******************************************************************
 	** 							End of metrics methods section

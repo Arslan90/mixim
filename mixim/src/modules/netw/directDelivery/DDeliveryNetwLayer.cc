@@ -92,6 +92,10 @@ void DDeliveryNetwLayer::handleUpperMsg(cMessage *msg)
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
 	storeBundle(upper_msg);
+	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
+	if (it == bundlesReplicaIndex.end()){
+		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
+	}
 }
 
 void DDeliveryNetwLayer::finish()

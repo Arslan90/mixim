@@ -290,11 +290,6 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
 					handleHelloMsg(prophetPkt);
 				}
 				break;
-			case RIB:
-				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleRIBMsg(prophetPkt);
-				}
-				break;
 			case Bundle_Offer:
 				if (prophetPkt->getDestAddr()==myNetwAddr){
 					handleBndlOfferMsg(prophetPkt);
@@ -400,98 +395,13 @@ void ProphetNCV2::handleLowerControl(cMessage* msg)
 	delete msg;
 }
 
-
 void ProphetNCV2::handleSelfMsg(cMessage* msg)
 {
-	switch (msg->getKind()) {
-		case RESTART:
-			if (canITransmit){
-
-			/*
-			 * Extracting destAddress and Time from controlMsgName
-			 */
-			char* msgName = strdup(msg->getName());
-
-			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-			ProphetNCPkt* emulatedPkt;
-			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
-
-			if (recordContactStats){
-				unsigned long contactID;
-				iteratorContactID iterator1 = indexContactID.find(addr);
-				if (iterator1 != indexContactID.end()){
-					contactID = iterator1->second.back();
-				}else{
-					opp_error("contact does not exist");
-				}
-				emulatedPkt->setContactID(contactID);
-			}
-
-			/** Starting IEP Phase					*/
-
-			/*
-			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
-			 * calculated by startRecoringContact
-			 */
-			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
-			emulatedPkt->setControlInfo(controlInfo);
-
-			emulatedPkt->setRestartIEP(true);
-
-			executeInitiatorRole(RIB,emulatedPkt);
-			delete emulatedPkt;
-
-
-			}
-			break;
-		case FORCED_RESTART:
-			if (canITransmit){
-
-			/*
-			 * Extracting destAddress and Time from controlMsgName
-			 */
-			char* msgName = strdup(msg->getName());
-
-			LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-			ProphetNCPkt* emulatedPkt;
-			emulatedPkt = prepareProphet(RIB,addr,myNetwAddr);
-
-			if (recordContactStats){
-				unsigned long contactID;
-				iteratorContactID iterator1 = indexContactID.find(addr);
-				if (iterator1 != indexContactID.end()){
-					contactID = iterator1->second.back();
-				}else{
-					opp_error("contact does not exist");
-				}
-				emulatedPkt->setContactID(contactID);
-			}
-
-			/** Starting IEP Phase					*/
-
-			/*
-			 * We emulate the reception of a prophetPkt from the other node with contactID as a serial
-			 * calculated by startRecoringContact
-			 */
-			NetwOppControlInfo* controlInfo = new NetwOppControlInfo(RESTART);
-			emulatedPkt->setControlInfo(controlInfo);
-
-			executeInitiatorRole(RIB,emulatedPkt);
-			delete emulatedPkt;
-
-
-			}
-			break;
-		default:
-			if (msg == heartBeatMsg){
-				updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-				ProphetNCPkt* netwPkt;
-				sendingHelloMsg(netwPkt);
-				scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
-			}
-			break;
+	if (msg == heartBeatMsg){
+		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
+		ProphetNCPkt* netwPkt;
+		sendingHelloMsg(netwPkt);
+		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
 }
 
@@ -506,30 +416,19 @@ void ProphetNCV2::handleUpperMsg(cMessage *msg)
 	}
 }
 
-
 void ProphetNCV2::sendingHelloMsg(ProphetNCPkt *netwPkt)
 {
 	sectorId = getCurrentSector();
 	netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId , getCurrentPos());
-//	netwPkt->setE2eAcks(ackSerial);
-//	std::set<unsigned long > storedBundle;
-//	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-//		storedBundle.insert((*it)->getSerial());
-//	}
-//	netwPkt->setH2hAcks(storedBundle);
-//	int nbrEntries = storedBundle.size(); //ackSerial.size()+ storedBundle.size();
-
 	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
 	ageDeliveryPreds();
 	predToSend.insert(preds.begin(),preds.end());
 	netwPkt->setPreds(predToSend);
 
 
-	int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-	int length = predsLength + netwPkt->getBitLength();
-//	int length = sizeof(unsigned long) * (nbrEntries)+ predsLength + netwPkt->getBitLength();
-//	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
+//	int length = predsLength + netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
 }
@@ -544,99 +443,78 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 //	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " current address " << myNetwAddr << std::endl;
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-//	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-//	    if (!receivedE2eAcks.empty()){
-//	    	storeAckSerial(receivedE2eAcks);
-//	    }
-//	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
-//	    if (!storedBundle.empty()){
-//	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
-//	    }
-
-	    /*************************** Sending RIB Msg **********/
-//	    sendingRIBMsg(netwPkt->getSrcAddr());
-
-
 	    update(netwPkt);
-	    if (nodeType == Veh){
-	    	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
-		}
-//	    if (nodeType == VPA){
-//	    	return;
-//	    }else{
-//	    	/*************************** Sending Bundle Msg **********/
-//
-//		    if (netwPkt->getSrcType() == VPA){
-////		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-////		    	vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
-//		    }else if (netwPkt->getSrcType() == Veh){
-////		    	sendingBundleMsg();
-//		    }
-//	    }
-	}
-}
 
-void ProphetNCV2::sendingRIBMsg(LAddress::L3Type nodeAddr)
-{
-	ProphetNCPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(RIB,myNetwAddr, nodeType ,nodeAddr, sectorId , getCurrentPos());
-
-	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
-	ageDeliveryPreds();
-	predToSend.insert(preds.begin(),preds.end());
-	netwPkt->setPreds(predToSend);
-
-	int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-	int length = predsLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
-
-
-//	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
-//	ageDeliveryPreds();
-//	predToSend.insert(preds.begin(),preds.end());
-//
-//	ProphetNCPkt *ribPkt;
-//	ribPkt = prepareProphet(RIB, myNetwAddr, nodeAddr, NULL, &predToSend);
-//	sendDown(ribPkt);
-}
-
-void ProphetNCV2::handleRIBMsg(ProphetNCPkt *netwPkt)
-{
-	update(netwPkt);
-    if (nodeType == Veh){
-    	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
+	    /*************************** Sending BundleOffer Msg **********/
+	    sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
+//	    if (nodeType == Veh){
+//	    	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
+//		}
 	}
 }
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
 {
-	ProphetNCPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Offer,myNetwAddr, nodeType ,nodeAddr, sectorId , getCurrentPos());
+//	/*************************** H2H Acks (stored bundles) **********/
+//	std::set<unsigned long> serialOfH2hAck;
+//	for (std::list<WaveShortMessage* >::iterator it = bundles.begin(); it != bundles.end(); it++){
+//		unsigned long wsmSerial = (*it)->getSerial();
+//		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
+//		if (it2 != neighborhoodSession.end()){
+//			NetwSession newSession = it2->second;
+//			if (newSession.getStoredBndl().count(wsmSerial) > 0){
+//				continue;
+//			}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
+//				continue;
+//			}else if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
+//				continue;
+//			}
+//		}
+//		predsIterator myPred = preds.find((*it)->getRecipientAddress());
+//		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
+//		bool addToOffer = false;
+//		if (otherPred != predsOfNode.end()){
+//			if (myPred != preds.end()){
+//				if (myPred->second <= otherPred->second){
+//					addToOffer = true;
+//				}
+//			}else{
+//				addToOffer = true;
+//			}
+//		}
+//		if (addToOffer){
+//			serialOfH2hAck.insert(wsmSerial);
+//		}
+//	}
+//	netwPkt->setH2hAcks(serialOfH2hAck);
+//
+//	/*************************** E2E Acks **********/
+	std::set<unsigned long> storedAck;
+	for (std::set<unsigned long >::iterator it = ackSerial.begin(); it != ackSerial.end(); it++){
+		unsigned long wsmSerial = (*it);
+//		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
+//		if (it2 != neighborhoodSession.end()){
+//			NetwSession newSession = it2->second;
+//			if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
+//				continue;
+//			}
+//		}
+		storedAck.insert(wsmSerial);
+	}
 
-	/*************************** H2H Acks (stored bundles) **********/
-	std::set<unsigned long> serialOfH2hAck;
-	for (std::list<WaveShortMessage* >::iterator it = bundles.begin(); it != bundles.end(); it++){
-		unsigned long wsmSerial = (*it)->getSerial();
-		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
-		if (it2 != neighborhoodSession.end()){
-			NetwSession newSession = it2->second;
-			if (newSession.getStoredBndl().count(wsmSerial) > 0){
-				continue;
-			}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
-				continue;
-			}else if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
-				continue;
-			}
+//	/*************************** H2H Acks (stored bundles) **********/
+	std::set<unsigned long > storedBundle;
+	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+		LAddress::L3Type destAddr = (*it)->getRecipientAddress();
+		if (destAddr == myNetwAddr){
+			opp_error("storing bundles addressed to current node");
 		}
 		predsIterator myPred = preds.find((*it)->getRecipientAddress());
 		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
 		bool addToOffer = false;
 		if (otherPred != predsOfNode.end()){
 			if (myPred != preds.end()){
-				if (myPred->second <= otherPred->second){
+				if (myPred->second < otherPred->second){
 					addToOffer = true;
 				}
 			}else{
@@ -644,61 +522,69 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 			}
 		}
 		if (addToOffer){
-			serialOfH2hAck.insert(wsmSerial);
+			unsigned long wsmSerial = (*it)->getSerial();
+//			std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
+//			if (it2 != neighborhoodSession.end()){
+//				NetwSession newSession = it2->second;
+//				if (newSession.getStoredBndl().count(wsmSerial) > 0){
+//					continue;
+//				}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
+//					continue;
+//				}
+//			}
+			storedBundle.insert(wsmSerial);
 		}
 	}
-	netwPkt->setH2hAcks(serialOfH2hAck);
 
-	/*************************** E2E Acks **********/
-	std::set<unsigned long> serialOfE2eAck;
-	for (std::set<unsigned long >::iterator it = ackSerial.begin(); it != ackSerial.end(); it++){
-		unsigned long wsmSerial = (*it);
-		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
-		if (it2 != neighborhoodSession.end()){
-			NetwSession newSession = it2->second;
-			if (newSession.getStoredBndl().count(wsmSerial) > 0){
-				continue;
-			}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
-				continue;
-			}else if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
-				continue;
-			}
-		}
-		serialOfE2eAck.insert(wsmSerial);
+	if (!(storedBundle.empty() & storedAck.empty())){
+		// if at least one of the two sets is not empty
+		ProphetNCPkt *netwPkt;
+		sectorId = getCurrentSector();
+		netwPkt = prepareNetwPkt(Bundle_Offer,myNetwAddr, nodeType ,nodeAddr, sectorId , getCurrentPos());
+		netwPkt->setE2eAcks(storedAck);
+		netwPkt->setH2hAcks(storedBundle);
+		int nbrEntries = storedAck.size()+ storedBundle.size();
+		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+		netwPkt->setBitLength(length);
+		cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
+		sendDown(netwPkt);
 	}
-	netwPkt->setE2eAcks(serialOfE2eAck);
-
-	int nbrEntries = serialOfH2hAck.size()+serialOfE2eAck.size();
-	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt);
 }
 
 void ProphetNCV2::handleBndlOfferMsg(ProphetNCPkt *netwPkt)
 {
-    /*************************** E2E Acks **********/
-	std::map<LAddress::L3Type, NetwSession>::iterator it2;
-	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
-	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
-	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
-	}
 
-	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-		storeAckSerial(*it);
-		erase(*it);
-	}
+    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+    if (!receivedE2eAcks.empty()){
+//    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+    	storeAckSerial(receivedE2eAcks);
+    }
+    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
+    if (!storedBundle.empty()){
+//    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+    }
+    /*************************** E2E Acks **********/
+//	std::map<LAddress::L3Type, NetwSession>::iterator it2;
+//	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+//	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
+//	if (it2 == neighborhoodSession.end()){
+//		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
+//		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//			newSession.insertInDelivredToVpaBndl(*it);
+//		}
+//		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
+//	}else{
+//		NetwSession newSession = it2->second;
+//		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//			newSession.insertInDelivredToVpaBndl(*it);
+//		}
+//		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
+//	}
+//
+//	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//		storeAckSerial(*it);
+//		erase(*it);
+//	}
 	/*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long> serialStoredBndl;
 	std::set<unsigned long> serialResponseBndl;
@@ -713,11 +599,13 @@ void ProphetNCV2::handleBndlOfferMsg(ProphetNCPkt *netwPkt)
 		}
 	}
 
-	if (!serialStoredBndl.empty()){
-		updateStoredBndlForSession(netwPkt->getSrcAddr(), serialStoredBndl);
+//	if (!serialStoredBndl.empty()){
+//		updateStoredBndlForSession(netwPkt->getSrcAddr(), serialStoredBndl);
+//	}
+	if (!serialResponseBndl.empty()){
+		sendingBndlRespMsg(netwPkt->getSrcAddr(), serialResponseBndl);
 	}
 
-	sendingBndlRespMsg(netwPkt->getSrcAddr(), serialResponseBndl);
 }
 
 void ProphetNCV2::sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl)
@@ -815,11 +703,6 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 	}
 }
 
-void ProphetNCV2::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
-{
-
-}
-
 void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd)
 {
 	ProphetNCPkt *netwPkt;
@@ -861,7 +744,6 @@ void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 		erase(*it);
 	}
 }
-
 
 void ProphetNCV2::storeBundle(WaveShortMessage *msg)
 {
@@ -910,745 +792,23 @@ void ProphetNCV2::storeBundle(WaveShortMessage *msg)
 	}
 }
 
-void ProphetNCV2::executeInitiatorRole(short  kind, ProphetNCPkt *prophetPkt)
+void ProphetNCV2::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks)
 {
-	/*
-	 * First we check if we actually record stats about contact
-	 */
-	unsigned long contactID;
-	SimpleContactStats contact;
-	if (recordContactStats){
-		contactID = prophetPkt->getContactID();
-		iteratorContactStats iterator1 = indexContactStats.find(contactID);
-		if (iterator1 == indexContactStats.end()){
-			/*
-			 * No entry found for this address, it is impossible
-			 */
-			opp_error("looking for an non-existent contact(ProphetNCV2::executeInitiatorRole)");
-		}else {
-			contact = iterator1->second;
+	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	if (it2 == neighborhoodSession.end()){
+		NetwSession newSession = NetwSession(srcAddr,0);
+		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
+			newSession.insertInDelivredToVpaBndl(*it);
 		}
-	}
-
-	switch (kind) {
-		case HELLO:
-			break;
-		case ERROR:
-			break;
-		case RIBD:
-			break;
-		case RIB:
-		{
-			std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
-			ageDeliveryPreds();
-			predToSend.insert(preds.begin(),preds.end());
-
-			// Decide if we have to fragment predictions in order to send them
-			bool shouldFragment = false;
-			int predSize = ((sizeof(int) + sizeof(double)) * predToSend.size()) * 8; // to express the size in bits unit
-
-			if (predSize > dataLength) {
-				shouldFragment = true;
-			}
-
-			if ((dontFragment) || (!shouldFragment)){
-				ProphetNCPkt *ribPkt;
-				ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predToSend);
-				ribPkt->setContactID(prophetPkt->getContactID());
-				ribPkt->setDf_Flag(false);
-
-		    	cObject* cInfo = prophetPkt->removeControlInfo();
-				if(cInfo != NULL){
-					ribPkt->setControlInfo(cInfo);
-				}
-
-				ribPkt->setRestartIEP(prophetPkt->getRestartIEP());
-
-				if (canITransmit){
-					if (delayed == 0){
-						sendDown(ribPkt);
-					}else{
-						sendDelayed(ribPkt,dblrand()*delayed,"lowerLayerOut");
-					}
-
-					/*
-					 * Collecting data
-					 */
-					updatingL3Sent();
-					updatingContactState(prophetPkt->getSrcAddr(),RIB);
-
-					if (recordContactStats){
-						contact.setL3Sent();
-						contact.setPredictionsSent(contact.getPredictionsSent()+predToSend.size());
-						updateContactWhenInit(prophetPkt, contactID, contact, kind);
-					}
-				}else {
-					delete ribPkt;
-				}
-
-
-			}else{
-				// we have to send fragment of predictions separately
-
-				int entrySize = (sizeof(int) + sizeof(double)) * 8;
-				int maxEntriesParFrag = dataLength / entrySize;
-				int totalEntries = predSize / entrySize;
-
-				short nbrFragment = totalEntries / maxEntriesParFrag;
-				if (totalEntries % maxEntriesParFrag != 0){
-					nbrFragment++;
-				}
-
-				short fragmentNum = 0;
-				int index = 0;
-				int remainingEntries = totalEntries;
-				int nbrEntriesParFrag = 0;
-
-
-				// in order to facilitate the process we copy preds into a vector to access it by index
-				std::vector<std::pair<LAddress::L3Type, double> >tmp = std::vector<std::pair<LAddress::L3Type, double> >();
-
-				for (predsIterator it = predToSend.begin(); it != predToSend.end(); it++){
-					tmp.push_back(std::pair<LAddress::L3Type, double>(it->first, it->second));
-				}
-
-				while (remainingEntries > 0){
-					if (remainingEntries >= maxEntriesParFrag){
-						nbrEntriesParFrag = maxEntriesParFrag;
-					}else{
-						nbrEntriesParFrag = remainingEntries;
-					}
-
-
-					std::map<LAddress::L3Type, double> predFragment = std::map<LAddress::L3Type, double>();
-					for (int i = index; i < index+nbrEntriesParFrag;i++){
-						predFragment.insert(tmp[i]);
-					}
-
-					ProphetNCPkt *ribPkt;
-					ribPkt = prepareProphet(RIB, myNetwAddr, prophetPkt->getSrcAddr(), NULL, &predFragment);
-					ribPkt->setContactID(prophetPkt->getContactID());
-					ribPkt->setDf_Flag(true);
-					ribPkt->setFragNbr(fragmentNum);
-					ribPkt->setFragTotal(nbrFragment);
-
-					if (canITransmit){
-						if (delayedFrag == 0){
-							sendDown(ribPkt);
-						}else{
-							sendDelayed(ribPkt,dblrand()*delayedFrag,"lowerLayerOut");
-						}
-
-						/*
-						 * Collecting data
-						 */
-						updatingL3Sent();
-						updatingContactState(prophetPkt->getSrcAddr(),RIB);
-
-						if (recordContactStats){
-							contact.setL3Sent();
-							contact.setPredictionsSent(contact.getPredictionsSent()+predToSend.size());
-							updateContactWhenInit(prophetPkt, contactID, contact, kind);
-						}
-					}else {
-						delete ribPkt;
-					}
-
-					remainingEntries-=nbrEntriesParFrag;
-					fragmentNum++;
-					index = index+nbrEntriesParFrag;
-				}
-			}
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+	}else{
+		NetwSession newSession = it2->second;
+		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
+			newSession.insertInDelivredToVpaBndl(*it);
 		}
-			break;
-		case Bundle_Offer:
-		{
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			if (recordContactStats){
-				contact.setL3Received();
-				updateContactWhenInit(prophetPkt, contactID, contact, kind);
-			}
-
-			if (abortConnection(Bundle_Offer,prophetPkt)){
-				/*
-				 * Nothing to do, we have to stop the exchange
-				 */
-				updatingContactState(prophetPkt->getSrcAddr(),Bundle);
-
-				if (recordContactStats){
-					contact.setSuccessfulContact(true);
-					updateContactWhenInit(prophetPkt, contactID, contact, kind);
-				}
-			}else {
-				std::list<BundleMeta> bndlMetaToAccept;
-
-				int bndlOffer = 0;
-				int alreadyAcked = 0;
-
-				for (std::list<BundleMeta>::iterator it = prophetPkt->getBndlmeta().begin(); it !=prophetPkt->getBndlmeta().end(); ++it) {
-					if (it->getFlags() == Prophet_Enum::Bndl_Accepted){
-						bndlOffer++;
-						/*
-						 * step 1 : check if offered bundles are already stored in this node,
-						 * in that case delete them from the offered list
-						 */
-						if (exist(*it)){
-							continue;
-						}
-						/*
-						 * step 2 : check if offered bundles are already acked,
-						 * in that case delete them from the offered list
-						 */
-						if (ackExist(*it)){
-							demandedAckedBundle++;
-							alreadyAcked++;
-							continue;
-						}
-					}else if (it->getFlags() == Prophet_Enum::PRoPHET_ACK){
-						/*
-						 * step 3 : check if BundleMeta is ACK,
-						 * in that case add it and delete the corresponding bundle from storage
-						 */
-						storeACK(*it);
-						if (recordContactStats){
-							contact.setAckReceived();
-							updateContactWhenInit(prophetPkt, contactID, contact, kind);
-						}
-						continue;
-					}else{
-						opp_error("Reception of bundle Meta of unknown type(ProphetNCV2::executeInitiatorRole)");
-					}
-					bndlMetaToAccept.push_back(*it);
-				}
-
-				if (recordContactStats){
-					contact.setOfferReceived(bndlOffer);
-					contact.setNbrAlreadyAcked(alreadyAcked);
-					updateContactWhenInit(prophetPkt, contactID, contact, kind);
-				}
-
-				/*
-				 * highly important: without doing this we don't transmit the filtered list to the next step
-				 * and so we will send bundle previously discarded
-				 */
-				prophetPkt->setBndlmeta(bndlMetaToAccept);
-
-				executeInitiatorRole(Bundle_Response,prophetPkt);
-
-				/*
-				 * Collecting data
-				 */
-				updatingContactState(prophetPkt->getSrcAddr(),Bundle_Offer);
-			}
-		}
-			break;
-		case Bundle_Response:
-		{
-			std::list<BundleMeta> bundleToAcceptMeta;
-			bundleToAcceptMeta = prophetPkt->getBndlmeta();
-
-			/*
-			 * step 1 : sending the response
-			 */
-
-			ProphetNCPkt *responsePkt;// = new Prophet();
-			responsePkt = prepareProphet(Bundle_Response,myNetwAddr,prophetPkt->getSrcAddr(), &bundleToAcceptMeta);
-			responsePkt->setContactID(prophetPkt->getContactID());
-			if (canITransmit){
-//				if (delayed == 0){
-					sendDown(responsePkt);
-//				}else{
-//					sendDelayed(responsePkt,dblrand()*delayed,"lowerLayerOut");
-//				}
-
-				/*
-				 * Collecting data
-				 */
-				updatingL3Sent();
-				updatingContactState(prophetPkt->getSrcAddr(),Bundle_Response);
-
-				if (recordContactStats){
-					contact.setL3Sent();
-					contact.setAcceptSent(bundleToAcceptMeta.size());
-					updateContactWhenInit(prophetPkt, contactID, contact, kind);
-				}
-			}else{
-				delete responsePkt;
-			}
-		}
-			break;
-		case Bundle:
-		{
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			updatingContactState(prophetPkt->getSrcAddr(),Bundle);
-			if (recordContactStats){
-				contact.setL3Received();
-				updateContactWhenInit(prophetPkt, contactID, contact, kind);
-			}
-
-			if (!(withAck)&&(recordContactStats)){
-				contact.setSuccessfulContact(true);
-			}
-
-			if (!abortConnection(Bundle,prophetPkt)){
-				bundlesReceived++;
-
-				if (recordContactStats){
-					contact.setBundleReceived();
-					updateContactWhenInit(prophetPkt, contactID, contact, kind);
-				}
-
-				WaveShortMessage *wsm;
-				wsm = check_and_cast<WaveShortMessage*>(prophetPkt->decapsulate());
-				wsm->setHopCount(wsm->getHopCount()+1);
-
-				if (wsm->getRecipientAddress() == myNetwAddr){
-					prophetPkt->encapsulate(wsm);
-					sendUp(prophetPkt->dup());
-					if (withAck){
-						executeInitiatorRole(Bundle_Ack,prophetPkt);
-					}
-				}else {
-					/*
-					 * Process to avoid storing twice the same msg
-					 */
-					if ( ! (exist(wsm)||ackExist(wsm))){
-						storeBundle(wsm);
-					}
-				}
-			}
-		}
-			break;
-		case Bundle_Ack:{
-			/*
-			 * Note: No need to send all acks because it's already done in Bundle_Offer,
-			 * send only ack of the received bundle
-			 */
-			ProphetNCPkt *ackPkt;// = new Prophet();
-			WaveShortMessage *wsm = check_and_cast<WaveShortMessage*>(prophetPkt->getEncapsulatedPacket());
-
-			if (!ackExist(wsm)){
-				/*
-				 * Step 1 : Creating the ACK
-				 */
-				BundleMeta meta = BundleMeta(wsm,Prophet_Enum::PRoPHET_ACK);
-				storeACK(meta);
-
-				/*
-				 * Step 2 : Sending the ACK
-				 */
-				std::list<BundleMeta> acksMeta;
-				BundleMeta copy;
-				copy = meta;
-				acksMeta.push_back(copy);
-
-				ackPkt = prepareProphet(Bundle_Ack, myNetwAddr, prophetPkt->getSrcAddr(), &acksMeta);
-				ackPkt->setContactID(prophetPkt->getContactID());
-				if (canITransmit){
-//					if (delayed == 0){
-						sendDown(ackPkt);
-//					}else{
-//						sendDelayed(ackPkt,dblrand()*delayed,"lowerLayerOut");
-//					}
-					/*
-					 * Collecting data
-					 */
-					updatingL3Sent();
-
-					if (recordContactStats){
-						contact.setL3Sent();
-						contact.setAckSent();
-						contact.setSuccessfulContact(true);
-						updateContactWhenInit(prophetPkt, contactID, contact, kind);
-					}
-				}else{
-					delete ackPkt;
-				}
-			}
-		}
-			break;
-		default:
-			opp_error("Unknown Prophetv2MessageKinds when calling executeInitiatorRole()");
-			break;
+		neighborhoodSession[srcAddr] = newSession;
 	}
 }
-
-void ProphetNCV2::executeListenerRole(short  kind, ProphetNCPkt *prophetPkt)
-{
-	/*
-	 * First we check if we actually record stats about contact
-	 */
-	unsigned long contactID;
-	SimpleContactStats contact;
-	if (recordContactStats){
-		contactID = prophetPkt->getContactID();
-		iteratorContactStats iterator1 = indexContactStats.find(contactID);
-		if (iterator1 == indexContactStats.end()){
-			if (kind == RIB){
-				/*
-				 * possibility that we received the RIB msg before receiving the control msg
-				 * We must create an entry for this contact
-				 */
-				startRecordingContact(prophetPkt->getSrcAddr(),contactID);
-				iteratorContactStats iterator2 = indexContactStats.find(contactID);
-				if (iterator2 == indexContactStats.end()){
-					/*
-					 * No entry found for this address, it is impossible
-					 */
-					opp_error("looking for an non-existent contact that has been inserted(ProphetNCV2::executeInitiatorRole)");
-				}else{
-					contact = iterator2->second;
-				}
-			}else{
-				/*
-				 * No entry found for this address, it is impossible
-				 */
-				opp_error("looking for an non-existent contact(ProphetNCV2::executeInitiatorRole)");
-			}
-		}else {
-			contact = iterator1->second;
-
-		}
-	}
-
-	switch (kind) {
-		case HELLO:
-			break;
-		case ERROR:
-			break;
-		case RIBD:
-			break;
-		case RIB:
-		{
-
-			if (!abortConnection(RIB,prophetPkt)){
-				bool haveToPartiallyUpdate = false;
-				if ((prophetPkt->getDf_Flag()==true)&&(contact.getPredictionsReceived()!=0)){
-					haveToPartiallyUpdate = true;
-				}
-
-				if ((withPartialUpdate)&&(haveToPartiallyUpdate)){
-					partialUpdate(prophetPkt);
-				}else{
-					update(prophetPkt);
-				}
-			}
-
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			if (recordContactStats){
-				contact.setL3Received();
-				contact.setPredictionsReceived(contact.getPredictionsReceived()+prophetPkt->getPreds().size());
-				updateContactWhenList(prophetPkt, contactID, contact, kind);
-			}
-
-			executeListenerRole(Bundle_Offer,prophetPkt);
-		}
-			break;
-		case Bundle_Offer:
-		{
-			/*
-			 * Step 1 : Calculating Bundle to Offer
-			 */
-
-			if (withTTL){
-				deleteOldBundle(ttl);
-			}
-
-			std::list<BundleMeta> bundleToOfferMeta;
-
-			std::list<BundleMeta> directBundleToOffer;
-			std::list<BundleMeta> otherBundleToOffer;
-			std::list<BundleMeta> ackToOffer;
-
-			if (!abortConnection(RIB,prophetPkt)){
-				/*
-				 * Extracting each type of bundleOffer, 1st list is related to bundle directly addressed to encounter node
-				 * 2nd is related to other bundle to offer, 3rd is related to ack
-				 */
-				std::vector<std::list<BundleMeta> > allBundleMeta = defineBundleOffer(prophetPkt);
-				for (unsigned int i  = 0; i  < allBundleMeta.size(); i++ ) {
-					std::list<BundleMeta> tmp = allBundleMeta[i];
-					switch (i) {
-						case 0:
-							directBundleToOffer = tmp;
-							break;
-						case 1:
-							otherBundleToOffer = tmp;
-							break;
-						case 2:
-							ackToOffer = tmp;
-							break;
-						default:
-							opp_error("definition of Bundle Offer must return a vector of size equal to 3(ProphetNCV2::executeListenerRole)");
-							break;
-					}
-					bundleToOfferMeta.insert(bundleToOfferMeta.end(),tmp.begin(),tmp.end());
-				}
-			}
-
-			lastBundleProposal[prophetPkt->getSrcAddr()] = simTime().dbl();
-
-			// Decide if we have to fragment predictions in order to send them
-			bool shouldFragment = false;
-			int bundleMetaSize = ((sizeof(BundleMeta)) * bundleToOfferMeta.size()) * 8; // to express the size in bits unit
-
-			if (bundleMetaSize > dataLength) {
-				shouldFragment = true;
-			}
-
-			if ((dontFragment) || (!shouldFragment)){
-
-				/*
-				 * Step 2 : Sending the ProphetPckt
-				 */
-
-				ProphetNCPkt *offerPkt;// = new Prophet();
-				offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bundleToOfferMeta);
-				offerPkt->setContactID(prophetPkt->getContactID());
-				offerPkt->setDf_Flag(false);
-				if (canITransmit){
-					if (delayed == 0){
-						sendDown(offerPkt);
-					}else{
-						sendDelayed(offerPkt,dblrand()*delayed,"lowerLayerOut");
-					}
-
-					/*
-					 * Collecting data
-					 */
-					updatingL3Sent();
-
-					if (recordContactStats){
-						contact.setL3Sent();
-						contact.setAckSent(contact.getAckSent()+ackToOffer.size());
-						contact.setOfferSent(directBundleToOffer.size()+otherBundleToOffer.size());
-						updateContactWhenList(prophetPkt, contactID, contact, kind);
-					}
-				}else{
-					delete offerPkt;
-				}
-
-			}else{
-				// we have to send fragment of predictions separately
-
-				int entrySize = (sizeof(BundleMeta)) * 8;
-				int maxEntriesParFrag = dataLength / entrySize;
-				int totalEntries = bundleMetaSize / entrySize;
-
-				short nbrFragment = totalEntries / maxEntriesParFrag;
-				if (totalEntries % maxEntriesParFrag != 0){
-					nbrFragment++;
-				}
-
-				short fragmentNum = 0;
-				int index = 0;
-				int remainingEntries = totalEntries;
-				int nbrEntriesParFrag = 0;
-
-				while (remainingEntries > 0){
-					if (remainingEntries >= maxEntriesParFrag){
-						nbrEntriesParFrag = maxEntriesParFrag;
-					}else{
-						nbrEntriesParFrag = remainingEntries;
-					}
-
-					std::list<BundleMeta> bndlMetaFragment = std::list<BundleMeta>();
-					for (int i = index; i < index+nbrEntriesParFrag;i++){
-						BundleMeta tmp = BundleMeta(bundleToOfferMeta.front());
-						bndlMetaFragment.push_back(tmp);
-						bundleToOfferMeta.pop_front();
-					}
-
-					/*
-					 * Step 2 : Sending the ProphetPckt
-					 */
-
-					ProphetNCPkt *offerPkt;// = new Prophet();
-					offerPkt = prepareProphet(Bundle_Offer,myNetwAddr,prophetPkt->getSrcAddr(),&bndlMetaFragment);
-					offerPkt->setContactID(prophetPkt->getContactID());
-					offerPkt->setDf_Flag(true);
-					offerPkt->setFragNbr(fragmentNum);
-					offerPkt->setFragTotal(nbrFragment);
-					if (canITransmit){
-						if (delayedFrag == 0){
-							sendDown(offerPkt);
-						}else{
-							sendDelayed(offerPkt,dblrand()*delayedFrag,"lowerLayerOut");
-						}
-
-						/*
-						 * Collecting data
-						 */
-						updatingL3Sent();
-
-						if (recordContactStats){
-							contact.setL3Sent();
-							int nbrAckSent = 0;
-							for (std::list<BundleMeta>::iterator it = bndlMetaFragment.begin(); it != bndlMetaFragment.end(); it++){
-								if (it->getFlags() == Prophet_Enum::PRoPHET_ACK){
-									nbrAckSent++;
-								}
-							}
-							contact.setAckSent(contact.getAckSent()+nbrAckSent);
-							contact.setOfferSent(prophetPkt->getBndlmeta().size());
-							updateContactWhenList(prophetPkt, contactID, contact, kind);
-						}
-					}else{
-						delete offerPkt;
-					}
-
-					remainingEntries-= nbrEntriesParFrag;
-					fragmentNum++;
-					index = index+nbrEntriesParFrag;
-				}
-			}
-		}
-			break;
-		case Bundle_Response:
-		{
-			std::list<BundleMeta> bndlMetaToAccept;
-			bndlMetaToAccept.clear();
-			if (withAck){
-				/*
-				 * 1 step : Check if demanded bundle in bundleResp is currently acked, delete it if it's the case
-				 */
-
-				for (std::list<BundleMeta>::iterator it = prophetPkt->getBndlmeta().begin(); it !=prophetPkt->getBndlmeta().end(); ++it) {
-					if (!ackExist(*it)){
-						bndlMetaToAccept.push_back(*it);
-					}
-				}
-				/*
-				 * highly important: without doing this we don't transmit the filtered list to the next step
-				 * and so we will send bundle previously discarded
-				 */
-				prophetPkt->setBndlmeta(bndlMetaToAccept);
-			}
-
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			if (recordContactStats){
-				contact.setL3Received();
-				contact.setAcceptReceived(prophetPkt->getBndlmeta().size());
-				updateContactWhenList(prophetPkt, contactID, contact, kind);
-			}
-			executeListenerRole(Bundle,prophetPkt);
-		}
-			break;
-		case Bundle:
-		{
-			if (withTTL){
-				deleteOldBundle(ttl);
-			}
-
-			std::list<BundleMeta> bundleToSendMeta;
-			bundleToSendMeta = prophetPkt->getBndlmeta();
-
-			ProphetNCPkt *bundlePkt;
-
-			if (abortConnection(Bundle_Response,prophetPkt)){
-				/*
-				 * No Bundle to transmit, send a prophet msg with NULL pointer instead of an encapsulated bundle
-				 */
-				bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,NULL);
-				bundlePkt->setContactID(prophetPkt->getContactID());
-				if (canITransmit){
-//					if (delayed == 0){
-						sendDown(bundlePkt);
-//					}else{
-//						sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
-//					}
-					/*
-					 * Collecting data
-					 */
-					updatingL3Sent();
-					if (recordContactStats){
-						contact.setL3Sent();
-						contact.setBundleSent();
-						updateContactWhenList(prophetPkt, contactID, contact, kind);
-					}
-				}else{
-					delete bundlePkt;
-				}
-			}else{
-				/*
-				 * 1 step : Send the corresponding bundle
-				 */
-				for (std::list<BundleMeta>::iterator it = bundleToSendMeta.begin(); it !=bundleToSendMeta.end(); ++it) {
-					bundlesIndexIterator it2 = bundlesIndex.find(it->getRecipientAddress());
-					if (it2!=bundlesIndex.end()){
-						innerIndexIterator it3 = it2->second.find(it->getSerial());
-						if (it3!=it2->second.end()){
-							bundlePkt = prepareProphet(Bundle,myNetwAddr,prophetPkt->getSrcAddr(),NULL,NULL,(it3->second)->dup());
-							bundlePkt->setContactID(prophetPkt->getContactID());
-							if (canITransmit){
-//								if (delayed == 0){
-									sendDown(bundlePkt);
-//								}else{
-//									sendDelayed(bundlePkt,dblrand()*delayed,"lowerLayerOut");
-//								}
-								/*
-								 * Collecting data
-								 */
-								updatingL3Sent();
-								if (recordContactStats){
-									contact.setL3Sent();
-									contact.setBundleSent();
-									updateContactWhenList(prophetPkt, contactID, contact, kind);
-								}
-							}else {
-								delete bundlePkt;
-							}
-						}
-					}
-				}
-			}
-		}
-			break;
-		case Bundle_Ack:
-		{
-			/*
-			 * Collecting data
-			 */
-			updatingL3Received();
-			if (recordContactStats){
-				contact.setL3Received();
-				updateContactWhenList(prophetPkt, contactID, contact, kind);
-			}
-
-			std::list<BundleMeta> acksMeta;
-			acksMeta = prophetPkt->getBndlmeta();
-
-			if (!abortConnection(kind,prophetPkt)){
-				for (std::list<BundleMeta>::iterator ackIt = acksMeta.begin(); ackIt !=acksMeta.end(); ++ackIt) {
-					BundleMeta meta = *ackIt;
-					storeACK(meta);
-					if (recordContactStats){
-						contact.setAckReceived();
-						updateContactWhenList(prophetPkt, contactID, contact, kind);
-					}
-				}
-			}
-		}
-			break;
-
-		default:
-			opp_error("Unknown Prophetv2MessageKinds when calling executeListenerRole()");
-		break;
-	}
-}
-
 ProphetNCPkt *ProphetNCV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
 
@@ -1682,218 +842,6 @@ ProphetNCPkt *ProphetNCV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,
 	return prophetMsg;
 }
 
-std::vector<std::list<BundleMeta> >ProphetNCV2::defineBundleOffer(ProphetNCPkt *prophetPkt)
-{
-	LAddress::L3Type encounterdNode = prophetPkt->getSrcAddr();
-	std::map<LAddress::L3Type, double> concernedPreds = std::map<LAddress::L3Type, double>();
-	std::vector<std::pair<LAddress::L3Type, double>	> sortedPreds;
-	std::vector<std::list<BundleMeta> > allBundleMeta;
-
-	std::list<BundleMeta> directBundleToOffer = std::list<BundleMeta>();
-	std::list<BundleMeta> otherBundleToOffer = std::list<BundleMeta>();
-	std::list<BundleMeta> ackToOffer = std::list<BundleMeta>();
-
-	// step 1 : check if we have any bundle that are addressed to @encouterdNode
-
-	bundlesIndexIterator it = bundlesIndex.find(encounterdNode);
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2;
-		for (it2 = innerMap.begin(); it2 !=innerMap.end(); ++it2){
-			BundleMeta meta (it2->second, Prophet_Enum::Bndl_Accepted);
-
-			if (withAck){
-				if (acksIndex.find(it2->second->getSerial())!=acksIndex.end()){
-					existAndErase(meta);
-					continue;
-				}
-			}
-			directBundleToOffer.push_back(meta);
-		}
-	}
-
-	// step 2 : check if we have any bundle that can be offered to @encouterdNode
-
-	ageDeliveryPreds();
-	predsIterator itCurrentNode;
-	for (predsIterator itEncouterdNode =prophetPkt->getPreds().begin();itEncouterdNode !=prophetPkt->getPreds().end(); ++itEncouterdNode){
-		if (itEncouterdNode->first == encounterdNode){
-			continue;
-		}
-
-		itCurrentNode = preds.find(itEncouterdNode->first);
-		if (itCurrentNode != preds.end()){
-			// the current node have a prediction for @it->first 
-			// the 2 nodes have a predictions for this destination
-			if (itEncouterdNode->second > itCurrentNode->second){
-				concernedPreds.insert(std::pair<LAddress::L3Type, double>(itEncouterdNode->first,itEncouterdNode->second));
-			}
-		}
-	}
-
-	switch (fwdStrategy) {
-		case FWD_GRTR:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTMX:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTHR:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRplus:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GTMXplus:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRsort:
-			opp_error("Forward Strategy not supported yet");
-			break;
-		case FWD_GRTRmax:
-		{
-			sortedPreds = std::vector<std::pair<LAddress::L3Type, double> >(concernedPreds.begin(), concernedPreds.end());
-			std::sort(sortedPreds.begin(),sortedPreds.end(),fwdGRTRmax_CompObject);
-		}
-			break;
-		default:
-			break;
-	}
-
-	for (std::vector<std::pair<LAddress::L3Type, double> >::iterator it= sortedPreds.begin(); it != sortedPreds.end(); ++it){
-		bundlesIndexIterator it2 = bundlesIndex.find(it->first);
-			if (it2 != bundlesIndex.end()){
-				innerIndexMap innerMap(it2->second);
-				innerIndexIterator it3;
-				for (it3 = innerMap.begin(); it3 !=innerMap.end(); ++it3){
-					BundleMeta meta (it3->second, Prophet_Enum::Bndl_Accepted);
-
-					if (withAck){
-						if (acksIndex.find(it3->second->getSerial())!=acksIndex.end()){
-							existAndErase(meta);
-							continue;
-						}
-					}
-					otherBundleToOffer.push_back(meta);
-				}
-			}
-	}
-
-	// step 3 : check if we have any ack that must be transmitted
-
-	if (withAck){
-		for (std::list<BundleMeta>::iterator it = acks.begin(); it !=acks.end(); ++it) {
-			if (existAndErase(*it)){
-				continue;
-			}
-			ackToOffer.push_back(*it);
-		}
-	}
-
-	allBundleMeta.push_back(directBundleToOffer);
-	allBundleMeta.push_back(otherBundleToOffer);
-	allBundleMeta.push_back(ackToOffer);
-
-	if (allBundleMeta.size()!=3){
-		opp_error("definition of Bundle Offer must return a vector of size equal to 3(ProphetNCV2::defineBundleOffer)");
-	}
-
-	return allBundleMeta;
-}
-
-bool ProphetNCV2::abortConnection(short  kind, ProphetNCPkt *prophetPkt)
-{
-	bool abort = false;
-
-	switch (kind) {
-		case HELLO:
-			break;
-		case ERROR:
-			break;
-		case RIBD:
-			break;
-		case RIB:
-		{
-			if (prophetPkt->getPreds().size() == 0){
-				abort = true;
-			}
-		}
-			break;
-		case Bundle_Offer:
-		{
-			if (prophetPkt->getBndlmeta().size() == 0){
-				abort = true;
-			}
-		}
-			break;
-		case Bundle_Response:
-		{
-			if (prophetPkt->getBndlmeta().size() == 0){
-				abort = true;
-			}
-		}
-			break;
-		case Bundle:
-		{
-			if (prophetPkt->getEncapsulatedPacket() == NULL){
-				abort = true;
-			}
-		}
-			break;
-		case Bundle_Ack:
-			break;
-		default:
-			opp_error("Unknown Prophetv2MessageKinds(ProphetNCV2::abortConnection)");
-			break;
-	}
-
-	return abort;
-}
-
-void ProphetNCV2::updateContactWhenInit(ProphetNCPkt *prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind)
-{
-	/*
-	 * Last we update stats about contact
-	 */
-	if (recordContactStats){
-		iteratorContactID iterator3 = indexContactID.find(prophetPkt->getSrcAddr());
-		if (iterator3 == indexContactID.end()){
-			/*
-			 * No entry found for this address, it is impossible
-			 */
-			opp_error("looking for an non-existent contact(ProphetNCV2::executeInitiatorRole)");
-		}else {
-			if (iterator3->second.size()>1){
-				contact.setRepeatedContact(true);
-			}
-		}
-		contact.setState(kind);
-		indexContactStats[contactID] = contact;
-	}
-}
-
-void ProphetNCV2::updateContactWhenList(ProphetNCPkt *prophetPkt, unsigned long contactID, SimpleContactStats contact, int kind)
-{
-	/*
-	 * Last we update stats about contact
-	 */
-	if (recordContactStats){
-		iteratorContactID iterator3 = indexContactID.find(prophetPkt->getSrcAddr());
-		if (iterator3 == indexContactID.end()){
-			/*
-			 * No entry found for this address, it is impossible
-			 */
-			opp_error("looking for an non-existent contact(ProphetNCV2::executeListenerRole)");
-		}else {
-			if (iterator3->second.size()>1){
-				contact.setRepeatedContact(true);
-			}
-		}
-		contact.setState(kind);
-		indexContactStats[contactID] = contact;
-	}
-}
-
 void ProphetNCV2::finish()
 {
 //	EV << "Sent:     " << nbrL3Sent << endl;
@@ -1914,223 +862,6 @@ void ProphetNCV2::finish()
 	while (!bundles.empty()){
 		delete bundles.front();
 		bundles.pop_front();
-	}
-
-	if (!nbrRepeatedContact.empty()){
-		histMaxRepeatedContact.setName("Histogram for max nbr repeated contact");
-		std::map<LAddress::L3Type, int>::iterator it;
-		std::vector<int> repeatedNTimes(maxForRC,0);
-		for (it = nbrRepeatedContact.begin(); it != nbrRepeatedContact.end(); it++){
-			histMaxRepeatedContact.collect(it->second);
-			for (int i = 0; i < it->second; ++i) {
-				int index = 0;
-				if (i < maxForRC){
-					index = i;
-				}else {
-					index = maxForRC - 1;
-				}
-				int tmp = repeatedNTimes[index];
-				repeatedNTimes[index] = tmp +1;
-			}
-		}
-		histMaxRepeatedContact.recordAs("Histogram for max nbr repeated contact");
-
-		for (unsigned int i = 0; i < repeatedNTimes.size(); ++i) {
-			stringstream flux1;
-			flux1 << i+1;
-			std::string tmpStr = "Bars for #repeated "+ flux1.str();
-			recordScalar(tmpStr.c_str(),repeatedNTimes[i]);
-		}
-
-		std::map<int, std::list<double> >::iterator it2;
-		std::vector<int> repartitionForMax(cutPoitsCDF.size()+1,0);
-		bool incremented = false;
-		for (it2 = contactDurForRC.begin(); it2 != contactDurForRC.end(); it2++){
-			std::list<double> durationList = it2->second;
-			std::vector<int> repartition(cutPoitsCDF.size()+1,0);
-
-			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
-				bool found = false;
-				for (int i = 0; i < cutPoitsCDF.size(); ++i) {
-					if (i == 0){
-						if (*it3 <= cutPoitsCDF[i]){
-							repartition[0]++;
-							found = true;
-						}
-					}else if (i == cutPoitsCDF.size()-1){
-						if (*it3 > cutPoitsCDF[i]){
-							repartition[cutPoitsCDF.size()]++;
-							found = true;
-						}
-					}else{
-						if ((*it3 > cutPoitsCDF[i-1]) && (*it3 <= cutPoitsCDF[i])){
-							repartition[i]++;
-							found = true;
-						}
-					}
-					if (found){
-						break;
-					}
-				}
-			}
-
-			for (int i = 0; i < repartition.size(); ++i) {
-				stringstream flux1;
-				if (it2->first < maxForRC){
-					flux1 << it2->first;
-					std::string tmpStr = "#repeated "+ flux1.str();
-					flux1.str(std::string());
-					if (i == 0){
-						flux1 << cutPoitsCDF[i];
-						tmpStr = "LQ"+flux1.str()+" "+tmpStr;
-						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
-					}else if (i == repartition.size()-1){
-						flux1 << cutPoitsCDF[i-1];
-						tmpStr = "G"+flux1.str()+" "+tmpStr;
-						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
-					}else{
-						flux1 << cutPoitsCDF[i-1];
-						stringstream flux2;
-						flux2 << cutPoitsCDF[i];
-						tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
-						recordScalar(string("Contact CDF "+tmpStr).c_str(),repartition[i]);
-					}
-				}else{
-					incremented = true;
-					repartitionForMax[i]+=repartition[i];
-				}
-			}
-		}
-
-		if (incremented){
-			for (int i = 0; i < repartitionForMax.size(); ++i) {
-				stringstream flux1;
-				flux1 << maxForRC;
-				std::string tmpStr = "#repeated "+ flux1.str();
-				flux1.str(std::string());
-				if (i == 0){
-					flux1 << cutPoitsCDF[i];
-					tmpStr = "LQ"+flux1.str()+" "+tmpStr;
-					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}else if (i == repartitionForMax.size()-1){
-					flux1 << cutPoitsCDF[i-1];
-					tmpStr = "G"+flux1.str()+" "+tmpStr;
-					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}else{
-					flux1 << cutPoitsCDF[i-1];
-					stringstream flux2;
-					flux2 << cutPoitsCDF[i];
-					tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
-					recordScalar(string("Contact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}
-			}
-		}
-
-		incremented = false;
-		repartitionForMax = std::vector<int>(cutPoitsCDF.size()+1,0);
-		for (it2 = interContactDurForRC.begin(); it2 != interContactDurForRC.end(); it2++){
-			std::list<double> durationList = it2->second;
-			std::vector<int> repartition(cutPoitsCDF.size()+1,0);
-
-			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
-				bool found = false;
-				for (int i = 0; i < cutPoitsCDF.size(); ++i) {
-					if (i == 0){
-						if (*it3 <= cutPoitsCDF[i]){
-							repartition[0]++;
-							found = true;
-						}
-					}else if (i == cutPoitsCDF.size()-1){
-						if (*it3 > cutPoitsCDF[i]){
-							repartition[cutPoitsCDF.size()]++;
-							found = true;
-						}
-					}else{
-						if ((*it3 > cutPoitsCDF[i-1]) && (*it3 <= cutPoitsCDF[i])){
-							repartition[i]++;
-							found = true;
-						}
-					}
-					if (found){
-						break;
-					}
-				}
-			}
-
-			for (int i = 0; i < repartition.size(); ++i) {
-				stringstream flux1;
-				if (it2->first < maxForRC){
-					flux1 << it2->first;
-					std::string tmpStr = "#repeated "+ flux1.str();
-					flux1.str(std::string());
-					if (i == 0){
-						flux1 << cutPoitsCDF[i];
-						tmpStr = "LQ"+flux1.str()+" "+tmpStr;
-						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
-					}else if (i == repartition.size()-1){
-						flux1 << cutPoitsCDF[i-1];
-						tmpStr = "G"+flux1.str()+" "+tmpStr;
-						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
-					}else{
-						flux1 << cutPoitsCDF[i-1];
-						stringstream flux2;
-						flux2 << cutPoitsCDF[i];
-						tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
-						recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartition[i]);
-					}
-				}else{
-					incremented = true;
-					repartitionForMax[i]+=repartition[i];
-				}
-			}
-		}
-
-		if (incremented){
-			for (int i = 0; i < repartitionForMax.size(); ++i) {
-				stringstream flux1;
-				flux1 << maxForRC;
-				std::string tmpStr = "#repeated "+ flux1.str();
-				flux1.str(std::string());
-				if (i == 0){
-					flux1 << cutPoitsCDF[i];
-					tmpStr = "LQ"+flux1.str()+" "+tmpStr;
-					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}else if (i == repartitionForMax.size()-1){
-					flux1 << cutPoitsCDF[i-1];
-					tmpStr = "G"+flux1.str()+" "+tmpStr;
-					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}else{
-					flux1 << cutPoitsCDF[i-1];
-					stringstream flux2;
-					flux2 << cutPoitsCDF[i];
-					tmpStr = "G"+flux1.str()+"LQ"+flux2.str()+" "+tmpStr;
-					recordScalar(string("InterContact CDF "+tmpStr).c_str(),repartitionForMax[i]);
-				}
-			}
-		}
-
-		std::map<LAddress::L3Type, std::list<double> >::iterator it5;
-		for (it5 = contactDurByAddr.begin(); it5 != contactDurByAddr.end(); it5++){
-			std::list<double> durationList = it5->second;
-			double totalDuration = 0;
-			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
-				totalDuration+=*it3;
-			}
-			contactDurHist.collect(totalDuration);
-		}
-		contactDurHist.recordAs("Histogram for total contact duration");
-
-		for (it5 = interContactDurByAddr.begin(); it5 != interContactDurByAddr.end(); it5++){
-			std::list<double> durationList = it5->second;
-			double totalDuration = 0;
-			for (std::list<double>::iterator it3 = durationList.begin(); it3 != durationList.end(); it3++){
-				totalDuration+=*it3;
-				interContactDuration.collect(*it3);
-			}
-			interContactDurHist.collect(totalDuration);
-		}
-		interContactDurHist.recordAs("Histogram for total interContact duration");
-		interContactDuration.recordAs("Duration between RC");
 	}
 }
 
@@ -2422,7 +1153,6 @@ void ProphetNCV2::recordAllClassifier()
 	}
 }
 
-
 void ProphetNCV2::initAllClassifier()
 {
 	DtnNetwLayer::initAllClassifier();
@@ -2493,6 +1223,7 @@ void ProphetNCV2::storeAckSerial(std::set<unsigned long > setOfSerials)
 {
     for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
     	storeAckSerial(*it);
+    	erase(*it);
     }
 }
 

@@ -41,6 +41,8 @@ simple DtnNetwLayer extends BaseNetwLayer
     	double netwRouteExpirency = default(2.0);
     	double netwRoutePending = default(1.0);
     	
+    	int scheduleStrategy = default(0);
+    	
     	double I_Preds = default(5);
     	
     	bool recordContactStats = default(true);

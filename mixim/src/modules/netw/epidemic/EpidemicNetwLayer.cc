@@ -347,16 +347,18 @@ std::vector<WaveShortMessage*> EpidemicNetwLayer::bundleForNode(LAddress::L3Type
 	std::vector<WaveShortMessage* > sentWSM;
 
 	// step 1 : check if we have any bundle that are addressed to @fwdDist or @fwdMETD
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair;
+	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
 	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin();it != bundlesReplicaIndex.end(); it++){
 		for (std::list<WaveShortMessage*>::iterator it2 = bundles.begin(); it2 != bundles.end(); it2++){
 			if ((*it2)->getSerial() == it->first){
-				sortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it2), it->second));
+				unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it2), it->second));
 				break;
 			}
 		}
 	}
-	std::sort(sortedWSMPair.begin(), sortedWSMPair.end(), comparatorRCAscObject);
+
+	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+//	std::sort(sortedWSMPair.begin(), sortedWSMPair.end(), func_RCAscRLDesc);
 
 
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){

@@ -160,6 +160,32 @@ void DtnNetwLayer::initialize(int stage)
 		receivedHWICVPA = 0;
 		receivedBWICVPA = 0;
 		receivedAWICVPA = 0;
+
+		int tmpScheduleStrategy = par("scheduleStrategy");
+
+		switch (tmpScheduleStrategy) {
+			case 0:
+				scheduleStrategy = RCAscRLDesc;
+				break;
+			case 1:
+				scheduleStrategy = RCAscRLAsc;
+				break;
+			case 2:
+				scheduleStrategy = RCDescRLDesc;
+				break;
+			case 3:
+				scheduleStrategy = RCDescRLAsc;
+				break;
+			case 4:
+				scheduleStrategy = RLAsc;
+				break;
+			case 5:
+				scheduleStrategy = RLDesc;
+				break;
+			default:
+				opp_error("Unrecognized scheduling strategy");
+				break;
+		}
 	}
 
 	if (stage == 2){
@@ -1356,6 +1382,40 @@ bool DtnNetwLayer::exist(unsigned long  serial)
 		}
 	}
 	return found;
+}
+
+std::vector<std::pair<WaveShortMessage*,int> > DtnNetwLayer::compAsFn_schedulingStrategy(std::vector<std::pair<WaveShortMessage*,int> > vectorToSort)
+{
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
+		cout << it->first->getSerial() << std::endl;
+	}
+	switch (scheduleStrategy) {
+		case RCAscRLDesc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RCAscRLDesc);
+			break;
+		case RCAscRLAsc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RCAscRLAsc);
+			break;
+		case RCDescRLDesc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RCDescRLDesc);
+			break;
+		case RCDescRLAsc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RCDescRLAsc);
+			break;
+		case RLAsc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RLAsc);
+			break;
+		case RLDesc:
+			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RLDesc);
+			break;
+		default:
+			opp_error("Unrecognized scheduling strategy");
+			break;
+	}
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
+		cout << it->first->getSerial() << std::endl;
+	}
+	return vectorToSort;
 }
 
 void DtnNetwLayer::sendDown(cMessage *msg)
