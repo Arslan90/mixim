@@ -101,13 +101,15 @@ class EpidemicNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsg(LAddress::L3Type destAddr);
+  	void sendingBndlResponseMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl);
+
+  	void handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt);
+
+  	void sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* > wsmToSend);
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
-
-	void sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsigned long> wsmFinalDeliverd);
+	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd);
 
   	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
 
@@ -115,12 +117,6 @@ class EpidemicNetwLayer : public DtnNetwLayer
 
   	/** Function for preparing GeoDtnNetwPkt */
   	GeoDtnNetwPkt* prepareNetwPkt(short kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr);
-
-  	std::vector<WaveShortMessage*> bundleForVPA(LAddress::L3Type vpaAddr);
-
-  	std::vector<WaveShortMessage*> bundleForNode(LAddress::L3Type node);
-
-  	//void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
 
   	void storeAckSerial(unsigned long serial);
 

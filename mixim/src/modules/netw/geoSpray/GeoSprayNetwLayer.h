@@ -120,6 +120,10 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 	 * Bool withEMethod standing for erroneous method, in order to evaluate the impact of the previous error
 	 */
 	bool withEMethod;
+
+	bool withExplicitE2EAck;
+
+	bool withExplicitH2HAck;
 /*******************************************************************
 ** 							Methods section
 ********************************************************************/
@@ -150,23 +154,25 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
-	void sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Type destAddr, std::list<unsigned long> wsmFinalDeliverd);
-
-  	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
-
-  	void sendingBundleOfferMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Type destAddr, std::list<unsigned long> wsmStoredBndl);
+  	void sendingBundleOfferMsg(LAddress::L3Type destAddr);
 
   	void handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleResponseMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Type destAddr, std::set<unsigned long> wsmResponseBndl);
+  	void sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmResponseBndl);
 
   	void handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, LAddress::L3Type destAddr, WaveShortMessage* wsm, int nbrReplica);
+  	void sendingBundleMsg(LAddress::L3Type destAddr, WaveShortMessage* wsm, int nbrReplica, bool custodyTransfer);
+
+  	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
+	void sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmFinalDeliverd);
+
+	void sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmDeliverd, int nbrReplica, bool custodyTransfer);
+
+  	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
 
 //  	std::pair<LAddress::L3Type, double> getBestFwdMETD();
 //
@@ -215,6 +221,8 @@ class GeoSprayNetwLayer : public DtnNetwLayer
   	bool erase(unsigned long serial);
 
   	bool exist(unsigned long serial);
+
+  	GeoTraCIMobility* getGeoTraci();
 };
 
 #endif

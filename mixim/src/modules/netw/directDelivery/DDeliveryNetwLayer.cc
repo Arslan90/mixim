@@ -117,7 +117,6 @@ void DDeliveryNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt)
 {
 	sectorId = getCurrentSector();
 	netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
-//	cout << "Sending Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
 }
@@ -132,51 +131,67 @@ void DDeliveryNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
 
-		if (nodeType == VPA){
-			return;
-		}else{
-			/*************************** Sending Bundle Msg **********/
-
+		/*************************** Sending Bundle Msg **********/
+		if (nodeType == Veh){
 			if (netwPkt->getSrcType() == VPA){
-				sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+				sendingBundleMsg(netwPkt->getSrcAddr());
 				vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
 			}
 		}
 	}
 }
 
-void DDeliveryNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
+void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 {
-	// step 1 : check if we have any bundle that are addressed to @vpaAddr
-	std::vector<WaveShortMessage* > wsmToSend = bundleForVPA(vpaAddr);
-//	std::vector<WaveShortMessage* > wsmToSend = bundleForNode(vpaAddr);
+	// step 1 : Build bundle list to send before reordering
+	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
+	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
+		unsigned long serial = it->first;
+		if (exist(serial)){
+			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+				if ((*it3)->getSerial() == serial){
+					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
+					break;
+				}
+			}
+		}
+	}
+
+	// step 2 : Reordering bundle list
+	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+
+	// step 3 : Sending bundles with NbrReplica to transfer
+	std::vector<WaveShortMessage* > sentWSM;
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
+		WaveShortMessage* wsm = it->first;
+		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
+		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
+		if ((itNode != neighborhoodSession.end())){
+			NetwSession sessionNode = itNode->second;
+			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}
+		}
+		sentWSM.push_back(wsm);
+	}
+
 	if (!firstSentToVPA){
-		bndlSentToVPA+=wsmToSend.size();
+		bndlSentToVPA+=sentWSM.size();
 		firstSentToVPA = true;
 	}
-	totalBndlSentToVPA+=wsmToSend.size();
+	totalBndlSentToVPA+=sentWSM.size();
 
-
-//	std::vector<WaveShortMessage* > wsmToSend;
-//	bundlesIndexIterator it = bundlesIndex.find(vpaAddr);
-//	if (it != bundlesIndex.end()){
-//		innerIndexMap innerMap(it->second);
-//		for (innerIndexIterator it2 = innerMap.begin(); it2 !=innerMap.end(); it2++){
-//			WaveShortMessage* wsm = it2->second;
-//			if (wsm != NULL){
-//				wsmToSend.push_back(wsm);
-//			}
-//		}
-//	}
-
-	// step 2 : send bundles
-	for (std::vector<WaveShortMessage*>::iterator it = wsmToSend.begin(); it!= wsmToSend.end(); it++){
+	for (std::vector<WaveShortMessage* >::iterator it = sentWSM.begin(); it != sentWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
-		GeoDtnNetwPkt* bundleForVPA;
-		bundleForVPA = prepareNetwPkt(Bundle,myNetwAddr, nodeType, vpaAddr, sectorId ,LAddress::L3BROADCAST);
-		bundleForVPA->encapsulate(wsm->dup());
-//		cout << "Sending Bundle packet from " << bundleForVPA->getSrcAddr() << " addressed to VPA " << bundleForVPA->getDestAddr() << std::endl;
-		sendDown(bundleForVPA);
+		GeoDtnNetwPkt* bundleMsg;
+		sectorId = getCurrentSector();
+		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
+		bundleMsg->encapsulate(wsm->dup());
+		sendDown(bundleMsg);
 	}
 }
 
@@ -190,7 +205,6 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		wsm->setHopCount(wsm->getHopCount()+1);
 		totalBundlesReceived++;
 
-		GeoDtnNetwPkt* bundleAckMsg;
 		std::list<unsigned long> finalReceivedWSM;
 
 		if (wsm->getRecipientAddress() == myNetwAddr){
@@ -208,14 +222,16 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			opp_error("DDeliveryNetwLayer::handleBundleMsg() - Reception of bundle by not recipient address not allowed");
 		}
 		if (!finalReceivedWSM.empty()){
-			bundleAckMsg = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType, netwPkt->getSrcAddr(), sectorId ,LAddress::L3BROADCAST);
-			sendingBundleAckMsg(bundleAckMsg, finalReceivedWSM);
+			sendingBundleAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM);
 		}
 	}
 }
 
-void DDeliveryNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsigned long> wsmFinalDeliverd)
+void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd)
 {
+	GeoDtnNetwPkt* netwPkt;
+	sectorId = getCurrentSector();
+	netwPkt = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
 	std::set<unsigned long> serialOfE2EAck;
 	for (std::list<unsigned long >::iterator it = wsmFinalDeliverd.begin(); it != wsmFinalDeliverd.end(); it++){
 		serialOfE2EAck.insert(*it);
@@ -228,22 +244,8 @@ void DDeliveryNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<u
 
 void DDeliveryNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	std::map<LAddress::L3Type, NetwSession>::iterator it2;
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
-	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
-	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
-	}
+	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 
 	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 		storeAckSerial(*it);
@@ -272,44 +274,6 @@ GeoDtnNetwPkt *DDeliveryNetwLayer::prepareNetwPkt(short  kind, LAddress::L3Type 
 	myNetwPkt->setBitLength(realPktLength);
 
 	return myNetwPkt;
-}
-
-std::vector<WaveShortMessage*> DDeliveryNetwLayer::bundleForVPA(LAddress::L3Type vpaAddr)
-{
-	// step 1 : check if we have any bundle that are addressed to @vpaAddr
-	std::vector<WaveShortMessage* > sortedWSM;
-	bundlesIndexIterator it = bundlesIndex.find(vpaAddr);
-	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		for (innerIndexIterator it2 = innerMap.begin(); it2 !=innerMap.end(); it2++){
-			WaveShortMessage* wsm = it2->second;
-			if (wsm != NULL){
-				sortedWSM.push_back(wsm);
-			}
-		}
-	}
-
-	// step 2 : sort the list and return it;
-	std::sort(sortedWSM.begin(), sortedWSM.end(), comparatorRLAscObject);
-	std::vector<WaveShortMessage* > sentWSM;
-	for (std::vector<WaveShortMessage*>::iterator it = sortedWSM.begin(); it!= sortedWSM.end(); it++){
-		WaveShortMessage* wsm = *it;
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(vpaAddr);
-		if (it2 != neighborhoodSession.end()){
-			NetwSession newSession = it2->second;
-			if (newSession.getStoredBndl().count(wsm->getSerial()) > 0){
-				continue;
-			}else if (newSession.getDelivredToBndl().count(wsm->getSerial()) > 0){
-				continue;
-			}else if (newSession.getDelivredToVpaBndl().count(wsm->getSerial()) > 0){
-				continue;
-			}
-		}
-		sentWSM.push_back(wsm);
-	}
-
-	return sentWSM;
 }
 
 void DDeliveryNetwLayer::storeAckSerial(unsigned long  serial)

@@ -1368,6 +1368,24 @@ void DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set
 	}
 }
 
+void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks)
+{
+	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	if (it2 == neighborhoodSession.end()){
+		NetwSession newSession = NetwSession(srcAddr,0);
+		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
+			newSession.insertInDelivredToVpaBndl(*it);
+		}
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+	}else{
+		NetwSession newSession = it2->second;
+		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
+			newSession.insertInDelivredToVpaBndl(*it);
+		}
+		neighborhoodSession[srcAddr] = newSession;
+	}
+}
+
 bool DtnNetwLayer::exist(unsigned long  serial)
 {
 	bool found = false;
@@ -1386,9 +1404,9 @@ bool DtnNetwLayer::exist(unsigned long  serial)
 
 std::vector<std::pair<WaveShortMessage*,int> > DtnNetwLayer::compAsFn_schedulingStrategy(std::vector<std::pair<WaveShortMessage*,int> > vectorToSort)
 {
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
-		cout << it->first->getSerial() << std::endl;
-	}
+//	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
+//		cout << it->first->getSerial() << std::endl;
+//	}
 	switch (scheduleStrategy) {
 		case RCAscRLDesc:
 			std::sort(vectorToSort.begin(), vectorToSort.end(), func_RCAscRLDesc);
@@ -1412,9 +1430,9 @@ std::vector<std::pair<WaveShortMessage*,int> > DtnNetwLayer::compAsFn_scheduling
 			opp_error("Unrecognized scheduling strategy");
 			break;
 	}
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
-		cout << it->first->getSerial() << std::endl;
-	}
+//	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = vectorToSort.begin(); it != vectorToSort.end(); it++){
+//		cout << it->first->getSerial() << std::endl;
+//	}
 	return vectorToSort;
 }
 

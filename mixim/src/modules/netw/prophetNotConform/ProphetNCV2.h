@@ -236,6 +236,8 @@ private:
 
 	bool withPartialUpdate;
 
+	bool withPredLength;
+
 	/*******************************************************************
 	** 							Metrics variables section
 	********************************************************************/
@@ -429,11 +431,6 @@ private:
 	ProphetNCPkt* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
 				std::list<BundleMeta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
 
-	/*
-	 * Function that store bundles according to the current Queuing Strategy
-	 */
-	void storeBundle(WaveShortMessage *msg);
-
 	/** @brief Handle messages from upper layer */
 	virtual void handleUpperMsg(cMessage* msg);
 
@@ -475,13 +472,13 @@ private:
 
   	void sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode);
 
-  	void handleBndlOfferMsg(ProphetNCPkt *netwPkt);
+  	void handleBundleOfferMsg(ProphetNCPkt *netwPkt);
 
   	void sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl);
 
-  	void handleBndlRespMsg(ProphetNCPkt *netwPkt);
+  	void handleBundleResponseMsg(ProphetNCPkt *netwPkt);
 
-  	void sendingBundleMsg(LAddress::L3Type destAddr,std::vector<std::pair<WaveShortMessage*, int> >wsmToSend);
+  	void sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend);
 
   	void handleBundleMsg(ProphetNCPkt *netwPkt);
 
@@ -494,8 +491,6 @@ private:
   	void storeAckSerial(std::set<unsigned long> setOfSerials);
 
   	bool erase(unsigned long serial);
-
-  	void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks);
 
 	/*******************************************************************
 	** 							End of metrics methods section

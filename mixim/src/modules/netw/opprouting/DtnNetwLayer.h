@@ -244,6 +244,7 @@ class DtnNetwLayer : public BaseNetwLayer {
 		  return (i.second<j.second);
 	  }else {
 		  return (func_RLDesc(i,j));
+//		  return (i.first->getTimestamp()>j.first->getTimestamp());
 	  }
 	}
 
@@ -278,14 +279,14 @@ class DtnNetwLayer : public BaseNetwLayer {
 	{
     	simtime_t first_TTL = i.first->getTimestamp();
 		simtime_t second_TTL = j.first->getTimestamp();
-		return ( first_TTL <= second_TTL );
+		return ( first_TTL < second_TTL );
 	}
 
     static bool func_RLDesc(std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
 	{
     	simtime_t first_TTL = i.first->getTimestamp();
 		simtime_t second_TTL = j.first->getTimestamp();
-		return ( first_TTL >= second_TTL );
+		return ( first_TTL > second_TTL );
 	}
 
 //	struct comparatorRCAsc {
@@ -501,6 +502,8 @@ public:
   	virtual void updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry);
 
   	virtual void updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle);
+
+  	virtual void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks);
 
   	void sendDown(cMessage* msg);
   public:

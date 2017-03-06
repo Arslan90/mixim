@@ -42,6 +42,7 @@ simple ProphetNCV2 extends DtnNetwLayer
     	bool withPartialUpdate = default(true);
     	
     	bool withEMethod = default(false);
+    	bool withPredLength = default(false);
     	
     	
         bool withFailRIBClassifier = default(false);

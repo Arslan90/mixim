@@ -82,190 +82,14 @@ void ProphetNCV2::initialize(int stage)
 
         withEMethod = par("withEMethod").boolValue();
 
+        withPredLength = par("withPredLength").boolValue();
+
 	}
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
 	}else if (stage==2){
 		sectorId = getCurrentSector();
 	}
-}
-
-/*******************************************************************
-**
-** 							Methods related to predictions
-**
-********************************************************************/
-
-void ProphetNCV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
-{
-	if (BAdress == myNetwAddr){
-		opp_warning("Cannot Update Delivery Predictions for its own Address(ProphetNCV2::updateDeliveryPredsFor)");
-	}else{
-		double PEnc,lastEncTime, predsForB;
-			/*
-			 * before calculating predsForB, we must age preds.
-			 */
-			ageDeliveryPreds();
-			double encTime = simTime().dbl();
-			predsIterator it= preds.find(BAdress);
-			predsIterator it2= lastEncouterTime.find(BAdress);
-
-			if (!withEMethod){
-				if (it2==lastEncouterTime.end()){
-					/*
-					 * if iterator is equal map.end(), it means that this node had not been meet yet
-					 * so lastEncTime equal 0 and therefore P equals PFirstContact
-					 */
-					predsForB = PFirstContact;
-				}else {
-					/*
-					 * if iterator is not equal map.end(), it means that this node had been meet before
-					 */
-					if (it==preds.end()){
-						predsForB = 0;
-					}else {
-						predsForB = it->second;
-					}
-					lastEncTime = it2->second;
-
-					if (simTime().dbl()-lastEncTime<I_TYP){
-						/*
-						 * if the node has been encountered recently then don't use PEncMax
-						 */
-						PEnc = PEncMax * (( simTime().dbl()-lastEncTime)/I_TYP);
-					}else {
-						/*
-						 * if the node has been encountered long ago then use PEncMax
-						 */
-						PEnc = PEncMax;
-					}
-					predsForB = predsForB + (1-predsForB)*PEnc;
-				}
-			}else{
-				if (it==preds.end()){
-					predsForB = PFirstContact;
-					if (it2==lastEncouterTime.end()){
-						lastEncTime = 0;
-					}else {
-						lastEncTime = it2->second;
-					}
-				}else {
-					predsForB = it->second;
-					if (it2==lastEncouterTime.end()){
-						lastEncTime = 0;
-					}else {
-						lastEncTime = it2->second;
-					}
-
-					if (simTime().dbl()-lastEncTime<I_TYP){
-						PEnc = PEncMax * (( simTime().dbl()-lastEncTime)/I_TYP);
-					}else {
-						PEnc = PEncMax;
-					}
-					predsForB = predsForB + (1-predsForB)*PEnc;
-				}
-			}
-
-			preds[BAdress] = predsForB;
-			if (BAdress == 10){
-				predForVPA.record(predsForB);
-			}
-			lastEncouterTime[BAdress] = encTime;
-			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << encTime << " Pred: " << predsForB << endl;
-	}
-}
-
-void ProphetNCV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<LAddress::L3Type,double> Bpreds)
-{
-
-	double predsForB,predsForC,BpredsForC;
-	LAddress::L3Type CAdress;
-	predsIterator tmp_it;
-	/*
-	 * before calculating transitive predictions, we must age preds.
-	 */
-	ageDeliveryPreds();
-	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
-
-		if ((it->first==myNetwAddr)||(it->first==BAdress)){
-			continue;
-		}
-
-		CAdress = it->first;
-		tmp_it= preds.find(CAdress);
-		if (tmp_it == preds.end()){
-			predsForC = 0;
-		} else {
-			predsForC=tmp_it->second;
-		}
-
-		tmp_it= Bpreds.find(CAdress);
-		BpredsForC=tmp_it->second;
-
-		tmp_it= preds.find(BAdress);
-		predsForB=tmp_it->second;
-
-		if (predsForC<(predsForB*BpredsForC*Beta)){
-			predsForC = predsForB*BpredsForC*Beta;
-		}
-
-		preds[CAdress] = predsForC;
-		if (CAdress ==10){
-			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << simTime().dbl() << " Pred after aging: " << predsForB << "Pred for VPA:" << predsForC <<endl;
-			predForVPA.record(predsForC);
-		}
-	}
-}
-
-void ProphetNCV2::ageDeliveryPreds()
-{
-	predsIterator it2;
-	double time = simTime().dbl();
-	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
-	if (timeDiff==0){
-		return;
-	}else {
-		double mult = std::pow(GAMMA, timeDiff);
-		std::vector<LAddress::L3Type> predsToDelete;
-
-		for (predsIterator it=preds.begin();it!=preds.end();it++){
-
-			if (it->first==myNetwAddr){
-				continue;
-			}
-
-			it->second = it->second * mult;
-
-
-			if (it->second < PMinThreshold){
-				predsToDelete.push_back(it->first);
-			}
-
-			if (it->first ==10){
-				predForVPA.record(it->second);
-			}
-		}
-
-		for (std::vector<LAddress::L3Type>::iterator it2 = predsToDelete.begin(); it2 != predsToDelete.end(); it2++){
-			LAddress::L3Type tmp = *it2;
-			preds.erase(tmp);
-		}
-
-		lastAgeUpdate = simTime().dbl();
-	}
-}
-
-void ProphetNCV2::update(ProphetNCPkt *prophetPkt)
-{
-	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
-	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
-	recordPredsStats();
-}
-
-void ProphetNCV2::partialUpdate(ProphetNCPkt *prophetPkt)
-{
-	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
-	recordPredsStats();
 }
 
 /*******************************************************************
@@ -292,12 +116,12 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
 				break;
 			case Bundle_Offer:
 				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBndlOfferMsg(prophetPkt);
+					handleBundleOfferMsg(prophetPkt);
 				}
 				break;
 			case Bundle_Response:
 				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBndlRespMsg(prophetPkt);
+					handleBundleResponseMsg(prophetPkt);
 				}
 				break;
 			case Bundle:
@@ -424,11 +248,11 @@ void ProphetNCV2::sendingHelloMsg(ProphetNCPkt *netwPkt)
 	ageDeliveryPreds();
 	predToSend.insert(preds.begin(),preds.end());
 	netwPkt->setPreds(predToSend);
-
-
-//	int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-//	int length = predsLength + netwPkt->getBitLength();
-//	netwPkt->setBitLength(length);
+	if (withPredLength){
+		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
+		int length = predsLength + netwPkt->getBitLength();
+		netwPkt->setBitLength(length);
+	}
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
 }
@@ -440,16 +264,11 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 		return;
 	}else{
 		/*************************** Handling Hello Msg **********/
-//	    cout << "Receiving Hello packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << " current address " << myNetwAddr << std::endl;
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
 	    update(netwPkt);
-
 	    /*************************** Sending BundleOffer Msg **********/
 	    sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
-//	    if (nodeType == Veh){
-//	    	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
-//		}
 	}
 }
 
@@ -551,17 +370,17 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 	}
 }
 
-void ProphetNCV2::handleBndlOfferMsg(ProphetNCPkt *netwPkt)
+void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 {
 
     std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
     if (!receivedE2eAcks.empty()){
-//    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
     	storeAckSerial(receivedE2eAcks);
     }
     std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
     if (!storedBundle.empty()){
-//    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
     }
     /*************************** E2E Acks **********/
 //	std::map<LAddress::L3Type, NetwSession>::iterator it2;
@@ -599,9 +418,6 @@ void ProphetNCV2::handleBndlOfferMsg(ProphetNCPkt *netwPkt)
 		}
 	}
 
-//	if (!serialStoredBndl.empty()){
-//		updateStoredBndlForSession(netwPkt->getSrcAddr(), serialStoredBndl);
-//	}
 	if (!serialResponseBndl.empty()){
 		sendingBndlRespMsg(netwPkt->getSrcAddr(), serialResponseBndl);
 	}
@@ -620,12 +436,12 @@ void ProphetNCV2::sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsign
 	sendDown(netwPkt);
 }
 
-void ProphetNCV2::handleBndlRespMsg(ProphetNCPkt *netwPkt)
+void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 {
 	std::set<unsigned long> serialResponseBndl = netwPkt->getH2hAcks();
 
 	// step 1 : Build bundle list to send before reordering
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair;
+	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
 	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
 		unsigned long serial = *it;
 		if (exist(serial)){
@@ -635,7 +451,7 @@ void ProphetNCV2::handleBndlRespMsg(ProphetNCPkt *netwPkt)
 			}else{
 				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
 					if ((*it3)->getSerial() == serial){
-						sortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
+						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
 						break;
 					}
 				}
@@ -644,23 +460,41 @@ void ProphetNCV2::handleBndlRespMsg(ProphetNCPkt *netwPkt)
 	}
 
 	// step 2 : Reordering bundle list
-	std::sort(sortedWSMPair.begin(), sortedWSMPair.end(), comparatorRCAscObject);
+	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
 
-	// step 3 : Sending bundles with NbrReplica to transfer
-	sendingBundleMsg(netwPkt->getSrcAddr(),sortedWSMPair);
+	// step 3 : Filtering bundle to send
+	std::vector<WaveShortMessage* > sentWSM;
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
+		WaveShortMessage* wsm = it->first;
+		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
+		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
+		if ((itNode != neighborhoodSession.end())){
+			NetwSession sessionNode = itNode->second;
+			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}
+		}
+		sentWSM.push_back(wsm);
+	}
+	sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType(),sentWSM);
 }
 
-void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr,std::vector<std::pair<WaveShortMessage*, int> >wsmToSend)
+void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend)
 {
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
-		WaveShortMessage* wsm = (*it).first;
+	for (std::vector<WaveShortMessage* >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
+		WaveShortMessage* wsm = *it;
 		ProphetNCPkt* bundleMsg;
 		sectorId = getCurrentSector();
 		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,getCurrentPos());
 		bundleMsg->encapsulate(wsm->dup());
-//			cout << "Sending Bundle packet from " << bundleMsg->getSrcAddr() << " addressed to 2Fwds " << fwdDist.first << " & " << fwdMETD.first << " Bundle Serial " << wsm->getSerial() << std::endl;
 		sendDown(bundleMsg);
-		bundlesReplicaIndex[wsm->getSerial()]++;
+		if (destType == Veh){
+			bundlesReplicaIndex[(*it)->getSerial()]++;
+		}
 	}
 }
 
@@ -720,24 +554,8 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsig
 
 void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 {
-	//	cout << "Receiving BundleAck packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
-
-	std::map<LAddress::L3Type, NetwSession>::iterator it2;
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
-	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
-	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
-	}
+	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 
 	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 		storeAckSerial(*it);
@@ -745,70 +563,7 @@ void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 	}
 }
 
-void ProphetNCV2::storeBundle(WaveShortMessage *msg)
-{
-		// step 1 : check if the bundle is already stored
-	if (!exist(msg)){
 
-		// step 2 : add the bundle to stored bundles
-		switch (qStrategy) {
-			case QUEUING_FIFO:
-			{
-				if (bundles.size()==bundlesStructureSize){
-					bundles.pop_front();
-				}else if (bundles.size()>bundlesStructureSize){
-					opp_error("bundles storage structure exceed its maximum size");
-				}
-			}
-				break;
-			case QUEUING_MOFO:
-				opp_error("QUEUING Strategy not supported yet");
-				break;
-			case QUEUING_MOPR:
-				opp_error("QUEUING Strategy not supported yet");
-				break;
-			case QUEUING_LinearMOPR:
-				opp_error("QUEUING Strategy not supported yet");
-				break;
-			case QUEUING_SHLI:
-				opp_error("QUEUING Strategy not supported yet");
-				break;
-			case QUEUING_LEPR:
-				opp_error("QUEUING Strategy not supported yet");
-				break;
-		}
-		bundles.push_back(msg);
-
-		// step 3 : adding this bundle to index
-		bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-		innerIndexMap inner_map;
-		if (it != bundlesIndex.end()){
-			inner_map = it->second;
-		}
-		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
-		bundlesIndex[msg->getRecipientAddress()] = inner_map;
-
-		haveToRestartIEP(simTime());
-	}
-}
-
-void ProphetNCV2::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks)
-{
-	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
-	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
-		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
-	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession[srcAddr] = newSession;
-	}
-}
 ProphetNCPkt *ProphetNCV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
 {
 
@@ -844,9 +599,6 @@ ProphetNCPkt *ProphetNCV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,
 
 void ProphetNCV2::finish()
 {
-//	EV << "Sent:     " << nbrL3Sent << endl;
-//	EV << "Received: " << nbrL3Received << endl;
-
 	recordAllScalars();
 
 	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
@@ -1246,6 +998,185 @@ bool ProphetNCV2::erase(unsigned long serial)
 		}
 	}
 	return found;
+}
+
+
+/*******************************************************************
+**
+** 							Methods related to predictions
+**
+********************************************************************/
+
+void ProphetNCV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
+{
+	if (BAdress == myNetwAddr){
+		opp_warning("Cannot Update Delivery Predictions for its own Address(ProphetNCV2::updateDeliveryPredsFor)");
+	}else{
+		double PEnc,lastEncTime, predsForB;
+			/*
+			 * before calculating predsForB, we must age preds.
+			 */
+			ageDeliveryPreds();
+			double encTime = simTime().dbl();
+			predsIterator it= preds.find(BAdress);
+			predsIterator it2= lastEncouterTime.find(BAdress);
+
+			if (!withEMethod){
+				if (it2==lastEncouterTime.end()){
+					/*
+					 * if iterator is equal map.end(), it means that this node had not been meet yet
+					 * so lastEncTime equal 0 and therefore P equals PFirstContact
+					 */
+					predsForB = PFirstContact;
+				}else {
+					/*
+					 * if iterator is not equal map.end(), it means that this node had been meet before
+					 */
+					if (it==preds.end()){
+						predsForB = 0;
+					}else {
+						predsForB = it->second;
+					}
+					lastEncTime = it2->second;
+
+					if (simTime().dbl()-lastEncTime<I_TYP){
+						/*
+						 * if the node has been encountered recently then don't use PEncMax
+						 */
+						PEnc = PEncMax * (( simTime().dbl()-lastEncTime)/I_TYP);
+					}else {
+						/*
+						 * if the node has been encountered long ago then use PEncMax
+						 */
+						PEnc = PEncMax;
+					}
+					predsForB = predsForB + (1-predsForB)*PEnc;
+				}
+			}else{
+				if (it==preds.end()){
+					predsForB = PFirstContact;
+					if (it2==lastEncouterTime.end()){
+						lastEncTime = 0;
+					}else {
+						lastEncTime = it2->second;
+					}
+				}else {
+					predsForB = it->second;
+					if (it2==lastEncouterTime.end()){
+						lastEncTime = 0;
+					}else {
+						lastEncTime = it2->second;
+					}
+
+					if (simTime().dbl()-lastEncTime<I_TYP){
+						PEnc = PEncMax * (( simTime().dbl()-lastEncTime)/I_TYP);
+					}else {
+						PEnc = PEncMax;
+					}
+					predsForB = predsForB + (1-predsForB)*PEnc;
+				}
+			}
+
+			preds[BAdress] = predsForB;
+			if (BAdress == 10){
+				predForVPA.record(predsForB);
+			}
+			lastEncouterTime[BAdress] = encTime;
+			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << encTime << " Pred: " << predsForB << endl;
+	}
+}
+
+void ProphetNCV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map<LAddress::L3Type,double> Bpreds)
+{
+
+	double predsForB,predsForC,BpredsForC;
+	LAddress::L3Type CAdress;
+	predsIterator tmp_it;
+	/*
+	 * before calculating transitive predictions, we must age preds.
+	 */
+	ageDeliveryPreds();
+	for (predsIterator it=Bpreds.begin(); it!=Bpreds.end();it++){
+
+		if ((it->first==myNetwAddr)||(it->first==BAdress)){
+			continue;
+		}
+
+		CAdress = it->first;
+		tmp_it= preds.find(CAdress);
+		if (tmp_it == preds.end()){
+			predsForC = 0;
+		} else {
+			predsForC=tmp_it->second;
+		}
+
+		tmp_it= Bpreds.find(CAdress);
+		BpredsForC=tmp_it->second;
+
+		tmp_it= preds.find(BAdress);
+		predsForB=tmp_it->second;
+
+		if (predsForC<(predsForB*BpredsForC*Beta)){
+			predsForC = predsForB*BpredsForC*Beta;
+		}
+
+		preds[CAdress] = predsForC;
+		if (CAdress ==10){
+			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << simTime().dbl() << " Pred after aging: " << predsForB << "Pred for VPA:" << predsForC <<endl;
+			predForVPA.record(predsForC);
+		}
+	}
+}
+
+void ProphetNCV2::ageDeliveryPreds()
+{
+	predsIterator it2;
+	double time = simTime().dbl();
+	int  timeDiff = int (time-lastAgeUpdate)/secondsInTimeUnit;
+	if (timeDiff==0){
+		return;
+	}else {
+		double mult = std::pow(GAMMA, timeDiff);
+		std::vector<LAddress::L3Type> predsToDelete;
+
+		for (predsIterator it=preds.begin();it!=preds.end();it++){
+
+			if (it->first==myNetwAddr){
+				continue;
+			}
+
+			it->second = it->second * mult;
+
+
+			if (it->second < PMinThreshold){
+				predsToDelete.push_back(it->first);
+			}
+
+			if (it->first ==10){
+				predForVPA.record(it->second);
+			}
+		}
+
+		for (std::vector<LAddress::L3Type>::iterator it2 = predsToDelete.begin(); it2 != predsToDelete.end(); it2++){
+			LAddress::L3Type tmp = *it2;
+			preds.erase(tmp);
+		}
+
+		lastAgeUpdate = simTime().dbl();
+	}
+}
+
+void ProphetNCV2::update(ProphetNCPkt *prophetPkt)
+{
+	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
+	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
+	recordPredsStats();
+}
+
+void ProphetNCV2::partialUpdate(ProphetNCPkt *prophetPkt)
+{
+	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
+	recordPredsStats();
 }
 
 /*******************************************************************
