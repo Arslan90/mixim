@@ -177,7 +177,7 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 		netwPkt->setH2hAcks(serialResponseBndl);
 		int length = sizeof(unsigned long) * (wsmResponseBndl.size())+ netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
-		cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
+//		cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 		sendDown(netwPkt);
 	}
 }
@@ -210,6 +210,7 @@ void EpidemicNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 
 	// step 3 : Sending bundles with NbrReplica to transfer
 	std::vector<WaveShortMessage* > sentWSM;
+	std::vector<unsigned long > oldWSM;
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
@@ -224,9 +225,23 @@ void EpidemicNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 				continue;
 			}
 		}
+		if (withTTL){
+			double duration = (simTime()-wsm->getTimestamp()).dbl();
+			if (duration > ttl){
+				oldWSM.push_back(wsm->getSerial());
+				continue;
+			}
+		}
 		sentWSM.push_back(wsm);
 	}
+
 	sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType(),sentWSM);
+
+	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+		if (erase(*it)){
+			nbrDeletedWithTTL++;
+		}
+	}
 }
 
 void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend)

@@ -279,6 +279,7 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 
 		// step 2 : Reordering bundle list
 		std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+		std::vector<unsigned long > oldWSM;
 
 		// step 3 : Sending bundles with NbrReplica to transfer
 		std::vector<WaveShortMessage* > sentWSM;
@@ -293,6 +294,13 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 				}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
 					continue;
 				}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+					continue;
+				}
+			}
+			if (withTTL){
+				double duration = (simTime()-wsm->getTimestamp()).dbl();
+				if (duration > ttl){
+					oldWSM.push_back(wsm->getSerial());
 					continue;
 				}
 			}
@@ -318,6 +326,12 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 			// sending bundles
 			sendingBundleMsg(netwPkt->getSrcAddr(), wsm->dup(), nbrReplicaToSend, custodyTransfert);
 
+		}
+
+		for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+			if (erase(*it)){
+				nbrDeletedWithTTL++;
+			}
 		}
 	}
 }

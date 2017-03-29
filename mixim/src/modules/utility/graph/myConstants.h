@@ -76,6 +76,12 @@ const int EDGE_ID = 0x61;
 const int EDGE_BEST_TRAVEL_TIME = 0x62;
 
 // ****************************************
+// SPECIAL COMMAND RELATED
+// ****************************************
+// SPECIAL COMMAND = 0x7X
+const int HOTSPOT_MODE = 0x71;
+
+// ****************************************
 // COMMAND Arguments type
 // ****************************************
 // COMMAND Arguments type= 0x8x
@@ -108,6 +114,7 @@ const int   T_ROUTE_NP_VPA  = LIST_STRING;
 const int   T_ROUTE_LENGTH_NP_VPA  = FLOAT;
 const int   T_EDGE_ID  = STRING;
 const int   T_EDGE_BEST_TRAVEL_TIME  = FLOAT;
+const int   T_HOTSPOT_MODE  = STRING;
 
 std::string convertToStr(int intToConvert){
 	std::stringstream ss;

@@ -464,6 +464,7 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 
 	// step 3 : Filtering bundle to send
 	std::vector<WaveShortMessage* > sentWSM;
+	std::vector<unsigned long > oldWSM;
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
@@ -478,9 +479,23 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 				continue;
 			}
 		}
+		if (withTTL){
+			double duration = (simTime()-wsm->getTimestamp()).dbl();
+			if (duration > ttl){
+				oldWSM.push_back(wsm->getSerial());
+				continue;
+			}
+		}
 		sentWSM.push_back(wsm);
 	}
+
 	sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType(),sentWSM);
+
+	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+		if (erase(*it)){
+			nbrDeletedWithTTL++;
+		}
+	}
 }
 
 void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend)

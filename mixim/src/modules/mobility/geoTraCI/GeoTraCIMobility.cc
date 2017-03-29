@@ -102,6 +102,8 @@ void GeoTraCIMobility::initialize(int stage)
 		debug = par("debug");
 		accidentCount = par("accidentCount");
 
+		withHotSpotMode = par("withHotSpotMode").boolValue();
+
 		currentPosXVec.setName("posx");
 		currentPosYVec.setName("posy");
 		currentSpeedVec.setName("speed");
@@ -737,11 +739,19 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 			arg2_value = arg2_value+" "+*it;
 		}
 	}
+	int arg3 = MY_CONST::HOTSPOT_MODE;
+	std::string arg3_value = "";
+	if (withHotSpotMode){
+		arg3_value = "True";
+	}else{
+		arg3_value = "False";
+	}
 
 	std::string msg = "";
 	msg+= MY_CONST::convertToStr(msg_type)+":"+MY_CONST::convertToStr(cmd)+";";
 	msg+= MY_CONST::convertToStr(arg1)+":"+MY_CONST::convertToStr(arg1_value)+";";
-	msg+= MY_CONST::convertToStr(arg2)+":"+arg2_value+"?";
+	msg+= MY_CONST::convertToStr(arg2)+":"+arg2_value+";";
+	msg+= MY_CONST::convertToStr(arg3)+":"+arg3_value+"?";
 
 	// Sending request to server
 	std::string queryRep = sendRequestToPyServer(msg);

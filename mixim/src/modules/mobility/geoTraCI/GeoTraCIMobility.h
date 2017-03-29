@@ -221,6 +221,8 @@ class GeoTraCIMobility : public TraCIMobility
 
 		std::string getL2Stats(cModule* macMod);
 
+		bool withHotSpotMode;
+
 };
 
 class GeoTraCIMobilityAccess

@@ -162,6 +162,7 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 
 	// step 3 : Sending bundles with NbrReplica to transfer
 	std::vector<WaveShortMessage* > sentWSM;
+	std::vector<unsigned long > oldWSM;
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
@@ -173,6 +174,13 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
 				continue;
 			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}
+		}
+		if (withTTL){
+			double duration = (simTime()-wsm->getTimestamp()).dbl();
+			if (duration > ttl){
+				oldWSM.push_back(wsm->getSerial());
 				continue;
 			}
 		}
@@ -192,6 +200,12 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
+	}
+
+	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+		if (erase(*it)){
+			nbrDeletedWithTTL++;
+		}
 	}
 }
 
@@ -219,7 +233,7 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			opp_error("DDeliveryNetwLayer::handleBundleMsg() - Reception of bundle by not recipient address not allowed");
+//			opp_error("DDeliveryNetwLayer::handleBundleMsg() - Reception of bundle by not recipient address not allowed");
 		}
 		if (!finalReceivedWSM.empty()){
 			sendingBundleAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM);

@@ -32,6 +32,7 @@ simple GeoTraCIMobility extends TraCIMobility
     parameters:
 		@class(GeoTraCIMobility);
         @display("i=block/cogwheel");
+        bool withHotSpotMode = default(false);
 //        bool debug = default(false);  // debug switch
 //        int accidentCount = default(0);  // number of accidents
 //        double accidentStart @unit("s") = default(uniform(30s,60s));  // time until first accident, relative to departure time
