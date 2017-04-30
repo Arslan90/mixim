@@ -365,7 +365,7 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		int nbrEntries = storedAck.size()+ storedBundle.size();
 		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
-		cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
+		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 		sendDown(netwPkt);
 	}
 }
@@ -432,7 +432,7 @@ void ProphetNCV2::sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsign
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	int length = sizeof(unsigned long) * (wsmResponseBndl.size())+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
+	//cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
 }
 
@@ -1097,7 +1097,7 @@ void ProphetNCV2::updateDeliveryPredsFor(const LAddress::L3Type BAdress)
 				predForVPA.record(predsForB);
 			}
 			lastEncouterTime[BAdress] = encTime;
-			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << encTime << " Pred: " << predsForB << endl;
+			//cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << encTime << " Pred: " << predsForB << endl;
 	}
 }
 
@@ -1137,7 +1137,7 @@ void ProphetNCV2::updateTransitivePreds(const LAddress::L3Type BAdress, std::map
 
 		preds[CAdress] = predsForC;
 		if (CAdress ==10){
-			cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << simTime().dbl() << " Pred after aging: " << predsForB << "Pred for VPA:" << predsForC <<endl;
+			//cout << "@: " << myNetwAddr << " encountered@: " <<  BAdress << " T: " << simTime().dbl() << " Pred after aging: " << predsForB << "Pred for VPA:" << predsForC <<endl;
 			predForVPA.record(predsForC);
 		}
 	}

@@ -301,7 +301,7 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 				emit(receiveL3SignalId,bundlesReceived);
 			}
 		}
-		if (!finalReceivedWSM.empty()){
+		if ((withAck) && (!finalReceivedWSM.empty())){
 			sendingBundleAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM);
 		}
 	}
@@ -323,13 +323,15 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list
 }
 void EpidemicNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+	if (withAck){
+		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 
-	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-		storeAckSerial(*it);
-		erase(*it);
-		ackReceivedPerVPA.insert(*it);
+		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+			storeAckSerial(*it);
+			erase(*it);
+			ackReceivedPerVPA.insert(*it);
+		}
 	}
 }
 
