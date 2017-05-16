@@ -1282,6 +1282,26 @@ void TraCIScenarioManager::commandChangeRouteById(std::string nodeId, std::strin
 	ASSERT(buf.eof());
 }
 
+void TraCIScenarioManager::commandChangeRouteByListOfEdges(std::string nodeId, int nbrEdge, std::list<std::string> listOfEdges)
+{
+	uint8_t variableId = VAR_ROUTE;
+	uint8_t variableType = TYPE_STRINGLIST;
+	TraCIBuffer tmp;
+	tmp << variableId << nodeId << variableType << nbrEdge;
+	ASSERT(nbrEdge == listOfEdges.size());
+	for (std::list<std::string>::iterator it = listOfEdges.begin(); it != listOfEdges.end(); it++){
+		std::string edgeId = (*it);
+		tmp << edgeId;
+	}
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, tmp);
+
+//	uint8_t variableId = VAR_SPEED;
+//	uint8_t variableType = TYPE_DOUBLE;
+//	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << speed);
+
+	ASSERT(buf.eof());
+}
+
 void TraCIScenarioManager::commandChangeTarget(std::string nodeId, std::string edgeId)
 {
 	uint8_t variableId = LANE_EDGE_ID;

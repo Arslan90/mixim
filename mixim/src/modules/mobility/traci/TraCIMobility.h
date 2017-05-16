@@ -159,6 +159,9 @@ class TraCIMobility : public BaseMobility
 		void commandChangeRouteById(std::string routeId) {
 				getManager()->commandChangeRouteById(getExternalId(), routeId);
 		}
+		void commandChangeRouteByListOfEdges(int nbrEdges, std::list<std::string> listOfEdges) {
+				getManager()->commandChangeRouteByListOfEdges(getExternalId(), nbrEdges, listOfEdges);
+		}
 		std::list<std::string> commandGetRouteIds() {
 			return getManager()->commandGetRouteIds();
 		}

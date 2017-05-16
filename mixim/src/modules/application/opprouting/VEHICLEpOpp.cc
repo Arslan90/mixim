@@ -102,6 +102,8 @@ void VEHICLEpOpp::initialize(int stage) {
 
 		reroutedToLoopRoute = false;
 		edgeForLooping ="";
+
+		reRouteAtEnd = par("reRouteAtEnd").boolValue();
 	}
 	if(stage==2) {
 		scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
@@ -636,6 +638,44 @@ void VEHICLEpOpp::sendDtnMessage()
 void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
 	if (signalID == mobilityStateChangedSignal) {
+		if (reRouteAtEnd){
+			bool mustReroute = false;
+			std::list<std::string> myRoute = traci->commandGetSingleVehicleRoutes();
+			std::string myRoadId = traci->getRoadId();
+			std::string lastRoadId;
+			int index = 0;
+			for(std::list<std::string>::reverse_iterator it = myRoute.rbegin(); it !=myRoute.rend(); it++){
+				index++;
+				if ((*it == myRoadId) && (index == 2)){
+					lastRoadId = myRoute.back();
+					mustReroute = true;
+					break;
+				}
+			}
+
+			if((mustReroute) && (lastRoadId != "")){
+				// list of all avaibales routes
+				std::list<std::string> routes = traci->commandGetRouteIds();
+				std::vector<std::string> compatibleRoutes  = std::vector<std::string>();
+				for (std::list<std::string>::iterator it = routes.begin(); it != routes.end(); it++){
+					std::string firstEdgeOfRoute = traci->commandGetEdgesOfRoute(*it).front();
+					if (firstEdgeOfRoute == lastRoadId){
+						compatibleRoutes.push_back(*it);
+					}
+				}
+
+				// selecting randomly a compatible loop route
+				if (!compatibleRoutes.empty()){
+					std::string selectedNewRouteId = compatibleRoutes[intrand(compatibleRoutes.size())];
+					std::list<std::string> edgeOfSelectedNewRoute = traci->commandGetEdgesOfRoute(selectedNewRouteId);
+					std::list<std::string> rebuildedNewRoute = edgeOfSelectedNewRoute;
+					rebuildedNewRoute.push_front(myRoadId);
+					// rerouting to new route
+					int newRouteSize = rebuildedNewRoute.size();
+					traci->commandChangeRouteByListOfEdges(newRouteSize, rebuildedNewRoute);
+				}
+			}
+		}
 		if (loopVehicle){
 			if (!reroutedToLoopRoute){
 				// list of all avaibales routes

@@ -33,6 +33,8 @@ simple VEHICLEpOpp extends DtnApplLayer
 		// my functions
 		bool vehicleIdAsInt = default(false);
 		
+		bool reRouteAtEnd = default(false);
+		
 		withDtnMsg = default(true);
         withOtherMsg = default(false);
 }

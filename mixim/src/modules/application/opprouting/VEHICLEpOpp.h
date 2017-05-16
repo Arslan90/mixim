@@ -171,6 +171,8 @@ class VEHICLEpOpp : public DtnApplLayer {
 
 		std::string currentAxe;
 
+		bool reRouteAtEnd;
+
 	protected:
 		virtual void onBeacon(WaveShortMessage* wsm);
 		virtual void onData(WaveShortMessage* wsm);

@@ -80,6 +80,7 @@ class TraCIScenarioManager : public cSimpleModule
 
         // My Functions
         void commandChangeRouteById(std::string nodeId, std::string routeId);
+        void commandChangeRouteByListOfEdges(std::string nodeId, int nbrEdge, std::list<std::string> listOfEdges);
         void commandChangeTarget(std::string nodeId, std::string edgeId);
         std::list<std::string> commandGetRouteIds();
         std::string commandGetRouteId(std::string nodeId);
