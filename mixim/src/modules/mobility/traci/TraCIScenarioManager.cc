@@ -710,8 +710,36 @@ std::list<std::string> TraCIScenarioManager::commandGetEdgesOfRoute(std::string 
 	return res;
 }
 
+std::list<std::string> TraCIScenarioManager::commandGetEdgesOfVehicleRoute(std::string vehicleId) {
+	std::list<std::string> res;
 
+	std::string objectId = "";
+	uint8_t variableType = TYPE_STRINGLIST;
+	//Variable 	VehicleTypeID
+	TraCIBuffer buf = queryTraCI(CMD_GET_VEHICLE_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_EDGES) << vehicleId );
 
+	// read additional CMD_GET_VEHICLE_VARIABLE sent back in response
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId; buf >> commandId;
+	ASSERT(commandId == RESPONSE_GET_VEHICLE_VARIABLE);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == VAR_EDGES);
+	std::string polyId_r; buf >> polyId_r;
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == TYPE_STRINGLIST);
+	uint32_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		std::string id; buf >> id;
+		res.push_back(id);
+	}
+
+	ASSERT(buf.eof());
+	return res;
+}
 
 double TraCIScenarioManager::commandGetArcCO2(std::string edgeId) {
 	//std::string res;

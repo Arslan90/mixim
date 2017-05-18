@@ -203,8 +203,9 @@ void GeoTraCIMobility::handleSelfMsg(cMessage *msg)
 	    std::string Old_NP_node = currentNP.getNpNode();
 	    double oldMETD = currentNP.getMetd();
 	    double oldEtaNpVpa = currentNP.getEtaNpVpa();
+	    std::string oldNpEdgeTo = currentNP.getNpEdgeTo();
 		currentNP = getNearestPoint(currentSector, remainingRoute);
-		if (currentNP.getNpNode() == Old_NP_node){
+		if ((currentNP.getNpNode() == Old_NP_node) && (currentNP.getNpEdgeTo() == oldNpEdgeTo)){
 			currentNP.setMetd(oldMETD);
 			currentNP.setEtaNpVpa(oldEtaNpVpa);
 		}else{
@@ -415,6 +416,20 @@ void GeoTraCIMobility::updateCurrentSector()
 		}else {
 			oldSector = currentSector;
 		}
+	}
+}
+
+void GeoTraCIMobility::reComputeMETDAfterReRoute(){
+	Enter_Method_Silent("reComputeMETDAfterReRoute");
+	this->initialRoute = commandGetEdgesOfRoute(commandGetRouteId());
+	std::list<std::string> newInitialRoute = commandGetEdgesOfVehRoute();
+	addRouteToEdgeBTTIndex(initialRoute);
+	this->remainingRoute = initialRoute;
+	this->indexLastRoadId = -1;
+	this->indexRoadId = roadIndexInRoute(road_id,initialRoute, this->indexLastRoadId);
+
+	if (!computeNPMsg->isScheduled()){
+		scheduleAt(simTime(), computeNPMsg);
 	}
 }
 

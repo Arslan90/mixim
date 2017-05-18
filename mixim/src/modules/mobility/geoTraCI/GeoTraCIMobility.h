@@ -128,6 +128,7 @@ class GeoTraCIMobility : public TraCIMobility
     NearestPoint getCurrentNp() const;
     void setCurrentMetd(double currentMetd);
 	virtual void updateCurrentSector();
+	void reComputeMETDAfterReRoute();
 
 
 

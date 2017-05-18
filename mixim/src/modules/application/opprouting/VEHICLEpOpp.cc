@@ -19,6 +19,7 @@
 #include "multiFunctions.h"
 #include "ApplOppControlInfo.h"
 #include "DtnNetwLayer.h"
+#include "GeoTraCIMobility.h"
 
 
 Define_Module(VEHICLEpOpp);
@@ -664,6 +665,11 @@ void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 					}
 				}
 
+				std::string routeId = traci->commandGetRouteId();
+				if (routeId == "!34"){
+					cout << "Problematic route" << endl;
+				}
+
 				// selecting randomly a compatible loop route
 				if (!compatibleRoutes.empty()){
 					std::string selectedNewRouteId = compatibleRoutes[intrand(compatibleRoutes.size())];
@@ -673,6 +679,10 @@ void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 					// rerouting to new route
 					int newRouteSize = rebuildedNewRoute.size();
 					traci->commandChangeRouteByListOfEdges(newRouteSize, rebuildedNewRoute);
+					GeoTraCIMobility* geoTraci = FindModule<GeoTraCIMobility*>::findSubModule(this->getParentModule());
+					if (geoTraci!=NULL){
+						geoTraci->reComputeMETDAfterReRoute();
+					}
 				}
 			}
 		}

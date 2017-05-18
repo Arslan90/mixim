@@ -173,6 +173,10 @@ class TraCIMobility : public BaseMobility
 		std::list<std::string> commandGetEdgesOfRoute(std::string routeId) {
 			return getManager()->commandGetEdgesOfRoute(routeId);
 		}
+
+		std::list<std::string> commandGetEdgesOfVehRoute() {
+			return getManager()->commandGetEdgesOfVehicleRoute(getExternalId());
+		}
 	    virtual int getCurrentSector() const;
 		virtual void updateCurrentSector();
 

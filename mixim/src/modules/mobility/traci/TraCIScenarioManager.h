@@ -87,6 +87,7 @@ class TraCIScenarioManager : public cSimpleModule
         std::string commandGetLaneId(std::string nodeId);
         std::string commandGetVehicleTypeId(std::string nodeId);
         std::list<std::string> commandGetEdgesOfRoute(std::string routeId);
+        std::list<std::string> commandGetEdgesOfVehicleRoute(std::string vehicleId);
         double commandGetEdgeCurrentTravelTime(std::string edgeId);
         double cmdGetLaneMaxSpeed(std::string laneId);
 
