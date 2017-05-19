@@ -34,6 +34,8 @@ simple VEHICLEpOpp extends DtnApplLayer
 		bool vehicleIdAsInt = default(false);
 		
 		bool reRouteAtEnd = default(false);
+		int maxNbrOfReRouting = default(0);
+		int nbrVehForReRouting = default(5);
 		
 		withDtnMsg = default(true);
         withOtherMsg = default(false);

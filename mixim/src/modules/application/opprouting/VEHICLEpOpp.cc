@@ -105,6 +105,31 @@ void VEHICLEpOpp::initialize(int stage) {
 		edgeForLooping ="";
 
 		reRouteAtEnd = par("reRouteAtEnd").boolValue();
+		maxNbrOfReRouting = par("maxNbrOfReRouting");
+		// if maxNbrOfReRouting == 0 then we assume that rerouting is done infinitly
+		if (maxNbrOfReRouting < 0){
+			opp_error("VEHICLEpOpp::initialize - Max number of re routing should be a positive integer");
+		}
+		currentNbrOfReRouting = 0;
+		nbrVehForReRouting = par("nbrVehForReRouting");
+		// if nbrVehForReRouting == 0 then we assume that rerouting is done for all vehicles
+		if (nbrVehForReRouting < 0){
+			opp_error("VEHICLEpOpp::initialize - Number of veh for re routing should be a positive integer");
+		}
+
+		seletedVehForReRouting = false;
+
+		if (nbrVehForReRouting == 0){
+			seletedVehForReRouting = true;
+		}
+
+		if (nbrVehForReRouting > 0){
+			int indexOfVeh = this->getParentModule()->getIndex();
+			if (indexOfVeh < nbrVehForReRouting){
+				seletedVehForReRouting = true;
+			}
+		}
+
 	}
 	if(stage==2) {
 		scheduleAt(simTime() + 1, delayTimer); //Scheduling the self message.
@@ -639,7 +664,7 @@ void VEHICLEpOpp::sendDtnMessage()
 void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
 	if (signalID == mobilityStateChangedSignal) {
-		if (reRouteAtEnd){
+		if ((reRouteAtEnd)&&((seletedVehForReRouting) && (maxNbrOfReRouting == 0) || (currentNbrOfReRouting <= maxNbrOfReRouting))){
 			bool mustReroute = false;
 			std::list<std::string> myRoute = traci->commandGetSingleVehicleRoutes();
 			std::string myRoadId = traci->getRoadId();
@@ -683,6 +708,7 @@ void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 					if (geoTraci!=NULL){
 						geoTraci->reComputeMETDAfterReRoute();
 					}
+					currentNbrOfReRouting++;
 				}
 			}
 		}
