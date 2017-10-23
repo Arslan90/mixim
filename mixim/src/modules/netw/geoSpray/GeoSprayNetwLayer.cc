@@ -142,7 +142,7 @@ void GeoSprayNetwLayer::finish()
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
 	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
 	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
-	recordScalar("# delOper NBHTable", NBHTableNbrInsert);
+	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
 
 	recordScalar("# Distinct Forwarders", nbr2Fwds);
 	recordScalar("# Same Forwarders", nbr1Fwds);
@@ -629,22 +629,6 @@ bool GeoSprayNetwLayer::erase(unsigned long serial)
 		if (found){
 			bundlesReplicaIndex.erase(serial);
 			bundlesRmgReplica.erase(serial);
-		}
-	}
-	return found;
-}
-
-bool GeoSprayNetwLayer::exist(unsigned long serial)
-{
-	bool found = false;
-
-	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
-		innerIndexMap innerMap = it->second;
-		for (innerIndexIterator it2 = innerMap.begin(); it2 != innerMap.end(); it2++){
-			if (serial == it2->first){
-				found = true;
-				break;
-			}
 		}
 	}
 	return found;

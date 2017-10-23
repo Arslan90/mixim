@@ -220,8 +220,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
   	bool erase(unsigned long serial);
 
-  	bool exist(unsigned long serial);
-
   	GeoTraCIMobility* getGeoTraci();
 };
 

@@ -267,46 +267,6 @@ std::vector<std::list<BundleMeta> > DtnNetwLayer::defineBundleOffer(NetwPkt *net
 	return allBundleMeta;
 }
 
-
-
-bool DtnNetwLayer::exist(WaveShortMessage *msg)
-{
-	bool found = false;
-	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end() ; it++){
-//	}
-//	bundlesIndexIterator it = bundlesIndex.find(msg->getRecipientAddress());
-//	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2 = innerMap.find(msg->getSerial());
-		if (it2 !=innerMap.end()){
-			found = true;
-			break;
-		}
-	}
-	return found;
-}
-
-
-
-bool DtnNetwLayer::exist(BundleMeta bndlMeta)
-{
-	bool found = false;
-	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end() ; it++){
-//	}
-//	bundlesIndexIterator it = bundlesIndex.find(bndlMeta.getRecipientAddress());
-//	if (it != bundlesIndex.end()){
-		innerIndexMap innerMap(it->second);
-		innerIndexIterator it2 = innerMap.find(bndlMeta.getSerial());
-		if (it2 !=innerMap.end()){
-			found = true;
-			break;
-		}
-	}
-	return found;
-}
-
-
-
 bool DtnNetwLayer::ackExist(WaveShortMessage *msg)
 {
 	bool exist = false;
@@ -1386,17 +1346,26 @@ void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set
 	}
 }
 
+bool DtnNetwLayer::exist(WaveShortMessage *msg)
+{
+	return exist(msg->getSerial());
+}
+
+bool DtnNetwLayer::exist(BundleMeta bndlMeta)
+{
+	return exist(bndlMeta.getSerial());
+}
+
 bool DtnNetwLayer::exist(unsigned long  serial)
 {
 	bool found = false;
 
 	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
 		innerIndexMap innerMap = it->second;
-		for (innerIndexIterator it2 = innerMap.begin(); it2 != innerMap.end(); it2++){
-			if (serial == it2->first){
+		innerIndexIterator it2 = innerMap.find(serial);
+		if (it2 !=innerMap.end()){
 				found = true;
 				break;
-			}
 		}
 	}
 	return found;
