@@ -14,12 +14,6 @@
 // 
 
 #include "GeoSprayNetwLayer.h"
-#include "FindModule.h"
-#include "VEHICLEpOpp.h"
-#include "VPApOpp.h"
-#include "algorithm"
-#include "list"
-#include "Coord.h"
 
 Define_Module(GeoSprayNetwLayer);
 
@@ -29,27 +23,12 @@ void GeoSprayNetwLayer::initialize(int stage)
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
 		nbrReplica = par("nbrReplica");
-		withSentTrack = par("withSentTrack").boolValue();
-
-		NBHTableNbrInsert    = 0;
-		NBHTableNbrDelete    = 0;
-		NBHAddressNbrInsert  = 0;
-		NBHAddressNbrDelete  = 0;
-
-		nbr2Fwds = 0;
-		nbr1Fwds = 0;
-		nbr0ValidFwds = 0;
-		nbr1ValidFwds = 0;
 
 		totalBundlesReceived = 0;
 		bndlSentToVPA = 0;
 		totalBndlSentToVPA = 0;
 
 		firstSentToVPA = false;
-
-		bndlInterestVec.setName("Evolve of interesting bundle of neighborhood");
-
-		missedOpprVec.setName("Evolve of missed opportunities");
 
 		meetVPA = false;
 
@@ -58,11 +37,6 @@ void GeoSprayNetwLayer::initialize(int stage)
         withExplicitE2EAck = par("withExplicitE2EAck").boolValue();
 
         withExplicitH2HAck = par("withExplicitH2HAck").boolValue();
-
-	}else if (stage == 1){
-
-	}else if (stage == 2){
-		sectorId = getCurrentSector();
 	}
 }
 
@@ -110,7 +84,7 @@ void GeoSprayNetwLayer::handleLowerMsg(cMessage *msg)
 void GeoSprayNetwLayer::handleSelfMsg(cMessage *msg)
 {
 	if (msg == heartBeatMsg){
-		double currentMETD, currentDist;
+		double currentMETD;
 		if (nodeType == Veh){
 			currentMETD = getGeoTraci()->getCurrentMetd();
 		}else if (nodeType == VPA){
@@ -119,8 +93,7 @@ void GeoSprayNetwLayer::handleSelfMsg(cMessage *msg)
 			opp_error("Undefined NodeType");
 		}
 		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-		GeoDtnNetwPkt* netwPkt;
-		sendingHelloMsg(netwPkt);
+		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
 }
@@ -139,16 +112,6 @@ void GeoSprayNetwLayer::handleUpperMsg(cMessage *msg)
 
 void GeoSprayNetwLayer::finish()
 {
-	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
-	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
-	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
-	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
-
-	recordScalar("# Distinct Forwarders", nbr2Fwds);
-	recordScalar("# Same Forwarders", nbr1Fwds);
-	recordScalar("# Unique valid Forwarders", nbr1ValidFwds);
-	recordScalar("# No valid Forwarders", nbr0ValidFwds);
-
 	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
 
 	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
@@ -157,12 +120,13 @@ void GeoSprayNetwLayer::finish()
 	recordAllScalars();
 }
 
-void GeoSprayNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt)
+void GeoSprayNetwLayer::sendingHelloMsg()
 {
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
-	netwPkt->setE2eAcks(ackSerial);
-	int nbrEntries = ackSerial.size();
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
+	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+	netwPkt->setE2eAcks(storedAck);
+	int nbrEntries = storedAck.size();
 	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
@@ -181,7 +145,7 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
 	    if (!receivedE2eAcks.empty()){
 	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-	    	storeAckSerial(receivedE2eAcks);
+	    	storeAckSerials(receivedE2eAcks);
 	    }
 	    /*************************** Sending Bundle Msg **********/
 		if (nodeType == Veh){
@@ -196,9 +160,8 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 {
-	GeoDtnNetwPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Offer,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle_Offer, destAddr);
 	std::set<unsigned long> serialOfH2hAck;
 	for (std::list<WaveShortMessage* >::iterator it = bundles.begin(); it != bundles.end(); it++){
 		serialOfH2hAck.insert((*it)->getSerial());
@@ -243,9 +206,8 @@ void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std:
 	}else {
 		opp_error("Undefined NodeType");
 	}
-	GeoDtnNetwPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Response,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	netwPkt->setSrcMETD(currentMETD);
 	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
@@ -338,9 +300,8 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, WaveShortMessage* wsm,  int nbrReplica, bool custodyTransfer)
 {
-	GeoDtnNetwPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
+	GeoDtnNetwPkt *netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle, destAddr);
 	netwPkt->setNbrReplica(nbrReplica);
 	netwPkt->encapsulate(wsm);
 	sendDown(netwPkt);
@@ -400,9 +361,8 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 	for (std::vector<WaveShortMessage* >::iterator it = sentWSM.begin(); it != sentWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
 		unsigned long serial = wsm->getSerial();
-		GeoDtnNetwPkt* bundleMsg;
-		sectorId = getCurrentSector();
-		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, vpaAddr, sectorId ,LAddress::L3BROADCAST);
+		GeoDtnNetwPkt *bundleMsg = new GeoDtnNetwPkt();
+		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if(!withExplicitE2EAck){
@@ -423,25 +383,24 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		wsm->setHopCount(wsm->getHopCount()+1);
 		totalBundlesReceived++;
 
-		std::list<unsigned long> finalReceivedWSM;
+		std::set<unsigned long> finalReceivedWSM;
 
-		std::list<unsigned long> receivedWSM;
+		std::set<unsigned long> receivedWSM;
 
 		if (wsm->getRecipientAddress() == myNetwAddr){
 			netwPkt->encapsulate(wsm);
 			sendUp(netwPkt->dup());
-			finalReceivedWSM.push_back(wsm->getSerial());
+			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
-			missedOpportunities.erase(wsm->getSerial());
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
 			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
 				storeBundle(wsm);
-				receivedWSM.push_back(wsm->getSerial());
+				receivedWSM.insert(wsm->getSerial());
 				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
 				if (it == bundlesReplicaIndex.end()){
 					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
@@ -449,7 +408,6 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 				}
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
-				missedOpportunities.erase(wsm->getSerial());
 			}
 		}
 		if (!finalReceivedWSM.empty() && withExplicitE2EAck){
@@ -462,48 +420,12 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 	}
 }
 
-void GeoSprayNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmFinalDeliverd)
-{
-	GeoDtnNetwPkt* netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
-	std::set<unsigned long> serialOfE2EAck;
-	for (std::list<unsigned long >::iterator it = wsmFinalDeliverd.begin(); it != wsmFinalDeliverd.end(); it++){
-		serialOfE2EAck.insert(*it);
-	}
-	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
-}
-
-void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmDeliverd, int nbrReplica, bool custodyTransfer)
-{
-	GeoDtnNetwPkt* netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
-	std::set<unsigned long> serialOfH2HAck;
-	for (std::list<unsigned long >::iterator it = wsmDeliverd.begin(); it != wsmDeliverd.end(); it++){
-		serialOfH2HAck.insert(*it);
-	}
-	netwPkt->setH2hAcks(serialOfH2HAck);
-	netwPkt->setNbrReplica(nbrReplica);
-	netwPkt->setCustodyTransfert(custodyTransfer);
-	int length = sizeof(unsigned long) * serialOfH2HAck.size()+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
-}
-
 void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	if (withExplicitE2EAck){
 		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-
-		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			storeAckSerial(*it);
-			erase(*it);
-		}
+		storeAckSerials(finalDelivredToBndl);
 	}
 
 	if (withExplicitH2HAck){
@@ -521,190 +443,41 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	}
 }
 
+void GeoSprayNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+	netwPkt->setE2eAcks(serialOfE2EAck);
+	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	netwPkt->setBitLength(length);
+	sendDown(netwPkt);
+}
+
+void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDeliverd, int nbrReplica, bool custodyTransfer)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	std::set<unsigned long> serialOfH2HAck = std::set<unsigned long>(wsmDeliverd);
+	netwPkt->setH2hAcks(serialOfH2HAck);
+	netwPkt->setNbrReplica(nbrReplica);
+	netwPkt->setCustodyTransfert(custodyTransfer);
+	int length = sizeof(unsigned long) * serialOfH2HAck.size()+ netwPkt->getBitLength();
+	netwPkt->setBitLength(length);
+	sendDown(netwPkt);
+}
 ////////////////////////////////////////// Others methods /////////////////////////
-
-void GeoSprayNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
-{
-	double currentTime = simTime().dbl();
-	std::set<LAddress::L3Type> entriesToDelete;
-	std::set<LAddress::L3Type> entriesToPend;
-
-	// Check entries to delete or to set as Pending
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if ((netwRouteExpirency > 0) && (!it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRouteExpirency)){
-			// if entry is currently pending and has expired we delete it
-			if (it->first != neighbor){
-				entriesToDelete.insert(it->second.getDestAddr());
-			}
-			if (it->second.getNodeType() == VPA){
-				meetVPA = true;
-			}
-		}
-
-		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
-			// if entry is currently active and has not been update since an amount of time =>>> set it as pending
-			if (it->first != neighbor){
-				entriesToPend.insert(it->second.getDestAddr());
-			}
-		}
-	}
-
-	// Update table entries (Deleting/Pending)
-	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
-		neighborhoodTable.erase(*it);
-		neighborhoodSession.erase(*it);
-		NBHTableNbrDelete++;
-	}
-
-	for (std::set<LAddress::L3Type>::iterator it = entriesToPend.begin(); it != entriesToPend.end(); it++){
-		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
-		if (it2 == neighborhoodTable.end()){
-			opp_error("NeighboorhoodTable entry not found");
-		}else{
-			it2->second.setStatus(false);
-		}
-	}
-
-	// Adding the new entry
-	std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(neighbor);
-	if (it == neighborhoodTable.end()){
-		// neighbor doesn't exist, add a new entry
-		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
-		NBHTableNbrInsert++;
-	}else{
-		// neighbor exists, update the old entry
-		neighborhoodTable[neighbor] = neighborEntry;
-	}
-}
-
-GeoDtnNetwPkt *GeoSprayNetwLayer::prepareNetwPkt(short  kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr)
-{
-	int realPktLength = 0;
-	GeoDtnNetwPkt *myNetwPkt = new GeoDtnNetwPkt();
-	myNetwPkt->setKind(kind);
-	myNetwPkt->setSrcAddr(srcAddr);
-	myNetwPkt->setSrcType(srcType);
-	myNetwPkt->setDestAddr(destAddr);
-	myNetwPkt->setVpaSectorId(vpaSectorId);
-	myNetwPkt->setVpaAddr(vpaAddr);
-
-
-	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
-	realPktLength *= 8;
-
-	myNetwPkt->setBitLength(realPktLength);
-
-	return myNetwPkt;
-}
-
-void GeoSprayNetwLayer::storeAckSerial(unsigned long  serial)
-{
-	if (ackSerial.count(serial) == 0){
-		ackSerial.insert(serial);
-	}
-}
-
-void GeoSprayNetwLayer::storeAckSerial(std::set<unsigned long > setOfSerials)
-{
-    for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-    	storeAckSerial(*it);
-    	erase(*it);
-    }
-}
 
 bool GeoSprayNetwLayer::erase(unsigned long serial)
 {
-	bool found = false;
+	bool found = DtnNetwLayer::erase(serial);
 
-	WaveShortMessage* wsm = NULL;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		if (serial == (*it)->getSerial()){
-			wsm = (*it);
-			break;
-		}
+	if (found){
+		bundlesReplicaIndex.erase(serial);
+		bundlesRmgReplica.erase(serial);
 	}
 
-	if (wsm !=NULL){
-		found = DtnNetwLayer::erase(wsm);
-		if (found){
-			bundlesReplicaIndex.erase(serial);
-			bundlesRmgReplica.erase(serial);
-		}
-	}
 	return found;
-}
-
-void GeoSprayNetwLayer::handleLowerControl(cMessage *msg)
-{
-	if (isEquiped) {
-
-	switch (msg->getKind()) {
-		case NEWLY_CONNECTED:
-			canITransmit = true;
-			break;
-		case NEW_NEIGHBOR:
-			{
-				if (canITransmit){
-
-					/*
-					 * Extracting destAddress and Time from controlMsgName
-					 */
-					char* msgName = strdup(msg->getName());
-
-					LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-					msgName = strtok(NULL,":");
-
-					double time = getTimeFromName((const char*) msgName);
-
-					/** Repeated contacts stats			*/
-					recordRecontactStats(addr,time);
-
-					/** Contacts duration stats				*/
-					recordBeginContactStats(addr,time);
-
-					if (recordContactStats){
-						unsigned long contactID = startRecordingContact(addr,time);
-					}
-
-					neighborsAddress.insert(addr);
-					NBHAddressNbrInsert++;
-				}
-			}
-			break;
-		case NO_NEIGHBOR_AND_DISCONNECTED:
-			canITransmit = false;
-			break;
-		case NEW_NEIGHBOR_GONE:
-			{
-				/*
-				 * Extracting destAddress and Time from controlMsgName
-				 */
-				char* msgName = strdup(msg->getName());
-
-				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-				msgName = strtok(NULL,":");
-
-				double time = getTimeFromName((const char*) msgName);
-
-				if (recordContactStats){
-					endRecordingContact(addr,time);
-				}
-
-				/** Contacts duration stats				 */
-				recordEndContactStats(addr,time);
-
-				lastBundleProposal.erase(addr);
-
-				neighborsAddress.erase(addr);
-				NBHAddressNbrDelete++;
-			}
-			break;
-	}
-
-	}
-	delete msg;
 }
 
 GeoTraCIMobility *GeoSprayNetwLayer::getGeoTraci()
@@ -720,5 +493,3 @@ GeoTraCIMobility *GeoSprayNetwLayer::getGeoTraci()
 	}
 	return geo;
 }
-
-

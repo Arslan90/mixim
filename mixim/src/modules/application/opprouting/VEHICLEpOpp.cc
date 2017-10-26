@@ -664,7 +664,8 @@ void VEHICLEpOpp::sendDtnMessage()
 void VEHICLEpOpp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
 	if (signalID == mobilityStateChangedSignal) {
-		if ((reRouteAtEnd)&&((seletedVehForReRouting) && (maxNbrOfReRouting == 0) || (currentNbrOfReRouting <= maxNbrOfReRouting))){
+//		if ((reRouteAtEnd)&&((seletedVehForReRouting) && (maxNbrOfReRouting == 0) || (currentNbrOfReRouting <= maxNbrOfReRouting))){
+		if ( ((reRouteAtEnd) && (seletedVehForReRouting)) && ((maxNbrOfReRouting == 0) || (currentNbrOfReRouting <= maxNbrOfReRouting)) ){
 			bool mustReroute = false;
 			std::list<std::string> myRoute = traci->commandGetSingleVehicleRoutes();
 			std::string myRoadId = traci->getRoadId();
@@ -852,7 +853,12 @@ void VEHICLEpOpp::finish() {
 	 * COOL! Crear de datos finales por cada vehiculo al termino de la simulacion.
 	 */
 //	DBG << "logs, finish," <<  traci->getExternalId() <<","<< myApplAddr() <<",vehTimeIn,"<< vehTimeIn <<",vehTimeOut,"<< vehTimeOut << ",RX,"<< vehRx <<","<<std::endl;
-
+	if (seletedVehForReRouting){
+		recordScalar("is Selected vehicle for Rerouting", 1);
+	}
+	if (currentNbrOfReRouting != 0){
+		recordScalar("# Nbr Rerouting", currentNbrOfReRouting);
+	}
 	DtnApplLayer::finish();
 }
 

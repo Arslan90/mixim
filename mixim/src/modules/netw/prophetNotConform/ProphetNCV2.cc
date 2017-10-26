@@ -14,14 +14,6 @@
 //
 
 #include "ProphetNCV2.h"
-#include "multiFunctions.h"
-#include "ApplOppControlInfo.h"
-#include "NetwOppControlInfo.h"
-#include "FindModule.h"
-#include "TraCIMobility.h"
-#include <iomanip>
-#include "Coord.h"
-#include "simtime.h"
 
 Define_Module(ProphetNCV2);
 
@@ -87,8 +79,6 @@ void ProphetNCV2::initialize(int stage)
 	}
 	else if (stage==1){
 		preds.insert(std::pair<LAddress::L3Type,double>(myNetwAddr,1));
-	}else if (stage==2){
-		sectorId = getCurrentSector();
 	}
 }
 
@@ -110,9 +100,7 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
 
 		switch (prophetPkt->getKind()) {
 			case HELLO:
-				if ((prophetPkt->getDestAddr()==LAddress::L3BROADCAST)||(prophetPkt->getDestAddr()==myNetwAddr)){
-					handleHelloMsg(prophetPkt);
-				}
+				handleHelloMsg(prophetPkt);
 				break;
 			case Bundle_Offer:
 				if (prophetPkt->getDestAddr()==myNetwAddr){
@@ -147,106 +135,21 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
     delete msg;
 }
 
-void ProphetNCV2::handleLowerControl(cMessage* msg)
-{
-
-	if (isEquiped) {
-
-	switch (msg->getKind()) {
-		case NEWLY_CONNECTED:
-			canITransmit = true;
-			break;
-		case NEW_NEIGHBOR:
-			{
-				if (canITransmit){
-
-					/*
-					 * Extracting destAddress and Time from controlMsgName
-					 */
-					char* msgName = strdup(msg->getName());
-
-					LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-					msgName = strtok(NULL,":");
-
-					double time = getTimeFromName((const char*) msgName);
-
-					/** Repeated contacts stats			*/
-					recordRecontactStats(addr,time);
-
-					/** Contacts duration stats				*/
-					recordBeginContactStats(addr,time);
-
-					if (recordContactStats){
-						unsigned long contactID = startRecordingContact(addr,time);
-					}
-
-					neighborsAddress.insert(addr);
-				}
-			}
-			break;
-		case NO_NEIGHBOR_AND_DISCONNECTED:
-			canITransmit = false;
-			break;
-		case NEW_NEIGHBOR_GONE:
-			{
-				/*
-				 * Extracting destAddress and Time from controlMsgName
-				 */
-				char* msgName = strdup(msg->getName());
-
-				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-				msgName = strtok(NULL,":");
-
-				double time = getTimeFromName((const char*) msgName);
-
-				if (recordContactStats){
-					endRecordingContact(addr,time);
-				}
-
-				/** Contacts duration stats				 */
-				recordEndContactStats(addr,time);
-
-				lastBundleProposal.erase(addr);
-
-				neighborsAddress.erase(addr);
-			}
-			break;
-	}
-
-	}
-	delete msg;
-}
-
 void ProphetNCV2::handleSelfMsg(cMessage* msg)
 {
 	if (msg == heartBeatMsg){
 		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-		ProphetNCPkt* netwPkt;
-		sendingHelloMsg(netwPkt);
+		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
 }
 
-void ProphetNCV2::handleUpperMsg(cMessage *msg)
+void ProphetNCV2::sendingHelloMsg()
 {
-	assert(dynamic_cast<WaveShortMessage*>(msg));
-	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	storeBundle(upper_msg);
-	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
-	if (it == bundlesReplicaIndex.end()){
-		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
-	}
-}
-
-void ProphetNCV2::sendingHelloMsg(ProphetNCPkt *netwPkt)
-{
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId , getCurrentPos());
-	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>();
+	ProphetNCPkt* netwPkt = new ProphetNCPkt();
+	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	ageDeliveryPreds();
-	predToSend.insert(preds.begin(),preds.end());
+	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
 	netwPkt->setPreds(predToSend);
 	if (withPredLength){
 		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
@@ -274,52 +177,8 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
 {
-//	/*************************** H2H Acks (stored bundles) **********/
-//	std::set<unsigned long> serialOfH2hAck;
-//	for (std::list<WaveShortMessage* >::iterator it = bundles.begin(); it != bundles.end(); it++){
-//		unsigned long wsmSerial = (*it)->getSerial();
-//		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
-//		if (it2 != neighborhoodSession.end()){
-//			NetwSession newSession = it2->second;
-//			if (newSession.getStoredBndl().count(wsmSerial) > 0){
-//				continue;
-//			}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
-//				continue;
-//			}else if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
-//				continue;
-//			}
-//		}
-//		predsIterator myPred = preds.find((*it)->getRecipientAddress());
-//		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
-//		bool addToOffer = false;
-//		if (otherPred != predsOfNode.end()){
-//			if (myPred != preds.end()){
-//				if (myPred->second <= otherPred->second){
-//					addToOffer = true;
-//				}
-//			}else{
-//				addToOffer = true;
-//			}
-//		}
-//		if (addToOffer){
-//			serialOfH2hAck.insert(wsmSerial);
-//		}
-//	}
-//	netwPkt->setH2hAcks(serialOfH2hAck);
-//
 //	/*************************** E2E Acks **********/
-	std::set<unsigned long> storedAck;
-	for (std::set<unsigned long >::iterator it = ackSerial.begin(); it != ackSerial.end(); it++){
-		unsigned long wsmSerial = (*it);
-//		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
-//		if (it2 != neighborhoodSession.end()){
-//			NetwSession newSession = it2->second;
-//			if (newSession.getDelivredToVpaBndl().count(wsmSerial) > 0){
-//				continue;
-//			}
-//		}
-		storedAck.insert(wsmSerial);
-	}
+	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 
 //	/*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long > storedBundle;
@@ -342,24 +201,14 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		}
 		if (addToOffer){
 			unsigned long wsmSerial = (*it)->getSerial();
-//			std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(nodeAddr);
-//			if (it2 != neighborhoodSession.end()){
-//				NetwSession newSession = it2->second;
-//				if (newSession.getStoredBndl().count(wsmSerial) > 0){
-//					continue;
-//				}else if (newSession.getDelivredToBndl().count(wsmSerial) > 0){
-//					continue;
-//				}
-//			}
 			storedBundle.insert(wsmSerial);
 		}
 	}
 
 	if (!(storedBundle.empty() & storedAck.empty())){
 		// if at least one of the two sets is not empty
-		ProphetNCPkt *netwPkt;
-		sectorId = getCurrentSector();
-		netwPkt = prepareNetwPkt(Bundle_Offer,myNetwAddr, nodeType ,nodeAddr, sectorId , getCurrentPos());
+		ProphetNCPkt *netwPkt = new ProphetNCPkt();
+		prepareNetwPkt(netwPkt, Bundle_Offer, nodeAddr);
 		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setH2hAcks(storedBundle);
 		int nbrEntries = storedAck.size()+ storedBundle.size();
@@ -372,39 +221,19 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 
 void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 {
-
+	/*************************** E2E Acks **********/
     std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
     if (!receivedE2eAcks.empty()){
     	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-    	storeAckSerial(receivedE2eAcks);
+    	storeAckSerials(receivedE2eAcks);
     }
+
+    /*************************** H2H Acks (stored bundles) **********/
     std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
     if (!storedBundle.empty()){
     	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
     }
-    /*************************** E2E Acks **********/
-//	std::map<LAddress::L3Type, NetwSession>::iterator it2;
-//	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-//	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
-//	if (it2 == neighborhoodSession.end()){
-//		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
-//		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-//			newSession.insertInDelivredToVpaBndl(*it);
-//		}
-//		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
-//	}else{
-//		NetwSession newSession = it2->second;
-//		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-//			newSession.insertInDelivredToVpaBndl(*it);
-//		}
-//		neighborhoodSession[netwPkt->getSrcAddr()] = newSession;
-//	}
-//
-//	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-//		storeAckSerial(*it);
-//		erase(*it);
-//	}
-	/*************************** H2H Acks (stored bundles) **********/
+
 	std::set<unsigned long> serialStoredBndl;
 	std::set<unsigned long> serialResponseBndl;
 
@@ -426,9 +255,8 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 
 void ProphetNCV2::sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl)
 {
-	ProphetNCPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Response,myNetwAddr, nodeType ,nodeAddr, sectorId , getCurrentPos());
+	ProphetNCPkt *netwPkt = new ProphetNCPkt();
+	prepareNetwPkt(netwPkt, Bundle_Response, nodeAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	int length = sizeof(unsigned long) * (wsmResponseBndl.size())+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -502,9 +330,8 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 {
 	for (std::vector<WaveShortMessage* >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
 		WaveShortMessage* wsm = *it;
-		ProphetNCPkt* bundleMsg;
-		sectorId = getCurrentSector();
-		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,getCurrentPos());
+		ProphetNCPkt* bundleMsg = new ProphetNCPkt();
+		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if (destType == Veh){
@@ -522,12 +349,12 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 	if (wsm != NULL){
 		wsm->setHopCount(wsm->getHopCount()+1);
 
-		std::list<unsigned long> finalReceivedWSM;
+		std::set<unsigned long> finalReceivedWSM;
 
 		if (wsm->getRecipientAddress() == myNetwAddr){
 			netwPkt->encapsulate(wsm);
 			sendUp(netwPkt->dup());
-			finalReceivedWSM.push_back(wsm->getSerial());
+			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
@@ -552,15 +379,11 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 	}
 }
 
-void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd)
+void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd)
 {
-	ProphetNCPkt *netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType ,destAddr, sectorId , getCurrentPos());
-	std::set<unsigned long> serialOfE2EAck;
-	for (std::list<unsigned long >::iterator it = wsmFinalDeliverd.begin(); it != wsmFinalDeliverd.end(); it++){
-		serialOfE2EAck.insert(*it);
-	}
+	ProphetNCPkt* netwPkt = new ProphetNCPkt();
+	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
 	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -571,45 +394,7 @@ void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 {
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-
-	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-		storeAckSerial(*it);
-		erase(*it);
-	}
-}
-
-
-ProphetNCPkt *ProphetNCV2::prepareProphet(short  kind, LAddress::L3Type srcAddr,LAddress::L3Type destAddr, std::list<BundleMeta> *meta, std::map<LAddress::L3Type,double> *preds, WaveShortMessage *msg)
-{
-
-	int realPktLength = 0, msgSize = 0, metaLength = 0, predsLength = 0;
-	ProphetNCPkt *prophetMsg = new ProphetNCPkt();
-	prophetMsg->setKind(kind);
-	prophetMsg->setSrcAddr(srcAddr);
-	prophetMsg->setDestAddr(destAddr);
-
-	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
-	if (meta!=NULL){
-		prophetMsg->setBndlmeta(*meta);
-		metaLength = (sizeof(BundleMeta)) * meta->size();
-		realPktLength += metaLength;
-	}
-	if (preds!=NULL){
-		prophetMsg->setPreds(*preds);
-		predsLength = (sizeof(int ) + sizeof(double)) * preds->size();
-		realPktLength+= predsLength;
-	}
-	if (msg!=NULL){
-		prophetMsg->encapsulate(msg);
-		msgSize = msg->getBitLength();
-	}
-
-	realPktLength *= 8;
-	realPktLength += msgSize;
-
-	prophetMsg->setBitLength(realPktLength);
-
-	return prophetMsg;
+	storeAckSerials(finalDelivredToBndl);
 }
 
 void ProphetNCV2::finish()
@@ -959,59 +744,14 @@ void ProphetNCV2::initAllClassifier()
 	}
 }
 
-ProphetNCPkt *ProphetNCV2::prepareNetwPkt(short  kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, Coord currentPos)
-{
-	int realPktLength = 0;
-	ProphetNCPkt *myNetwPkt = new ProphetNCPkt();
-	myNetwPkt->setKind(kind);
-	myNetwPkt->setSrcAddr(srcAddr);
-	myNetwPkt->setSrcType(srcType);
-	myNetwPkt->setDestAddr(destAddr);
-	myNetwPkt->setVpaSectorId(vpaSectorId);
-	myNetwPkt->setCurrentPos(currentPos);
-
-
-	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
-	realPktLength *= 8;
-
-	myNetwPkt->setBitLength(realPktLength);
-
-	return myNetwPkt;
-}
-
-void ProphetNCV2::storeAckSerial(unsigned long  serial)
-{
-	if (ackSerial.count(serial) == 0){
-		ackSerial.insert(serial);
-	}
-}
-
-void ProphetNCV2::storeAckSerial(std::set<unsigned long > setOfSerials)
-{
-    for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-    	storeAckSerial(*it);
-    	erase(*it);
-    }
-}
-
 bool ProphetNCV2::erase(unsigned long serial)
 {
-	bool found = false;
+	bool found = DtnNetwLayer::erase(serial);
 
-	WaveShortMessage* wsm = NULL;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		if (serial == (*it)->getSerial()){
-			wsm = (*it);
-			break;
-		}
+	if (found){
+		bundlesReplicaIndex.erase(serial);
 	}
 
-	if (wsm !=NULL){
-		found = DtnNetwLayer::erase(wsm);
-		if (found){
-			bundlesReplicaIndex.erase(serial);
-		}
-	}
 	return found;
 }
 
@@ -1184,8 +924,7 @@ void ProphetNCV2::ageDeliveryPreds()
 void ProphetNCV2::update(ProphetNCPkt *prophetPkt)
 {
 	updateDeliveryPredsFor(prophetPkt->getSrcAddr());
-	updateTransitivePreds(prophetPkt->getSrcAddr(),prophetPkt->getPreds());
-	recordPredsStats();
+	partialUpdate(prophetPkt);
 }
 
 void ProphetNCV2::partialUpdate(ProphetNCPkt *prophetPkt)

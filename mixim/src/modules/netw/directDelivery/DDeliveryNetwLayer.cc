@@ -14,12 +14,6 @@
 // 
 
 #include "DDeliveryNetwLayer.h"
-#include "FindModule.h"
-#include "VEHICLEpOpp.h"
-#include "VPApOpp.h"
-#include "algorithm"
-#include "list"
-#include "limits"
 
 Define_Module(DDeliveryNetwLayer);
 
@@ -28,9 +22,6 @@ void DDeliveryNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		NBHAddressNbrInsert  = 0;
-		NBHAddressNbrDelete  = 0;
-
 		totalBundlesReceived = 0;
 		bndlSentToVPA = 0;
 		totalBndlSentToVPA = 0;
@@ -39,10 +30,6 @@ void DDeliveryNetwLayer::initialize(int stage)
 
 		meetVPA = false;
 
-	}else if (stage == 1){
-
-	}else if (stage == 2){
-		sectorId = getCurrentSector();
 	}
 }
 
@@ -81,30 +68,13 @@ void DDeliveryNetwLayer::handleSelfMsg(cMessage *msg)
 {
 	if (msg == heartBeatMsg){
 		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-		GeoDtnNetwPkt* netwPkt;
-		sendingHelloMsg(netwPkt);
+		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
-	}
-}
-
-void DDeliveryNetwLayer::handleUpperMsg(cMessage *msg)
-{
-	assert(dynamic_cast<WaveShortMessage*>(msg));
-	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	storeBundle(upper_msg);
-	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
-	if (it == bundlesReplicaIndex.end()){
-		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
 	}
 }
 
 void DDeliveryNetwLayer::finish()
 {
-	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
-	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
-	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
-	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
-
 	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
 
 	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
@@ -113,10 +83,10 @@ void DDeliveryNetwLayer::finish()
 	recordAllScalars();
 }
 
-void DDeliveryNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt)
+void DDeliveryNetwLayer::sendingHelloMsg()
 {
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(HELLO,myNetwAddr, nodeType ,LAddress::L3BROADCAST, sectorId ,LAddress::L3BROADCAST);
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
 }
@@ -195,9 +165,8 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 
 	for (std::vector<WaveShortMessage* >::iterator it = sentWSM.begin(); it != sentWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
-		GeoDtnNetwPkt* bundleMsg;
-		sectorId = getCurrentSector();
-		bundleMsg = prepareNetwPkt(Bundle,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
+		GeoDtnNetwPkt* bundleMsg = new GeoDtnNetwPkt();
+		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 	}
@@ -219,12 +188,12 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		wsm->setHopCount(wsm->getHopCount()+1);
 		totalBundlesReceived++;
 
-		std::list<unsigned long> finalReceivedWSM;
+		std::set<unsigned long> finalReceivedWSM;
 
 		if (wsm->getRecipientAddress() == myNetwAddr){
 			netwPkt->encapsulate(wsm);
 			sendUp(netwPkt->dup());
-			finalReceivedWSM.push_back(wsm->getSerial());
+			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
@@ -241,15 +210,11 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 	}
 }
 
-void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd)
+void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd)
 {
-	GeoDtnNetwPkt* netwPkt;
-	sectorId = getCurrentSector();
-	netwPkt = prepareNetwPkt(Bundle_Ack,myNetwAddr, nodeType, destAddr, sectorId ,LAddress::L3BROADCAST);
-	std::set<unsigned long> serialOfE2EAck;
-	for (std::list<unsigned long >::iterator it = wsmFinalDeliverd.begin(); it != wsmFinalDeliverd.end(); it++){
-		serialOfE2EAck.insert(*it);
-	}
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
 	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -260,155 +225,7 @@ void DDeliveryNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-
-	for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-		storeAckSerial(*it);
-		erase(*it);
-		ackReceivedPerVPA.insert(*it);
-	}
+	storeAckSerials(finalDelivredToBndl);
 }
 
 ////////////////////////////////////////// Others methods /////////////////////////
-
-GeoDtnNetwPkt *DDeliveryNetwLayer::prepareNetwPkt(short  kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr)
-{
-	int realPktLength = 0;
-	GeoDtnNetwPkt *myNetwPkt = new GeoDtnNetwPkt();
-	myNetwPkt->setKind(kind);
-	myNetwPkt->setSrcAddr(srcAddr);
-	myNetwPkt->setSrcType(srcType);
-	myNetwPkt->setDestAddr(destAddr);
-	myNetwPkt->setVpaSectorId(vpaSectorId);
-	myNetwPkt->setVpaAddr(vpaAddr);
-
-
-	realPktLength = sizeof(kind)+sizeof(srcAddr)+sizeof(destAddr)+sizeof(unsigned long) * 2 + sizeof(int);
-	realPktLength *= 8;
-
-	myNetwPkt->setBitLength(realPktLength);
-
-	return myNetwPkt;
-}
-
-void DDeliveryNetwLayer::storeAckSerial(unsigned long  serial)
-{
-	if (ackSerial.count(serial) == 0){
-		ackSerial.insert(serial);
-	}
-}
-
-void DDeliveryNetwLayer::storeAckSerial(std::set<unsigned long > setOfSerials)
-{
-    for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-    	storeAckSerial(*it);
-    	erase(*it);
-    }
-}
-
-bool DDeliveryNetwLayer::erase(unsigned long serial)
-{
-	bool found = false;
-
-	WaveShortMessage* wsm = NULL;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		if (serial == (*it)->getSerial()){
-			wsm = (*it);
-			break;
-		}
-	}
-
-	if (wsm !=NULL){
-		found = DtnNetwLayer::erase(wsm);
-	}
-	return found;
-}
-
-bool DDeliveryNetwLayer::exist(unsigned long serial)
-{
-	bool found = false;
-
-	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
-		innerIndexMap innerMap = it->second;
-		for (innerIndexIterator it2 = innerMap.begin(); it2 != innerMap.end(); it2++){
-			if (serial == it2->first){
-				found = true;
-				break;
-			}
-		}
-	}
-	return found;
-}
-
-void DDeliveryNetwLayer::handleLowerControl(cMessage *msg)
-{
-	if (isEquiped) {
-
-	switch (msg->getKind()) {
-		case NEWLY_CONNECTED:
-			canITransmit = true;
-			break;
-		case NEW_NEIGHBOR:
-			{
-				if (canITransmit){
-
-					/*
-					 * Extracting destAddress and Time from controlMsgName
-					 */
-					char* msgName = strdup(msg->getName());
-
-					LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-					msgName = strtok(NULL,":");
-
-					double time = getTimeFromName((const char*) msgName);
-
-					/** Repeated contacts stats			*/
-					recordRecontactStats(addr,time);
-
-					/** Contacts duration stats				*/
-					recordBeginContactStats(addr,time);
-
-					if (recordContactStats){
-						unsigned long contactID = startRecordingContact(addr,time);
-					}
-
-					neighborsAddress.insert(addr);
-					NBHAddressNbrInsert++;
-				}
-			}
-			break;
-		case NO_NEIGHBOR_AND_DISCONNECTED:
-			canITransmit = false;
-			break;
-		case NEW_NEIGHBOR_GONE:
-			{
-				/*
-				 * Extracting destAddress and Time from controlMsgName
-				 */
-				char* msgName = strdup(msg->getName());
-
-				LAddress::L3Type addr = getAddressFromName((const char*)strtok(msgName,":"));
-
-				msgName = strtok(NULL,":");
-
-				double time = getTimeFromName((const char*) msgName);
-
-				if (recordContactStats){
-					endRecordingContact(addr,time);
-				}
-
-				/** Contacts duration stats				 */
-				recordEndContactStats(addr,time);
-
-				lastBundleProposal.erase(addr);
-
-				neighborsAddress.erase(addr);
-				NBHAddressNbrDelete++;
-			}
-			break;
-	}
-
-	}
-	delete msg;
-}
-

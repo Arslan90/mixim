@@ -17,31 +17,31 @@
 #define __MIXIM_DTNNETWLAYER_H_
 
 #include <omnetpp.h>
+#include "cmodule.h"
+#include "cmessage.h"
 #include <cassert>
 
 #include <map>
 #include <set>
 #include <iterator>
+#include <list>
+#include "fstream"
 
+#include "TraCIMobility.h"
 #include "BaseNetwLayer.h"
-#include "WaveShortMessage_m.h"
-#include "NetwPkt_m.h"
-#include "cmessage.h"
 #include "NetwControlInfo.h"
-#include "ArpInterface.h"
-#include "SimpleAddress.h"
-#include "cmodule.h"
+
+#include "WaveShortMessage_m.h"
+#include "DtnNetwPkt_m.h"
 #include "Mac80211Pkt_m.h"
-#include "Prophet_m.h"
+
 #include "BundleMeta.h"
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
-#include "iterator"
-#include "BaseMobility.h"
-#include "fstream"
 #include "NetwSession.h"
 #include "NetwRoute.h"
-#include "TraCIMobility.h"
+
+
 
 const double maxDbl = std::numeric_limits<double>::max();
 
@@ -72,6 +72,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	int NBHTableNbrInsert;
 	int NBHTableNbrDelete;
+	int NBHAddressNbrInsert;
+	int NBHAddressNbrDelete;
 
 	enum NodeType {
 		VPA = 0x0A,
@@ -183,9 +185,9 @@ class DtnNetwLayer : public BaseNetwLayer {
     /**
   	 * Size of acks structure
   	 */
-    int ackStructureSize;
+    unsigned int ackStructureSize;
     /** Size of the WMS Storage structure */
-    int bundlesStructureSize;
+    unsigned int bundlesStructureSize;
     /** Fifo structure for WMS Storage*/
     std::list<WaveShortMessage*> bundles;
     /** Specific map with K as recipient address of WSMessage &
@@ -219,11 +221,10 @@ class DtnNetwLayer : public BaseNetwLayer {
     cMessage *restartIEP;
     std::set<LAddress::L3Type> neighborsAddress;
     bool withConnectionRestart;
-    BaseMobility *mobility;
     simsignal_t receiveL3SignalId;
     std::set<unsigned long > bundleSentPerVPA;
     std::set<unsigned long > ackReceivedPerVPA;
-    bool meetVPA;
+
     long nbrNeighors;
     long nbrCountForMeanNeighbors;
     bool hadBundles;
@@ -232,6 +233,12 @@ class DtnNetwLayer : public BaseNetwLayer {
     long receivedHWICVPA;
     long receivedBWICVPA;
     long receivedAWICVPA;
+
+
+    bool meetVPA;
+
+	// E2E Acks serial
+	std::set<unsigned long > ackSerial;
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -289,29 +296,6 @@ class DtnNetwLayer : public BaseNetwLayer {
 		return ( first_TTL > second_TTL );
 	}
 
-//	struct comparatorRCAsc {
-//		bool operator() (std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
-//		{
-//		  if (i.second != j.second){
-//			  return (i.second<j.second);
-//		  }else {
-//			  return (i.first->getTimestamp()>j.first->getTimestamp());
-//		  }
-//
-//		}
-//	} comparatorRCAscObject;
-//
-//	// comparison, not case sensitive.
-//	struct comparatorRLAsc {
-//		bool operator() (WaveShortMessage* first_TTL, WaveShortMessage* second_TTL)
-//		{
-//			simtime_t i = first_TTL->getTimestamp();
-//			simtime_t j = second_TTL->getTimestamp();
-//			return ( i <= j );
-//		}
-//	} comparatorRLAscObject;
-
-
     /*******************************************************************
 	** 							Methods section
 	********************************************************************/
@@ -319,11 +303,7 @@ public:
     virtual void initialize(int stage);
     virtual void finish();
     virtual bool forceRestartIEP(LAddress::L3Type addr);
-    virtual bool hasBundlesToSend();
-    virtual bool resetStatPerVPA();
-    unsigned long nbrBundles() const;
-    unsigned long  nbrAckReceivedPerVpa() const;
-    unsigned long  nbrBundleSentPerVpa() const;
+    virtual void resetStatPerVPA();
     std::string  BundleSentPerVpaSerialToString() const;
     bool isMeetVpa() const;
     long getNbrCountForMeanNeighbors() const;
@@ -346,16 +326,7 @@ public:
         return receivedHWICVPA;
     }
 
-    void setReceivedAwicvpa(long  receivedAwicvpa)
-    {
-        receivedAWICVPA = receivedAwicvpa;
-    }
-
   protected:
-  	/**
-  	 * Function that define offered bundles for the BundleOffer sub-phase of IEP Phase
-  	 */
-  	virtual std::vector<std::list<BundleMeta> >defineBundleOffer(NetwPkt *netwPkt);
 
   	/**
   	 * @brief Function that check if the WaveShortMessage identified by
@@ -379,9 +350,10 @@ public:
 
   	/**
   	 * @brief Function that erase the WaveShortMessage identified by
-  	 * @param bndlMeta
+  	 * it's serial number @param serial, makes call of getStoredWSMFromSerial
+  	 * then erase with *msg
   	 */
-  	virtual bool erase(BundleMeta bndlMeta);
+  	virtual bool erase(unsigned long serial);
 
   	/**
   	 * @brief Function that check if an ack  identified by
@@ -407,6 +379,10 @@ public:
   	virtual void storeBundle(WaveShortMessage *msg);
 
   	virtual void storeACK(BundleMeta meta);
+
+  	virtual void storeAckSerial(unsigned long serial);
+
+  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
 
   	/*
   	 * Convert a string to L3Address
@@ -434,6 +410,9 @@ public:
 
   	/** @brief Handle control messages from lower layer */
   	virtual void handleUpperControl(cMessage* msg);
+
+  	/** @brief Generic method to prepareNetwPkt */
+  	virtual void prepareNetwPkt(DtnNetwPkt* myNetwPkt, short  kind, LAddress::L3Type destAddr);
 
   	/*
   	 * Function to decide if we have to restart IEP
@@ -496,9 +475,6 @@ public:
 
   	virtual Coord getCurrentPos();
 
-  	/** Build KnownNeighbors set based on neighborhood table*/
-  	std::set<LAddress::L3Type> getKnownNeighbors();
-
   	virtual void updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry);
 
   	virtual void updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle);
@@ -506,6 +482,8 @@ public:
   	virtual void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks);
 
   	void sendDown(cMessage* msg);
+
+  	virtual WaveShortMessage* getStoredWSMFromSerial(unsigned long serial);
   public:
 	/*
 	 * Getter for isEquiped boolean

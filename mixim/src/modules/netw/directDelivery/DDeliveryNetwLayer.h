@@ -16,10 +16,8 @@
 #ifndef __MIXIM_DDELIVERYNETWLAYER_H_
 #define __MIXIM_DDELIVERYNETWLAYER_H_
 
-#include <omnetpp.h>
 #include "DtnNetwLayer.h"
 #include "GeoDtnNetwPkt_m.h"
-#include "set"
 
 /**
  * TODO - Generated class
@@ -30,15 +28,7 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 ** 							Variables section
 ********************************************************************/
   protected:
-	int NBHAddressNbrInsert;
-	int NBHAddressNbrDelete;
-
 	int totalBundlesReceived;
-
-	bool meetVPA;
-
-	// E2E Acks serial
-	std::set<unsigned long > ackSerial;
 
 	int bndlSentToVPA;
 
@@ -46,30 +36,6 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 
 	int totalBndlSentToVPA;
 
-	/**
-	 * Comparator used to sort Bundles to sent when using RC Asc strategy
-	 */
-	struct comparatorRCAsc {
-		bool operator() (std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
-		{
-		  if (i.second != j.second){
-			  return (i.second<j.second);
-		  }else {
-			  return (i.first->getTimestamp()>j.first->getTimestamp());
-		  }
-
-		}
-	} comparatorRCAscObject;
-
-	// comparison, not case sensitive.
-	struct comparatorRLAsc {
-		bool operator() (WaveShortMessage* first_TTL, WaveShortMessage* second_TTL)
-		{
-			simtime_t i = first_TTL->getTimestamp();
-			simtime_t j = second_TTL->getTimestamp();
-			return ( i <= j );
-		}
-	} comparatorRLAscObject;
 /*******************************************************************
 ** 							Methods section
 ********************************************************************/
@@ -81,22 +47,17 @@ class DDeliveryNetwLayer : public DtnNetwLayer
     virtual void finish();
 
   protected:
-  	/** @brief Handle messages from upper layer */
-  	virtual void handleUpperMsg(cMessage* msg);
 
   	/** @brief Handle messages from lower layer */
   	virtual void handleLowerMsg(cMessage* msg);
 
   	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
-
-  	/** @brief Handle control messages from lower layer */
-  	virtual void handleLowerControl(cMessage* msg);
 //
 //  	/** @brief Handle control messages from lower layer */
 //  	virtual void handleUpperControl(cMessage* msg);
 
-  	void sendingHelloMsg(GeoDtnNetwPkt *netwPkt);
+  	void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
@@ -104,22 +65,11 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 
-	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long > wsmFinalDeliverd);
+	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd);
 
   	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
 
 	////////////////////////// Others Methods //////////////////////
-
-  	/** Function for preparing GeoDtnNetwPkt */
-  	GeoDtnNetwPkt* prepareNetwPkt(short kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, LAddress::L3Type vpaAddr);
-
-  	void storeAckSerial(unsigned long serial);
-
-  	void storeAckSerial(std::set<unsigned long> setOfSerials);
-
-  	bool erase(unsigned long serial);
-
-  	bool exist(unsigned long serial);
 };
 
 #endif

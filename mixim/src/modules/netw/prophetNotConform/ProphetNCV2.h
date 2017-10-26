@@ -18,39 +18,9 @@
 
 #ifndef PROPHETNCV2_H_
 #define PROPHETNCV2_H_
-//#include <cassert>
-//
-//#include <cobject.h>
-//#include <iostream>
-//#include <map>
-//#include <list>
-//#include <iterator>
-//#include <math.h>
-//#include <algorithm>
-//
-//#include "BaseNetwLayer.h"
-//#include "WaveShortMessage_m.h"
-//#include "NetwPkt_m.h"
-//#include "cmessage.h"
-//#include "NetwControlInfo.h"
-//#include "ArpInterface.h"
-//#include "SimpleAddress.h"
-//#include "cmodule.h"
-//#include "Mac80211Pkt_m.h"
-//#include "Prophet_m.h"
-//#include "BundleMeta.h"
-//#include "SimpleContactStats.h"
-//#include "ClassifiedContactStats.h"
-//#include "iterator"
-//#include "DtnNetwLayer.h"
 
-#include <algorithm>
-#include "cmodule.h"
-#include "cmessage.h"
-#include <omnetpp.h>
 #include "DtnNetwLayer.h"
 #include "ProphetNCPkt_m.h"
-#include "fstream"
 #include "iostream"
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
@@ -86,15 +56,6 @@ public:
 		Bundle_Ack = 0xD0,
 		Bundle = 0xFF,
 	};
-//	/**
-//	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
-//	 */
-//	enum prophetNetwControlKinds {
-//		NEWLY_CONNECTED = LAST_BASE_NETW_CONTROL_KIND,
-//		NEW_NEIGHBOR = NEWLY_CONNECTED + 10,
-//		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
-//		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
-//	};
 
 protected:
 
@@ -156,79 +117,16 @@ private:
 	 * How many seconds one time unit is when calculating aging of
 	 * delivery predictions. Should be tweaked for the scenario.*/
 	int secondsInTimeUnit;
-//
-//	/**
-//	 * Boolean for the activation of PRoPHET ACK mecanism
-//	 */
-//	bool withAck;
-//
-//	/**
-//	 * Map structures for ACKs
-//	 */
-//	std::list<BundleMeta> acks;
-//
-//	bool withTTL;
-//	int ttl;
-//	int nbrDeletedWithTTL;
-//
-//	/**
-// 	 * Specific map with K as serial of WSM &
-//	 * V as a bndl_meta struct.
-//	 * This structure simplify the search of ACKs
-//	 */
-//	std::map<unsigned long,BundleMeta> acksIndex;
-//
-//	/**
-//	 * Size of acks structure
-//	 */
-//	int ackStructureSize;
-//
+
 	/** delivery predictabilities */
 	std::map<LAddress::L3Type, double> preds;
-//	//std::map<DTNHost, double> preds;
-//
+
 	/** last encouter timestamp (sim)time */
 	std::map<LAddress::L3Type, double> lastEncouterTime;
-//	//std::map<DTNHost, double> lastEncouterTime;
-//
+
 	/** last delivery predictability update (sim)time */
 	double lastAgeUpdate;
-//
-//	/** Size of the WMS Storage structure */
-//	int bundlesStructureSize;
-//
-//	/** Fifo structure for WMS Storage*/
-//	std::list<WaveShortMessage*> bundles;
-//
-//	/** Specific map with K as recipient address of WSMessage &
-//	 * V as a pointer to WSMessage.
-//	 * This structure simplify the search of WSMessage destinated
-//	 * to a specific node
-//	 * */
-//	std::map<LAddress::L3Type,innerIndexMap > bundlesIndex;
-//
-//	/** Boolean to verify if the transmission is possible */
-//	bool canITransmit;
-//
-//	/**
-//	 * Equiped vehicle in pourcentage, by default all vehicles
-//	 * are equiped (100% = 1)
-//	 */
-//	double equipedVehPc;
-//
-//	/**
-//	 * Determine if this vehicle is equiped or not
-//	 */
-//	bool isEquiped;
-//
-//	int maxPcktLength;
-//
-//	bool dontFragment;
-//
-//	int dataLength;
-//
-//	std::vector<double> cutPoitsCDF;
-//
+
 	/*
 	 * Threshold for Interval of time between first and last preds
 	 */
@@ -242,53 +140,18 @@ private:
 	** 							Metrics variables section
 	********************************************************************/
 
-//	bool recordContactStats;
-//
-//	long nbrL3Sent;
-//	long nbrL3Received;
-//
 	cOutVector nbrPredsVector;
 	cOutVector predsMean;
 	cOutVector predsMax;
 	cOutVector predsMin;
 	cOutVector predsVariance;
 	cOutVector predForVPA;
-//
-//	cOutVector *predsMeanCommunities;
 
 	std::map<LAddress::L3Type, cOutVector* > predsForRC;
 
 	cOutVector nbrContactsForRCVect;
 	std::map<LAddress::L3Type, int > nbrContactsForRC;
-//
-//	double sumOfContactDur;
-//
-//	int nbrContacts;
-//
-//	cOutVector contactDurVector;
-//
-//	std::map<LAddress::L3Type, double> contacts;
-//
-//	std::map<LAddress::L3Type, double> endContactTime;
-//
-//	std::map<LAddress::L3Type, std::set<SimpleContactStats> > simpleContacts;
-//
-//	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
-//
-//	std::map<unsigned long, SimpleContactStats> indexContactStats;
-//
-//	ClassifiedContactStats Global;
-//	bool withGlobal;
-//	bool withCDFForGlobal;
-//
-//	ClassifiedContactStats Succ;
-//	bool withSucc;
-//	bool withCDFForSucc;
-//
-//	ClassifiedContactStats Fail;
-//	bool withFail;
-//	bool withCDFForFail;
-//
+
 	ClassifiedContactStats FailRIB;
 	bool withFailRIB;
 	bool withCDFForFailRIB;
@@ -308,13 +171,7 @@ private:
 	ClassifiedContactStats FailBndlAck;
 	bool withFailBndlAck;
 	bool withCDFForFailBndlAck;
-//
-//	double sumOfInterContactDur;
-//
-//	int nbrRecontacts;
-//
-//	cOutVector intercontactDurVector;
-//
+
 	/**
 	 * Contact between 2 nodes, where the initiator role had received packets of kind Bundle
 	 */
@@ -329,21 +186,12 @@ private:
 	 * Map for the state of the initator role during contact
 	 */
 	std::map<LAddress::L3Type, Prophetv2MessageKinds> contactState;
-//
-//	int deletedBundlesWithAck;
-//
-//	int demandedAckedBundle;
-//
-//	int bundlesReceived;
-
-	int nbrSimpleContactStats;
 
 	/**
 	 * Stats for repeated contacts only
 	 */
 
 	std::map<LAddress::L3Type, int > nbrRepeatedContact;
-	cLongHistogram histMaxRepeatedContact;
 
 	int maxForRC;
 
@@ -353,7 +201,6 @@ private:
 	std::map<int, std::list<double> > contactDurForRC;
 
 	std::map<LAddress::L3Type, std::list<double> > contactDurByAddr;
-	cLongHistogram contactDurHist;
 
 	/*
 	 * Intercontact duration for RepeatedContact (RC)
@@ -361,42 +208,11 @@ private:
 	std::map<int, std::list<double> > interContactDurForRC;
 
 	std::map<LAddress::L3Type, std::list<double> > interContactDurByAddr;
-	cLongHistogram interContactDurHist;
-
-	cDoubleHistogram interContactDuration;
 
 	/*
 	 * Bool withEMethod standing for erroneous method, in order to evaluate the impact of the previous error
 	 */
 	bool withEMethod;
-
-	// E2E Acks serial
-	std::set<unsigned long > ackSerial;
-
-	/**
-	 * Comparator used to sort Bundles to sent when using RC Asc strategy
-	 */
-	struct comparatorRCAsc {
-		bool operator() (std::pair<WaveShortMessage*, int> i,std::pair<WaveShortMessage*, int> j)
-		{
-		  if (i.second != j.second){
-			  return (i.second<j.second);
-		  }else {
-			  return (i.first->getTimestamp()>j.first->getTimestamp());
-		  }
-
-		}
-	} comparatorRCAscObject;
-
-	// comparison, not case sensitive.
-	struct comparatorRLAsc {
-		bool operator() (WaveShortMessage* first_TTL, WaveShortMessage* second_TTL)
-		{
-			simtime_t i = first_TTL->getTimestamp();
-			simtime_t j = second_TTL->getTimestamp();
-			return ( i <= j );
-		}
-	} comparatorRLAscObject;
 
 	/*******************************************************************
 	** 							end of metrics variables section
@@ -424,24 +240,11 @@ private:
 	/** Function for partially updating & exchanging probabilities */
 	void partialUpdate(ProphetNCPkt *prophetPkt);
 
-	/** Function for preparing Prophet message */
-	ProphetNCPkt* prepareNetwPkt(short kind, LAddress::L3Type srcAddr, int srcType, LAddress::L3Type destAddr, int vpaSectorId, Coord currentPos);
-
-	/** Function for preparing Prophet message */
-	ProphetNCPkt* prepareProphet(short kind, LAddress::L3Type srcAddr, LAddress::L3Type destAddr,
-				std::list<BundleMeta>* meta = NULL, std::map<LAddress::L3Type,double>* preds = NULL, WaveShortMessage* msg = NULL);
-
-	/** @brief Handle messages from upper layer */
-	virtual void handleUpperMsg(cMessage* msg);
-
 	/** @brief Handle messages from lower layer */
 	virtual void handleLowerMsg(cMessage* msg);
 
 	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
-
-	/** @brief Handle control messages from lower layer */
-	virtual void handleLowerControl(cMessage* msg);
 
 //	/** @brief Handle control messages from lower layer */
 //	virtual void handleUpperControl(cMessage* msg);
@@ -466,7 +269,7 @@ private:
 
 	void recordAllClassifier();
 
-  	void sendingHelloMsg(ProphetNCPkt *netwPkt);
+  	void sendingHelloMsg();
 
   	void handleHelloMsg(ProphetNCPkt *netwPkt);
 
@@ -482,13 +285,9 @@ private:
 
   	void handleBundleMsg(ProphetNCPkt *netwPkt);
 
-	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::list<unsigned long> wsmFinalDeliverd);
+	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd);
 
   	void handleBundleAckMsg(ProphetNCPkt *netwPkt);
-
-  	void storeAckSerial(unsigned long serial);
-
-  	void storeAckSerial(std::set<unsigned long> setOfSerials);
 
   	bool erase(unsigned long serial);
 
