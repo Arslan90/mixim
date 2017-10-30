@@ -104,14 +104,14 @@ void DDeliveryNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		/*************************** Sending Bundle Msg **********/
 		if (nodeType == Veh){
 			if (netwPkt->getSrcType() == VPA){
-				sendingBundleMsg(netwPkt->getSrcAddr());
+				sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType());
 				vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
 			}
 		}
 	}
 }
 
-void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
+void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType)
 {
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
@@ -169,6 +169,9 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr)
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
+		if (destType == Veh){
+			bundlesReplicaIndex[(*it)->getSerial()]++;
+		}
 	}
 
 	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){

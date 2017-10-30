@@ -61,7 +61,7 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsg(LAddress::L3Type destAddr);
+  	void sendingBundleMsg(LAddress::L3Type destAddr, int destType);
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 

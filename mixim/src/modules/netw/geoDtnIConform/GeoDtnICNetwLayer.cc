@@ -14,12 +14,7 @@
 // 
 
 #include "GeoDtnICNetwLayer.h"
-//#include "FindModule.h"
-//#include "VEHICLEpOpp.h"
-//#include "VPApOpp.h"
 #include "algorithm"
-//#include "list"
-//#include "Coord.h"
 
 Define_Module(GeoDtnICNetwLayer);
 
@@ -417,7 +412,7 @@ void GeoDtnICNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(), finalDelivredToBndl);
+	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 	storeAckSerials(finalDelivredToBndl);
 
 	std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();

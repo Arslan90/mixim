@@ -136,6 +136,9 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 }
 
 void PyGraphServerManager::finish(){
+	// Resenting signals before closing finishing and clearing all data
+	emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
+	emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
 	finishConnection();
 }
 

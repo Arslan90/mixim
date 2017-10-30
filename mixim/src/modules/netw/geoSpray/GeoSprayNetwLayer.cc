@@ -241,10 +241,11 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 
 		// step 2 : Reordering bundle list
 		std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
-		std::vector<unsigned long > oldWSM;
+
 
 		// step 3 : Sending bundles with NbrReplica to transfer
 		std::vector<WaveShortMessage* > sentWSM;
+		std::vector<unsigned long > oldWSM;
 		for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 			WaveShortMessage* wsm = it->first;
 			if (ackSerial.count(wsm->getSerial()) > 0) {continue;}

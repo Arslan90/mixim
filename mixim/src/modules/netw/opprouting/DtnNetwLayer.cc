@@ -1103,7 +1103,7 @@ void DtnNetwLayer::DefineNodeType()
 
 int DtnNetwLayer::getCurrentSector()
 {
-	int currentSector = -1;
+//	int currentSector = -1;
 	switch (nodeType) {
 		case Veh:
 			traci = TraCIMobilityAccess().get(getParentModule());
@@ -1117,7 +1117,8 @@ int DtnNetwLayer::getCurrentSector()
 			opp_error("DtnNetwLayer::getCurrentSector() - Unable to define CurrentSector due to unknown node type");
 			break;
 	}
-	return currentSector;
+//	return currentSector;
+	return sectorId;
 }
 
 Coord DtnNetwLayer::getCurrentPos()
