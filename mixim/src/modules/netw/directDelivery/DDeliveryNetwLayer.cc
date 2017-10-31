@@ -22,14 +22,7 @@ void DDeliveryNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		totalBundlesReceived = 0;
-		bndlSentToVPA = 0;
-		totalBndlSentToVPA = 0;
-
-		firstSentToVPA = false;
-
-		meetVPA = false;
-
+		// Nothing to do
 	}
 }
 
@@ -40,28 +33,31 @@ void DDeliveryNetwLayer::handleLowerMsg(cMessage *msg)
 
     coreEV << "Receiving GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Addressed to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 
-    switch (netwPkt->getKind()) {
-		case HELLO:
-			handleHelloMsg(netwPkt);
-			break;
-		case Bundle_Ack:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleAckMsg(netwPkt);
-			}
-			break;
-		case Bundle:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleMsg(netwPkt);
-			}
-			break;
-		default:
-			break;
+   	if (isEquiped){
+		switch (netwPkt->getKind()) {
+			case HELLO:
+				handleHelloMsg(netwPkt);
+				break;
+			case Bundle:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleMsg(netwPkt);
+				}
+				break;
+			case Bundle_Ack:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleAckMsg(netwPkt);
+				}
+				break;
+			default:
+				opp_error("Unknown or unsupported DtnNetwMsgKinds when calling HandleLowerMsg()");
+				break;
+		}
 	}
 
     updatingL3Received();
 
     delete netwPkt;
-    delete m;
+    delete msg;
 }
 
 void DDeliveryNetwLayer::handleSelfMsg(cMessage *msg)
@@ -75,11 +71,6 @@ void DDeliveryNetwLayer::handleSelfMsg(cMessage *msg)
 
 void DDeliveryNetwLayer::finish()
 {
-	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
-
-	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
-	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
-
 	recordAllScalars();
 }
 
@@ -100,7 +91,6 @@ void DDeliveryNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		/*************************** Handling Hello Msg **********/
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-
 		/*************************** Sending Bundle Msg **********/
 		if (nodeType == Veh){
 			if (netwPkt->getSrcType() == VPA){
@@ -128,55 +118,21 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 	}
 
 	// step 2 : Reordering bundle list
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+	// step 3 : Filtering bundle to send
 
-	// step 3 : Sending bundles with NbrReplica to transfer
-	std::vector<WaveShortMessage* > sentWSM;
-	std::vector<unsigned long > oldWSM;
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
-		WaveShortMessage* wsm = it->first;
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
-		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
-			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}
-		}
-		if (withTTL){
-			double duration = (simTime()-wsm->getTimestamp()).dbl();
-			if (duration > ttl){
-				oldWSM.push_back(wsm->getSerial());
-				continue;
-			}
-		}
-		sentWSM.push_back(wsm);
-	}
+	// These steps are now achieved by a unique function implemented in DtnNetwLayer.cc
+	std::vector<WaveShortMessage* > sentWSM = scheduleFilterBundles(unsortedWSMPair, destAddr, destType);
 
-	if (!firstSentToVPA){
-		bndlSentToVPA+=sentWSM.size();
-		firstSentToVPA = true;
-	}
-	totalBndlSentToVPA+=sentWSM.size();
-
+	// step 4 : Sending bundles
 	for (std::vector<WaveShortMessage* >::iterator it = sentWSM.begin(); it != sentWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
+		unsigned long serial = wsm->getSerial();
 		GeoDtnNetwPkt* bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if (destType == Veh){
-			bundlesReplicaIndex[(*it)->getSerial()]++;
-		}
-	}
-
-	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		if (erase(*it)){
-			nbrDeletedWithTTL++;
+			bundlesReplicaIndex[serial]++;
 		}
 	}
 }
@@ -200,12 +156,11 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
-
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-//			opp_error("DDeliveryNetwLayer::handleBundleMsg() - Reception of bundle by not recipient address not allowed");
+			opp_error("DDeliveryNetwLayer::handleBundleMsg() - Reception of bundle by not recipient address not allowed");
 		}
 		if (!finalReceivedWSM.empty()){
 			sendingBundleAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM);

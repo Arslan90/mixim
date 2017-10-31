@@ -139,6 +139,9 @@ void PyGraphServerManager::finish(){
 	// Resenting signals before closing finishing and clearing all data
 	emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
 	emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
+	recordScalar("# Total Bundle Sent", nbrBundleSent);
+	recordScalar("# Total Bundle Received by L3", nbrL3BundleReceived);
+	recordScalar("# Total Unique Bundle Received by VPAs", nbrUniqueBundleReceived);
 	finishConnection();
 }
 

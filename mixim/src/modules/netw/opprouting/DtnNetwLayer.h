@@ -235,6 +235,14 @@ class DtnNetwLayer : public BaseNetwLayer {
     long receivedAWICVPA;
 
 
+	int totalBundlesReceived;
+
+	bool firstSentToVPA;
+
+	int bndlSentToVPA;
+
+	int totalBndlSentToVPA;
+
     bool meetVPA;
 
 	// E2E Acks serial
@@ -484,6 +492,8 @@ public:
   	void sendDown(cMessage* msg);
 
   	virtual WaveShortMessage* getStoredWSMFromSerial(unsigned long serial);
+
+  	virtual std::vector<WaveShortMessage* > scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType);
   public:
 	/*
 	 * Getter for isEquiped boolean

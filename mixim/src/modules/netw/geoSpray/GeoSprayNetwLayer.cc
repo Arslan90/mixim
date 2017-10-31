@@ -24,14 +24,6 @@ void GeoSprayNetwLayer::initialize(int stage)
 	if (stage == 0){
 		nbrReplica = par("nbrReplica");
 
-		totalBundlesReceived = 0;
-		bndlSentToVPA = 0;
-		totalBndlSentToVPA = 0;
-
-		firstSentToVPA = false;
-
-		meetVPA = false;
-
         withEMethod = par("withEMethod").boolValue();
 
         withExplicitE2EAck = par("withExplicitE2EAck").boolValue();
@@ -47,52 +39,47 @@ void GeoSprayNetwLayer::handleLowerMsg(cMessage *msg)
 
     coreEV << "Receiving GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Addressed to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 
-    switch (netwPkt->getKind()) {
-		case HELLO:
-			handleHelloMsg(netwPkt);
-			break;
-		case Bundle_Ack:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleAckMsg(netwPkt);
-			}
-			break;
-		case Bundle_Offer:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleOfferMsg(netwPkt);
-			}
-			break;
-		case Bundle_Response:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleResponseMsg(netwPkt);
-			}
-			break;
-		case Bundle:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleMsg(netwPkt);
-			}
-			break;
-		default:
-			break;
+   	if (isEquiped){
+		switch (netwPkt->getKind()) {
+			case HELLO:
+				handleHelloMsg(netwPkt);
+				break;
+			case Bundle_Offer:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleOfferMsg(netwPkt);
+				}
+				break;
+			case Bundle_Response:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleResponseMsg(netwPkt);
+				}
+				break;
+			case Bundle:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleMsg(netwPkt);
+				}
+				break;
+			case Bundle_Ack:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleAckMsg(netwPkt);
+				}
+				break;
+			default:
+				opp_error("Unknown or unsupported DtnNetwMsgKinds when calling HandleLowerMsg()");
+				break;
+		}
 	}
 
     updatingL3Received();
 
     delete netwPkt;
-    delete m;
+    delete msg;
 }
 
 void GeoSprayNetwLayer::handleSelfMsg(cMessage *msg)
 {
 	if (msg == heartBeatMsg){
-		double currentMETD;
-		if (nodeType == Veh){
-			currentMETD = getGeoTraci()->getCurrentMetd();
-		}else if (nodeType == VPA){
-			currentMETD = 0.0;
-		}else {
-			opp_error("Undefined NodeType");
-		}
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,currentMETD,maxDbl, simTime(), true, nodeType, getCurrentPos()));
+		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,getCurrentMETD(),maxDbl, simTime(), true, nodeType, getCurrentPos()));
 		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
@@ -112,11 +99,6 @@ void GeoSprayNetwLayer::handleUpperMsg(cMessage *msg)
 
 void GeoSprayNetwLayer::finish()
 {
-	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
-
-	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
-	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
-
 	recordAllScalars();
 }
 
@@ -174,6 +156,9 @@ void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 
 void GeoSprayNetwLayer::handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt)
 {
+	/*************************** E2E Acks **********/
+    // We don't receive any E2E Acks here
+    /*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long> serialStoredBndl;
 	std::set<unsigned long> serialResponseBndl;
 
@@ -184,7 +169,7 @@ void GeoSprayNetwLayer::handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt)
 
 	for (std::set<unsigned long>::iterator it = serialStoredBndl.begin(); it != serialStoredBndl.end(); it++){
 		unsigned long serial = *it;
-		if ((ackSerial.count(serial) == 1) || (exist(serial))){
+		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -198,18 +183,10 @@ void GeoSprayNetwLayer::handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmResponseBndl)
 {
-	double currentMETD;
-	if (nodeType == Veh){
-		currentMETD = getGeoTraci()->getCurrentMetd();
-	}else if (nodeType == VPA){
-		currentMETD = 0.0;
-	}else {
-		opp_error("Undefined NodeType");
-	}
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-	netwPkt->setSrcMETD(currentMETD);
+	netwPkt->setSrcMETD(getCurrentMETD());
 	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
@@ -218,9 +195,9 @@ void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std:
 void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 {
 	std::set<unsigned long> serialResponseBndl = netwPkt->getH2hAcks();
-	double currentMETD = getGeoTraci()->getCurrentMetd();
-	if (currentMETD > netwPkt->getSrcMETD()){
-		// step 1 : Build bundle list to send before reordering
+	
+	// step 1 : Build bundle list to send before reordering
+	if (getCurrentMETD() > netwPkt->getSrcMETD()){
 		std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
 		for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
 			unsigned long serial = *it;
@@ -240,77 +217,56 @@ void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 		}
 
 		// step 2 : Reordering bundle list
-		std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+		// step 3 : Filtering bundle to send
 
+		// These steps are now achieved by a unique function implemented in DtnNetwLayer.cc
+		std::vector<WaveShortMessage* > sentWSM = scheduleFilterBundles(unsortedWSMPair, netwPkt->getSrcAddr(), netwPkt->getSrcType());
 
-		// step 3 : Sending bundles with NbrReplica to transfer
-		std::vector<WaveShortMessage* > sentWSM;
-		std::vector<unsigned long > oldWSM;
-		for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
-			WaveShortMessage* wsm = it->first;
-			if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-			std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
-			if ((itNode != neighborhoodSession.end())){
-				NetwSession sessionNode = itNode->second;
-				if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-					continue;
-				}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-					continue;
-				}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
-					continue;
-				}
-			}
-			if (withTTL){
-				double duration = (simTime()-wsm->getTimestamp()).dbl();
-				if (duration > ttl){
-					oldWSM.push_back(wsm->getSerial());
-					continue;
-				}
-			}
-
-			// Fixing the number of replica to send
-			bool custodyTransfert = false;
-			int nbrReplicaToSend = 0;
-			std::map<unsigned long, int>::iterator it2 = bundlesRmgReplica.find(wsm->getSerial());
-			if (it2 == bundlesRmgReplica.end()){
-				opp_error("Remaining Replica not found");
-			}else{
-				int remainingCopy = it2->second;
-				if ((remainingCopy <= 0 ) || (remainingCopy > nbrReplica )){
-					opp_error("Invalid remaining replica");
-				}else if (remainingCopy == 1 ){
-					nbrReplicaToSend = 1;
-					custodyTransfert = true;
-				}else{
-					nbrReplicaToSend =  remainingCopy / 2;
-				}
-			}
-
-			// sending bundles
-			sendingBundleMsg(netwPkt->getSrcAddr(), wsm->dup(), nbrReplicaToSend, custodyTransfert);
-
-		}
-
-		for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-			if (erase(*it)){
-				nbrDeletedWithTTL++;
-			}
-		}
+		// step 4 : Sending bundles
+		sendingBundleMsg(netwPkt->getSrcAddr(), sentWSM);
 	}
 }
 
-void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, WaveShortMessage* wsm,  int nbrReplica, bool custodyTransfer)
+void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<WaveShortMessage* >  wsmToSend)
 {
-	GeoDtnNetwPkt *netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, Bundle, destAddr);
-	netwPkt->setNbrReplica(nbrReplica);
-	netwPkt->encapsulate(wsm);
-	sendDown(netwPkt);
-	if (!withExplicitH2HAck){
-		bundlesReplicaIndex[wsm->getSerial()] = bundlesReplicaIndex[wsm->getSerial()] + nbrReplica;
-		bundlesRmgReplica[wsm->getSerial()] = bundlesRmgReplica[wsm->getSerial()] - nbrReplica;
-		if (custodyTransfer){
-			erase(wsm->getSerial());
+	for (std::vector<WaveShortMessage* >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
+		WaveShortMessage* wsm = *it;
+		unsigned long serial = wsm->getSerial();
+
+		// step 1 : Fixing amount of replica to send and decide whether or not perform custody transfer
+		// Fixing the number of replica to send
+		bool custodyTransfert = false;
+		int nbrReplicaToSend = 0;
+		std::map<unsigned long, int>::iterator it2 = bundlesRmgReplica.find(serial);
+		if (it2 == bundlesRmgReplica.end()){
+			opp_error("Remaining Replica not found");
+		}else{
+			int remainingCopy = it2->second;
+			if ((remainingCopy <= 0 ) || (remainingCopy > nbrReplica )){
+				opp_error("Invalid remaining replica");
+			}else if (remainingCopy == 1 ){
+				nbrReplicaToSend = 1;
+				custodyTransfert = true;
+			}else{
+				nbrReplicaToSend =  remainingCopy / 2;
+			}
+		}
+
+		// step 2 : sending Bundles
+		GeoDtnNetwPkt *netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, Bundle, destAddr);
+		netwPkt->setNbrReplica(nbrReplicaToSend);
+		netwPkt->setCustodyTransfert(custodyTransfert);
+		netwPkt->encapsulate(wsm->dup());
+		sendDown(netwPkt);
+		if (!withExplicitH2HAck){
+//			cout << "Before (@,serial): (" << myNetwAddr << "," << serial << ") NbrReplicaToSend " << nbrReplicaToSend << " Current NbrReplica " << bundlesReplicaIndex[serial] << " Current RgmReplica " << bundlesRmgReplica[serial] << endl;
+			bundlesReplicaIndex[serial] = bundlesReplicaIndex[serial] + nbrReplicaToSend;
+			bundlesRmgReplica[serial] = bundlesRmgReplica[serial] - nbrReplicaToSend;
+//			cout << "After (@,serial): (" << myNetwAddr << "," << serial << ") NbrReplicaToSend " << nbrReplicaToSend << " Current NbrReplica " << bundlesReplicaIndex[serial] << " Current RgmReplica " << bundlesRmgReplica[serial] << endl;
+			if (custodyTransfert){
+				erase(serial);
+			}
 		}
 	}
 }
@@ -332,46 +288,30 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 	}
 
 	// step 2 : Reordering bundle list
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+	// step 3 : Filtering bundle to send
 
-	// step 3 : Sending bundles with NbrReplica to transfer
-	std::vector<WaveShortMessage* > sentWSM;
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
-		WaveShortMessage* wsm = it->first;
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(vpaAddr);
-		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
-			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}
-		}
-		sentWSM.push_back(wsm);
-	}
+	// These steps are now achieved by a unique function implemented in DtnNetwLayer.cc
+	std::vector<WaveShortMessage* > sentWSM = scheduleFilterBundles(unsortedWSMPair, vpaAddr, VPA);
 
-	if (!firstSentToVPA){
-		bndlSentToVPA+=sentWSM.size();
-		firstSentToVPA = true;
-	}
-	totalBndlSentToVPA+=sentWSM.size();
-
+	// step 4 : Sending bundles
+	std::set<unsigned long > serialsToDelete;
 	for (std::vector<WaveShortMessage* >::iterator it = sentWSM.begin(); it != sentWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
 		unsigned long serial = wsm->getSerial();
 		GeoDtnNetwPkt *bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
+		bundleMsg->setNbrReplica(0);
+		bundleMsg->setCustodyTransfert(false);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if(!withExplicitE2EAck){
-			storeAckSerial(serial);
-			erase(serial);
+			serialsToDelete.insert(serial);
 		}
 	}
 
+	if(!withExplicitE2EAck){
+		storeAckSerials(serialsToDelete);
+	}
 }
 
 void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
@@ -416,30 +356,7 @@ void GeoSprayNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		}
 
 		if (!receivedWSM.empty()  && withExplicitH2HAck){
-			sendingBundleH2HAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM, netwPkt->getNbrReplica(), netwPkt->getCustodyTransfert());
-		}
-	}
-}
-
-void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
-{
-	if (withExplicitE2EAck){
-		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-		storeAckSerials(finalDelivredToBndl);
-	}
-
-	if (withExplicitH2HAck){
-		std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
-		if (delivredToBndl.size()>1){
-			opp_warning("GeoSprayNetwLayer::handleBundleAckMsg - Unsupported handling of more then a single H2HAck");
-		}
-		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
-			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + nbrReplica;
-			bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - nbrReplica;
-			if (netwPkt->getCustodyTransfert()){
-				erase(*it);
-			}
+			sendingBundleH2HAckMsg(netwPkt->getSrcAddr(), receivedWSM, netwPkt->getNbrReplica(), netwPkt->getCustodyTransfert());
 		}
 	}
 }
@@ -467,6 +384,30 @@ void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
+
+void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
+{
+	if (withExplicitE2EAck){
+		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+		storeAckSerials(finalDelivredToBndl);
+	}
+
+	if (withExplicitH2HAck){
+		std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
+		if (delivredToBndl.size()>1){
+			opp_warning("GeoSprayNetwLayer::handleBundleAckMsg - Unsupported handling of more then a single H2HAck");
+		}
+		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
+			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + netwPkt->getNbrReplica();
+			bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - netwPkt->getNbrReplica();
+			if (netwPkt->getCustodyTransfert()){
+				erase(*it);
+			}
+		}
+	}
+}
+
 ////////////////////////////////////////// Others methods /////////////////////////
 
 bool GeoSprayNetwLayer::erase(unsigned long serial)
@@ -474,7 +415,6 @@ bool GeoSprayNetwLayer::erase(unsigned long serial)
 	bool found = DtnNetwLayer::erase(serial);
 
 	if (found){
-		bundlesReplicaIndex.erase(serial);
 		bundlesRmgReplica.erase(serial);
 	}
 
@@ -493,4 +433,17 @@ GeoTraCIMobility *GeoSprayNetwLayer::getGeoTraci()
 			break;
 	}
 	return geo;
+}
+
+double GeoSprayNetwLayer::getCurrentMETD()
+{
+	double currentMETD;
+	if (nodeType == Veh){
+		currentMETD = getGeoTraci()->getCurrentMetd();
+	}else if (nodeType == VPA){
+		currentMETD = 0.0;
+	}else {
+		opp_error("Undefined NodeType");
+	}
+	return currentMETD;
 }

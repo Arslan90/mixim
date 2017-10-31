@@ -180,6 +180,14 @@ void DtnNetwLayer::initialize(int stage)
 				opp_error("Unrecognized scheduling strategy");
 				break;
 		}
+
+		totalBundlesReceived = 0;
+		bndlSentToVPA = 0;
+		totalBndlSentToVPA = 0;
+
+		firstSentToVPA = false;
+
+		meetVPA = false;
 	}
 
 	if (stage == 2){
@@ -934,7 +942,11 @@ bool DtnNetwLayer::erase(unsigned long serial)
 
 	if (wsm !=NULL){
 		found = erase(wsm);
+		if (found){
+			bundlesReplicaIndex.erase(serial);
+		}
 	}
+
 	return found;
 }
 
@@ -994,6 +1006,11 @@ void DtnNetwLayer::recordAllScalars()
 	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
 	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
 	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
+
+	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
+
+	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
+	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
 }
 
 void DtnNetwLayer::resetStatPerVPA()
@@ -1103,7 +1120,7 @@ void DtnNetwLayer::DefineNodeType()
 
 int DtnNetwLayer::getCurrentSector()
 {
-//	int currentSector = -1;
+	int oldSector = sectorId;
 	switch (nodeType) {
 		case Veh:
 			traci = TraCIMobilityAccess().get(getParentModule());
@@ -1117,7 +1134,9 @@ int DtnNetwLayer::getCurrentSector()
 			opp_error("DtnNetwLayer::getCurrentSector() - Unable to define CurrentSector due to unknown node type");
 			break;
 	}
-//	return currentSector;
+	if (oldSector != sectorId){
+		firstSentToVPA = false;
+	}
 	return sectorId;
 }
 
@@ -1296,7 +1315,9 @@ void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 {
     for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
     	storeAckSerial(*it);
-    	erase(*it);
+    	if (erase(*it)){
+    		deletedBundlesWithAck++;
+    	}
     }
 }
 
@@ -1326,4 +1347,61 @@ void DtnNetwLayer::prepareNetwPkt(DtnNetwPkt* myNetwPkt, short  kind, LAddress::
 	realPktLength *= 8;
 
 	myNetwPkt->setBitLength(realPktLength);
+}
+
+std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType){
+
+	// step 1 : Reordering Bundles list
+	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+
+
+	// step 2 : Filtering Bundles to send
+	std::vector<WaveShortMessage* > sentWSM;
+	std::vector<unsigned long > oldWSM;
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
+		WaveShortMessage* wsm = it->first;
+		// step 2.1 : Check if the current bundle is not registered in neighborhoodSession
+		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
+		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
+		if ((itNode != neighborhoodSession.end())){
+			NetwSession sessionNode = itNode->second;
+			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+				continue;
+			}
+		}
+
+		// step 2.2 : Check if the current bundle is up to date and has not expired
+		if (withTTL){
+			double duration = (simTime()-wsm->getTimestamp()).dbl();
+			if (duration > ttl){
+				oldWSM.push_back(wsm->getSerial());
+				continue;
+			}
+		}
+
+		// step 2.3 : If bundle is fine, then add it to list of Bundles to sends
+		sentWSM.push_back(wsm);
+	}
+
+	// step 3 : Delete Expired Bundles
+	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+		if (erase(*it)){
+			nbrDeletedWithTTL++;
+		}
+	}
+
+	// step 4 : Update stats related Bundles sent to VPA if the encountered node is a VPA
+	if (destType == VPA){
+		if (!firstSentToVPA){
+			bndlSentToVPA+=sentWSM.size();
+			firstSentToVPA = true;
+		}
+		totalBndlSentToVPA+=sentWSM.size();
+	}
+
+	return sentWSM;
 }

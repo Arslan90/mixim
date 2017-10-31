@@ -31,14 +31,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
   protected:
 	GeoTraCIMobility* geoTraci;
 
-	int totalBundlesReceived;
-
-	bool firstSentToVPA;
-
-	int bndlSentToVPA;
-
-	int totalBndlSentToVPA;
-
 	int nbrReplica;
 
 	std::map<unsigned long, int> bundlesRmgReplica;
@@ -83,7 +75,7 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
   	void handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleMsg(LAddress::L3Type destAddr, WaveShortMessage* wsm, int nbrReplica, bool custodyTransfer);
+  	void sendingBundleMsg(LAddress::L3Type destAddr, std::vector<WaveShortMessage* >  wsmToSend);
 
   	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
 
@@ -100,6 +92,8 @@ class GeoSprayNetwLayer : public DtnNetwLayer
   	bool erase(unsigned long serial);
 
   	GeoTraCIMobility* getGeoTraci();
+
+  	double getCurrentMETD();
 };
 
 #endif

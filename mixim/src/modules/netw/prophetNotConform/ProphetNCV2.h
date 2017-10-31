@@ -277,7 +277,7 @@ private:
 
   	void handleBundleOfferMsg(ProphetNCPkt *netwPkt);
 
-  	void sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl);
+  	void sendingBundleResponseMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl);
 
   	void handleBundleResponseMsg(ProphetNCPkt *netwPkt);
 
@@ -288,8 +288,6 @@ private:
 	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd);
 
   	void handleBundleAckMsg(ProphetNCPkt *netwPkt);
-
-  	bool erase(unsigned long serial);
 
 	/*******************************************************************
 	** 							End of metrics methods section

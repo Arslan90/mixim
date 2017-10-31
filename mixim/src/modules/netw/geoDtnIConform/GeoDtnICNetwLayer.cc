@@ -564,18 +564,6 @@ void GeoDtnICNetwLayer::storeCustodyAckSerials(std::set<unsigned long > setOfSer
 	}
 }
 
-
-bool GeoDtnICNetwLayer::erase(unsigned long serial)
-{
-	bool found = DtnNetwLayer::erase(serial);
-
-	if (found){
-		bundlesReplicaIndex.erase(serial);
-	}
-
-	return found;
-}
-
 void GeoDtnICNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
 {
 	double currentTime = simTime().dbl();

@@ -22,11 +22,7 @@ void EpidemicNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		totalBundlesReceived = 0;
-		bndlSentToVPA = 0;
-		totalBndlSentToVPA = 0;
-
-		firstSentToVPA = false;
+		// Nothing to do
 	}
 }
 
@@ -37,33 +33,36 @@ void EpidemicNetwLayer::handleLowerMsg(cMessage *msg)
 
     coreEV << "Receiving GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Addressed to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 
-    switch (netwPkt->getKind()) {
-		case HELLO:
-			handleHelloMsg(netwPkt);
-			break;
-		case Bundle_Response:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleResponseMsg(netwPkt);
-			}
-			break;
-		case Bundle:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleMsg(netwPkt);
-			}
-			break;
-		case Bundle_Ack:
-			if (netwPkt->getDestAddr() == myNetwAddr){
-				handleBundleAckMsg(netwPkt);
-			}
-			break;
-		default:
-			break;
+   	if (isEquiped){
+		switch (netwPkt->getKind()) {
+			case HELLO:
+				handleHelloMsg(netwPkt);
+				break;
+			case Bundle_Response:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleResponseMsg(netwPkt);
+				}
+				break;
+			case Bundle:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleMsg(netwPkt);
+				}
+				break;
+			case Bundle_Ack:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleAckMsg(netwPkt);
+				}
+				break;
+			default:
+				opp_error("Unknown or unsupported DtnNetwMsgKinds when calling HandleLowerMsg()");
+				break;
+		}
 	}
 
     updatingL3Received();
 
     delete netwPkt;
-    delete m;
+    delete msg;
 }
 
 void EpidemicNetwLayer::handleSelfMsg(cMessage *msg)
@@ -77,11 +76,6 @@ void EpidemicNetwLayer::handleSelfMsg(cMessage *msg)
 
 void EpidemicNetwLayer::finish()
 {
-	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
-
-	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
-	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
-
 	recordAllScalars();
 }
 
@@ -89,7 +83,8 @@ void EpidemicNetwLayer::sendingHelloMsg()
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
-	netwPkt->setE2eAcks(ackSerial);
+	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+	netwPkt->setE2eAcks(storedAck);
 	std::set<unsigned long > storedBundle;
 	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
 		storedBundle.insert((*it)->getSerial());
@@ -172,62 +167,26 @@ void EpidemicNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 	}
 
 	// step 2 : Reordering bundle list
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+	// step 3 : Filtering bundle to send
 
-	// step 3 : Sending bundles with NbrReplica to transfer
-	std::vector<WaveShortMessage* > sentWSM;
-	std::vector<unsigned long > oldWSM;
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
-		WaveShortMessage* wsm = it->first;
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
-		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
-			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}
-		}
-		if (withTTL){
-			double duration = (simTime()-wsm->getTimestamp()).dbl();
-			if (duration > ttl){
-				oldWSM.push_back(wsm->getSerial());
-				continue;
-			}
-		}
-		sentWSM.push_back(wsm);
-	}
+	// These steps are now achieved by a unique function implemented in DtnNetwLayer.cc
+	std::vector<WaveShortMessage* > sentWSM = scheduleFilterBundles(unsortedWSMPair, netwPkt->getSrcAddr(), netwPkt->getSrcType());
 
+	// step 4 : Sending bundles
 	sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType(),sentWSM);
-
-	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		if (erase(*it)){
-			nbrDeletedWithTTL++;
-		}
-	}
 }
 
 void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend)
 {
-	if (destType == VPA){
-		if (!firstSentToVPA){
-			bndlSentToVPA+=wsmToSend.size();
-			firstSentToVPA = true;
-		}
-		totalBndlSentToVPA+=wsmToSend.size();
-	}
-
 	for (std::vector<WaveShortMessage* >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
 		WaveShortMessage* wsm = *it;
+		unsigned long serial = wsm->getSerial();
 		GeoDtnNetwPkt* bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if (destType == Veh){
-			bundlesReplicaIndex[(*it)->getSerial()]++;
+			bundlesReplicaIndex[serial]++;
 		}
 	}
 }
@@ -251,7 +210,6 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
-
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
@@ -266,7 +224,7 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 				emit(receiveL3SignalId,bundlesReceived);
 			}
 		}
-		if ((withAck) && (!finalReceivedWSM.empty())){
+		if (!finalReceivedWSM.empty()){
 			sendingBundleAckMsg(netwPkt->getSrcAddr(), finalReceivedWSM);
 		}
 	}
@@ -274,14 +232,17 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long >(wsmFinalDeliverd);
-	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	if (withAck){
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+		std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+		netwPkt->setE2eAcks(serialOfE2EAck);
+		int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+		netwPkt->setBitLength(length);
+		sendDown(netwPkt);
+	}
 }
+
 void EpidemicNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	if (withAck){

@@ -28,13 +28,6 @@ class EpidemicNetwLayer : public DtnNetwLayer
 ** 							Variables section
 ********************************************************************/
   protected:
-	int totalBundlesReceived;
-
-	int bndlSentToVPA;
-
-	bool firstSentToVPA;
-
-	int totalBndlSentToVPA;
 
 /*******************************************************************
 ** 							Methods section

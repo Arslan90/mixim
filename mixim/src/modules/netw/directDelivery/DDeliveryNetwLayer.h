@@ -28,13 +28,6 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 ** 							Variables section
 ********************************************************************/
   protected:
-	int totalBundlesReceived;
-
-	int bndlSentToVPA;
-
-	bool firstSentToVPA;
-
-	int totalBndlSentToVPA;
 
 /*******************************************************************
 ** 							Methods section
@@ -53,9 +46,6 @@ class DDeliveryNetwLayer : public DtnNetwLayer
 
   	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
-//
-//  	/** @brief Handle control messages from lower layer */
-//  	virtual void handleUpperControl(cMessage* msg);
 
   	void sendingHelloMsg();
 

@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 
 #include "ProphetNCV2.h"
 
@@ -90,48 +90,45 @@ void ProphetNCV2::initialize(int stage)
 
 void ProphetNCV2::handleLowerMsg(cMessage* msg)
 {
-	std::pair<SimpleContactStats, std::set<SimpleContactStats>::iterator > pair;
     Mac80211Pkt *m = check_and_cast<Mac80211Pkt *>(msg);
-    coreEV << " handling packet from " << m->getSrcAddr() << std::endl;
+    ProphetNCPkt *netwPkt = check_and_cast<ProphetNCPkt *>(m->decapsulate());
 
-    ProphetNCPkt *prophetPkt = check_and_cast<ProphetNCPkt *>(m->decapsulate());
+    coreEV << "Receiving ProphetNCPkt packet from " << netwPkt->getSrcAddr() << " Addressed to " << netwPkt->getDestAddr() << " by current node " << myNetwAddr << std::endl;
 
-    if (isEquiped){
-
-		switch (prophetPkt->getKind()) {
+   	if (isEquiped){
+		switch (netwPkt->getKind()) {
 			case HELLO:
-				handleHelloMsg(prophetPkt);
+				handleHelloMsg(netwPkt);
 				break;
 			case Bundle_Offer:
-				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBundleOfferMsg(prophetPkt);
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleOfferMsg(netwPkt);
 				}
 				break;
 			case Bundle_Response:
-				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBundleResponseMsg(prophetPkt);
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleResponseMsg(netwPkt);
 				}
 				break;
 			case Bundle:
-				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBundleMsg(prophetPkt);
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleMsg(netwPkt);
 				}
 				break;
 			case Bundle_Ack:
-				if (prophetPkt->getDestAddr()==myNetwAddr){
-					handleBundleAckMsg(prophetPkt);
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleBundleAckMsg(netwPkt);
 				}
 				break;
 			default:
-				opp_error("Unknown or unsupported Prophetv2MessageKinds when calling HandleLowerMsg()");
+				opp_error("Unknown or unsupported DtnNetwMsgKinds when calling HandleLowerMsg()");
 				break;
 		}
-    }
-
+	}
 
     updatingL3Received();
 
-    delete prophetPkt;
+    delete netwPkt;
     delete msg;
 }
 
@@ -142,6 +139,24 @@ void ProphetNCV2::handleSelfMsg(cMessage* msg)
 		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
+}
+
+void ProphetNCV2::finish()
+{
+	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
+	recordScalar("# failed contacts at RIB", nbrFailedContactAtRIB);
+	recordScalar("# failed contacts at Bundle_Offer", nbrFailedContactAtBundle_Offer);
+	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
+	recordScalar("# successful contacts", nbrSuccessfulContact);
+
+	recordAllScalars();
+	classifyAll();
+	recordAllClassifier();
+
+//	while (!bundles.empty()){
+//		delete bundles.front();
+//		bundles.pop_front();
+//	}
 }
 
 void ProphetNCV2::sendingHelloMsg()
@@ -229,18 +244,17 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
     }
 
     /*************************** H2H Acks (stored bundles) **********/
-    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
-    if (!storedBundle.empty()){
-    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
-    }
-
 	std::set<unsigned long> serialStoredBndl;
 	std::set<unsigned long> serialResponseBndl;
 
 	serialStoredBndl = netwPkt->getH2hAcks();
+    if (!serialStoredBndl.empty()){
+    	updateStoredBndlForSession(netwPkt->getSrcAddr(), serialStoredBndl);
+    }
+
 	for (std::set<unsigned long>::iterator it = serialStoredBndl.begin(); it != serialStoredBndl.end(); it++){
 		unsigned long serial = *it;
-		if ((ackSerial.count(serial) == 1) || (exist(serial))){
+		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -248,17 +262,16 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 	}
 
 	if (!serialResponseBndl.empty()){
-		sendingBndlRespMsg(netwPkt->getSrcAddr(), serialResponseBndl);
+		sendingBundleResponseMsg(netwPkt->getSrcAddr(), serialResponseBndl);
 	}
-
 }
 
-void ProphetNCV2::sendingBndlRespMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl)
+void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmResponseBndl)
 {
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
-	prepareNetwPkt(netwPkt, Bundle_Response, nodeAddr);
+	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-	int length = sizeof(unsigned long) * (wsmResponseBndl.size())+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	//cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
@@ -288,54 +301,26 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 	}
 
 	// step 2 : Reordering bundle list
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
-
 	// step 3 : Filtering bundle to send
-	std::vector<WaveShortMessage* > sentWSM;
-	std::vector<unsigned long > oldWSM;
-	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
-		WaveShortMessage* wsm = it->first;
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
-		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
-			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}
-		}
-		if (withTTL){
-			double duration = (simTime()-wsm->getTimestamp()).dbl();
-			if (duration > ttl){
-				oldWSM.push_back(wsm->getSerial());
-				continue;
-			}
-		}
-		sentWSM.push_back(wsm);
-	}
 
+	// These steps are now achieved by a unique function implemented in DtnNetwLayer.cc
+	std::vector<WaveShortMessage* > sentWSM = scheduleFilterBundles(unsortedWSMPair, netwPkt->getSrcAddr(), netwPkt->getSrcType());
+
+	// step 4 : Sending bundles
 	sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType(),sentWSM);
-
-	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		if (erase(*it)){
-			nbrDeletedWithTTL++;
-		}
-	}
 }
 
 void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std::vector<WaveShortMessage* >  wsmToSend)
 {
 	for (std::vector<WaveShortMessage* >::iterator it = wsmToSend.begin(); it != wsmToSend.end(); it++){
 		WaveShortMessage* wsm = *it;
+		unsigned long serial = wsm->getSerial();
 		ProphetNCPkt* bundleMsg = new ProphetNCPkt();
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if (destType == Veh){
-			bundlesReplicaIndex[(*it)->getSerial()]++;
+			bundlesReplicaIndex[serial]++;
 		}
 	}
 }
@@ -348,6 +333,7 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 
 	if (wsm != NULL){
 		wsm->setHopCount(wsm->getHopCount()+1);
+		totalBundlesReceived++;
 
 		std::set<unsigned long> finalReceivedWSM;
 
@@ -358,7 +344,6 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
-
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
@@ -395,26 +380,6 @@ void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 	storeAckSerials(finalDelivredToBndl);
-}
-
-void ProphetNCV2::finish()
-{
-	recordAllScalars();
-
-	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
-	recordScalar("# failed contacts at RIB", nbrFailedContactAtRIB);
-	recordScalar("# failed contacts at Bundle_Offer", nbrFailedContactAtBundle_Offer);
-	recordScalar("# failed contacts at Bundle_Response", nbrFailedContactAtBundle_Response);
-	recordScalar("# successful contacts", nbrSuccessfulContact);
-
-
-	classifyAll();
-	recordAllClassifier();
-
-	while (!bundles.empty()){
-		delete bundles.front();
-		bundles.pop_front();
-	}
 }
 
 /*******************************************************************
@@ -743,18 +708,6 @@ void ProphetNCV2::initAllClassifier()
 		FailBndlAck = ClassifiedContactStats("BndlAckFail",false,withCDFForFailBndlAck);
 	}
 }
-
-bool ProphetNCV2::erase(unsigned long serial)
-{
-	bool found = DtnNetwLayer::erase(serial);
-
-	if (found){
-		bundlesReplicaIndex.erase(serial);
-	}
-
-	return found;
-}
-
 
 /*******************************************************************
 **

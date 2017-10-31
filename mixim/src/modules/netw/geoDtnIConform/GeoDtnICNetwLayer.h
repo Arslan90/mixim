@@ -161,8 +161,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	void storeCustodyAckSerial(unsigned long serial);
 
   	void storeCustodyAckSerials(std::set<unsigned long> setOfSerials);
-
-  	bool erase(unsigned long serial);
   	
   	bool checkBeforeHelloMechanism();
 
