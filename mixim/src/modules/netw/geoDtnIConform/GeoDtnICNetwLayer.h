@@ -45,17 +45,14 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	int gMETDFwd;
 	int bMETDFwd;
 
-	int totalBundlesReceived;
+	int Fwd_No;
+	int Fwd_Yes_METD;
+	int Fwd_Yes_Dist;
+	int Fwd_Yes_Both;
 
-	std::set<unsigned long> custodyAckSerial;
+	std::set<unsigned long> custodySerial;
 
 	std::set<unsigned long > missedOpportunities;
-
-	int bndlSentToVPA;
-
-	bool firstSentToVPA;
-
-	int totalBndlSentToVPA;
 
 	/**
 	 * Current Number of Insert operation in ACKSerial & Bundle storage
@@ -79,10 +76,28 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	};
 	int custodyMode;
 
+	enum ForwardStratEnum{
+		AtLeastOne = 0,
+		Both = 1
+	};
+	int multiMetricFwdStrat;
+
+	bool withAddressedAck;
+
 	// CBH: CheckBeforeHello
 	bool withCBH;
 
 	simsignal_t inRadioWithVPA;
+
+	bool withExplicitE2EAck;
+
+	int custodyList;
+
+	enum CustodyListEnum {
+		No_Diffuse = 0,
+		Diffuse = 1,
+		Diffuse_Delete = 2
+	};
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -128,27 +143,29 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
 
-  	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
-
-  	std::pair<LAddress::L3Type, double> getBestFwdMETD();
-
-  	std::pair<LAddress::L3Type, double> getBestFwdDist();
+  	void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
-
-  	void sendingHelloMsg(double distance, double METD, Coord currentPos);
-
-  	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 
 //  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, std::pair<LAddress::L3Type, double> FwdDist, std::pair<LAddress::L3Type, double> FwdMETD);
 
   	void sendingBundleMsg();
 
+  	void newSendingBundleMsg(GeoDtnNetwPkt *netwPkt);
+
   	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
+
+  	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
+
+  	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDelivred, std::set<unsigned long> wsmFinalDeliverd);
+
+  	void sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd);
+
+  	void sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDeliverd, bool custodyTransfer);
 
   	void handleBundleAckMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDelivred, std::set<unsigned long> wsmFinalDeliverd);
+////////////////////////// Others Methods //////////////////////
 
   	void recordStatsFwds(std::pair<LAddress::L3Type, double> fwdDist, std::pair<LAddress::L3Type, double> fwdMETD);
 
@@ -158,17 +175,35 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	virtual void storeAckSerial(unsigned long serial);
 
-  	void storeCustodyAckSerial(unsigned long serial);
+  	void storeCustodySerial(unsigned long serial);
 
-  	void storeCustodyAckSerials(std::set<unsigned long> setOfSerials);
+  	void storeCustodySerials(std::set<unsigned long> setOfSerials);
   	
-  	bool checkBeforeHelloMechanism();
+  	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
 
-  	GeoTraCIMobility* getGeoTraci();
+  	std::pair<LAddress::L3Type, double> getBestFwdMETD();
 
+  	std::pair<LAddress::L3Type, double> getBestFwdDist();
+  	
   	void emitInRadioWithVPA(LAddress::L3Type neighbor, int neighborNodeType, int flagValue);
 
   	void updateInRadioWithVPA(short kind, int neighborNodeType);
+  	  	
+  	bool checkBeforeHelloMechanism();
+
+  	std::vector<std::pair<WaveShortMessage*,int> > specific_scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType);
+
+  	GeoTraCIMobility* getGeoTraci();
+  	
+	double getCurrentMETD();
+
+	double getCurrentDist();
+
+	bool makeForwardingDecision(double srcDist, double srcMETD);
+
+	bool makeCustodyDecision(double srcDist);
+
+  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
 };
 
 #endif

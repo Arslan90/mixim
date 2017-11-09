@@ -25,8 +25,6 @@ simple GeoSprayNetwLayer extends DtnNetwLayer
     parameters:
     	@class(GeoSprayNetwLayer);
     	int nbrReplica = default(20);
-    	bool withSentTrack = default(false);
-	    bool withEMethod = default(true);
 	    bool withExplicitE2EAck = default(false);
 	    bool withExplicitH2HAck = default(false);
 }

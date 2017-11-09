@@ -25,12 +25,28 @@ simple GeoDtnICNetwLayer extends DtnNetwLayer
     parameters:
     	@class(GeoDtnICNetwLayer);
     	bool withMETDFwd = default(true);
-    	bool withDistFwd = default(true); 
+    	bool withDistFwd = default(true);
+    	
+		bool withExplicitE2EAck = default(false); 
     	
     	// 0: No Custody, 
     	// 1: Custody for Dist with No Active Clearance of theses bundles, 
     	// 2: Custody for Dist with Active Clearence of these bundles
     	int custodyMode = default(0);
+	    
+	    // 0 : Forward if the encountered node improves at least one metric
+	    // 1 : Forward if the encountered node improves both metrics
+	    int multiMetricFwdStrat =default(0);
+	    
+	    // If false sent acks are broadcasted otherwise they are adressed to sender
+	    bool withAddressedAck = default(false);
+    	
     	// CBH: CheckBeforeHello
     	bool withCBH = default(false);
+    	
+    	// 0: No CustodyList
+    	// 1: Diffuse CustodyList
+    	// 2: Diffuse CustodyList and Delete bundles consequently
+    	int custodyList = default(0);
+
 }

@@ -38,8 +38,6 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 	/*
 	 * Bool withEMethod standing for erroneous method, in order to evaluate the impact of the previous error
 	 */
-	bool withEMethod;
-
 	bool withExplicitE2EAck;
 
 	bool withExplicitH2HAck;

@@ -261,7 +261,7 @@ void GeoDtnNetwLayer::sendingHelloMsg(GeoDtnNetwPkt *netwPkt, double distance, d
 		netwPkt->setH2hAcks(storedBundle);
 		int nbrEntries = ackSerial.size()+ storedBundle.size();
 		if (custodyMode == Yes_WithACK){
-			netwPkt->setCustodyAcks(custodyAckSerial);
+			netwPkt->setCustodySerials(custodyAckSerial);
 			nbrEntries+= custodyAckSerial.size();
 		}
 		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
@@ -304,7 +304,7 @@ void GeoDtnNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 			}
 	    }
 	    if (custodyMode == Yes_WithACK){
-		    std::set<unsigned long> custodyAcks = netwPkt->getCustodyAcks();
+		    std::set<unsigned long> custodyAcks = netwPkt->getCustodySerials();
 		    if (!custodyAcks.empty()){
 		    	storeCustodyAckSerial(custodyAcks);
 		    }

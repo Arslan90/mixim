@@ -24,8 +24,6 @@ void GeoSprayNetwLayer::initialize(int stage)
 	if (stage == 0){
 		nbrReplica = par("nbrReplica");
 
-        withEMethod = par("withEMethod").boolValue();
-
         withExplicitE2EAck = par("withExplicitE2EAck").boolValue();
 
         withExplicitH2HAck = par("withExplicitH2HAck").boolValue();
@@ -235,6 +233,12 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 
 		// step 1 : Fixing amount of replica to send and decide whether or not perform custody transfer
 		// Fixing the number of replica to send
+
+		if ((myNetwAddr == 1954)&&(serial == 1911991)){
+			cout << "Total replicas " << bundlesReplicaIndex[serial] << endl;
+			cout << "Remaining replicas " << bundlesRmgReplica[serial] << endl;
+		}
+
 		bool custodyTransfert = false;
 		int nbrReplicaToSend = 0;
 		std::map<unsigned long, int>::iterator it2 = bundlesRmgReplica.find(serial);
@@ -243,6 +247,9 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		}else{
 			int remainingCopy = it2->second;
 			if ((remainingCopy <= 0 ) || (remainingCopy > nbrReplica )){
+				cout << "My Address" << myNetwAddr << endl;
+				cout << "Dest Address" << destAddr << endl;
+				cout << "WSM Serial" << serial << endl;
 				opp_error("Invalid remaining replica");
 			}else if (remainingCopy == 1 ){
 				nbrReplicaToSend = 1;
@@ -300,8 +307,6 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		unsigned long serial = wsm->getSerial();
 		GeoDtnNetwPkt *bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
-		bundleMsg->setNbrReplica(0);
-		bundleMsg->setCustodyTransfert(false);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg);
 		if(!withExplicitE2EAck){
@@ -401,7 +406,7 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
 			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + netwPkt->getNbrReplica();
 			bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - netwPkt->getNbrReplica();
-			if (netwPkt->getCustodyTransfert()){
+			if (netwPkt->getCustodyTransfert() || (bundlesRmgReplica[*it] <= 0)){
 				erase(*it);
 			}
 		}
