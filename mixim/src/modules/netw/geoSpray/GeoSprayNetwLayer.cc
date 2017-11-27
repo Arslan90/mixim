@@ -234,11 +234,6 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		// step 1 : Fixing amount of replica to send and decide whether or not perform custody transfer
 		// Fixing the number of replica to send
 
-		if ((myNetwAddr == 1954)&&(serial == 1911991)){
-			cout << "Total replicas " << bundlesReplicaIndex[serial] << endl;
-			cout << "Remaining replicas " << bundlesRmgReplica[serial] << endl;
-		}
-
 		bool custodyTransfert = false;
 		int nbrReplicaToSend = 0;
 		std::map<unsigned long, int>::iterator it2 = bundlesRmgReplica.find(serial);
@@ -247,9 +242,6 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		}else{
 			int remainingCopy = it2->second;
 			if ((remainingCopy <= 0 ) || (remainingCopy > nbrReplica )){
-				cout << "My Address" << myNetwAddr << endl;
-				cout << "Dest Address" << destAddr << endl;
-				cout << "WSM Serial" << serial << endl;
 				opp_error("Invalid remaining replica");
 			}else if (remainingCopy == 1 ){
 				nbrReplicaToSend = 1;
@@ -267,10 +259,8 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		netwPkt->encapsulate(wsm->dup());
 		sendDown(netwPkt);
 		if (!withExplicitH2HAck){
-//			cout << "Before (@,serial): (" << myNetwAddr << "," << serial << ") NbrReplicaToSend " << nbrReplicaToSend << " Current NbrReplica " << bundlesReplicaIndex[serial] << " Current RgmReplica " << bundlesRmgReplica[serial] << endl;
 			bundlesReplicaIndex[serial] = bundlesReplicaIndex[serial] + nbrReplicaToSend;
 			bundlesRmgReplica[serial] = bundlesRmgReplica[serial] - nbrReplicaToSend;
-//			cout << "After (@,serial): (" << myNetwAddr << "," << serial << ") NbrReplicaToSend " << nbrReplicaToSend << " Current NbrReplica " << bundlesReplicaIndex[serial] << " Current RgmReplica " << bundlesRmgReplica[serial] << endl;
 			if (custodyTransfert){
 				erase(serial);
 			}
@@ -404,10 +394,12 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 			opp_warning("GeoSprayNetwLayer::handleBundleAckMsg - Unsupported handling of more then a single H2HAck");
 		}
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
-			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + netwPkt->getNbrReplica();
-			bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - netwPkt->getNbrReplica();
-			if (netwPkt->getCustodyTransfert() || (bundlesRmgReplica[*it] <= 0)){
-				erase(*it);
+			if (exist(*it)){
+				bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + netwPkt->getNbrReplica();
+				bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - netwPkt->getNbrReplica();
+				if (netwPkt->getCustodyTransfert() || (bundlesRmgReplica[*it] <= 0)){
+					erase(*it);
+				}
 			}
 		}
 	}
