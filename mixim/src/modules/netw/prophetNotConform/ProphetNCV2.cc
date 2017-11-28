@@ -168,7 +168,7 @@ void ProphetNCV2::sendingHelloMsg()
 	netwPkt->setPreds(predToSend);
 	if (withPredLength){
 		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-		int length = predsLength + netwPkt->getBitLength();
+		int length = predsLength *8+ netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 	}
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
@@ -227,7 +227,7 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setH2hAcks(storedBundle);
 		int nbrEntries = storedAck.size()+ storedBundle.size();
-		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+		int length = sizeof(unsigned long) * (nbrEntries) *8+ netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 		sendDown(netwPkt);
@@ -271,7 +271,7 @@ void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<u
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * wsmResponseBndl.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	//cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
@@ -370,7 +370,7 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }

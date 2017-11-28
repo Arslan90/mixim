@@ -174,7 +174,7 @@ void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }

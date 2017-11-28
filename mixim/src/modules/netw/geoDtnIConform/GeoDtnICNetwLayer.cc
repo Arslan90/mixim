@@ -207,7 +207,7 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 //			nbrEntries+= custodyAckSerial.size();
 //		}
 	}
-	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * (nbrEntries) *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
@@ -452,7 +452,7 @@ void GeoDtnICNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
@@ -468,7 +468,7 @@ void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	}
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
@@ -484,7 +484,7 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	std::set<unsigned long> serialOfH2HAck = std::set<unsigned long>(wsmDeliverd);
 	netwPkt->setH2hAcks(serialOfH2HAck);
 	netwPkt->setCustodyTransfert(custodyTransfer);
-	int length = sizeof(unsigned long) * serialOfH2HAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfH2HAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }

@@ -107,7 +107,7 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	netwPkt->setE2eAcks(storedAck);
 	int nbrEntries = storedAck.size();
-	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * (nbrEntries) *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt);
@@ -147,7 +147,7 @@ void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 		serialOfH2hAck.insert((*it)->getSerial());
 	}
 	netwPkt->setH2hAcks(serialOfH2hAck);
-	int length = sizeof(unsigned long) * serialOfH2hAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfH2hAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
@@ -185,7 +185,7 @@ void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std:
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	netwPkt->setSrcMETD(getCurrentMETD());
-	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * wsmResponseBndl.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
@@ -362,7 +362,7 @@ void GeoSprayNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
@@ -375,7 +375,7 @@ void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setH2hAcks(serialOfH2HAck);
 	netwPkt->setNbrReplica(nbrReplica);
 	netwPkt->setCustodyTransfert(custodyTransfer);
-	int length = sizeof(unsigned long) * serialOfH2HAck.size()+ netwPkt->getBitLength();
+	int length = sizeof(unsigned long) * serialOfH2HAck.size() *8+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt);
 }
