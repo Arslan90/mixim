@@ -36,5 +36,12 @@ simple PyGraphServerManager
         
 		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=count,mean,last,vector);
 		@statistic[totalOverhead](title="OT";source="totalOverhead";record=count,mean,last,vector);
+		@statistic[ratioCtrlData](title="RCD";source="ratioCtrlData";record=count,mean,last,vector);
+		@statistic[ratioRecvSent](title="RRS";source="ratioRecvSent";record=count,mean,last,vector);
+		
+		@statistic[TotalSizeHelloCtrl](title="THC";source="TotalSizeHelloCtrl";record=count,mean,last,vector);
+		@statistic[TotalSizeOtherCtrl](title="TOC";source="TotalSizeOtherCtrl";record=count,mean,last,vector);
+		@statistic[TotalSizeCtrl](title="TC";source="TotalSizeCtrl";record=count,mean,last,vector);
+		@statistic[TotalSizeData](title="TD";source="TotalSizeData";record=count,mean,last,vector);
         
 }

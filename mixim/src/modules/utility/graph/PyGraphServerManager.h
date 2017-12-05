@@ -33,6 +33,7 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	std::string sendRequestToPyServer(std::string buf);
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, const char *s);
 
   protected:
     virtual void initialize(int stage);
@@ -62,11 +63,29 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	long nbrUniqueBundleReceived;
 	long nbrL3BundleReceived;
 
+	double helloCtrlSentSizeKbits;
+	double otherCtrlSentSizeKbits;
+	double dataSentSizeKbits;
+
 	simsignal_t sentSignalId, receiveSignalId, receiveL3SignalId ,tSentSignalId, tReceiveSignalId, tReceiveL3SignalId;
+
+	simsignal_t sentBitsLengthSignalId;
 
 	simsignal_t dR;
 
 	simsignal_t oT;
+
+	simsignal_t rCtrlData;
+
+	simsignal_t rRecvSent;
+
+	simsignal_t sizeHelloCtrl;
+
+	simsignal_t sizeOtherCtrl;
+
+	simsignal_t sizeCtrl;
+
+	simsignal_t sizeData;
 
 	bool collectStatOnly;
 };

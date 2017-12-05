@@ -17,6 +17,7 @@
 #include <unistd.h>
 #include "stdio.h"
 #include "clistener.h"
+#include "DtnApplLayer.h"
 //#include <sys/socket.h> // Needed for the socket functions
 //#include <netdb.h>      // Needed for the socket functions
 
@@ -46,20 +47,41 @@ void PyGraphServerManager::initialize(int stage)
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
 		simulation.getSystemModule()->subscribe(receiveL3SignalId, this);
 
+		sentBitsLengthSignalId = registerSignal("sentBitsLength");
+		simulation.getSystemModule()->subscribe(sentBitsLengthSignalId, this);
+
 		tSentSignalId = registerSignal("TotalSentBndl");
 		tReceiveSignalId = registerSignal("TotalReceivedBndl");
 		tReceiveL3SignalId = registerSignal("TotalL3ReceivedBndl");
 
 		dR = registerSignal("deliveryRatio");
 		oT = registerSignal("totalOverhead");
+		rCtrlData = registerSignal("ratioCtrlData");
+		rRecvSent = registerSignal("ratioRecvSent");
+
+		sizeHelloCtrl = registerSignal("TotalSizeHelloCtrl");
+		sizeOtherCtrl = registerSignal("TotalSizeOtherCtrl");
+		sizeCtrl = registerSignal("TotalSizeCtrl");
+		sizeData = registerSignal("TotalSizeData");
 
 		emit(dR, 0.0);
 		emit(oT, 0.0);
+		emit(rCtrlData, 0.0);
+		emit(rRecvSent, 0.0);
+
+		emit(sizeHelloCtrl, 0.0);
+        emit(sizeOtherCtrl, 0.0);
+        emit(sizeCtrl, 0.0);
+        emit(sizeData, 0.0);
 
 		nbrBundleSent = 0;
 		nbrBundleReceived = 0;
 		nbrUniqueBundleReceived = 0;
 		nbrL3BundleReceived = 0;
+
+		helloCtrlSentSizeKbits = 0;
+		otherCtrlSentSizeKbits = 0;
+		dataSentSizeKbits = 0;
 
 		collectStatOnly = par("collectStatOnly").boolValue();
 
@@ -128,6 +150,11 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	if (strcmp(getSignalName(signalID),"receivedBndl") == 0){
 		nbrUniqueBundleReceived++;
 		emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
+		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
+			double uniqDataReceived = (double) (nbrUniqueBundleReceived * DtnApplLayer::getDataLengthBitsAsStatic()) / 1024;
+			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
+			emit(rRecvSent, ratio);
+		}
 	}
 	if (strcmp(getSignalName(signalID),"receivedL3Bndl") == 0){
 		nbrL3BundleReceived++;
@@ -135,10 +162,79 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	}
 }
 
+void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalID, const char *s)
+{
+	Enter_Method_Silent();
+	if (strcmp(getSignalName(signalID),"sentBitsLength") == 0){
+		std::string hCtrlSizeAsStr = "", oCtrlSizeAsStr = "", nbrEncapDataAsStr = "";
+		long helloCtrlSize = 0, otherCtrlSize = 0, nbrEncapData = 0;
+
+		char* signalStr = strdup(s);
+
+		hCtrlSizeAsStr = std::string(strtok(signalStr,":"));
+		if (hCtrlSizeAsStr != ""){ helloCtrlSize = strtol(hCtrlSizeAsStr.c_str(),NULL,10);}
+
+		oCtrlSizeAsStr = std::string(strtok(NULL,":"));
+		if (oCtrlSizeAsStr != ""){ otherCtrlSize = strtol(oCtrlSizeAsStr.c_str(),NULL,10);}
+
+		nbrEncapDataAsStr = std::string(strtok(NULL,":"));
+		if (nbrEncapDataAsStr != ""){ nbrEncapData = strtol(nbrEncapDataAsStr.c_str(),NULL,10);}
+
+		if (helloCtrlSize != 0){
+			helloCtrlSentSizeKbits += ((double)helloCtrlSize / 1024);
+			emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
+		}
+
+		if (otherCtrlSize != 0){
+			otherCtrlSentSizeKbits += ((double)otherCtrlSize / 1024);
+			emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
+		}
+
+		int dataLength = DtnApplLayer::getDataLengthBitsAsStatic();
+		if (nbrEncapData != 0){
+			dataSentSizeKbits += ((double)nbrEncapData * dataLength / 1024);
+			emit(sizeData, dataSentSizeKbits);
+		}
+
+		if ((helloCtrlSize != 0) || (otherCtrlSize != 0)){
+			emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
+		}
+
+		if ((helloCtrlSize != 0) || (otherCtrlSize != 0) || (nbrEncapData != 0)){
+			if (dataSentSizeKbits != 0){
+				emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
+			}
+		}
+
+		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
+			double uniqDataReceived = (double) (nbrUniqueBundleReceived * dataLength) / 1024;
+			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
+			emit(rRecvSent, ratio);
+		}
+	}
+}
+
 void PyGraphServerManager::finish(){
 	// Resenting signals before closing finishing and clearing all data
 	emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
 	emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
+	if (dataSentSizeKbits != 0){
+		emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
+	}else {
+		emit(rCtrlData, 0);
+	}
+
+	if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
+		double uniqDataReceived = (double) (nbrUniqueBundleReceived * DtnApplLayer::getDataLengthBitsAsStatic()) / 1024;
+		double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
+		emit(rRecvSent, ratio);
+	}
+
+	emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
+	emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
+	emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
+	emit(sizeData, dataSentSizeKbits);
+
 	recordScalar("# Total Bundle Sent", nbrBundleSent);
 	recordScalar("# Total Bundle Received by L3", nbrL3BundleReceived);
 	recordScalar("# Total Unique Bundle Received by VPAs", nbrUniqueBundleReceived);

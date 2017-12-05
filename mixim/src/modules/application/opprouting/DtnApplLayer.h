@@ -44,6 +44,11 @@ class DtnApplLayer : public BaseWaveApplLayer	{
         return currentSector;
     }
 
+    int getDataLengthBits() const
+    {
+    	return dataLengthBits;
+    }
+
 
 protected:
     /**ARTURO/Arslan  @brief Message kinds used by Dtn Appl Layer */
@@ -188,12 +193,16 @@ protected:
 
 		simsignal_t sentSignalId, receiveSignalId;
 
+		static int dataLengthBitsAsStatic;
+
 
 public:
 		t_scenarioType getScenarioModel() const
 		{
 			return scenarioModel;
 		}
+
+		static int getDataLengthBitsAsStatic();
 
 };
 
