@@ -107,10 +107,11 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	netwPkt->setE2eAcks(storedAck);
 	int nbrEntries = storedAck.size();
-	int length = sizeof(unsigned long) * (nbrEntries) *8+ netwPkt->getBitLength();
+	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
+	int length = helloControlBitLength+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt);
+	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
 void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
@@ -147,9 +148,10 @@ void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 		serialOfH2hAck.insert((*it)->getSerial());
 	}
 	netwPkt->setH2hAcks(serialOfH2hAck);
-	int length = sizeof(unsigned long) * serialOfH2hAck.size() *8+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * serialOfH2hAck.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void GeoSprayNetwLayer::handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt)
@@ -185,9 +187,10 @@ void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std:
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	netwPkt->setSrcMETD(getCurrentMETD());
-	int length = sizeof(unsigned long) * wsmResponseBndl.size() *8+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void GeoSprayNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
@@ -257,7 +260,7 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		netwPkt->setNbrReplica(nbrReplicaToSend);
 		netwPkt->setCustodyTransfert(custodyTransfert);
 		netwPkt->encapsulate(wsm->dup());
-		sendDown(netwPkt);
+		sendDown(netwPkt, 0, 0, 1);
 		if (!withExplicitH2HAck){
 			bundlesReplicaIndex[serial] = bundlesReplicaIndex[serial] + nbrReplicaToSend;
 			bundlesRmgReplica[serial] = bundlesRmgReplica[serial] - nbrReplicaToSend;
@@ -298,7 +301,7 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		GeoDtnNetwPkt *bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
 		bundleMsg->encapsulate(wsm->dup());
-		sendDown(bundleMsg);
+		sendDown(bundleMsg, 0, 0, 1);
 		if(!withExplicitE2EAck){
 			serialsToDelete.insert(serial);
 		}
@@ -362,9 +365,10 @@ void GeoSprayNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size() *8+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDeliverd, int nbrReplica, bool custodyTransfer)
@@ -375,9 +379,10 @@ void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setH2hAcks(serialOfH2HAck);
 	netwPkt->setNbrReplica(nbrReplica);
 	netwPkt->setCustodyTransfert(custodyTransfer);
-	int length = sizeof(unsigned long) * serialOfH2HAck.size() *8+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * serialOfH2HAck.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
