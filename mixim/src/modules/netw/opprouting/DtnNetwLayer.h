@@ -96,6 +96,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	cOutVector intercontactDurVector;
 
+	cOutVector nbrStoredBundleVector;
+
 	std::map<LAddress::L3Type, double> contacts;
 
 	std::map<LAddress::L3Type, double> endContactTime;

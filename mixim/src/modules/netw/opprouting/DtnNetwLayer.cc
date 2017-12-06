@@ -124,6 +124,9 @@ void DtnNetwLayer::initialize(int stage)
 		sumOfInterContactDur = 0.0;
 		intercontactDurVector.setName("Evolution of intercontact duration mean");
 
+		nbrStoredBundleVector.setName("StoredBundles");
+		nbrStoredBundleVector.record(0);
+
 		deletedBundlesWithAck = 0;
 
 		delayed = par("delayed").doubleValue();
@@ -284,6 +287,8 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  	if (bundles.size() != bundlesCopy.size()){
 	  		opp_error("Double insertion in bundles Index");
 	  	}
+
+		nbrStoredBundleVector.record(bundles.size());
 	}
 
 	if (bundles.size() > 0){
