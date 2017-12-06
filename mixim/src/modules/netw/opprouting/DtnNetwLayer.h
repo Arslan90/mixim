@@ -96,6 +96,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	cOutVector intercontactDurVector;
 
+	cOutVector nbrStoredBundleVector;
+
 	std::map<LAddress::L3Type, double> contacts;
 
 	std::map<LAddress::L3Type, double> endContactTime;
@@ -222,6 +224,7 @@ class DtnNetwLayer : public BaseNetwLayer {
     std::set<LAddress::L3Type> neighborsAddress;
     bool withConnectionRestart;
     simsignal_t receiveL3SignalId;
+    simsignal_t sentBitsLengthSignalId;
     std::set<unsigned long > bundleSentPerVPA;
     std::set<unsigned long > ackReceivedPerVPA;
 
@@ -491,9 +494,20 @@ public:
 
   	void sendDown(cMessage* msg);
 
+  	void sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlLength, short nbrEncapData);
+
   	virtual WaveShortMessage* getStoredWSMFromSerial(unsigned long serial);
 
   	virtual std::vector<WaveShortMessage* > scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType);
+
+  	string lg2Str(long longToConvert)
+  	{
+  		std::stringstream ss;
+  		ss << longToConvert;
+  		std::string str = std::string(ss.str());
+  		return str;
+  	}
+
   public:
 	/*
 	 * Getter for isEquiped boolean

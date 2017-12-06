@@ -166,13 +166,15 @@ void ProphetNCV2::sendingHelloMsg()
 	ageDeliveryPreds();
 	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
 	netwPkt->setPreds(predToSend);
+	long helloControlBitLength = 0;
 	if (withPredLength){
 		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-		int length = predsLength + netwPkt->getBitLength();
+		helloControlBitLength = sizeof(unsigned long) * (predsLength) *8;
+		int length = helloControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 	}
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt);
+	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
 void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
@@ -227,10 +229,11 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setH2hAcks(storedBundle);
 		int nbrEntries = storedAck.size()+ storedBundle.size();
-		int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+		long otherControlBitLength = sizeof(unsigned long) * nbrEntries *8;
+		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
-		sendDown(netwPkt);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
 }
 
@@ -271,10 +274,10 @@ void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<u
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-	int length = sizeof(unsigned long) * wsmResponseBndl.size()+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	//cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
@@ -318,7 +321,7 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 		ProphetNCPkt* bundleMsg = new ProphetNCPkt();
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
-		sendDown(bundleMsg);
+		sendDown(bundleMsg, 0, 0, 1);
 		if (destType == Veh){
 			bundlesReplicaIndex[serial]++;
 		}
@@ -369,10 +372,10 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-	netwPkt->setE2eAcks(serialOfE2EAck);
-	int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	sendDown(netwPkt);
+	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)

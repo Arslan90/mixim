@@ -91,10 +91,11 @@ void EpidemicNetwLayer::sendingHelloMsg()
 	}
 	netwPkt->setH2hAcks(storedBundle);
 	int nbrEntries = ackSerial.size()+ storedBundle.size();
-	int length = sizeof(unsigned long) * (nbrEntries)+ netwPkt->getBitLength();
+	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
+	int length = helloControlBitLength+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
-	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt);
+		coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
 void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
@@ -136,10 +137,10 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 		prepareNetwPkt(netwPkt, Bundle_Response, nodeAddr);
 		netwPkt->setH2hAcks(serialResponseBndl);
-		int length = sizeof(unsigned long) * (wsmResponseBndl.size())+ netwPkt->getBitLength();
+		long otherControlBitLength = sizeof(unsigned long) * (serialResponseBndl.size()) *8;
+		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
-//		cout << "Sending BundleResponse packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
-		sendDown(netwPkt);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
 }
 
@@ -184,7 +185,7 @@ void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType
 		GeoDtnNetwPkt* bundleMsg = new GeoDtnNetwPkt();
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
-		sendDown(bundleMsg);
+		sendDown(bundleMsg, 0, 0, 1);
 		if (destType == Veh){
 			bundlesReplicaIndex[serial]++;
 		}
@@ -237,9 +238,10 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 		std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 		netwPkt->setE2eAcks(serialOfE2EAck);
-		int length = sizeof(unsigned long) * serialOfE2EAck.size()+ netwPkt->getBitLength();
+		long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
-		sendDown(netwPkt);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
 }
 

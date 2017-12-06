@@ -65,7 +65,7 @@ void DtnNetwLayer::initialize(int stage)
 
 		equipedVehPc = par("equipedVehPc").doubleValue();
 		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
-			opp_error("Pourcentage of equiped vehicle is wrong, please correct it");
+			opp_error("Percentage of equipped vehicle is wrong, please correct it");
 		}
 		if (equipedVehPc == 1){
 			isEquiped = true;
@@ -124,6 +124,9 @@ void DtnNetwLayer::initialize(int stage)
 		sumOfInterContactDur = 0.0;
 		intercontactDurVector.setName("Evolution of intercontact duration mean");
 
+		nbrStoredBundleVector.setName("StoredBundles");
+		nbrStoredBundleVector.record(0);
+
 		deletedBundlesWithAck = 0;
 
 		delayed = par("delayed").doubleValue();
@@ -145,6 +148,7 @@ void DtnNetwLayer::initialize(int stage)
         withConnectionRestart = par("withConnectionRestart").boolValue();
 
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
+		sentBitsLengthSignalId = registerSignal("sentBitsLength");
 
 		nbrNeighors = 0;
 		nbrCountForMeanNeighbors = 0;
@@ -283,6 +287,8 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  	if (bundles.size() != bundlesCopy.size()){
 	  		opp_error("Double insertion in bundles Index");
 	  	}
+
+		nbrStoredBundleVector.record(bundles.size());
 	}
 
 	if (bundles.size() > 0){
@@ -1302,6 +1308,13 @@ void DtnNetwLayer::sendDown(cMessage *msg)
 {
 	BaseLayer::sendDown(msg);
 	updatingL3Sent();
+}
+
+void DtnNetwLayer::sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlLength, short nbrEncapData)
+{
+	string signalStr = lg2Str(HelloCtrlLength)+":"+lg2Str(OtherCtrlLength)+":"+lg2Str(nbrEncapData);
+	emit(sentBitsLengthSignalId,signalStr.c_str());
+	sendDown(msg);
 }
 
 void DtnNetwLayer::storeAckSerial(unsigned long  serial)

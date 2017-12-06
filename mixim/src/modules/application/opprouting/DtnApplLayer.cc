@@ -128,6 +128,8 @@ void DtnApplLayer::initialize(int stage)
 		nbrMsgSent = 0;
 		nbrMsgReceived = 0;
 
+		DtnApplLayer::dataLengthBitsAsStatic = dataLengthBits;
+
 		avgDelay = 0;
 		totalDelay = 0;
 
@@ -243,6 +245,9 @@ DtnApplLayer::~DtnApplLayer()
 {
 }
 
+int DtnApplLayer::getDataLengthBitsAsStatic()
+{
+	return dataLengthBitsAsStatic;
+}
 
-
-
+int DtnApplLayer::dataLengthBitsAsStatic = 0;
