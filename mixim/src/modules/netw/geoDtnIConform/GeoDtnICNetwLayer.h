@@ -93,6 +93,9 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	int custodyList;
 
+	std::set<unsigned long> custodySerialDeleted;
+	std::multimap<double, unsigned long> custodySerialTimeStamp;
+
 	enum CustodyListEnum {
 		No_Diffuse = 0,
 		Diffuse = 1,
@@ -149,7 +152,7 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 //  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, std::pair<LAddress::L3Type, double> FwdDist, std::pair<LAddress::L3Type, double> FwdMETD);
 
-  	void sendingBundleMsg();
+//  	void sendingBundleMsg();
 
   	void newSendingBundleMsg(GeoDtnNetwPkt *netwPkt);
 
@@ -169,10 +172,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	void recordStatsFwds(std::pair<LAddress::L3Type, double> fwdDist, std::pair<LAddress::L3Type, double> fwdMETD);
 
-  	std::vector<WaveShortMessage*> bundleForNode(LAddress::L3Type node);
-
-  	std::vector<std::pair<WaveShortMessage*, int> > bundleFor1Fwd(LAddress::L3Type fwd);
-
   	virtual void storeAckSerial(unsigned long serial);
 
   	void storeCustodySerial(unsigned long serial);
@@ -181,10 +180,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	
   	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
 
-  	std::pair<LAddress::L3Type, double> getBestFwdMETD();
-
-  	std::pair<LAddress::L3Type, double> getBestFwdDist();
-  	
   	void emitInRadioWithVPA(LAddress::L3Type neighbor, int neighborNodeType, int flagValue);
 
   	void updateInRadioWithVPA(short kind, int neighborNodeType);
@@ -204,6 +199,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	bool makeCustodyDecision(double srcDist);
 
   	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
+
+  	virtual void deletedCustodySerials();
 };
 
 #endif

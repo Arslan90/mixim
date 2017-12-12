@@ -195,6 +195,11 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
 {
 //	/*************************** E2E Acks **********/
+	/***************** Cleaning AckSerials from old entries *****/
+	if (withTTLForCtrl){
+		deletedAckSerials();
+	}
+	/***************** Cleaning AckSerials from old entries *****/
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 
 //	/*************************** H2H Acks (stored bundles) **********/

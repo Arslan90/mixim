@@ -81,6 +81,12 @@ void EpidemicNetwLayer::finish()
 
 void EpidemicNetwLayer::sendingHelloMsg()
 {
+	/***************** Cleaning AckSerials from old entries *****/
+	if (withTTLForCtrl){
+		deletedAckSerials();
+	}
+	/***************** Cleaning AckSerials from old entries *****/
+
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);

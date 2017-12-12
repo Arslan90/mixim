@@ -251,6 +251,15 @@ class DtnNetwLayer : public BaseNetwLayer {
 	// E2E Acks serial
 	std::set<unsigned long > ackSerial;
 
+	bool withTTLForCtrl;
+	int ttlForCtrl;
+	double factorForTTLCtrl;
+
+    int nbrCtrlDeletedWithTTL;
+
+	std::set<unsigned long> ackSerialDeleted;
+	std::multimap<double, unsigned long> ackSerialTimeStamp;
+
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
 	 */
@@ -394,6 +403,8 @@ public:
   	virtual void storeAckSerial(unsigned long serial);
 
   	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
+
+  	virtual void deletedAckSerials();
 
   	/*
   	 * Convert a string to L3Address

@@ -33,6 +33,11 @@ simple DtnNetwLayer extends BaseNetwLayer
     	bool withTTL = default(false);
     	int ttl = default(900);
     	
+    	bool withTTLForCtrl = default(false);
+    	//int ttlForCtrl = default(900);
+    	
+    	double factorForTTLCtrl = default(1.0);
+    	
     	bool DF = default(false);
     	int MTU = default(2304); // MTU for WIFI 802.11P in bytes (octets)
     	headerLength @unit(bit) = default(272bit);

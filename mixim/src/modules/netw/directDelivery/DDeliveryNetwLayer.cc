@@ -76,6 +76,12 @@ void DDeliveryNetwLayer::finish()
 
 void DDeliveryNetwLayer::sendingHelloMsg()
 {
+	/***************** Cleaning AckSerials from old entries *****/
+	if (withTTLForCtrl){
+		deletedAckSerials();
+	}
+	/***************** Cleaning AckSerials from old entries *****/
+
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;

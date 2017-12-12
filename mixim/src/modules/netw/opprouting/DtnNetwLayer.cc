@@ -192,6 +192,15 @@ void DtnNetwLayer::initialize(int stage)
 		firstSentToVPA = false;
 
 		meetVPA = false;
+
+		/* Setting Timers for Ctrl Msgs */
+		withTTLForCtrl = par("withTTLForCtrl").boolValue();
+		factorForTTLCtrl = par("factorForTTLCtrl").doubleValue();
+
+		double ttlForCtrlAsDbl = ttl * factorForTTLCtrl;
+		ttlForCtrl = (int) ttlForCtrlAsDbl;
+
+		nbrCtrlDeletedWithTTL = 0;
 	}
 
 	if (stage == 2){
@@ -1004,6 +1013,10 @@ void DtnNetwLayer::recordAllScalars()
 		recordScalar("# DeletedBundlesWithTTL", nbrDeletedWithTTL);
 	}
 
+	if (withTTLForCtrl){
+		recordScalar("# DeletedCtrlMsgsWithTTL", nbrCtrlDeletedWithTTL);
+	}
+
 	if (withRestart){
 		recordScalar("# Restarted IEP", nbrRestartedIEP);
 	}
@@ -1319,8 +1332,15 @@ void DtnNetwLayer::sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlL
 
 void DtnNetwLayer::storeAckSerial(unsigned long  serial)
 {
-	if (ackSerial.count(serial) == 0){
-		ackSerial.insert(serial);
+	if (withTTLForCtrl){
+		if ((ackSerial.count(serial) == 0) && (ackSerialDeleted.count(serial) == 0)){
+			ackSerial.insert(serial);
+			ackSerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
+		}
+	}else{
+		if (ackSerial.count(serial) == 0){
+			ackSerial.insert(serial);
+		}
 	}
 }
 
@@ -1332,6 +1352,27 @@ void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
     		deletedBundlesWithAck++;
     	}
     }
+}
+
+void DtnNetwLayer::deletedAckSerials(){
+	double expirationTime = simTime().dbl() - ttlForCtrl;
+	std::multimap<double,unsigned long>::iterator it,itlow,itup;
+	itlow = ackSerialTimeStamp.upper_bound (0.0);  // itlow points to b
+	itup = ackSerialTimeStamp.lower_bound (expirationTime);   // itup points to e (not d)
+
+	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
+
+	// print range [itlow,itup):
+	for (it=itlow; it!=itup; it++){
+	    //std::cout << (*it).first << " => " << (*it).second << '\n';
+	    nbrCtrlDeletedWithTTL++;
+	    ackSerial.erase((*it).second);
+	    ackSerialDeleted.insert((*it).second);
+	}
+
+	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
+
+	ackSerialTimeStamp.erase ( itlow, itup ); // erasing by range
 }
 
 WaveShortMessage* DtnNetwLayer::getStoredWSMFromSerial(unsigned long serial){
