@@ -50,9 +50,9 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	int Fwd_Yes_Dist;
 	int Fwd_Yes_Both;
 
-	std::set<unsigned long> custodySerial;
+	//std::set<unsigned long> custodySerial;
 
-	//std::map<unsigned long, double> custodySerial;
+	std::map<unsigned long, double> custodySerial;
 
 	std::set<unsigned long > missedOpportunities;
 
@@ -176,9 +176,9 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	virtual void storeAckSerial(unsigned long serial);
 
-  	void storeCustodySerial(unsigned long serial);
+  	void storeCustodySerial(unsigned long serial, double timestamp);
 
-  	void storeCustodySerials(std::set<unsigned long> setOfSerials);
+  	void storeCustodySerials(std::map<unsigned long, double > setOfSerials);
   	
   	std::set<unsigned long> buildCustodySerialWithTimeStamp();
 

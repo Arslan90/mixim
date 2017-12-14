@@ -17,9 +17,11 @@ cplusplus {{
 #include "DtnNetwPkt_m.h"
 #include "SimpleAddress.h"
 #include "BundleMeta.h"
+#include <map>
 typedef std::list<BundleMeta> bndlMeta;
 typedef std::set<LAddress::L3Type> Neighbors;
 typedef std::set<unsigned long> CustodySerials;
+typedef std::map<unsigned long, double> CustodySerialsWithTimestamp;
 }}
 packet DtnNetwPkt;
 
@@ -29,6 +31,7 @@ class noncobject bndlMeta;
 class LAddress::L3Type extends void;
 class noncobject Neighbors;
 class noncobject CustodySerials;
+class noncobject CustodySerialsWithTimestamp;
 //
 // TODO generated message class
 //
@@ -45,6 +48,7 @@ packet GeoDtnNetwPkt extends DtnNetwPkt {
     bndlMeta bndlmeta = std::list<BundleMeta>();
     Neighbors knownNeighbors;
     CustodySerials custodySerials;
+    CustodySerialsWithTimestamp custodySerialsWithTimestamp;
     int nbrReplica;
     
     int result_Field @enum(t_result_field);
