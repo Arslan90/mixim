@@ -1332,26 +1332,30 @@ void DtnNetwLayer::sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlL
 
 void DtnNetwLayer::storeAckSerial(unsigned long  serial)
 {
-	if (withTTLForCtrl){
-		if ((ackSerial.count(serial) == 0) && (ackSerialDeleted.count(serial) == 0)){
-			ackSerial.insert(serial);
-			ackSerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
-		}
-	}else{
-		if (ackSerial.count(serial) == 0){
-			ackSerial.insert(serial);
+	if (withAck){
+		if (withTTLForCtrl){
+			if ((ackSerial.count(serial) == 0) && (ackSerialDeleted.count(serial) == 0)){
+				ackSerial.insert(serial);
+				ackSerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
+			}
+		}else{
+			if (ackSerial.count(serial) == 0){
+				ackSerial.insert(serial);
+			}
 		}
 	}
 }
 
 void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 {
-    for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-    	storeAckSerial(*it);
-    	if (erase(*it)){
-    		deletedBundlesWithAck++;
-    	}
-    }
+	if (withAck){
+		for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+			storeAckSerial(*it);
+			if (erase(*it)){
+				deletedBundlesWithAck++;
+			}
+		}
+	}
 }
 
 void DtnNetwLayer::deletedAckSerials(){

@@ -14,7 +14,9 @@
 // 
 
 #include "GeoDtnICNetwLayer.h"
+#include "math.h"
 #include "algorithm"
+#include "multiFunctions.h"
 
 Define_Module(GeoDtnICNetwLayer);
 
@@ -73,6 +75,8 @@ void GeoDtnICNetwLayer::initialize(int stage)
 		if ((custodyList != No_Diffuse) && (custodyList != Diffuse) && (custodyList != Diffuse_Delete)){
 			opp_error("No valid CustodyList");
 		}
+
+		majorationOfCustodyTimestamp = par("majorationOfCustodyTimestamp").doubleValue();
 
 	}
 }
@@ -168,7 +172,8 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	double myCurrentDist = getCurrentDist();
-	netwPkt->setSrcMETD(getCurrentMETD());
+	double myCurrentMETD = getCurrentMETD();
+	netwPkt->setSrcMETD(myCurrentMETD);
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	int nbrEntries = 0;
 	if (checkBeforeHelloMechanism()){
@@ -192,10 +197,20 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 			}
 			/***************** Cleaning CustodySerials from old entries *****/
 			// If we use Dist metric, Custody mode is Yes and Custody list is > 0
-			custodyBundle = std::set<unsigned long >(custodySerial);
+			//custodyBundle = std::set<unsigned long >(custodySerial);
+			custodyBundle = buildCustodySerialWithTimeStamp();
 			if (myCurrentDist == 0){
 				for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-					custodyBundle.insert(*it);
+					unsigned long myCustodySerial = (*it);
+					unsigned long myCustodyTimestamp;
+					if ((myCurrentMETD <= 0)||(myCurrentMETD == maxDbl)) {
+						myCustodyTimestamp = 0;
+					}else{
+						myCustodyTimestamp = (unsigned long) (ceil((myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl())));
+					}
+					unsigned long myCustodyWithTimestamp = multiFunctions::cantorPairingFunc(myCustodySerial, myCustodyTimestamp);
+
+					custodyBundle.insert(myCustodyWithTimestamp);
 				}
 			}
 			netwPkt->setCustodySerials(custodyBundle);
@@ -248,9 +263,11 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    std::set<unsigned long > custodyBundle = netwPkt->getCustodySerials();
 		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
 	    	for(std::set<unsigned long >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
+	    		std::pair<unsigned long, unsigned long > myCustodySerialWithTimeStamp = multiFunctions::inverseCantorPairingFunc((*it));
 	    		storeCustodySerial(*it);
 	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
-	    			erase(*it);
+	    			erase(myCustodySerialWithTimeStamp.first);
+	    			//erase(*it);
 	    		}
 	    	}
 	    }
@@ -333,7 +350,15 @@ void GeoDtnICNetwLayer::newSendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 				if (custodyDecision){
 					erase(serial);
 					if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
-						storeCustodySerial(serial);
+						unsigned long currentTSForSerial;
+						double currentMETDForSerial = netwPkt->getSrcMETD();
+						if ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) {
+							currentTSForSerial = 0;
+						}else{
+							currentTSForSerial = (unsigned long) (ceil((currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl())));
+						}
+						unsigned long serialWithTimestamp = multiFunctions::cantorPairingFunc(serial, currentTSForSerial);
+						storeCustodySerial(serialWithTimestamp);
 					}
 				}
 			}
@@ -447,29 +472,6 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 	}
 }
 
-void GeoDtnICNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDelivred, std::set<unsigned long> wsmFinalDeliverd)
-{
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-//	if (withAddressedAck){
-//		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-//	}else if (!withAddressedAck){
-	if (!withAddressedAck){
-		prepareNetwPkt(netwPkt, Bundle_Ack, LAddress::L3BROADCAST);
-	} else if (withAddressedAck){
-		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-	}
-	std::set<unsigned long> serialOfH2HAck = std::set<unsigned long>(wsmDelivred);
-	netwPkt->setH2hAcks(serialOfH2HAck);
-
-	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-	netwPkt->setE2eAcks(serialOfE2EAck);
-	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
-	int length = otherControlBitLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-	sendDown(netwPkt, 0, otherControlBitLength, 0);
-}
-
-
 void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd)
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
@@ -496,6 +498,10 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	}
 	std::set<unsigned long> serialOfH2HAck = std::set<unsigned long>(wsmDeliverd);
 	netwPkt->setH2hAcks(serialOfH2HAck);
+	double myCurrentDist = getCurrentDist();
+	double myCurrentMETD = getCurrentMETD();
+	netwPkt->setSrcMETD(myCurrentMETD);
+	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	netwPkt->setCustodyTransfert(custodyTransfer);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfH2HAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
@@ -519,20 +525,19 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 			if (netwPkt->getCustodyTransfert()){
 				erase(*it);
 				if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
-					storeCustodySerial(*it);
+					unsigned long currentTSForSerial;
+					double currentMETDForSerial = netwPkt->getSrcMETD();
+					if ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) {
+						currentTSForSerial = 0;
+					}else{
+						currentTSForSerial = (unsigned long) (ceil((currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl())));
+					}
+					unsigned long serialWithTimestamp = multiFunctions::cantorPairingFunc((*it), currentTSForSerial);
+					storeCustodySerial(serialWithTimestamp);
 				}
 			}
 		}
 	}
-//	std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
-//	updateStoredBndlForSession(netwPkt->getSrcAddr(), delivredToBndl);
-//	if (custodyMode == Yes_WithoutACK){
-//		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
-//			erase(*it);
-//		}
-//	}else if (custodyMode == Yes_WithACK){
-//		storeAckSerials(delivredToBndl);
-//	}
 }
 
 ////////////////////////////////////////// Others methods /////////////////////////
@@ -582,15 +587,26 @@ void GeoDtnICNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 
 void GeoDtnICNetwLayer::storeCustodySerial(unsigned long  serial)
 {
+	std::pair<unsigned long, unsigned long > serialWithTimestamp = multiFunctions::inverseCantorPairingFunc(serial);
+	unsigned long currentSerial = serialWithTimestamp.first;
+	unsigned long currentTimestamp = serialWithTimestamp.second;
 	if (withTTLForCtrl){
-		if ((custodySerial.count(serial) == 0) && (custodySerialDeleted.count(serial) == 0)){
-			custodySerial.insert(serial);
+		if (custodySerial.count(currentSerial) == 0){
+			custodySerial.insert(currentSerial);
 	    	currentNbrIsrt++;
-			custodySerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
+	    	std::map<unsigned long, double >::iterator it = custodySerialTimeStamp.find(currentSerial);
+	    	if (it == custodySerialTimeStamp.end()){
+	    		custodySerialTimeStamp.insert(std::pair<unsigned long, double>(currentSerial,(double)(currentTimestamp)));
+	    	}else{
+	    		// If new timestamp longer than previous we update it otherwise we do nothing
+	    		if (it->second < currentTimestamp){
+	    			custodySerialTimeStamp[currentSerial] = currentTimestamp;
+	    		}
+	    	}
 		}
 	}else{
-		if (custodySerial.count(serial) == 0){
-			custodySerial.insert(serial);
+		if (custodySerial.count(currentSerial) == 0){
+			custodySerial.insert(currentSerial);
 	    	currentNbrIsrt++;
 		}
 	}
@@ -601,13 +617,16 @@ void GeoDtnICNetwLayer::storeCustodySerials(std::set<unsigned long > setOfSerial
 	if (nodeType == Veh){
 	    for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
 	    	unsigned long serial = (*it);
+	    	std::pair<unsigned long, unsigned long > myCustodySerialWithTimeStamp = multiFunctions::inverseCantorPairingFunc(serial);
+	    	unsigned long myCustodySerial = myCustodySerialWithTimeStamp.first;
+	    	unsigned long myCustodyTimestamp = myCustodySerialWithTimeStamp.second;
 	    	storeCustodySerial(serial);
 	    	double currentMETD = maxDbl;
 	    	if (withMETDFwd){
 	    		currentMETD = geoTraci->getCurrentNp().getMetd();
 	    	}
 	    	if (currentMETD != 0){
-	    		erase(serial);
+	    		erase(myCustodySerial);
 	    	}
 	    }
 	}
@@ -863,22 +882,41 @@ bool GeoDtnICNetwLayer::makeCustodyDecision(double srcDist)
 
 void GeoDtnICNetwLayer::deletedCustodySerials()
 {
-	double expirationTime = simTime().dbl() - ttlForCtrl;
-	std::multimap<double,unsigned long>::iterator it,itlow,itup;
-	itlow = custodySerialTimeStamp.upper_bound (0.0);  // itlow points to b
-	itup = custodySerialTimeStamp.lower_bound (expirationTime);   // itup points to e (not d)
+	std::set<unsigned long> entriesToDelete;
+	double currentTime = simTime().dbl();
 
 	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
 
-	// print range [itlow,itup):
-	for (it=itlow; it!=itup; it++){
-	    //std::cout << (*it).first << " => " << (*it).second << '\n';
-	    nbrCtrlDeletedWithTTL++;
-	    custodySerial.erase((*it).second);
-	    custodySerialDeleted.insert((*it).second);
+	for (std::map<unsigned long, double>::iterator it = custodySerialTimeStamp.begin(); it != custodySerialTimeStamp.end(); it++){
+		if ((*it).second < currentTime){
+		    //std::cout << (*it).first << " => " << (*it).second << '\n';
+		    nbrCtrlDeletedWithTTL++;
+		    custodySerial.erase((*it).first);
+		    entriesToDelete.insert((*it).first);
+		}
 	}
 
 	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
 
-	custodySerialTimeStamp.erase ( itlow, itup ); // erasing by range
+	for(std::set<unsigned long>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+		custodySerialTimeStamp.erase((*it));
+	}
+}
+
+std::set<unsigned long> GeoDtnICNetwLayer::buildCustodySerialWithTimeStamp(){
+	std::set<unsigned long> myCustodySerialsWithTimeStamp;
+
+	for(std::set<unsigned long>::iterator it = custodySerial.begin(); it != custodySerial.end(); it++){
+		std::map<unsigned long, double>::iterator it2 = custodySerialTimeStamp.find((*it));
+		if (it2 != custodySerialTimeStamp.end()){
+			unsigned long myCustodySerial = it2->first;
+			unsigned long myCustodyTimestamp = (unsigned long) (ceil(it2->second));
+			unsigned long myCustodyWithTimestamp = multiFunctions::cantorPairingFunc(myCustodySerial, myCustodyTimestamp);
+			myCustodySerialsWithTimeStamp.insert(myCustodyWithTimestamp);
+		}else{
+			opp_error("GeoDtnICNetwLayer::buildCustodySerialWithTimeStamp Unable to find CustodySerial in custodySerialTimeStamp");
+		}
+	}
+
+	return myCustodySerialsWithTimeStamp;
 }

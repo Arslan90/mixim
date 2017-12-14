@@ -48,5 +48,7 @@ simple GeoDtnICNetwLayer extends DtnNetwLayer
     	// 1: Diffuse CustodyList
     	// 2: Diffuse CustodyList and Delete bundles consequently
     	int custodyList = default(0);
+    	
+    	double majorationOfCustodyTimestamp = default(1.1);
 
 }

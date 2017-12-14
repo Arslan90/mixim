@@ -52,6 +52,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	std::set<unsigned long> custodySerial;
 
+	//std::map<unsigned long, double> custodySerial;
+
 	std::set<unsigned long > missedOpportunities;
 
 	/**
@@ -94,7 +96,9 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	int custodyList;
 
 	std::set<unsigned long> custodySerialDeleted;
-	std::multimap<double, unsigned long> custodySerialTimeStamp;
+	std::map<unsigned long,double> custodySerialTimeStamp;
+
+	double majorationOfCustodyTimestamp;
 
 	enum CustodyListEnum {
 		No_Diffuse = 0,
@@ -160,8 +164,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	void handleBundleMsg(GeoDtnNetwPkt *netwPkt);
 
-  	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDelivred, std::set<unsigned long> wsmFinalDeliverd);
-
   	void sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd);
 
   	void sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDeliverd, bool custodyTransfer);
@@ -178,6 +180,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	void storeCustodySerials(std::set<unsigned long> setOfSerials);
   	
+  	std::set<unsigned long> buildCustodySerialWithTimeStamp();
+
   	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
 
   	void emitInRadioWithVPA(LAddress::L3Type neighbor, int neighborNodeType, int flagValue);
