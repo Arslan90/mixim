@@ -42,6 +42,11 @@ void GeoSprayNetwLayer::handleLowerMsg(cMessage *msg)
 			case HELLO:
 				handleHelloMsg(netwPkt);
 				break;
+			case RIB:
+				if ((broadcast1stMsg) || ((!broadcast1stMsg) && (netwPkt->getDestAddr() == myNetwAddr))){
+					handleBundleOfferMsg(netwPkt);
+				}
+				break;
 			case Bundle_Offer:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleOfferMsg(netwPkt);
@@ -110,6 +115,56 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
+//	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+//	netwPkt->setE2eAcks(storedAck);
+//	int nbrEntries = storedAck.size();
+//	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
+//	int length = helloControlBitLength+ netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+//	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+//	sendDown(netwPkt,helloControlBitLength, 0, 0);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,0, 0, 0);
+}
+
+void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+{
+	// If not the same sector ignore message
+	if (netwPkt->getVpaSectorId() != sectorId){
+		return;
+	}else{
+//		/*************************** Handling Hello Msg **********/
+//	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+//	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+//	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+//	    if (!receivedE2eAcks.empty()){
+//	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+//	    	storeAckSerials(receivedE2eAcks);
+//	    }
+//	    /*************************** Sending Bundle Msg **********/
+//		if (nodeType == Veh){
+//			if (netwPkt->getSrcType() == VPA){
+//				sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+//			}else if (netwPkt->getSrcType() == Veh){
+//				sendingBundleOfferMsg(netwPkt->getSrcAddr());
+//			}
+//		}
+		/*************************** Handling Hello Msg **********/
+	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+		/*************************** Sending Bundle Offer Msg **********/
+	    sendingRIBMsg(netwPkt->getSrcAddr());
+	}
+}
+
+void GeoSprayNetwLayer::sendingRIBMsg(LAddress::L3Type nodeAddr)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	if (!broadcast1stMsg){
+		prepareNetwPkt(netwPkt, RIB, nodeAddr);
+	}else{
+		prepareNetwPkt(netwPkt, RIB, LAddress::L3BROADCAST);
+	}
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	netwPkt->setE2eAcks(storedAck);
 	int nbrEntries = storedAck.size();
@@ -120,27 +175,19 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
-void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+void GeoSprayNetwLayer::handleRIBMsg(GeoDtnNetwPkt *netwPkt)
 {
-	// If not the same sector ignore message
-	if (netwPkt->getVpaSectorId() != sectorId){
-		return;
-	}else{
-		/*************************** Handling Hello Msg **********/
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
-	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-	    if (!receivedE2eAcks.empty()){
-	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-	    	storeAckSerials(receivedE2eAcks);
-	    }
-	    /*************************** Sending Bundle Msg **********/
-		if (nodeType == Veh){
-			if (netwPkt->getSrcType() == VPA){
-				sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-			}else if (netwPkt->getSrcType() == Veh){
-				sendingBundleOfferMsg(netwPkt->getSrcAddr());
-			}
+	std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+	if (!receivedE2eAcks.empty()){
+		updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+		storeAckSerials(receivedE2eAcks);
+	}
+	/*************************** Sending Bundle Msg **********/
+	if (nodeType == Veh){
+		if (netwPkt->getSrcType() == VPA){
+			sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+		}else if (netwPkt->getSrcType() == Veh){
+			sendingBundleOfferMsg(netwPkt->getSrcAddr());
 		}
 	}
 }

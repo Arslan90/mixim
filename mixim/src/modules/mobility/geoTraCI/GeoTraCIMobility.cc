@@ -395,7 +395,7 @@ void GeoTraCIMobility::updateCurrentSector()
 				ss11 << netwMod->getReceivedBwicvpa();
 				ss12 << netwMod->getReceivedAwicvpa();
 				if ((netwMod->getReceivedHwicvpa() != 0) ||(netwMod->getReceivedBwicvpa() != 0)||(netwMod->getReceivedAwicvpa() != 0)){
-					cout << "debug found" << endl;
+//					cout << "debug found" << endl;
 				}
 				str= str+":"+ss10.str()+":"+ss11.str()+":"+ss12.str();
 

@@ -77,4 +77,6 @@ simple DtnNetwLayer extends BaseNetwLayer
 		bool withContactTraceFile = default(false);
 		string contactTraceFileName = default("netContact.trace");
 		double contactTrFlUpdatePeriod = default(5.0);
+		
+		bool broadcast1stMsg = default(false);
 }       

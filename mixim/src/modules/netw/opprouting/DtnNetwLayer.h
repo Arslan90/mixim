@@ -260,6 +260,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 	std::set<unsigned long> ackSerialDeleted;
 	std::multimap<double, unsigned long> ackSerialTimeStamp;
 
+	bool broadcast1stMsg;
+
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
 	 */

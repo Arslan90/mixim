@@ -201,6 +201,8 @@ void DtnNetwLayer::initialize(int stage)
 		ttlForCtrl = (int) ttlForCtrlAsDbl;
 
 		nbrCtrlDeletedWithTTL = 0;
+
+		broadcast1stMsg = par("broadcast1stMsg").boolValue();
 	}
 
 	if (stage == 2){

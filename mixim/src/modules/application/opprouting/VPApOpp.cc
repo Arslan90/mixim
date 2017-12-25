@@ -802,7 +802,7 @@ void VPApOpp::receiveSignal(cComponent *source, simsignal_t signalID, const char
 			currentVehDensity--;
 			vehPassedBy++;
 			if ((rcvH >0) || (rcvB >0) || (rcvA >0)){
-				cout << "debug found" << endl;
+//				cout << "debug found" << endl;
 			}
 			if (nbrBndls > 0){ vehHasBndls++;}
 			if (contactedVPA){

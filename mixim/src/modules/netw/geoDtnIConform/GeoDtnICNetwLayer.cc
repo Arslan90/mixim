@@ -94,6 +94,11 @@ void GeoDtnICNetwLayer::handleLowerMsg(cMessage *msg)
 				handleHelloMsg(netwPkt);
 				updateInRadioWithVPA(HELLO,netwPkt->getSrcType());
 				break;
+			case RIB:
+				if ((broadcast1stMsg) || ((!broadcast1stMsg) && (netwPkt->getDestAddr() == myNetwAddr))){
+					handleRIBMsg(netwPkt);
+				}
+				break;
 			case Bundle:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleMsg(netwPkt);
@@ -175,6 +180,157 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	double myCurrentMETD = getCurrentMETD();
 	netwPkt->setSrcMETD(myCurrentMETD);
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
+//	int nbrEntries = 0;
+//	if (checkBeforeHelloMechanism()){
+//		/***************** Cleaning AckSerials from old entries *****/
+//		if (withTTLForCtrl){
+//			deletedAckSerials();
+//		}
+//		/***************** Cleaning AckSerials from old entries *****/
+//		std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+//		netwPkt->setE2eAcks(storedAck);
+//		std::set<unsigned long > storedBundle;
+//		for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+//			storedBundle.insert((*it)->getSerial());
+//		}
+//		netwPkt->setH2hAcks(storedBundle);
+//		std::map<unsigned long,double > custodyBundle;
+//		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
+//			/***************** Cleaning CustodySerials from old entries *****/
+//			if (withTTLForCtrl){
+//				deletedCustodySerials();
+//			}
+//			/***************** Cleaning CustodySerials from old entries *****/
+//			// If we use Dist metric, Custody mode is Yes and Custody list is > 0
+//			custodyBundle = std::map<unsigned long,double >(custodySerial);
+//			//custodyBundle = buildCustodySerialWithTimeStamp();
+//			if (myCurrentDist == 0){
+//				for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+//					unsigned long myCustodySerial = (*it);
+//					double myCustodyTimestamp = 0;
+//					if (  !	((myCurrentMETD <= 0)||(myCurrentMETD == maxDbl)) ) {
+//						myCustodyTimestamp = myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl();
+//					}
+//
+//			    	std::map<unsigned long, double >::iterator it2 = custodyBundle.find(myCustodySerial);
+//			    	if (it2 == custodyBundle.end()){
+//			    		custodyBundle.insert(std::pair<unsigned long, double>(myCustodySerial,myCustodyTimestamp));
+//			    	}else{
+//			    		// If new timestamp longer than previous we update it otherwise we do nothing
+//			    		if (it2->second < myCustodyTimestamp){
+//			    			custodyBundle[myCustodySerial] = myCustodyTimestamp;
+//			    		}
+//			    	}
+//				}
+//			}
+//			netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
+//		}
+//		if (withTTLForCtrl){
+//			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size()*2;
+//		}else{
+//			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size();
+//		}
+//
+//
+////		nbrEntries = ackSerial.size()+ storedBundle.size();
+////		std::set<unsigned long > custodyBundle = std::set<unsigned long >(custodySerial);
+////		if (netwPkt->getSrcDist_NP_VPA() == 0){
+//////			std::set<unsigned long > custodyBundle = std::set<unsigned long >(storedBundle);
+////			for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+////				custodyBundle.insert(*it);
+////			}
+////		}
+////		netwPkt->setCustodySerials(custodyBundle);
+////		nbrEntries+=custodyBundle.size();
+////		if (custodyMode == Yes_WithACK){
+////			netwPkt->setCustodyAcks(custodyAckSerial);
+////			nbrEntries+= custodyAckSerial.size();
+////		}
+//	}
+//	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
+//	int length = helloControlBitLength+ netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+//	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+//	sendDown(netwPkt,helloControlBitLength, 0, 0);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,0, 0, 0);
+}
+
+void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+{
+	// If not the same sector ignore message
+	if (netwPkt->getVpaSectorId() != sectorId){
+		return;
+	}else{
+//		/*************************** Handling Hello Msg **********/
+//	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+//	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+//	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+//	    if (!receivedE2eAcks.empty()){
+//	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+//	    	storeAckSerials(receivedE2eAcks);
+////	    	for(std::set<unsigned long >::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
+////	    		custodyAckSerial.erase(*it);
+////	    	}
+//	    }
+//	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
+//	    if (!storedBundle.empty()){
+//	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+//	    }
+//	    std::map<unsigned long, double > custodyBundle = netwPkt->getCustodySerialsWithTimestamp();
+//		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
+//	    	for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
+//	    		storeCustodySerial(it->first, it->second);
+//	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
+//	    			erase(it->first);
+//	    			//erase(*it);
+//	    		}
+//	    	}
+//	    }
+////	    if ((custodyMode == Yes_WithACK)||(custodyMode == Yes_WithoutACK)){
+////			/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
+////			if(( netwPkt->getSrcDist_NP_VPA() == 0)){
+////				for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+////					erase(*it);
+////				}
+////			}
+////	    }
+////	    if (custodyMode == Yes_WithACK){
+////		    std::set<unsigned long> custodyAcks = netwPkt->getCustodyAcks();
+////		    if (!custodyAcks.empty()){
+////		    	storeCustodyAckSerials(custodyAcks);
+////		    }
+////	    }
+//	    /*************************** Sending Bundle Msg **********/
+//		if (nodeType == Veh){
+//		    if (netwPkt->getSrcType() == VPA){
+//		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+//		    	vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
+//		    }else if (netwPkt->getSrcType() == Veh){
+//		    	//sendingBundleMsg();
+//		    	newSendingBundleMsg(netwPkt);
+//		    }
+//	    }
+		/*************************** Handling Hello Msg **********/
+		NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+		updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+		/*************************** Sending Bundle Offer Msg **********/
+	    sendingRIBMsg(netwPkt->getSrcAddr());
+	}
+}
+
+void GeoDtnICNetwLayer::sendingRIBMsg(LAddress::L3Type nodeAddr)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	if (!broadcast1stMsg){
+		prepareNetwPkt(netwPkt, RIB, nodeAddr);
+	}else{
+		prepareNetwPkt(netwPkt, RIB, LAddress::L3BROADCAST);
+	}
+	double myCurrentDist = getCurrentDist();
+	double myCurrentMETD = getCurrentMETD();
+	netwPkt->setSrcMETD(myCurrentMETD);
+	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	int nbrEntries = 0;
 	if (checkBeforeHelloMechanism()){
 		/***************** Cleaning AckSerials from old entries *****/
@@ -249,37 +405,30 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
-void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+void GeoDtnICNetwLayer::handleRIBMsg(GeoDtnNetwPkt *netwPkt)
 {
-	// If not the same sector ignore message
-	if (netwPkt->getVpaSectorId() != sectorId){
-		return;
-	}else{
-		/*************************** Handling Hello Msg **********/
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
-	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-	    if (!receivedE2eAcks.empty()){
-	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-	    	storeAckSerials(receivedE2eAcks);
+	std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+	if (!receivedE2eAcks.empty()){
+		updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+		storeAckSerials(receivedE2eAcks);
 //	    	for(std::set<unsigned long >::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
 //	    		custodyAckSerial.erase(*it);
 //	    	}
-	    }
-	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
-	    if (!storedBundle.empty()){
-	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
-	    }
-	    std::map<unsigned long, double > custodyBundle = netwPkt->getCustodySerialsWithTimestamp();
-		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
-	    	for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
-	    		storeCustodySerial(it->first, it->second);
-	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
-	    			erase(it->first);
-	    			//erase(*it);
-	    		}
-	    	}
-	    }
+	}
+	std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
+	if (!storedBundle.empty()){
+		updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+	}
+	std::map<unsigned long, double > custodyBundle = netwPkt->getCustodySerialsWithTimestamp();
+	if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
+		for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
+			storeCustodySerial(it->first, it->second);
+			if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
+				erase(it->first);
+				//erase(*it);
+			}
+		}
+	}
 //	    if ((custodyMode == Yes_WithACK)||(custodyMode == Yes_WithoutACK)){
 //			/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
 //			if(( netwPkt->getSrcDist_NP_VPA() == 0)){
@@ -294,16 +443,15 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 //		    	storeCustodyAckSerials(custodyAcks);
 //		    }
 //	    }
-	    /*************************** Sending Bundle Msg **********/
-		if (nodeType == Veh){
-		    if (netwPkt->getSrcType() == VPA){
-		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-		    	vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
-		    }else if (netwPkt->getSrcType() == Veh){
-		    	//sendingBundleMsg();
-		    	newSendingBundleMsg(netwPkt);
-		    }
-	    }
+	/*************************** Sending Bundle Msg **********/
+	if (nodeType == Veh){
+		if (netwPkt->getSrcType() == VPA){
+			sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+			vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
+		}else if (netwPkt->getSrcType() == Veh){
+			//sendingBundleMsg();
+			newSendingBundleMsg(netwPkt);
+		}
 	}
 }
 

@@ -154,6 +154,10 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
+  	void sendingRIBMsg( LAddress::L3Type nodeAddr);
+
+  	void handleRIBMsg(GeoDtnNetwPkt *netwPkt);
+
 //  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, std::pair<LAddress::L3Type, double> FwdDist, std::pair<LAddress::L3Type, double> FwdMETD);
 
 //  	void sendingBundleMsg();

@@ -51,6 +51,10 @@ class EpidemicNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
+  	void sendingRIBMsg( LAddress::L3Type nodeAddr);
+
+  	void handleRIBMsg(GeoDtnNetwPkt *netwPkt);
+
   	void sendingBndlResponseMsg( LAddress::L3Type nodeAddr, std::set<unsigned long> wsmResponseBndl);
 
   	void handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt);

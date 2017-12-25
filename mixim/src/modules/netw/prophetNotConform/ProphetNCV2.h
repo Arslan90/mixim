@@ -273,6 +273,10 @@ private:
 
   	void handleHelloMsg(ProphetNCPkt *netwPkt);
 
+  	void sendingRIBMsg( LAddress::L3Type nodeAddr);
+
+  	void handleRIBMsg(ProphetNCPkt *netwPkt);
+
   	void sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode);
 
   	void handleBundleOfferMsg(ProphetNCPkt *netwPkt);

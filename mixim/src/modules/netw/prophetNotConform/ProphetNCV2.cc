@@ -100,6 +100,11 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
 			case HELLO:
 				handleHelloMsg(netwPkt);
 				break;
+			case RIB:
+				if ((broadcast1stMsg) || ((!broadcast1stMsg) && (netwPkt->getDestAddr() == myNetwAddr))){
+					handleBundleOfferMsg(netwPkt);
+				}
+				break;
 			case Bundle_Offer:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleOfferMsg(netwPkt);
@@ -163,6 +168,50 @@ void ProphetNCV2::sendingHelloMsg()
 {
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
+//	ageDeliveryPreds();
+//	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
+//	netwPkt->setPreds(predToSend);
+//	long helloControlBitLength = 0;
+//	if (withPredLength){
+//		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
+//		helloControlBitLength = sizeof(unsigned long) * (predsLength) *8;
+//		int length = helloControlBitLength + netwPkt->getBitLength();
+//		netwPkt->setBitLength(length);
+//	}
+//	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+//	sendDown(netwPkt,helloControlBitLength, 0, 0);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,0, 0, 0);
+}
+
+void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
+{
+	// If not the same sector ignore message
+	if (netwPkt->getVpaSectorId() != sectorId){
+		return;
+	}else{
+		/*************************** Handling Hello Msg **********/
+//	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+//	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+//	    update(netwPkt);
+//	    /*************************** Sending BundleOffer Msg **********/
+//	    sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
+		/*************************** Handling Hello Msg **********/
+	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+		/*************************** Sending Bundle Offer Msg **********/
+	    sendingRIBMsg(netwPkt->getSrcAddr());
+	}
+}
+
+void ProphetNCV2::sendingRIBMsg(LAddress::L3Type nodeAddr)
+{
+	ProphetNCPkt* netwPkt = new ProphetNCPkt();
+	if (!broadcast1stMsg){
+		prepareNetwPkt(netwPkt, RIB, nodeAddr);
+	}else{
+		prepareNetwPkt(netwPkt, RIB, LAddress::L3BROADCAST);
+	}
 	ageDeliveryPreds();
 	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
 	netwPkt->setPreds(predToSend);
@@ -177,19 +226,11 @@ void ProphetNCV2::sendingHelloMsg()
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
-void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
+void ProphetNCV2::handleRIBMsg(ProphetNCPkt *netwPkt)
 {
-	// If not the same sector ignore message
-	if (netwPkt->getVpaSectorId() != sectorId){
-		return;
-	}else{
-		/*************************** Handling Hello Msg **********/
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
-	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    update(netwPkt);
-	    /*************************** Sending BundleOffer Msg **********/
-	    sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
-	}
+	update(netwPkt);
+	/*************************** Sending BundleOffer Msg **********/
+	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
 }
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
