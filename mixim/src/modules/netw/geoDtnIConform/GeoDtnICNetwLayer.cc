@@ -207,12 +207,12 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 						myCustodyTimestamp = myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl();
 					}
 
-			    	std::map<unsigned long, double >::iterator it = custodyBundle.find(myCustodySerial);
-			    	if (it == custodyBundle.end()){
+			    	std::map<unsigned long, double >::iterator it2 = custodyBundle.find(myCustodySerial);
+			    	if (it2 == custodyBundle.end()){
 			    		custodyBundle.insert(std::pair<unsigned long, double>(myCustodySerial,myCustodyTimestamp));
 			    	}else{
 			    		// If new timestamp longer than previous we update it otherwise we do nothing
-			    		if (it->second < myCustodyTimestamp){
+			    		if (it2->second < myCustodyTimestamp){
 			    			custodyBundle[myCustodySerial] = myCustodyTimestamp;
 			    		}
 			    	}
