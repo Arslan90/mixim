@@ -44,7 +44,7 @@ void GeoSprayNetwLayer::handleLowerMsg(cMessage *msg)
 				break;
 			case RIB:
 				if ((broadcast1stMsg) || ((!broadcast1stMsg) && (netwPkt->getDestAddr() == myNetwAddr))){
-					handleBundleOfferMsg(netwPkt);
+					handleRIBMsg(netwPkt);
 				}
 				break;
 			case Bundle_Offer:
