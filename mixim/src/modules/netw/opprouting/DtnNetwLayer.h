@@ -224,7 +224,10 @@ class DtnNetwLayer : public BaseNetwLayer {
     std::set<LAddress::L3Type> neighborsAddress;
     bool withConnectionRestart;
     simsignal_t receiveL3SignalId;
+    simsignal_t sentL3SignalId;
     simsignal_t sentBitsLengthSignalId;
+    simsignal_t helloCtrlBitsLengthId;
+    simsignal_t otherCtrlBitsLengthId;
     std::set<unsigned long > bundleSentPerVPA;
     std::set<unsigned long > ackReceivedPerVPA;
 
@@ -518,6 +521,10 @@ public:
   		std::string str = std::string(ss.str());
   		return str;
   	}
+
+  	void emitSignalForHelloCtrlMsg(long sizeHC_SB_Octets, long sizeHC_SA_Octets, long sizeHC_CL_Octets, long sizeHC_RCC_Octets);
+
+  	void emitSignalForOtherCtrlMsg(long sizeOC_SB_Octets, long sizeOC_SA_Octets, long sizeOC_CL_Octets, long sizeOC_RCC_Octets);
 
   public:
 	/*

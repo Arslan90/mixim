@@ -112,6 +112,8 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	netwPkt->setE2eAcks(storedAck);
+	long sizeHC_SA_Octets = sizeof(unsigned long) * storedAck.size();
+	emitSignalForHelloCtrlMsg(0, sizeHC_SA_Octets, 0, 0);
 	int nbrEntries = storedAck.size();
 	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
 	int length = helloControlBitLength+ netwPkt->getBitLength();
@@ -154,6 +156,8 @@ void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 		serialOfH2hAck.insert((*it)->getSerial());
 	}
 	netwPkt->setH2hAcks(serialOfH2hAck);
+	long sizeOC_SB_Octets = sizeof(unsigned long) * serialOfH2hAck.size();
+	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfH2hAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -193,6 +197,8 @@ void GeoSprayNetwLayer::sendingBundleResponseMsg(LAddress::L3Type destAddr, std:
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
 	netwPkt->setSrcMETD(getCurrentMETD());
+	long sizeOC_SB_Octets = sizeof(unsigned long) * wsmResponseBndl.size();
+	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -267,6 +273,7 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		netwPkt->setCustodyTransfert(custodyTransfert);
 		netwPkt->encapsulate(wsm->dup());
 		sendDown(netwPkt, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		if (!withExplicitH2HAck){
 			bundlesReplicaIndex[serial] = bundlesReplicaIndex[serial] + nbrReplicaToSend;
 			bundlesRmgReplica[serial] = bundlesRmgReplica[serial] - nbrReplicaToSend;
@@ -308,6 +315,7 @@ void GeoSprayNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		if(!withExplicitE2EAck){
 			serialsToDelete.insert(serial);
 		}
@@ -371,6 +379,8 @@ void GeoSprayNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
+	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -385,6 +395,8 @@ void GeoSprayNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setH2hAcks(serialOfH2HAck);
 	netwPkt->setNbrReplica(nbrReplica);
 	netwPkt->setCustodyTransfert(custodyTransfer);
+	long sizeOC_RCC_Octets = sizeof(unsigned long) * serialOfH2HAck.size();
+	emitSignalForOtherCtrlMsg(0, 0, 0, sizeOC_RCC_Octets);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfH2HAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);

@@ -34,14 +34,33 @@ simple PyGraphServerManager
         int waitingTime = default(200);
         bool collectStatOnly = default(false);
         
-		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=count,mean,last,vector);
-		@statistic[totalOverhead](title="OT";source="totalOverhead";record=count,mean,last,vector);
-		@statistic[ratioCtrlData](title="RCD";source="ratioCtrlData";record=count,mean,last,vector);
-		@statistic[ratioRecvSent](title="RRS";source="ratioRecvSent";record=count,mean,last,vector);
+		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=mean,last,vector);
+		@statistic[totalOverhead](title="OT";source="totalOverhead";record=mean,last,vector);
 		
-		@statistic[TotalSizeHelloCtrl](title="THC";source="TotalSizeHelloCtrl";record=count,mean,last,vector);
-		@statistic[TotalSizeOtherCtrl](title="TOC";source="TotalSizeOtherCtrl";record=count,mean,last,vector);
-		@statistic[TotalSizeCtrl](title="TC";source="TotalSizeCtrl";record=count,mean,last,vector);
-		@statistic[TotalSizeData](title="TD";source="TotalSizeData";record=count,mean,last,vector);
+		@statistic[uniqBndlSent](title="UniqBundleSent";source="uniqBndlSent";record=mean,last,vector);
+		@statistic[uniqBndlReceived](title="UniqBndlReceived";source="uniqBndlReceived";record=mean,last,vector);
+		@statistic[l3BndlSent](title="L3BundleSent";source="l3BndlSent";record=ean,last,vector);
+		@statistic[l3BndlReceived](title="L3BundleReceived";source="l3BndlReceived";record=mean,last,vector);				
+		
+		@statistic[ratioCtrlData](title="RCD";source="ratioCtrlData";record=mean,last,vector);
+		@statistic[ratioRecvSent](title="RRS";source="ratioRecvSent";record=mean,last,vector);
+		
+		@statistic[TotalSizeHelloCtrl](title="THC";source="TotalSizeHelloCtrl";record=mean,last,vector);
+		@statistic[TotalSizeOtherCtrl](title="TOC";source="TotalSizeOtherCtrl";record=mean,last,vector);
+		@statistic[TotalSizeCtrl](title="TC";source="TotalSizeCtrl";record=mean,last,vector);
+		@statistic[TotalSizeData](title="TD";source="TotalSizeData";record=mean,last,vector);
+		
+		@statistic[THC_SB](title="THC_SB";source="t_sizeHC_SB";record=mean,last,vector);
+		@statistic[THC_SA](title="THC_SA";source="t_sizeHC_SA";record=mean,last,vector);
+		@statistic[THC_CL](title="THC_CL";source="t_sizeHC_CL";record=mean,last,vector);
+		@statistic[THC_RCC](title="THC_RCC";source="t_sizeHC_RCC";record=mean,last,vector);
+		
+		@statistic[TOC_SB](title="TOC_SB";source="t_sizeOC_SB";record=mean,last,vector);
+		@statistic[TOC_SA](title="TOC_SA";source="t_sizeOC_SA";record=mean,last,vector);
+		@statistic[TOC_CL](title="TOC_CL";source="t_sizeOC_CL";record=mean,last,vector);
+		@statistic[TOC_RCC](title="TOC_RCC";source="t_sizeOC_RCC";record=mean,last,vector);
+		
+		//@statistic[controlOverhead](title="OverheadControlMsg";source="t_sizeOC_RCC";record=mean,last,vector);
+				
         
 }

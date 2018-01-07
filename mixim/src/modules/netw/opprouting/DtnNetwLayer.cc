@@ -148,7 +148,13 @@ void DtnNetwLayer::initialize(int stage)
         withConnectionRestart = par("withConnectionRestart").boolValue();
 
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
+		sentL3SignalId = registerSignal("sentL3Bndl");
+
 		sentBitsLengthSignalId = registerSignal("sentBitsLength");
+
+		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
+
+		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
 
 		nbrNeighors = 0;
 		nbrCountForMeanNeighbors = 0;
@@ -1463,3 +1469,21 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 
 	return sentWSM;
 }
+
+void DtnNetwLayer::emitSignalForHelloCtrlMsg(long  sizeHC_SB_Octets, long  sizeHC_SA_Octets, long  sizeHC_CL_Octets, long  sizeHC_RCC_Octets)
+{
+	string signalStr = lg2Str(sizeHC_SB_Octets * 8)+":"+lg2Str(sizeHC_SA_Octets * 8)+":"
+						+lg2Str(sizeHC_CL_Octets * 8)+":"+lg2Str(sizeHC_RCC_Octets * 8);
+	emit(helloCtrlBitsLengthId,signalStr.c_str());
+}
+
+
+
+void DtnNetwLayer::emitSignalForOtherCtrlMsg(long  sizeOC_SB_Octets, long  sizeOC_SA_Octets, long  sizeOC_CL_Octets, long  sizeOC_RCC_Octets)
+{
+	string signalStr = lg2Str(sizeOC_SB_Octets * 8)+":"+lg2Str(sizeOC_SA_Octets * 8)+":"
+						+lg2Str(sizeOC_CL_Octets * 8)+":"+lg2Str(sizeOC_RCC_Octets * 8);
+	emit(otherCtrlBitsLengthId,signalStr.c_str());
+}
+
+

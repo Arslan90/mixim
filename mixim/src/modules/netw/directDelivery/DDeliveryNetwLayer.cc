@@ -137,6 +137,7 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		if (destType == Veh){
 			bundlesReplicaIndex[serial]++;
 		}
@@ -180,6 +181,8 @@ void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
+	long sizeOC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);

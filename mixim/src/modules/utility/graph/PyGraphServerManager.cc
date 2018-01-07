@@ -47,12 +47,22 @@ void PyGraphServerManager::initialize(int stage)
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
 		simulation.getSystemModule()->subscribe(receiveL3SignalId, this);
 
+		sentL3SignalId = registerSignal("sentL3Bndl");
+		simulation.getSystemModule()->subscribe(sentL3SignalId, this);
+
 		sentBitsLengthSignalId = registerSignal("sentBitsLength");
 		simulation.getSystemModule()->subscribe(sentBitsLengthSignalId, this);
 
-		tSentSignalId = registerSignal("TotalSentBndl");
-		tReceiveSignalId = registerSignal("TotalReceivedBndl");
-		tReceiveL3SignalId = registerSignal("TotalL3ReceivedBndl");
+		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
+		simulation.getSystemModule()->subscribe(helloCtrlBitsLengthId, this);
+
+		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
+		simulation.getSystemModule()->subscribe(otherCtrlBitsLengthId, this);
+
+		tSentSignalId = registerSignal("uniqBndlSent");
+		tReceiveSignalId = registerSignal("uniqBndlReceived");
+		tReceiveL3SignalId = registerSignal("l3BndlReceived");
+		tSentL3SignalId = registerSignal("l3BndlSent");
 
 		dR = registerSignal("deliveryRatio");
 		oT = registerSignal("totalOverhead");
@@ -66,6 +76,12 @@ void PyGraphServerManager::initialize(int stage)
 
 		emit(dR, 0.0);
 		emit(oT, 0.0);
+
+		emit(tSentSignalId, 0.0);
+		emit(tReceiveSignalId, 0.0);
+		emit(tReceiveL3SignalId, 0.0);
+		emit(tSentL3SignalId, 0.0);
+
 		emit(rCtrlData, 0.0);
 		emit(rRecvSent, 0.0);
 
@@ -75,13 +91,43 @@ void PyGraphServerManager::initialize(int stage)
         emit(sizeData, 0.0);
 
 		nbrBundleSent = 0;
-		nbrBundleReceived = 0;
+		nbrL3BundleSent = 0;
 		nbrUniqueBundleReceived = 0;
 		nbrL3BundleReceived = 0;
 
 		helloCtrlSentSizeKbits = 0;
 		otherCtrlSentSizeKbits = 0;
 		dataSentSizeKbits = 0;
+
+		t_sizeHC_SB = registerSignal("t_sizeHC_SB");
+		t_sizeHC_SA = registerSignal("t_sizeHC_SA");
+		t_sizeHC_CL = registerSignal("t_sizeHC_CL");
+		t_sizeHC_RCC= registerSignal("t_sizeHC_RCC");
+
+		sizeHC_SB_Kbits  = 0;
+		sizeHC_SA_Kbits  = 0;
+		sizeHC_CL_Kbits  = 0;
+		sizeHC_RCC_Kbits = 0;
+
+		emit(t_sizeHC_SB , 0);
+		emit(t_sizeHC_SA , 0);
+		emit(t_sizeHC_CL , 0);
+		emit(t_sizeHC_RCC, 0);
+
+		t_sizeOC_SB = registerSignal("t_sizeOC_SB");
+		t_sizeOC_SA = registerSignal("t_sizeOC_SA");
+		t_sizeOC_CL = registerSignal("t_sizeOC_CL");
+		t_sizeOC_RCC= registerSignal("t_sizeOC_RCC");
+
+		sizeOC_SB_Kbits  = 0;
+		sizeOC_SA_Kbits  = 0;
+		sizeOC_CL_Kbits  = 0;
+		sizeOC_RCC_Kbits = 0;
+
+		emit(t_sizeOC_SB , 0);
+		emit(t_sizeOC_SA , 0);
+		emit(t_sizeOC_CL , 0);
+		emit(t_sizeOC_RCC, 0);
 
 		collectStatOnly = par("collectStatOnly").boolValue();
 
@@ -146,9 +192,11 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	Enter_Method_Silent();
 	if (strcmp(getSignalName(signalID),"sentBndl") == 0){
 		nbrBundleSent++;
+		emit(tSentSignalId, nbrBundleSent);
 	}
 	if (strcmp(getSignalName(signalID),"receivedBndl") == 0){
 		nbrUniqueBundleReceived++;
+		emit(tReceiveSignalId, nbrUniqueBundleReceived);
 		emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
 		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
 			double uniqDataReceived = (double) (nbrUniqueBundleReceived * DtnApplLayer::getDataLengthBitsAsStatic()) / 1024;
@@ -158,7 +206,13 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	}
 	if (strcmp(getSignalName(signalID),"receivedL3Bndl") == 0){
 		nbrL3BundleReceived++;
+		emit(tReceiveL3SignalId, nbrL3BundleReceived);
 		emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
+	}
+
+	if (strcmp(getSignalName(signalID),"sentL3Bndl") == 0){
+		nbrL3BundleSent++;
+		emit(tSentL3SignalId, nbrL3BundleSent);
 	}
 }
 
@@ -212,6 +266,70 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			emit(rRecvSent, ratio);
 		}
 	}
+
+	if (strcmp(getSignalName(signalID),"helloCtrlBitsLength") == 0){
+		char* sizeAsStr = strtok(strdup(s),":");
+		std::vector<long> sizeAsLong (4,0);
+		int index = 0;
+		while (sizeAsStr != NULL){
+			sizeAsLong[index] = strtol(sizeAsStr,NULL,10);
+			switch (index) {
+				case 0:	{
+						sizeHC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeHC_SB, sizeHC_SB_Kbits);
+				}break;
+				case 1:	{
+						sizeHC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeHC_SA, sizeHC_SA_Kbits);
+				}break;
+				case 2:	{
+						sizeHC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeHC_CL, sizeHC_CL_Kbits);
+				}break;
+				case 3:	{
+						sizeHC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
+				}break;
+				default:{
+					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Hello Ctrl Msg Lengths");
+				}break;
+			}
+			index++;
+			sizeAsStr = strtok(NULL,":");
+		}
+	}
+
+	if (strcmp(getSignalName(signalID),"otherCtrlBitsLength") == 0){
+		char* sizeAsStr = strtok(strdup(s),":");
+		std::vector<long> sizeAsLong (4,0);
+		int index = 0;
+		while (sizeAsStr != NULL){
+			sizeAsLong[index] = strtol(sizeAsStr,NULL,10);
+			switch (index) {
+				case 0:	{
+						sizeOC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeOC_SB, sizeOC_SB_Kbits);
+				}break;
+				case 1:	{
+						sizeOC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeOC_SA, sizeOC_SA_Kbits);
+				}break;
+				case 2:	{
+						sizeOC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeOC_CL, sizeOC_CL_Kbits);
+				}break;
+				case 3:	{
+						sizeOC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
+						emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+				}break;
+				default:{
+					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Other Ctrl Msg Lengths");
+				}break;
+			}
+			index++;
+			sizeAsStr = strtok(NULL,":");
+		}
+	}
 }
 
 void PyGraphServerManager::finish(){
@@ -235,9 +353,26 @@ void PyGraphServerManager::finish(){
 	emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
 	emit(sizeData, dataSentSizeKbits);
 
+	emit(tSentSignalId, nbrBundleSent);
+	emit(tSentL3SignalId, nbrL3BundleSent);
+	emit(tReceiveSignalId, nbrUniqueBundleReceived);
+	emit(tReceiveL3SignalId, nbrL3BundleReceived);
+
 	recordScalar("# Total Bundle Sent", nbrBundleSent);
+	recordScalar("# Total Bundle Sent by L3", nbrL3BundleSent);
 	recordScalar("# Total Bundle Received by L3", nbrL3BundleReceived);
 	recordScalar("# Total Unique Bundle Received by VPAs", nbrUniqueBundleReceived);
+
+	emit(t_sizeHC_SB, sizeHC_SB_Kbits);
+	emit(t_sizeHC_SA, sizeHC_SA_Kbits);
+	emit(t_sizeHC_CL, sizeHC_CL_Kbits);
+	emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
+
+	emit(t_sizeOC_SB, sizeOC_SB_Kbits);
+	emit(t_sizeOC_SA, sizeOC_SA_Kbits);
+	emit(t_sizeOC_CL, sizeOC_CL_Kbits);
+	emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+
 	finishConnection();
 }
 

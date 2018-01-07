@@ -222,8 +222,16 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 		}
 		if (withTTLForCtrl){
 			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size()*2;
+			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+			long sizeHC_RCC_Octets = sizeof(unsigned long) * custodyBundle.size() * 2;
+			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, sizeHC_RCC_Octets);
 		}else{
 			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size();
+			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+			long sizeHC_RCC_Octets = sizeof(unsigned long) * custodyBundle.size();
+			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, sizeHC_RCC_Octets);
 		}
 
 
@@ -354,6 +362,7 @@ void GeoDtnICNetwLayer::newSendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundleMsg->setCustodyTransfert(custodyDecision);
 			bundleMsg->encapsulate(wsm->dup());
 			sendDown(bundleMsg, 0, 0, 1);
+			emit(sentL3SignalId,1);
 			if ((custodyMode == No) || (custodyMode == Yes_WithoutACK)){
 				bundlesReplicaIndex[serial]++;
 				if (custodyDecision){
@@ -409,6 +418,7 @@ void GeoDtnICNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		prepareNetwPkt(bundleMsg, Bundle, vpaAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		bundleSentPerVPA.insert(serial);
 		if(!withExplicitE2EAck){
 			serialsToDelete.insert(serial);
@@ -488,6 +498,8 @@ void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	}
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 	netwPkt->setE2eAcks(serialOfE2EAck);
+	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -509,6 +521,8 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setSrcMETD(myCurrentMETD);
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	netwPkt->setCustodyTransfert(custodyTransfer);
+	long sizeOC_RCC_Octets = sizeof(unsigned long) * serialOfH2HAck.size();
+	emitSignalForOtherCtrlMsg(0, 0, 0, sizeOC_RCC_Octets);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfH2HAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);

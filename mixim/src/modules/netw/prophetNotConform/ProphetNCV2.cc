@@ -169,7 +169,9 @@ void ProphetNCV2::sendingHelloMsg()
 	long helloControlBitLength = 0;
 	if (withPredLength){
 		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-		helloControlBitLength = sizeof(unsigned long) * (predsLength) *8;
+		long sizeHC_CL_Octets = predsLength;
+		emitSignalForHelloCtrlMsg(0, 0, sizeHC_CL_Octets, 0);
+		helloControlBitLength = (predsLength) *8;
 		int length = helloControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 	}
@@ -234,6 +236,9 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setH2hAcks(storedBundle);
 		int nbrEntries = storedAck.size()+ storedBundle.size();
+		long sizeOC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+		long sizeOC_SA_Octets = sizeof(unsigned long) * storedAck.size();
+		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, sizeOC_SA_Octets, 0, 0);
 		long otherControlBitLength = sizeof(unsigned long) * nbrEntries *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
@@ -279,6 +284,8 @@ void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<u
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
+	long sizeOC_SB_Octets = sizeof(unsigned long) * wsmResponseBndl.size();
+	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -327,6 +334,7 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		if (destType == Veh){
 			bundlesReplicaIndex[serial]++;
 		}
@@ -377,6 +385,8 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
 	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);

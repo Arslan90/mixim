@@ -59,7 +59,7 @@ class PyGraphServerManager : public cSimpleModule, cListener
 
 	// Different stats for Bundle Sending/Reception
 	long nbrBundleSent;
-	long nbrBundleReceived;
+	long nbrL3BundleSent;
 	long nbrUniqueBundleReceived;
 	long nbrL3BundleReceived;
 
@@ -67,9 +67,13 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	double otherCtrlSentSizeKbits;
 	double dataSentSizeKbits;
 
-	simsignal_t sentSignalId, receiveSignalId, receiveL3SignalId ,tSentSignalId, tReceiveSignalId, tReceiveL3SignalId;
+	simsignal_t sentSignalId, receiveSignalId, receiveL3SignalId , sentL3SignalId ,tSentSignalId, tReceiveSignalId, tReceiveL3SignalId, tSentL3SignalId;
 
 	simsignal_t sentBitsLengthSignalId;
+
+	simsignal_t helloCtrlBitsLengthId;
+
+	simsignal_t otherCtrlBitsLengthId;
 
 	simsignal_t dR;
 
@@ -86,6 +90,39 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	simsignal_t sizeCtrl;
 
 	simsignal_t sizeData;
+
+	/**
+	 * Size Hello Ctrl Messages: SB (Stored Bundles)
+	 * SA (Stored ACKs), CL (Custody Lists), RCC (Replica and Custody Confirmations)
+	 */
+
+	simsignal_t t_sizeHC_SB;
+	simsignal_t t_sizeHC_SA;
+	simsignal_t t_sizeHC_CL;
+	simsignal_t t_sizeHC_RCC;
+
+	double sizeHC_SB_Kbits;
+	double sizeHC_SA_Kbits;
+	double sizeHC_CL_Kbits;
+	double sizeHC_RCC_Kbits;
+
+
+	/**
+	 * Size Other Ctrl Messages: SB (Stored Bundles)
+	 * SA (Stored ACKs), CL (Custody Lists), RCC (Replica and Custody Confirmations)
+	 */
+
+	simsignal_t t_sizeOC_SB;
+	simsignal_t t_sizeOC_SA;
+	simsignal_t t_sizeOC_CL;
+	simsignal_t t_sizeOC_RCC;
+
+	double sizeOC_SB_Kbits;
+	double sizeOC_SA_Kbits;
+	double sizeOC_CL_Kbits;
+	double sizeOC_RCC_Kbits;
+
+
 
 	bool collectStatOnly;
 };

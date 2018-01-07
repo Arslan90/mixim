@@ -97,6 +97,9 @@ void EpidemicNetwLayer::sendingHelloMsg()
 	}
 	netwPkt->setH2hAcks(storedBundle);
 	int nbrEntries = ackSerial.size()+ storedBundle.size();
+	long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+	long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+	emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, 0);
 	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
 	int length = helloControlBitLength+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
@@ -143,6 +146,8 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 		prepareNetwPkt(netwPkt, Bundle_Response, nodeAddr);
 		netwPkt->setH2hAcks(serialResponseBndl);
+		long sizeOC_SB_Octets = sizeof(unsigned long) * serialResponseBndl.size();
+		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
 		long otherControlBitLength = sizeof(unsigned long) * (serialResponseBndl.size()) *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
@@ -192,6 +197,7 @@ void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType
 		prepareNetwPkt(bundleMsg, Bundle, destAddr);
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
+		emit(sentL3SignalId,1);
 		if (destType == Veh){
 			bundlesReplicaIndex[serial]++;
 		}
@@ -244,6 +250,8 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 		std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
 		netwPkt->setE2eAcks(serialOfE2EAck);
+		long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+		emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
 		long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
