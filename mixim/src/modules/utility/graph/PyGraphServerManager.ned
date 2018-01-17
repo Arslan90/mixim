@@ -33,13 +33,14 @@ simple PyGraphServerManager
         int margin = default(0);  // margin to add to all received vehicle positions
         int waitingTime = default(200);
         bool collectStatOnly = default(false);
+        double updateInterval = default(1.0);
         
 		@statistic[deliveryRatio](title="DR";source="deliveryRatio";record=mean,last,vector);
 		@statistic[totalOverhead](title="OT";source="totalOverhead";record=mean,last,vector);
 		
 		@statistic[uniqBndlSent](title="UniqBundleSent";source="uniqBndlSent";record=mean,last,vector);
 		@statistic[uniqBndlReceived](title="UniqBndlReceived";source="uniqBndlReceived";record=mean,last,vector);
-		@statistic[l3BndlSent](title="L3BundleSent";source="l3BndlSent";record=ean,last,vector);
+		@statistic[l3BndlSent](title="L3BundleSent";source="l3BndlSent";record=mean,last,vector);
 		@statistic[l3BndlReceived](title="L3BundleReceived";source="l3BndlReceived";record=mean,last,vector);				
 		
 		@statistic[ratioCtrlData](title="RCD";source="ratioCtrlData";record=mean,last,vector);
@@ -61,6 +62,4 @@ simple PyGraphServerManager
 		@statistic[TOC_RCC](title="TOC_RCC";source="t_sizeOC_RCC";record=mean,last,vector);
 		
 		//@statistic[controlOverhead](title="OverheadControlMsg";source="t_sizeOC_RCC";record=mean,last,vector);
-				
-        
 }

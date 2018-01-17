@@ -224,14 +224,14 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size()*2;
 			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
 			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
-			long sizeHC_RCC_Octets = sizeof(unsigned long) * custodyBundle.size() * 2;
-			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, sizeHC_RCC_Octets);
+			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size() * 2;
+			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
 		}else{
 			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size();
 			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
 			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
-			long sizeHC_RCC_Octets = sizeof(unsigned long) * custodyBundle.size();
-			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, sizeHC_RCC_Octets);
+			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
+			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
 		}
 
 

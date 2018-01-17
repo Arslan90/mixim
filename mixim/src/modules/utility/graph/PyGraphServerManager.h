@@ -122,7 +122,9 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	double sizeOC_CL_Kbits;
 	double sizeOC_RCC_Kbits;
 
+	cMessage* updateMsg;
 
+	double updateInterval;
 
 	bool collectStatOnly;
 };

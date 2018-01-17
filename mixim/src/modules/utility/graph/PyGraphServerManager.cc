@@ -18,6 +18,7 @@
 #include "stdio.h"
 #include "clistener.h"
 #include "DtnApplLayer.h"
+#include "math.h"
 //#include <sys/socket.h> // Needed for the socket functions
 //#include <netdb.h>      // Needed for the socket functions
 
@@ -131,6 +132,18 @@ void PyGraphServerManager::initialize(int stage)
 
 		collectStatOnly = par("collectStatOnly").boolValue();
 
+		updateInterval = par("updateInterval").doubleValue();
+		if (updateInterval <= 0){
+			opp_error("PyGraphServerManager::initialize - Update Interval should be a strict positive double");
+		}
+		updateMsg = new cMessage("updateMsg");
+		double currentTime = simTime().dbl();
+		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
+		if (currentTime == scheduleTime){
+			scheduleTime+=updateInterval;
+		}
+		scheduleAt(scheduleTime, updateMsg);
+
 		initializeConnection();
 
 
@@ -184,7 +197,49 @@ std::string PyGraphServerManager::sendRequestToPyServer(std::string buf)
 void PyGraphServerManager::handleMessage(cMessage *msg)
 {
     // TODO - Generated method body
+	if (strcmp(msg->getName(),"updateMsg") == 0){
 
+		/**
+		 * My old metrics
+		 */
+		emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
+		emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
+		emit(sizeData, dataSentSizeKbits);
+		emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
+
+		if (dataSentSizeKbits != 0){
+			emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
+		}else {
+			emit(rCtrlData, 0);
+		}
+
+		int dataLength = DtnApplLayer::getDataLengthBitsAsStatic();
+		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
+			double uniqDataReceived = (double) (nbrUniqueBundleReceived * dataLength) / 1024;
+			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
+			emit(rRecvSent, ratio);
+		}
+
+		/**
+		 * My new metrics
+		 */
+		emit(t_sizeHC_SB, sizeHC_SB_Kbits);
+		emit(t_sizeHC_SA, sizeHC_SA_Kbits);
+		emit(t_sizeHC_CL, sizeHC_CL_Kbits);
+		emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
+
+		emit(t_sizeOC_SB, sizeOC_SB_Kbits);
+		emit(t_sizeOC_SA, sizeOC_SA_Kbits);
+		emit(t_sizeOC_CL, sizeOC_CL_Kbits);
+		emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+
+		double currentTime = simTime().dbl();
+		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
+		if (currentTime == scheduleTime){
+			scheduleTime+=updateInterval;
+		}
+		scheduleAt(scheduleTime, updateMsg);
+	}
 }
 
 void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalID, long l)
@@ -236,34 +291,34 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 
 		if (helloCtrlSize != 0){
 			helloCtrlSentSizeKbits += ((double)helloCtrlSize / 1024);
-			emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
+//			emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
 		}
 
 		if (otherCtrlSize != 0){
 			otherCtrlSentSizeKbits += ((double)otherCtrlSize / 1024);
-			emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
+//			emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
 		}
 
 		int dataLength = DtnApplLayer::getDataLengthBitsAsStatic();
 		if (nbrEncapData != 0){
 			dataSentSizeKbits += ((double)nbrEncapData * dataLength / 1024);
-			emit(sizeData, dataSentSizeKbits);
+//			emit(sizeData, dataSentSizeKbits);
 		}
 
 		if ((helloCtrlSize != 0) || (otherCtrlSize != 0)){
-			emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
+//			emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
 		}
 
 		if ((helloCtrlSize != 0) || (otherCtrlSize != 0) || (nbrEncapData != 0)){
 			if (dataSentSizeKbits != 0){
-				emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
+//				emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
 			}
 		}
 
 		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
 			double uniqDataReceived = (double) (nbrUniqueBundleReceived * dataLength) / 1024;
 			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
-			emit(rRecvSent, ratio);
+//			emit(rRecvSent, ratio);
 		}
 	}
 
@@ -276,19 +331,19 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			switch (index) {
 				case 0:	{
 						sizeHC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeHC_SB, sizeHC_SB_Kbits);
+//						emit(t_sizeHC_SB, sizeHC_SB_Kbits);
 				}break;
 				case 1:	{
 						sizeHC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeHC_SA, sizeHC_SA_Kbits);
+//						emit(t_sizeHC_SA, sizeHC_SA_Kbits);
 				}break;
 				case 2:	{
 						sizeHC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeHC_CL, sizeHC_CL_Kbits);
+//						emit(t_sizeHC_CL, sizeHC_CL_Kbits);
 				}break;
 				case 3:	{
 						sizeHC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
+//						emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
 				}break;
 				default:{
 					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Hello Ctrl Msg Lengths");
@@ -308,19 +363,19 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			switch (index) {
 				case 0:	{
 						sizeOC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeOC_SB, sizeOC_SB_Kbits);
+//						emit(t_sizeOC_SB, sizeOC_SB_Kbits);
 				}break;
 				case 1:	{
 						sizeOC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeOC_SA, sizeOC_SA_Kbits);
+//						emit(t_sizeOC_SA, sizeOC_SA_Kbits);
 				}break;
 				case 2:	{
 						sizeOC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeOC_CL, sizeOC_CL_Kbits);
+//						emit(t_sizeOC_CL, sizeOC_CL_Kbits);
 				}break;
 				case 3:	{
 						sizeOC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
-						emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+//						emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
 				}break;
 				default:{
 					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Other Ctrl Msg Lengths");
