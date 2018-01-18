@@ -303,7 +303,8 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  		opp_error("Double insertion in bundles Index");
 	  	}
 
-		nbrStoredBundleVector.record(bundles.size());
+	  	unsigned int size = bundles.size();
+		nbrStoredBundleVector.record(size);
 	}
 
 	if (bundles.size() > 0){
