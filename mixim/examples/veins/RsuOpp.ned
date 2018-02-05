@@ -22,7 +22,7 @@ package org.mixim.examples.veins;
 
 import org.mixim.base.modules.*;
 import org.mixim.modules.mobility.LinearMobility;
-import org.mixim.modules.netw.opprouting.ProphetV2;
+import org.mixim.modules.legacy.netw.opprouting.ProphetV2;
 import org.mixim.modules.nic.Nic80211pOpp;
 
 module RsuOpp

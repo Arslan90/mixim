@@ -101,7 +101,6 @@ void DDeliveryNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		if (nodeType == Veh){
 			if (netwPkt->getSrcType() == VPA){
 				sendingBundleMsg(netwPkt->getSrcAddr(),netwPkt->getSrcType());
-				vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
 			}
 		}
 	}

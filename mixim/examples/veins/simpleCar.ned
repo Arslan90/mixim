@@ -21,7 +21,7 @@
 package org.mixim.examples.veins;
 
 import org.mixim.base.modules.*;
-import org.mixim.modules.netw.simpleApplNetw.SimpleApplNetw;
+import org.mixim.modules.legacy.netw.simpleApplNetw.SimpleApplNetw;
 import org.mixim.modules.nic.Nic80211pOpp;
 
 module simpleCar

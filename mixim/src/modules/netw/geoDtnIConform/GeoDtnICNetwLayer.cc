@@ -92,21 +92,17 @@ void GeoDtnICNetwLayer::handleLowerMsg(cMessage *msg)
 		switch (netwPkt->getKind()) {
 			case HELLO:
 				handleHelloMsg(netwPkt);
-				updateInRadioWithVPA(HELLO,netwPkt->getSrcType());
 				break;
 			case Bundle:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleMsg(netwPkt);
-					updateInRadioWithVPA(Bundle,netwPkt->getSrcType());
 				}
 				break;
 			case Bundle_Ack:
-				// if sent acks are addressed to me or
-				// they are broadcasted
+				// if sent acks are addressed to me or they are broadcasted
 				if ((withAddressedAck && (netwPkt->getDestAddr() == myNetwAddr)) || (!withAddressedAck)){
 //				if (!withAddressedAck){
 					handleBundleAckMsg(netwPkt);
-					updateInRadioWithVPA(Bundle_Ack,netwPkt->getSrcType());
 //				} else if (withAddressedAck){
 //					if (netwPkt->getDestAddr() == myNetwAddr){
 //						handleBundleAckMsg(netwPkt);
@@ -306,16 +302,14 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		if (nodeType == Veh){
 		    if (netwPkt->getSrcType() == VPA){
 		    	sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-		    	vpaContactDistance.push_back(getCurrentPos().distance(netwPkt->getCurrentPos()));
 		    }else if (netwPkt->getSrcType() == Veh){
-		    	//sendingBundleMsg();
-		    	newSendingBundleMsg(netwPkt);
+		    	sendingBundleMsg(netwPkt);
 		    }
 	    }
 	}
 }
 
-void GeoDtnICNetwLayer::newSendingBundleMsg(GeoDtnNetwPkt *netwPkt)
+void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 {
 	// VERY IMPORTANT MUST RECHECK MECHANISM FOR CUSTODY AND WHETEVER TO SEND, sTO CUSTODY OR NOT
 
@@ -419,7 +413,6 @@ void GeoDtnICNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
-		bundleSentPerVPA.insert(serial);
 		if(!withExplicitE2EAck){
 			serialsToDelete.insert(serial);
 		}
@@ -559,33 +552,6 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 
 ////////////////////////////////////////// Others methods /////////////////////////
 
-void GeoDtnICNetwLayer::recordStatsFwds(std::pair<LAddress::L3Type,double> fwdDist, std::pair<LAddress::L3Type,double> fwdMETD)
-{
-	if ((fwdDist.first == 0) && (fwdMETD.first == 0)){
-		nbr0ValidFwds++;
-	}else if ((fwdDist.first != 0) != (fwdMETD.first != 0)){
-		if (fwdDist.first != 0){
-			coreEV << "Node:" << myNetwAddr << " Unique valid Forwarders : (Dist): " << fwdDist.first << std::endl;
-//			std::cout << "Node:" << myNetwAddr << " Unique valid Forwarders : (Dist): " << fwdDist.first << std::endl;
-		}
-		if (fwdMETD.first != 0){
-			coreEV << "Node:" << myNetwAddr << " Unique valid Forwarders : (METD): " << fwdMETD.first << std::endl;
-//			std::cout << "Node:" << myNetwAddr << " Unique valid Forwarders : (METD): " << fwdMETD.first << std::endl;
-		}
-		nbr1ValidFwds++;
-	}else {
-		if (fwdDist.first != fwdMETD.first){
-			coreEV << "Node:" << myNetwAddr << " Distinct Forwarders : (Dist: " << fwdDist.first << " , METD: " << fwdMETD.first << ")"<< std::endl;
-//			std::cout << "Node:" << myNetwAddr << " Distinct Forwarders : (Dist: " << fwdDist.first << " , METD: " << fwdMETD.first << ")"<< std::endl;
-			nbr2Fwds++;
-		}else {
-			coreEV << "Node:" << myNetwAddr << " Same Forwarders for both Metrics: " << fwdDist.first << std::endl;
-//			std::cout << "Node:" << myNetwAddr << " Same Forwarders for both Metrics: " << fwdDist.first << std::endl;
-			nbr1Fwds++;
-		}
-	}
-}
-
 void GeoDtnICNetwLayer::storeAckSerial(unsigned long  serial)
 {
 	if (ackSerial.count(serial) == 0){
@@ -656,82 +622,6 @@ void GeoDtnICNetwLayer::storeCustodySerials(std::map<unsigned long, double > set
 	}
 }
 
-void GeoDtnICNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry)
-{
-	double currentTime = simTime().dbl();
-	std::set<LAddress::L3Type> entriesToDelete;
-	std::set<LAddress::L3Type> entriesToPend;
-
-	// Check entries to delete or to set as Pending
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if ((netwRouteExpirency > 0) && (!it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRouteExpirency)){
-			// if entry is currently pending and has expired we delete it
-			if (it->first != neighbor){
-				entriesToDelete.insert(it->second.getDestAddr());
-			}
-		}
-
-		if ((netwRoutePending > 0) && (it->second.isStatus()) && ((currentTime - it->second.getTimestamp().dbl()) >= netwRoutePending)){
-			// if entry is currently active and has not been update since an amount of time =>>> set it as pending
-			if (it->first != neighbor){
-				entriesToPend.insert(it->second.getDestAddr());
-			}
-		}
-	}
-
-	// Update table entries (Deleting/Pending)
-	for (std::set<LAddress::L3Type>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
-		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
-		if (it2 != neighborhoodTable.end()){
-			emitInRadioWithVPA(it2->first, it2->second.getNodeType(), -1);
-		}
-
-		neighborhoodTable.erase(*it);
-		neighborhoodSession.erase(*it);
-		NBHTableNbrDelete++;
-	}
-
-	for (std::set<LAddress::L3Type>::iterator it = entriesToPend.begin(); it != entriesToPend.end(); it++){
-		std::map<LAddress::L3Type, NetwRoute>::iterator it2 = neighborhoodTable.find(*it);
-		if (it2 == neighborhoodTable.end()){
-			opp_error("NeighboorhoodTable entry not found");
-		}else{
-			it2->second.setStatus(false);
-		}
-		if ((nodeType == Veh) && (it2 != neighborhoodTable.end()) && (it2->second.getNodeType() == VPA) ){
-			if (!vpaContactDuration.empty()){
-				double lastContactTime = vpaContactDuration.back();
-				if (lastContactTime <= 0){
-					double contactDuration = simTime().dbl() - (-lastContactTime);
-					vpaContactDuration.pop_back();
-					vpaContactDuration.push_back(contactDuration);
-				}else{
-					opp_error("Error value is negative");
-				}
-			}
-		}
-	}
-
-	// Adding the new entry
-	std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.find(neighbor);
-	if (it == neighborhoodTable.end()){
-		// neighbor doesn't exist, add a new entry
-		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
-		NBHTableNbrInsert++;
-		if (neighborEntry.getNodeType() == VPA){
-			meetVPA = true;
-		}
-	}else{
-		// neighbor exists, update the old entry
-		neighborhoodTable[neighbor] = neighborEntry;
-	}
-
-	emitInRadioWithVPA(neighbor, neighborEntry.getNodeType(), 1);
-	nbrNeighors += neighborhoodTable.size()-1;
-	nbrCountForMeanNeighbors++;
-
-}
-
 GeoTraCIMobility *GeoDtnICNetwLayer::getGeoTraci()
 {
 	GeoTraCIMobility* geo;
@@ -763,49 +653,6 @@ bool GeoDtnICNetwLayer::checkBeforeHelloMechanism()
 	}else{
 		// if CBH is not activated return always true
 		return true;
-	}
-}
-
-void GeoDtnICNetwLayer::emitInRadioWithVPA(LAddress::L3Type neighbor, int neighborNodeType, int flagValue)
-{
-	std::stringstream ss1,ss2;
-	if ((nodeType == Veh) && (neighborNodeType == VPA) ){
-		ss1 << neighbor;
-		ss2 << flagValue;
-		std::string str = ss1.str()+":"+ss2.str();
-		emit(inRadioWithVPA,str.c_str());
-		if (flagValue == 1){
-			vpaContactDuration.push_back(-simTime().dbl());
-		}
-	}
-}
-
-void GeoDtnICNetwLayer::updateInRadioWithVPA(short kind, int neighborNodeType){
-
-	bool isInRadioWithVPA = false;
-
-	// Detect if the current node is in radio with a vpa
-	for (std::map<LAddress::L3Type, NetwRoute>::iterator it = neighborhoodTable.begin(); it != neighborhoodTable.end(); it++){
-		if ((nodeType == Veh)&&(it->second.getNodeType() == VPA)&&(it->second.isStatus())){
-			isInRadioWithVPA = true;
-			break;
-		}
-	}
-	// Updating stats if also in radio with other vehicles
-	if ((nodeType == Veh) && isInRadioWithVPA && (neighborNodeType == Veh)){
-		switch (kind) {
-			case HELLO:
-				receivedHWICVPA++;
-				break;
-			case Bundle:
-				receivedBWICVPA++;
-				break;
-			case Bundle_Ack:
-				receivedAWICVPA++;
-				break;
-			default:
-				break;
-		}
 	}
 }
 

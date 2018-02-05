@@ -63,18 +63,18 @@ simple DtnNetwLayer extends BaseNetwLayer
         // equiped vehicle pourcentage, by default 1 (100%)
         double equipedVehPc = default(1);
         
-        string cutPoints = default("1;5;20;50;100;500;");
+//        string cutPoints = default("1;5;20;50;100;500;");
 //        string cutPoints = default("20;50;100");
 
-		double delayed = default(0.0);
+//		double delayed = default(0.0);
+//		
+//		double delayedFrag = default(0.0);
 		
-		double delayedFrag = default(0.0);
+//		bool withRestart = default(false);
 		
-		bool withRestart = default(false);
-		
-		bool withConnectionRestart = default(false);
-		
-		bool withContactTraceFile = default(false);
-		string contactTraceFileName = default("netContact.trace");
-		double contactTrFlUpdatePeriod = default(5.0);
+//		bool withConnectionRestart = default(false);
+//		
+//		bool withContactTraceFile = default(false);
+//		string contactTraceFileName = default("netContact.trace");
+//		double contactTrFlUpdatePeriod = default(5.0);
 }       

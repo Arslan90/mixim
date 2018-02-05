@@ -78,34 +78,6 @@ void DtnNetwLayer::initialize(int stage)
 			}
 		}
 
-		maxPcktLength = par("MTU"); // MTU is expressed in bytes unit
-		maxPcktLength*=8;
-
-		dontFragment = par("DF").boolValue();
-
-		const char* cutPoints = par("cutPoints").stringValue();
-		char* cutPointsChar = strdup(cutPoints);
-
-		char* tmp = strtok (cutPointsChar,";");
-		double cutPointValue = 0;
-		std::istringstream iss(tmp);
-		iss >> cutPointValue;
-		cutPoitsCDF.push_back(cutPointValue);
-
-		while (tmp != NULL)	{
-			tmp = strtok (NULL, ";");
-			if (tmp != NULL){
-				cutPointValue = 0;
-				if (strcmp(tmp,"") != 0){
-					std::istringstream iss(tmp);
-					iss >> cutPointValue;
-					cutPoitsCDF.push_back(cutPointValue);
-				}
-			}
-		}
-
-		dataLength = maxPcktLength - headerLength;
-
 		/*
 		 * Collecting data & metrics
 		 */
@@ -129,23 +101,7 @@ void DtnNetwLayer::initialize(int stage)
 
 		deletedBundlesWithAck = 0;
 
-		delayed = par("delayed").doubleValue();
-
-		delayedFrag = par("delayedFrag").doubleValue();
-
-        demandedAckedBundle = 0;
-
         bundlesReceived = 0;
-
-        lastBundleUpdate = 0.0;
-
-        nbrRestartedIEP = 0;
-
-        nbrCancelRestartedIEP = 0;
-
-        withRestart = par("withRestart").boolValue();
-
-        withConnectionRestart = par("withConnectionRestart").boolValue();
 
 		receiveL3SignalId = registerSignal("receivedL3Bndl");
 		sentL3SignalId = registerSignal("sentL3Bndl");
@@ -155,15 +111,6 @@ void DtnNetwLayer::initialize(int stage)
 		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
 
 		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
-
-		nbrNeighors = 0;
-		nbrCountForMeanNeighbors = 0;
-
-		hadBundles = false;
-
-		receivedHWICVPA = 0;
-		receivedBWICVPA = 0;
-		receivedAWICVPA = 0;
 
 		int tmpScheduleStrategy = par("scheduleStrategy");
 
@@ -197,8 +144,6 @@ void DtnNetwLayer::initialize(int stage)
 
 		firstSentToVPA = false;
 
-		meetVPA = false;
-
 		/* Setting Timers for Ctrl Msgs */
 		withTTLForCtrl = par("withTTLForCtrl").boolValue();
 		factorForTTLCtrl = par("factorForTTLCtrl").doubleValue();
@@ -214,61 +159,6 @@ void DtnNetwLayer::initialize(int stage)
 		heartBeatMsg = new cMessage("heartBeatMsg");
 		scheduleAt(simTime(), heartBeatMsg);
 	}
-}
-
-
-bool DtnNetwLayer::ackExist(WaveShortMessage *msg)
-{
-	bool exist = false;
-	if ((withAck)&&(acksIndex.find(msg->getSerial())!=acksIndex.end())){
-		exist = true;
-	}
-	return exist;
-}
-
-
-
-bool DtnNetwLayer::ackExist(BundleMeta bndlMeta)
-{
-	bool exist = false;
-	if ((withAck)&&(acksIndex.find(bndlMeta.getSerial())!=acksIndex.end())){
-		exist = true;
-	}
-	return exist;
-}
-
-
-
-bool DtnNetwLayer::existAndErase(BundleMeta bndlMeta)
-{
-	bool found = false;
-	unsigned long serial = bndlMeta.getSerial();
-	LAddress::L3Type addr = bndlMeta.getRecipientAddress();
-
-	if (exist(bndlMeta)){
-		bundlesIndexIterator it = bundlesIndex.find(addr);
-		if (it != bundlesIndex.end()){
-			innerIndexMap inner_map = it->second;
-			innerIndexIterator it2 = inner_map.find(serial);
-			if (it2 !=inner_map.end()){
-				WaveShortMessage* wsm = it2->second;
-				bundles.remove(wsm);
-				inner_map.erase(serial);
-				if (inner_map.empty()){
-					bundlesIndex.erase(addr);
-				}else {
-					bundlesIndex[addr] = inner_map;
-				}
-				if (wsm->getOwner()==this){
-					delete wsm;
-				}
-				found = true;
-			}
-		}else{
-			opp_error("bundle exist but not found in the index");
-		}
-	}
-	return found;
 }
 
 void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
@@ -294,8 +184,6 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
 		bundlesIndex[msg->getRecipientAddress()] = inner_map;
 
-		haveToRestartIEP(simTime());
-
 	  	std::list<WaveShortMessage*> bundlesCopy = std::list<WaveShortMessage*>(bundles.begin(),bundles.end());
 	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
 
@@ -306,39 +194,7 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  	unsigned int size = bundles.size();
 		nbrStoredBundleVector.record(size);
 	}
-
-	if (bundles.size() > 0){
-		hadBundles = true;
-	}
 }
-
-
-
-void DtnNetwLayer::storeACK(BundleMeta meta)
-{
-	// step 1 : check if the ack is already stored
-	if (!ackExist(meta)){
-		if (acks.size()==ackStructureSize){
-			unsigned long serial = acks.front().getSerial();
-			acksIndex.erase(serial);
-			acks.pop_front();
-		}else if (acks.size() > ackStructureSize){
-			opp_error("acks storage structure exceed its maximum size");
-		}
-		// step 2 : add the ack to stored ack
-		acks.push_back(meta);
-
-		// step 3 : adding this ack to index
-		acksIndex[meta.getSerial()] = meta;
-
-		// step 4 : increment counter related to bundles deleted with the use of ACK
-		if (existAndErase(meta)) {
-			deletedBundlesWithAck++;
-		}
-	}
-}
-
-
 
 LAddress::L3Type DtnNetwLayer::getAddressFromName(const char *name)
 {
@@ -352,8 +208,6 @@ LAddress::L3Type DtnNetwLayer::getAddressFromName(const char *name)
 	return addr;
 }
 
-
-
 double DtnNetwLayer::getTimeFromName(const char *name)
 {
 	double time = 0;
@@ -366,32 +220,6 @@ double DtnNetwLayer::getTimeFromName(const char *name)
 	return time;
 }
 
-
-
-void DtnNetwLayer::deleteOldBundle(int ttl)
-{
-	std::list<WaveShortMessage*> bundlesToDelete;
-
-	if (withTTL){
-		std::list<WaveShortMessage*>::iterator it;
-		for (it = bundles.begin(); it != bundles.end(); it++){
-			WaveShortMessage* wsm = *it;
-			if ((wsm->getTimestamp() + ttl) > simTime().dbl()){
-				bundlesToDelete.push_front(wsm);
-			}
-		}
-
-		for (it = bundlesToDelete.begin(); it != bundlesToDelete.end(); it++){
-			WaveShortMessage* wsm = *it;
-			if(erase(wsm)){
-				nbrDeletedWithTTL++;
-			}
-		}
-	}
-}
-
-
-
 void DtnNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
@@ -402,8 +230,6 @@ void DtnNetwLayer::handleUpperMsg(cMessage *msg)
 		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
 	}
 }
-
-
 
 void DtnNetwLayer::handleLowerMsg(cMessage *msg)
 {
@@ -463,9 +289,6 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 							startRecordingContact(addr,time);
 						}
 
-						lastBundleProposal[addr] = time;
-
-						neighborsAddress.insert(addr);
 						NBHAddressNbrInsert++;
 					}
 				}
@@ -493,9 +316,6 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 					/** Contacts duration stats				 */
 					recordEndContactStats(addr,time);
 
-					lastBundleProposal.erase(addr);
-
-					neighborsAddress.erase(addr);
 					NBHAddressNbrDelete++;
 				}
 				break;
@@ -537,65 +357,6 @@ void DtnNetwLayer::handleUpperControl(cMessage *msg)
 	if (bundlesIndexSize != bundles.size()){
 		opp_warning("Size of Bundles and BundlesIndex data structurs are not the same");
 	}
-}
-
-bool DtnNetwLayer::haveToRestartIEP(simtime_t t)
-{
-	bool haveToRestartIEP = false;
-
-	lastBundleUpdate = t.dbl();
-	if (withRestart){
-		for (std::map<LAddress::L3Type, double>::iterator it = lastBundleProposal.begin(); it != lastBundleProposal.end(); it++){
-			double lastProposal = it->second;
-			if (lastProposal < lastBundleUpdate){
-				stringstream ss;
-				ss << it->first;
-//				if (restartIEP->isScheduled()){
-//					cancelEvent(restartIEP);
-//					nbrCancelRestartedIEP++;
-//				}
-				restartIEP = new cMessage(ss.str().c_str(), RESTART);
-				scheduleAt(simTime(),restartIEP);
-
-				haveToRestartIEP = true;
-				nbrRestartedIEP++;
-			}
-		}
-		if (withConnectionRestart){
-			for (std::set<LAddress::L3Type>::iterator it = neighborsAddress.begin(); it != neighborsAddress.end(); it++){
-				std::map<LAddress::L3Type, double>::iterator it2 = lastBundleProposal.find(*it);
-				if (it2 == lastBundleProposal.end()){
-					stringstream ss;
-					ss << *it;
-					restartIEP = new cMessage(ss.str().c_str(), RESTART);
-					scheduleAt(simTime(),restartIEP);
-
-					haveToRestartIEP = true;
-					nbrRestartedIEP++;
-				}
-			}
-		}
-	}
-
-	return haveToRestartIEP;
-}
-
-bool DtnNetwLayer::forceRestartIEP(LAddress::L3Type addr)
-{
-	bool haveToRestartIEP = false;
-	stringstream ss;
-	ss << addr;
-	//				if (restartIEP->isScheduled()){
-	//					cancelEvent(restartIEP);
-	//					nbrCancelRestartedIEP++;
-	//				}
-	restartIEP = new cMessage(ss.str().c_str(), FORCED_RESTART);
-	scheduleAt(simTime(),restartIEP);
-
-	haveToRestartIEP = true;
-	nbrRestartedIEP++;
-
-	return haveToRestartIEP;
 }
 
 unsigned long DtnNetwLayer::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
@@ -679,26 +440,6 @@ unsigned long DtnNetwLayer::startRecordingContact(int addr, double time)
 	return contactID;
 }
 
-unsigned long DtnNetwLayer::startRecordingContact(int addr, unsigned long  contactID)
-{
-	/*
-	 * possibility that we received a msg before receiving the control msg
-	 * We must create an entry for this contact
-	 */
-
-	std::list<unsigned long> contactIDList = indexContactID[addr];
-	contactIDList.push_back(contactID);
-	indexContactID[addr] = contactIDList;
-
-	SimpleContactStats contact = SimpleContactStats();
-	contact.setSerial(contactID);
-	indexContactStats.insert(std::pair<unsigned long,SimpleContactStats>(contactID,contact));
-
-	return contactID;
-}
-
-
-
 unsigned long DtnNetwLayer::endRecordingContact(int addr, double time)
 {
 	unsigned long contactID = 0;
@@ -732,8 +473,6 @@ unsigned long DtnNetwLayer::endRecordingContact(int addr, double time)
 	return contactID;
 }
 
-
-
 unsigned long DtnNetwLayer::endRecordingContact(unsigned long  contactID, bool hasForcedEnding)
 {
 	iteratorContactStats iterator = indexContactStats.find(contactID);
@@ -760,8 +499,6 @@ void DtnNetwLayer::recordBeginContactStats(LAddress::L3Type addr, double time)
 	contacts.insert(std::pair<LAddress::L3Type, double>(addr, time));
 }
 
-
-
 void DtnNetwLayer::recordEndContactStats(LAddress::L3Type addr, double time)
 {
 	double duration = time - contacts.find(addr)->second;
@@ -770,8 +507,6 @@ void DtnNetwLayer::recordEndContactStats(LAddress::L3Type addr, double time)
 	contacts.erase(addr);
 	endContactTime[addr] = time;
 }
-
-
 
 void DtnNetwLayer::recordRecontactStats(LAddress::L3Type addr, double time)
 {
@@ -786,8 +521,6 @@ void DtnNetwLayer::recordRecontactStats(LAddress::L3Type addr, double time)
 		intercontactDurVector.record(sumOfInterContactDur/ double (nbrRecontacts));
 	}
 }
-
-
 
 void DtnNetwLayer::classify(SimpleContactStats *newContact)
 {
@@ -818,8 +551,6 @@ void DtnNetwLayer::classify(SimpleContactStats *newContact)
 	}
 }
 
-
-
 void DtnNetwLayer::classifyAll()
 {
 	for(iteratorContactStats it = indexContactStats.begin(); it != indexContactStats.end(); it++){
@@ -827,8 +558,6 @@ void DtnNetwLayer::classifyAll()
 		classify(contactToClassify);
 	}
 }
-
-
 
 void DtnNetwLayer::initAllClassifier()
 {
@@ -852,8 +581,6 @@ void DtnNetwLayer::initAllClassifier()
 	    Fail = ClassifiedContactStats("Failed",false,withCDFForFail);
 	}
 }
-
-
 
 void DtnNetwLayer::recordClassifier(ClassifiedContactStats classifier)
 {
@@ -896,8 +623,6 @@ void DtnNetwLayer::recordClassifier(ClassifiedContactStats classifier)
 
 	classifier.getDurationStats().recordAs(string(classifier.getName()+": DurationStats").c_str());
 }
-
-
 
 bool DtnNetwLayer::erase(WaveShortMessage *msg)
 {
@@ -997,8 +722,6 @@ void DtnNetwLayer::recordAllClassifier()
 	}
 }
 
-
-
 void DtnNetwLayer::recordAllScalars()
 {
 	recordScalar("# L3Sent", nbrL3Sent);
@@ -1012,7 +735,6 @@ void DtnNetwLayer::recordAllScalars()
 	if (withAck){
 		recordScalar("# ACKs", acks.size());
 		recordScalar("# DeletedBundles", deletedBundlesWithAck);
-		recordScalar("# DemandedAckedBundles", demandedAckedBundle);
 		recordScalar("# Bundles", bundles.size());
 	}
 
@@ -1024,10 +746,6 @@ void DtnNetwLayer::recordAllScalars()
 		recordScalar("# DeletedCtrlMsgsWithTTL", nbrCtrlDeletedWithTTL);
 	}
 
-	if (withRestart){
-		recordScalar("# Restarted IEP", nbrRestartedIEP);
-	}
-
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
 	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
 	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
@@ -1037,94 +755,6 @@ void DtnNetwLayer::recordAllScalars()
 
 	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
 	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
-}
-
-void DtnNetwLayer::resetStatPerVPA()
-{
-	bundleSentPerVPA.clear();
-	ackReceivedPerVPA.clear();
-	meetVPA = false;
-	nbrNeighors = 0;
-	nbrCountForMeanNeighbors = 0;
-	hadBundles = false;
-	if (bundles.size() > 0){
-		hadBundles = true;
-	}
-	vpaContactDuration.clear();
-	vpaContactDistance.clear();
-
-	receivedHWICVPA = 0;
-	receivedBWICVPA = 0;
-	receivedAWICVPA = 0;
-}
-
-bool DtnNetwLayer::isMeetVpa() const
-{
-    return meetVPA;
-}
-
-std::string DtnNetwLayer::BundleSentPerVpaSerialToString() const
-{
-	std::string serialsAsStr ="";
-	for(std::set<unsigned long>::const_iterator it = bundleSentPerVPA.begin(); it != bundleSentPerVPA.end(); it++){
-		std::stringstream ss;
-		ss << *it;
-		serialsAsStr = serialsAsStr+ss.str()+",";
-	}
-//	if (serialsAsStr.size() > 1){
-//		serialsAsStr.erase(serialsAsStr.size()-1);
-//	}
-	if (serialsAsStr.size() == 0){
-		serialsAsStr = serialsAsStr+",";
-	}
-	return serialsAsStr;
-}
-
-long DtnNetwLayer::getNbrCountForMeanNeighbors() const
-{
-    return nbrCountForMeanNeighbors;
-}
-
-long DtnNetwLayer::getNbrNeighors() const
-{
-    return nbrNeighors;
-}
-
-bool DtnNetwLayer::isHadBundles() const
-{
-    return hadBundles;
-}
-
-std::pair<double,double> DtnNetwLayer::VPAContactDuration()
-{
-	double total = 0.0;
-	double count = 0.0;
-
-	for (std::list<double>::iterator it = vpaContactDuration.begin(); it != vpaContactDuration.end(); it++){
-		double tmp = *it;
-		if (tmp >= 0){
-			total +=tmp;
-			count++;
-		}
-	}
-
-	return std::pair<double,double>(total,count);
-}
-
-std::pair<double,double> DtnNetwLayer::VPAContactDistance()
-{
-	double total = 0.0;
-	double count = 0.0;
-
-	for (std::list<double>::iterator it = vpaContactDistance.begin(); it != vpaContactDistance.end(); it++){
-		double tmp = *it;
-		if (tmp >= 0){
-			total +=tmp;
-			count++;
-		}
-	}
-
-	return std::pair<double,double>(total,count);
 }
 
 void DtnNetwLayer::DefineNodeType()
@@ -1220,9 +850,6 @@ void DtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute 
 		// neighbor doesn't exist, add a new entry
 		neighborhoodTable.insert(std::pair<LAddress::L3Type, NetwRoute>(neighbor, neighborEntry));
 		NBHTableNbrInsert++;
-		if (neighborEntry.getNodeType() == VPA){
-			meetVPA = true;
-		}
 	}else{
 		// neighbor exists, update the old entry
 		neighborhoodTable[neighbor] = neighborEntry;
@@ -1268,11 +895,6 @@ void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set
 bool DtnNetwLayer::exist(WaveShortMessage *msg)
 {
 	return exist(msg->getSerial());
-}
-
-bool DtnNetwLayer::exist(BundleMeta bndlMeta)
-{
-	return exist(bndlMeta.getSerial());
 }
 
 bool DtnNetwLayer::exist(unsigned long  serial)
@@ -1478,13 +1100,9 @@ void DtnNetwLayer::emitSignalForHelloCtrlMsg(long  sizeHC_SB_Octets, long  sizeH
 	emit(helloCtrlBitsLengthId,signalStr.c_str());
 }
 
-
-
 void DtnNetwLayer::emitSignalForOtherCtrlMsg(long  sizeOC_SB_Octets, long  sizeOC_SA_Octets, long  sizeOC_CL_Octets, long  sizeOC_RCC_Octets)
 {
 	string signalStr = lg2Str(sizeOC_SB_Octets * 8)+":"+lg2Str(sizeOC_SA_Octets * 8)+":"
 						+lg2Str(sizeOC_CL_Octets * 8)+":"+lg2Str(sizeOC_RCC_Octets * 8);
 	emit(otherCtrlBitsLengthId,signalStr.c_str());
 }
-
-

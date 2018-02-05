@@ -216,12 +216,6 @@ class GeoTraCIMobility : public TraCIMobility
 
 		std::pair<std::string, double> addEntryToEdgeBTTIndex(std::string edgeAndValue);
 
-		simsignal_t sectorChange;
-
-		bool hadDistZero;
-
-		std::string getL2Stats(cModule* macMod);
-
 		bool withHotSpotMode;
 
 };

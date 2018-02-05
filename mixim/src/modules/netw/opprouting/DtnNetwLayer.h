@@ -134,9 +134,6 @@ class DtnNetwLayer : public BaseNetwLayer {
 		FORCED_RESTART = NEWLY_CONNECTED + 50};
     long nbrL3Sent;
     long nbrL3Received;
-    double delayed;
-    double delayedFrag;
-
 	/**
 	 * @brief The same as used by Prophetv2 in order to stay consistent with it
 	 */
@@ -169,7 +166,6 @@ class DtnNetwLayer : public BaseNetwLayer {
   	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
     bool withAck;
-    int demandedAckedBundle;
     int bundlesReceived;
     /**
   	 * Map structures for ACKs
@@ -209,37 +205,13 @@ class DtnNetwLayer : public BaseNetwLayer {
   	 * Determine if this vehicle is equiped or not
   	 */
     bool isEquiped;
-    int maxPcktLength;
-    bool dontFragment;
-    int dataLength;
-    std::vector<double> cutPoitsCDF;
     int deletedBundlesWithAck;
-    double lastBundleUpdate;
-    bool withRestart;
-    int nbrRestartedIEP;
-    int nbrCancelRestartedIEP;
-    std::map<LAddress::L3Type,double> lastBundleProposal;
-    // self message to restart IEP after reception of new Bundles
-    cMessage *restartIEP;
-    std::set<LAddress::L3Type> neighborsAddress;
-    bool withConnectionRestart;
+
     simsignal_t receiveL3SignalId;
     simsignal_t sentL3SignalId;
     simsignal_t sentBitsLengthSignalId;
     simsignal_t helloCtrlBitsLengthId;
     simsignal_t otherCtrlBitsLengthId;
-    std::set<unsigned long > bundleSentPerVPA;
-    std::set<unsigned long > ackReceivedPerVPA;
-
-    long nbrNeighors;
-    long nbrCountForMeanNeighbors;
-    bool hadBundles;
-    std::list<double> vpaContactDuration;
-    std::list<double> vpaContactDistance;
-    long receivedHWICVPA;
-    long receivedBWICVPA;
-    long receivedAWICVPA;
-
 
 	int totalBundlesReceived;
 
@@ -248,8 +220,6 @@ class DtnNetwLayer : public BaseNetwLayer {
 	int bndlSentToVPA;
 
 	int totalBndlSentToVPA;
-
-    bool meetVPA;
 
 	// E2E Acks serial
 	std::set<unsigned long > ackSerial;
@@ -325,29 +295,6 @@ class DtnNetwLayer : public BaseNetwLayer {
 public:
     virtual void initialize(int stage);
     virtual void finish();
-    virtual bool forceRestartIEP(LAddress::L3Type addr);
-    virtual void resetStatPerVPA();
-    std::string  BundleSentPerVpaSerialToString() const;
-    bool isMeetVpa() const;
-    long getNbrCountForMeanNeighbors() const;
-    long getNbrNeighors() const;
-    bool isHadBundles() const;
-    std::pair<double,double> VPAContactDuration();
-    std::pair<double,double> VPAContactDistance();
-    long getReceivedAwicvpa() const
-    {
-        return receivedAWICVPA;
-    }
-
-    long getReceivedBwicvpa() const
-    {
-        return receivedBWICVPA;
-    }
-
-    long getReceivedHwicvpa() const
-    {
-        return receivedHWICVPA;
-    }
 
   protected:
 
@@ -359,10 +306,8 @@ public:
 
   	/**
   	 * @brief Function that check if the WaveShortMessage identified by
-  	 * @param bndlMeta is currently stored in this node
+  	 * @param serial is currently stored in this node
   	 */
-  	virtual bool exist(BundleMeta bndlMeta);
-
   	virtual bool exist(unsigned long serial);
 
   	/**
@@ -378,30 +323,10 @@ public:
   	 */
   	virtual bool erase(unsigned long serial);
 
-  	/**
-  	 * @brief Function that check if an ack  identified by
-  	 * @param *msg serial is currently stored in this node
-  	 */
-  	virtual bool ackExist(WaveShortMessage *msg);
-
-  	/**
-  	 * @brief Function that check if an ack identified by
-  	 * @param bndlMeta serial is currently stored in this node
-  	 */
-  	virtual bool ackExist(BundleMeta bndlMeta);
-
-  	/**
-  	 * @brief Function that check if the WaveShortMessage identified by
-  	 * @param bndlMeta is currently stored in this node then deleted it
-  	 */
-  	virtual bool existAndErase(BundleMeta bndlMeta);
-
   	/*
   	 * Function that store bundles according to the current Queuing Strategy
   	 */
   	virtual void storeBundle(WaveShortMessage *msg);
-
-  	virtual void storeACK(BundleMeta meta);
 
   	virtual void storeAckSerial(unsigned long serial);
 
@@ -418,8 +343,6 @@ public:
   	 * Convert a string to time
   	 */
   	virtual double getTimeFromName(const char * name);
-
-  	virtual void deleteOldBundle(int ttl);
 
   	/** @brief Handle messages from upper layer */
   	virtual void handleUpperMsg(cMessage* msg);
@@ -442,7 +365,7 @@ public:
   	/*
   	 * Function to decide if we have to restart IEP
   	 */
-  	virtual bool haveToRestartIEP(simtime_t t);
+//  	virtual bool haveToRestartIEP(simtime_t t);
 
   	/*
   	 * generate contact serial
@@ -453,11 +376,6 @@ public:
   	 * start recording
   	 */
   	virtual unsigned long startRecordingContact(int addr, double time);
-
-  	/*
-  	 * start recording
-  	 */
-  	virtual unsigned long startRecordingContact(int addr, unsigned long contactID);
 
   	/*
   	 * end recording

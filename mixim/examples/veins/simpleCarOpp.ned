@@ -22,7 +22,7 @@ package org.mixim.examples.veins;
 
 import org.mixim.base.modules.*;
 import org.mixim.modules.application.ieee80211p.VPAp;
-import org.mixim.modules.netw.simpleProphet.simpleProphet;
+import org.mixim.modules.legacy.netw.simpleProphet.simpleProphet;
 import org.mixim.modules.nic.Nic80211pOpp;
 
 module simpleCarOpp

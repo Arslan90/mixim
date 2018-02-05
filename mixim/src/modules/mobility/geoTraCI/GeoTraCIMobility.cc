@@ -157,13 +157,7 @@ void GeoTraCIMobility::initialize(int stage)
 		currentETA_NP_VPA = currentNP.getEtaNpVpa();
 		currentMETD = currentNP.getMetd();
 
-		hadDistZero = false;
-
-		sectorChange = registerSignal("sectorChanged");
-
 		updateCurrentSector();
-
-
 
 	}
 	else
@@ -335,11 +329,6 @@ void GeoTraCIMobility::updateCurrentSector()
 		}
 		inSector= (col * rowSectorGrid) + row; //Every column has 33rows. Sectors starts in cero from bottom to top and left to right.
 
-		//if (((vehiclePosSumo.x < 150) || (vehiclePosSumo.x > 1500))
-		//		|| ((vehiclePosSumo.y < 150) || (vehiclePosSumo.y > 1500))){
-		//	inSector = -1;
-		//}
-
 		//if I noticed a change of sectorID reset everything. Also gives the current counter o'course.
 		//Note: this counter is complemented with the counter in received messages by VPAs or Vehicles.
 		if (inSector != currentSector){
@@ -347,72 +336,6 @@ void GeoTraCIMobility::updateCurrentSector()
 			if (! computeNPMsg->isScheduled() ){
 				scheduleAt(simTime(), computeNPMsg);
 			}
-			std::stringstream ss1,ss2;
-			ss1 << oldSector;
-			ss2 << currentSector;
-			std::string str = ss1.str()+":"+ss2.str();
-			if (getParentModule()->findSubmodule("netw")!=-1){
-				DtnNetwLayer* netwMod = FindModule<DtnNetwLayer*>::findSubModule(getParentModule());
-				if(netwMod->isHadBundles()){
-					str= str+":"+"1";
-				}else{
-					str= str+":"+"0";
-				}
-//				std::stringstream ss5;
-//				ss5 << netwMod->nbrBundles();
-//				str= str+":"+ss5.str();
-				if(netwMod->isMeetVpa()){
-					str= str+":"+"1";
-				}else{
-					str= str+":"+"0";
-				}
-				if (hadDistZero){
-					str= str+":"+"1";
-				}else{
-					str= str+":"+"0";
-				}
-				std::stringstream ss3,ss4,ss6,ss7,ss8,ss9,ss10,ss11,ss12;
-//				ss3 << netwMod->nbrAckReceivedPerVpa();
-//				str= str+":"+ss3.str();
-//				ss4 << netwMod->nbrBundleSentPerVpa();
-//				str= str+":"+ss4.str();
-				str= str+":"+netwMod->BundleSentPerVpaSerialToString();
-				ss3 << netwMod->getNbrNeighors();
-				str= str+":"+ss3.str();
-				ss4 << netwMod->getNbrCountForMeanNeighbors();
-				str= str+":"+ss4.str();
-				std::pair<double,double> vpaContact = netwMod->VPAContactDuration();
-				ss6 << vpaContact.first;
-				str= str+":"+ss6.str();
-				ss7 << vpaContact.second;
-				str= str+":"+ss7.str();
-				std::pair<double,double> vpaDistance = netwMod->VPAContactDistance();
-				ss8 << vpaDistance.first;
-				str= str+":"+ss8.str();
-				ss9 << vpaDistance.second;
-				str= str+":"+ss9.str();
-				ss10 << netwMod->getReceivedHwicvpa();
-				ss11 << netwMod->getReceivedBwicvpa();
-				ss12 << netwMod->getReceivedAwicvpa();
-				if ((netwMod->getReceivedHwicvpa() != 0) ||(netwMod->getReceivedBwicvpa() != 0)||(netwMod->getReceivedAwicvpa() != 0)){
-//					cout << "debug found" << endl;
-				}
-				str= str+":"+ss10.str()+":"+ss11.str()+":"+ss12.str();
-
-				if (getParentModule()->findSubmodule("nic")!=-1){
-					cModule* nicMod = this->getParentModule()->getSubmodule("nic");
-					if ((nicMod != NULL) && (nicMod->findSubmodule("mac80211p") != -1)){
-						Mac80211p* macMod = FindModule<Mac80211p*>::findSubModule(nicMod);
-						str= str+":"+getL2Stats((cModule*) macMod);
-					}else{
-						opp_error("Unable to found mac module to collect L2 Stats");
-					}
-				}
-
-				netwMod->resetStatPerVPA();
-				hadDistZero = false;
-			}
-			emit(sectorChange,str.c_str());
 		}else {
 			oldSector = currentSector;
 		}
@@ -525,40 +448,6 @@ void GeoTraCIMobility::updateMETD(bool reComputeETA_NP_VPA)
 	}else {
 		return;
 	}
-
-
-
-//	int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute);
-//	if ((indexNP_edgeTo != -1) && (indexRoadId == -1)) {
-//		// We don't updateMETD, instead we consider it as valid, until the next compute
-//		return;
-//	}
-//
-//	double currentETA_NP = maxDbl;
-//	double currentRmgRoadBestTT = maxDbl; // RmgRoadBestTT: Remaining Road Best Travel Time
-//	if (!reComputeETA_NP_VPA){
-//		// It is only an update of METD, with ETA_NP_VPA previously calculated
-//		if (currentETA_NP_VPA == maxDbl){
-//			opp_error("Calling updateMETD without previous calculation of ETA_NP_VPA");
-//		}
-//	}else {
-//		// It is a full compute of METD, with calculation of both ETA_NP and ETA_NP_VPA
-//		currentETA_NP_VPA = calculateETA_NP_VPA();
-//	}
-//
-//	currentRmgRoadBestTT = calculateRmgRoadBestTT();
-//	currentETA_NP = calculateETA_NP(false);
-//
-//	if ((!currentNP.isValid()) || (currentETA_NP_VPA == maxDbl) ||
-//			(currentETA_NP == maxDbl) || (currentRmgRoadBestTT == maxDbl)	){
-//		currentMETD = maxDbl;
-//	}else{
-//		currentMETD = currentRmgRoadBestTT + currentETA_NP + currentETA_NP_VPA;
-//	}
-//
-//	if ((currentMETD == maxDbl) && (currentNP.isValid())){
-//		opp_error("Unable to calculate METD when having already a valid NP_Node");
-//	}
 }
 
 double GeoTraCIMobility::calculateRmgRoadBestTT()
@@ -632,33 +521,6 @@ double GeoTraCIMobility::calculateETA_NP(bool includeCurrentRoad)
 		}
 	}
 	return ETA_NP;
-
-
-//	int indexNP_edgeTo = roadIndexInRoute(currentNP.getNpEdgeTo(), initialRoute);
-//	if (indexNP_edgeTo == -1){
-//		std::string warning_str = "Unable to find index of NP_edgeTo "+currentNP.NP_edgeTo+" for VehId "+this->external_id;
-//		opp_warning(warning_str.c_str());
-//	}
-//	if ((indexNP_edgeTo != -1) && (indexRoadId != -1) && (indexNP_edgeTo >= indexRoadId)){
-//		ETA_NP = 0.0;
-//		bool foundNP_edgeTo = false;
-//		for (std::list<std::string>::iterator it = remainingRoute.begin(); it != remainingRoute.end(); it++){
-//			if (*it == currentNP.getNpEdgeTo()){
-//				foundNP_edgeTo = true;
-//				break;
-//			}
-//
-//			if ((!includeCurrentRoad) && (*it == this->road_id)){
-//				continue;
-//			}else{
-//				ETA_NP += getEdgeBestTravelTime(*it);
-//			}
-//		}
-//		if (!foundNP_edgeTo){
-//			opp_error("Unable to find NP_edgeTo");
-//		}
-//	}
-//	return ETA_NP;
 }
 
 double GeoTraCIMobility::calculateETA_NP_VPA()
@@ -677,16 +539,6 @@ double GeoTraCIMobility::calculateETA_NP_VPA()
 	}else {
 //		std::cout << "is not valid " << endl;
 	}
-//
-//
-//	if ((currentNP.getRouteNpVpa().empty()) && (currentNP.getDistanceNpVpa() == 0.0)){
-//		ETA_NP_VPA = 0.0;
-//	}else if (currentNP.isValid()){
-//		ETA_NP_VPA = 0.0;
-//		for (std::list<std::string>::iterator it = currentNP.getRouteNpVpa().begin(); it != currentNP.getRouteNpVpa().end(); it++){
-//			ETA_NP_VPA += getEdgeBestTravelTime(*it);
-//		}
-//	}
 	return ETA_NP_VPA;
 }
 
@@ -810,10 +662,6 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
         }
 		distance = MY_CONST::convertToDbl(reponse_tokens[13]);
 
-		if (distance == 0){
-			hadDistZero = true;
-		}
-
 		returnedNP = NearestPoint(reponse_tokens[3], reponse_tokens[5], reponse_tokens[7], reponse_tokens[9], route, distance);
 	}
 
@@ -857,80 +705,6 @@ void GeoTraCIMobility::addRouteToEdgeBTTIndex(std::list<std::string> route)
 
 std::string GeoTraCIMobility::sendRequestToPyServer(std::string buf)
 {
-//	std::string rep;
-//
-//	std::string HOST = "127.0.0.1";
-//	int PORT = 19999;
-//	int MAX_BUFFER = 4096;
-//
-//	int connectionFd, rc, index = 0, limit = MAX_BUFFER;
-////	struct sockaddr_in servAddr, localAddr;
-//	char buffer[MAX_BUFFER+1];
-//
-//
-////	memset(&servAddr, 0, sizeof(servAddr));
-////	servAddr.sin_family = AF_INET;
-////	servAddr.sin_port = htons(PORT);
-////	servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
-//
-//	// Create socket
-//	connectionFd = socket(AF_INET, SOCK_STREAM, 0);
-//
-////	/* bind any port number */
-////	memset(&localAddr, 0, sizeof(localAddr));
-////	localAddr.sin_family = AF_INET;
-////	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-////	localAddr.sin_port = htons(0);
-//
-//	int returnCode = 0;
-//
-//	returnCode = bind(connectionFd,
-//	  (struct sockaddr *) &localAddr, sizeof(localAddr));
-//	if (returnCode == -1){
-//		std::stringstream ss;
-//		ss << errno;
-//		std::string errorMsg = "(BIND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
-//		opp_error(errorMsg.c_str());
-//	}
-//
-//
-//	// Connect to Server
-//	returnCode = connect(connectionFd,(struct sockaddr *)&servAddr, sizeof(servAddr));
-//	if (returnCode == -1){
-//		std::stringstream ss;
-//		ss << errno;
-//		std::string errorMsg = "(CONNECT) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
-//		opp_error(errorMsg.c_str());
-//	}
-//
-//	// Sending request
-//	sprintf( buffer, "%s", buf.c_str() );
-//	returnCode = ::send(connectionFd, buffer, strlen(buffer), 0 );
-////	printf("Client send to Server %s\n", buffer);
-//	if (returnCode == -1){
-//		std::stringstream ss;
-//		ss << errno;
-//		std::string errorMsg = "(SEND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
-//		opp_error(errorMsg.c_str());
-//	}
-//
-//	// Receiving request
-//	memset(&buffer[0], 0, sizeof(buffer));
-//	returnCode = recv(connectionFd, buffer, MAX_BUFFER, 0);
-////	printf("Client read from Server %s\n", buffer);
-//
-//	if (returnCode == -1){
-//		std::stringstream ss;
-//		ss << errno;
-//		std::string errorMsg = "(RECV) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
-//		opp_error(errorMsg.c_str());
-//	}
-//	rep = std::string(buffer);
-//
-//	// Closing connection to Server
-//	close(connectionFd);
-
-
 	return pyManager->sendRequestToPyServer(buf);
 
 }
@@ -990,246 +764,3 @@ void GeoTraCIMobility::updateDisplayString() {
 		getParentModule()->getDisplayString().setTagArg("b", 1, "2");
 	}
 }
-
-std::string GeoTraCIMobility::getL2Stats(cModule* macMod)
-{
-	std::string str;
-	Mac80211p* mac = check_and_cast<Mac80211p*>(macMod);
-	str = str+":"+mac->getLastStatsSent();
-	str = str+":"+mac->getLastStatsDropped();
-	str = str+":"+mac->getLastStatsReceivedBroadcast();
-	str = str+":"+mac->getLastStatsLost();
-	str = str+":"+mac->getLastStatsNumBackoffs();
-	str = str+":"+mac->getLastStatsBackoffDuration();
-	return str;
-}
-
-
-
-//int GeoTraCIMobility::cmd_NP_ALL(){
-//	int dist = 0;
-//	updateCurrentSector();
-//	int vpaIndex = currentSector;
-//	//	using namespace SOCKET;
-//	std::string HOST = "127.0.0.1";
-//	int PORT = 19999;
-//	int MAX_BUFFER = 4096;
-//
-//	int msg_type = MY_CONST::QUERY;
-//	int cmd = MY_CONST::CMD_NP_ALL;
-//
-//	int arg1 = MY_CONST::VPA_SECTOR_ID;
-//	int arg1_value = vpaIndex;
-//
-//	int arg2 = MY_CONST::ROUTE_CURRENT;
-//	std::string arg2_value = "";
-//	for (std::list<std::string>::iterator it = remainingRoute.begin(); it != remainingRoute.end(); it++){
-//		if (arg2_value == ""){
-//			arg2_value = *it;
-//		}else{
-//			arg2_value = arg2_value+" "+*it;
-//		}
-//	}
-//
-//	std::string msg = "";
-//	msg+= MY_CONST::convertToStr(msg_type)+":"+MY_CONST::convertToStr(cmd)+";";
-//	msg+= MY_CONST::convertToStr(arg1)+":"+MY_CONST::convertToStr(arg1_value)+";";
-//	msg+= MY_CONST::convertToStr(arg2)+":"+arg2_value+"#";
-//
-//	int connectionFd, rc, index = 0, limit = MAX_BUFFER;
-//	struct sockaddr_in servAddr, localAddr;
-//	char buffer[MAX_BUFFER+1];
-//
-//
-//	memset(&servAddr, 0, sizeof(servAddr));
-//	servAddr.sin_family = AF_INET;
-//	servAddr.sin_port = htons(PORT);
-//	servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
-//
-//	// Create socket
-//	connectionFd = socket(AF_INET, SOCK_STREAM, 0);
-//
-//	/* bind any port number */
-//	localAddr.sin_family = AF_INET;
-//	localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-//	localAddr.sin_port = htons(0);
-//
-//	rc = bind(connectionFd,
-//	  (struct sockaddr *) &localAddr, sizeof(localAddr));
-//
-//	// Connect to Server
-//	connect(connectionFd,
-//	  (struct sockaddr *)&servAddr, sizeof(servAddr));
-//
-//	// Send request to Server
-////	std::string tmp = "";
-////	for (std::list<std::string>::iterator it = remainingRoute.begin(); it != remainingRoute.end(); it++){
-////		if (tmp == ""){
-////			tmp = *it;
-////		}else{
-////			tmp = tmp+" "+*it;
-////		}
-////	}
-////	std::stringstream ss;
-////	ss << "ShortestPath_" << vpaIndex << "_";
-////	std::string req= ss.str()+tmp+";";
-//	sprintf( buffer, "%s", msg.c_str() );
-//	::send(connectionFd, buffer, strlen(buffer), 0 );
-//	printf("Client send to Server %s\n", buffer);
-//
-////	  printf("Client sent to sever %s\n", buffer);
-////
-////	  sprintf( buffer, "%s", " " );
-////	  send( connectionFd, buffer, strlen(buffer), 0 );
-////
-////	  printf("Client sent to sever %s\n", buffer);
-////
-////	  sprintf( buffer, "%f", coordY );
-////	  send( connectionFd, buffer, strlen(buffer), 0 );
-////
-////	   printf("Client sent to sever %s\n", buffer);
-//
-//	  // Receive data from Server
-//	  // sprintf( buffer, "%s", "" );
-//
-//	memset(&buffer[0], 0, sizeof(buffer));
-//	recv(connectionFd, buffer, MAX_BUFFER, 0);
-//	printf("Client read from Server %s\n", buffer);
-//
-//
-////	std::list<std::string> response;
-////	char* tmp_str = strtok(buffer,";");
-////	while (tmp_str != NULL){
-////		printf("%s\n", tmp_str);
-////		response.push_front(std::string(tmp_str));
-////		tmp_str = strtok(NULL,";");
-////	}
-//
-//	rep_NP_ALL(buffer);
-//
-//	close(connectionFd);
-//
-////	printf("Client closed.\n");
-//	return dist;
-//}
-//
-//void GeoTraCIMobility::rep_NP_ALL(char *data)
-//{
-//	std::vector<std::string> reponse_tokens = MY_CONST::tokenizeMSG(data);
-//
-//	// Checking if received data are correct
-//	bool abort = false;
-//	if (reponse_tokens[0] != MY_CONST::convertToStr(MY_CONST::RESPONSE)) {abort = true;}
-//	if (reponse_tokens[1] != MY_CONST::convertToStr(MY_CONST::RESPONSE_NP_ALL)) {abort = true;}
-//	if (reponse_tokens[2] != MY_CONST::convertToStr(MY_CONST::EDGE_TO_NP)) {abort = true;}
-//	if (reponse_tokens[4] != MY_CONST::convertToStr(MY_CONST::NODE_NP)) {abort = true;}
-//	if (reponse_tokens[6] != MY_CONST::convertToStr(MY_CONST::EDGE_FROM_NP)) {abort = true;}
-//	if (reponse_tokens[8] != MY_CONST::convertToStr(MY_CONST::NODE_VPA_MAPPING)) {abort = true;}
-//	if (reponse_tokens[10] != MY_CONST::convertToStr(MY_CONST::ROUTE_NP_VPA)) {abort = true;}
-//	if (reponse_tokens[12] != MY_CONST::convertToStr(MY_CONST::ROUTE_LENGTH_NP_VPA)) {abort = true;}
-//
-//	if (abort){
-//		opp_warning("Bad format for reponse_NP_ALL");
-//	}else{
-//
-//		currentNP.NP_edgeTo = reponse_tokens[3];
-//		currentNP.NP_node = reponse_tokens[5];
-//		currentNP.NP_edgefrom = reponse_tokens[7];
-//		currentNP.VPA_node = reponse_tokens[9];
-//		char* edges = strtok(strdup(reponse_tokens[11].c_str())," ");
-//		while (edges != NULL){
-//			currentNP.Route_NP_VPA.push_back(std::string(edges));
-//			edges = strtok(NULL," ");
-//		}
-//		currentNP.Distance_NP_VPA = MY_CONST::convertToDbl(reponse_tokens[13]);
-//	}
-//}
-
-//void GeoTraCIMobility::requestingFromPyServer()
-//{
-////	using namespace SOCKET;
-//	std::string HOST = "127.0.0.1";
-//	int PORT = 19999;
-//	int MAX_BUFFER = 4096;
-//
-//	  int connectionFd, rc, index = 0, limit = MAX_BUFFER;
-//	  struct sockaddr_in servAddr, localAddr;
-//	  char buffer[MAX_BUFFER+1];
-//
-//
-//	  memset(&servAddr, 0, sizeof(servAddr));
-//	  servAddr.sin_family = AF_INET;
-//	  servAddr.sin_port = htons(PORT);
-//	  servAddr.sin_addr.s_addr = inet_addr(HOST.c_str());
-//
-//	  // Create socket
-//	  connectionFd = socket(AF_INET, SOCK_STREAM, 0);
-//
-//	  /* bind any port number */
-//	  localAddr.sin_family = AF_INET;
-//	  localAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-//	  localAddr.sin_port = htons(0);
-//
-//	  rc = bind(connectionFd,
-//	      (struct sockaddr *) &localAddr, sizeof(localAddr));
-//
-//	  // Connect to Server
-//	  connect(connectionFd,
-//	      (struct sockaddr *)&servAddr, sizeof(servAddr));
-//
-//	  // Send request to Server
-//	  std::string req= "ShortestPath_297162704_82660198";
-//	  sprintf( buffer, "%s", req.c_str() );
-//	  ::send(connectionFd, buffer, strlen(buffer), 0 );
-//
-////	  printf("Client sent to sever %s\n", buffer);
-////
-////	  sprintf( buffer, "%s", " " );
-////	  send( connectionFd, buffer, strlen(buffer), 0 );
-////
-////	  printf("Client sent to sever %s\n", buffer);
-////
-////	  sprintf( buffer, "%f", coordY );
-////	  send( connectionFd, buffer, strlen(buffer), 0 );
-////
-////	   printf("Client sent to sever %s\n", buffer);
-//
-//	  // Receive data from Server
-//	  // sprintf( buffer, "%s", "" );
-//	  recv(connectionFd, buffer, MAX_BUFFER, 0);
-//	  printf("Client read from Server %s\n", buffer);
-//
-//	  close(connectionFd);
-//
-//	  printf("Client closed.\n");
-//}
-
-//double GeoTraCIMobility::calculateMETD()
-//{
-//	double ETA_NP = calculateETA_NP();
-//	double ETA_NP_VPA = calculateETA_NP_VPA();
-//	double newMETD = 0.0;
-//
-//	if ((ETA_NP == std::numeric_limits<double>::max()) || (ETA_NP_VPA == std::numeric_limits<double>::max())){
-//		newMETD = std::numeric_limits<double>::max();
-//	}else{
-//		newMETD = ETA_NP + ETA_NP_VPA;
-//	}
-//	return newMETD;
-//}
-
-//void GeoTraCIMobility::updateMETD(double lastETA_NP_VPA)
-//{
-//	double ETA_NP = calculateETA_NP();
-//	double newMETD = 0.0;
-//
-//	if (! ((ETA_NP == std::numeric_limits<double>::max()) || (lastETA_NP_VPA == std::numeric_limits<double>::max()))){
-//		newMETD = ETA_NP + lastETA_NP_VPA;
-//		currentMETD = newMETD;
-//	}
-//}
-
-
-
-
-

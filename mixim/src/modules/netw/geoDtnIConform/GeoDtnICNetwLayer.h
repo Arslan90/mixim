@@ -95,8 +95,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	int custodyList;
 
-	std::set<unsigned long> custodySerialDeleted;
-	std::map<unsigned long,double> custodySerialTimeStamp;
+//	std::set<unsigned long> custodySerialDeleted;
+//	std::map<unsigned long,double> custodySerialTimeStamp;
 
 	double majorationOfCustodyTimestamp;
 
@@ -158,7 +158,7 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 //  	void sendingBundleMsg();
 
-  	void newSendingBundleMsg(GeoDtnNetwPkt *netwPkt);
+  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt);
 
   	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
 
@@ -172,8 +172,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 ////////////////////////// Others Methods //////////////////////
 
-  	void recordStatsFwds(std::pair<LAddress::L3Type, double> fwdDist, std::pair<LAddress::L3Type, double> fwdMETD);
-
   	virtual void storeAckSerial(unsigned long serial);
 
   	void storeCustodySerial(unsigned long serial, double timestamp);
@@ -182,12 +180,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	
   	std::set<unsigned long> buildCustodySerialWithTimeStamp();
 
-  	void updateNeighborhoodTable(LAddress::L3Type neighboor, NetwRoute neighboorEntry);
-
-  	void emitInRadioWithVPA(LAddress::L3Type neighbor, int neighborNodeType, int flagValue);
-
-  	void updateInRadioWithVPA(short kind, int neighborNodeType);
-  	  	
   	bool checkBeforeHelloMechanism();
 
   	std::vector<std::pair<WaveShortMessage*,int> > specific_scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType);
