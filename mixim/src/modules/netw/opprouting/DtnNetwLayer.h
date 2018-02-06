@@ -62,7 +62,9 @@ class DtnNetwLayer : public BaseNetwLayer {
 	** 							Variables section
 	********************************************************************/
   protected:
-	TraCIMobility* traci;
+	/*******************************************************************
+	** 							Neighborhood Mechanism variables
+	********************************************************************/
 	double heartBeatMsgPeriod;
 	double netwRouteExpirency;
 	double netwRoutePending;
@@ -75,6 +77,11 @@ class DtnNetwLayer : public BaseNetwLayer {
 	int NBHAddressNbrInsert;
 	int NBHAddressNbrDelete;
 
+	/*******************************************************************
+	** 							Main  variables
+	********************************************************************/
+	TraCIMobility* traci;
+
 	enum NodeType {
 		VPA = 0x0A,
 		Veh = 0x01,
@@ -84,43 +91,17 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	int sectorId;
 
-	double sumOfContactDur;
-
-	int nbrContacts;
-
-	cOutVector contactDurVector;
-
-	double sumOfInterContactDur;
-
-	int nbrRecontacts;
-
-	cOutVector intercontactDurVector;
-
-	cOutVector nbrStoredBundleVector;
-
-	std::map<LAddress::L3Type, double> contacts;
-
-	std::map<LAddress::L3Type, double> endContactTime;
-
-	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
-
-	std::map<unsigned long, SimpleContactStats> indexContactStats;
-
-	ClassifiedContactStats Global;
-	bool withGlobal;
-	bool withCDFForGlobal;
-
-	ClassifiedContactStats Succ;
-	bool withSucc;
-	bool withCDFForSucc;
-
-	ClassifiedContactStats Fail;
-	bool withFail;
-	bool withCDFForFail;
-
-	bool recordContactStats;
-
-	std::map<unsigned long, int> bundlesReplicaIndex;
+    /** Boolean to verify if the transmission is possible */
+    bool canITransmit;
+    /**
+  	 * Equiped vehicle in pourcentage, by default all vehicles
+  	 * are equiped (100% = 1)
+  	 */
+    double equipedVehPc;
+    /**
+  	 * Determine if this vehicle is equiped or not
+  	 */
+    bool isEquiped;
 
 	/**
 	 * @brief Prophet Control Kinds used when notified by the lower layer (i.e Mac1609_4_Opp & NicEntryDebug)
@@ -131,9 +112,9 @@ class DtnNetwLayer : public BaseNetwLayer {
 		NO_NEIGHBOR_AND_DISCONNECTED = NEWLY_CONNECTED + 20,
 		NEW_NEIGHBOR_GONE = NEWLY_CONNECTED + 30,
 		RESTART = NEWLY_CONNECTED + 40,
-		FORCED_RESTART = NEWLY_CONNECTED + 50};
-    long nbrL3Sent;
-    long nbrL3Received;
+		FORCED_RESTART = NEWLY_CONNECTED + 50
+	};
+
 	/**
 	 * @brief The same as used by Prophetv2 in order to stay consistent with it
 	 */
@@ -161,29 +142,10 @@ class DtnNetwLayer : public BaseNetwLayer {
 	};
 
 	DtnNetwSchedulingPolicy scheduleStrategy;
-
-	/**
-  	 * Boolean for the activation of PRoPHET ACK mecanism
-  	 */
-    bool withAck;
-    int bundlesReceived;
-    /**
-  	 * Map structures for ACKs
-  	 */
-    std::list<BundleMeta> acks;
+	/************************* Related to Bundle Storage ***********/
     bool withTTL;
     int ttl;
-    int nbrDeletedWithTTL;
-    /**
-   	 * Specific map with K as serial of WSM &
-  	 * V as a bndl_meta struct.
-  	 * This structure simplify the search of ACKs
-  	 */
-    std::map<unsigned long ,BundleMeta> acksIndex;
-    /**
-  	 * Size of acks structure
-  	 */
-    unsigned int ackStructureSize;
+
     /** Size of the WMS Storage structure */
     unsigned int bundlesStructureSize;
     /** Fifo structure for WMS Storage*/
@@ -194,18 +156,61 @@ class DtnNetwLayer : public BaseNetwLayer {
   	 * to a specific node
   	 * */
     std::map<LAddress::L3Type,innerIndexMap> bundlesIndex;
-    /** Boolean to verify if the transmission is possible */
-    bool canITransmit;
-    /**
-  	 * Equiped vehicle in pourcentage, by default all vehicles
-  	 * are equiped (100% = 1)
+
+	std::map<unsigned long, int> bundlesReplicaIndex;
+
+	/************************* Related to Bundle Storage ***********/
+
+	/************************* Related to ACKs ***********/
+
+	bool withTTLForCtrl;
+	int ttlForCtrl;
+	double factorForTTLCtrl;
+
+	/**
+  	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
-    double equipedVehPc;
+    bool withAck;
+
     /**
-  	 * Determine if this vehicle is equiped or not
+   	 * Specific map with K as serial of WSM &
+  	 * V as a bndl_meta struct.
+  	 * This structure simplify the search of ACKs
   	 */
-    bool isEquiped;
-    int deletedBundlesWithAck;
+    std::map<unsigned long ,BundleMeta> acksIndex;
+    /**
+  	 * Size of acks structure
+  	 */
+    unsigned int ackStructureSize;
+    /**
+  	 * Map structures for ACKs
+  	 */
+    std::list<BundleMeta> acks;
+
+	// E2E Acks serial
+	std::set<unsigned long > ackSerial;
+
+	std::set<unsigned long> ackSerialDeleted;
+	std::multimap<double, unsigned long> ackSerialTimeStamp;
+
+	/************************* Related to ACKs ***********/
+
+	/*******************************************************************
+	** 					Variables used to compute main statistics
+	********************************************************************/
+    long nbrL3Sent;
+    long nbrL3Received;
+
+	int bundlesReceived;
+    int nbrDeletedBundlesByTTL;
+    int nbrDeletedBundlesByAck;
+
+    int nbrDeletedCtrlByTTL;
+
+    bool firstSentToVPA;
+	int totalBundlesReceived;
+	int bndlSentToVPA;
+	int totalBndlSentToVPA;
 
     simsignal_t receiveL3SignalId;
     simsignal_t sentL3SignalId;
@@ -213,25 +218,56 @@ class DtnNetwLayer : public BaseNetwLayer {
     simsignal_t helloCtrlBitsLengthId;
     simsignal_t otherCtrlBitsLengthId;
 
-	int totalBundlesReceived;
+	simsignal_t t_ackLifeTime;
 
-	bool firstSentToVPA;
+	cMessage* updateMsg;
 
-	int bndlSentToVPA;
+	double updateInterval;
 
-	int totalBndlSentToVPA;
+    /*******************************************************************
+	** 					Variables used to compute other statistics
+	********************************************************************/
+	bool recordContactStats;
 
-	// E2E Acks serial
-	std::set<unsigned long > ackSerial;
+    double sumOfContactDur;
 
-	bool withTTLForCtrl;
-	int ttlForCtrl;
-	double factorForTTLCtrl;
+	int nbrContacts;
 
-    int nbrCtrlDeletedWithTTL;
+	cOutVector contactDurVector;
 
-	std::set<unsigned long> ackSerialDeleted;
-	std::multimap<double, unsigned long> ackSerialTimeStamp;
+	double sumOfInterContactDur;
+
+	int nbrRecontacts;
+
+	cOutVector intercontactDurVector;
+
+	cOutVector nbrStoredBundleVector;
+
+	cOutVector nbrStoredAcksVector;
+
+	std::map<LAddress::L3Type, double> contacts;
+
+	std::map<LAddress::L3Type, double> endContactTime;
+
+	std::map<LAddress::L3Type, std::list<unsigned long> > indexContactID;
+
+	std::map<unsigned long, SimpleContactStats> indexContactStats;
+
+	ClassifiedContactStats Global;
+	bool withGlobal;
+	bool withCDFForGlobal;
+
+	ClassifiedContactStats Succ;
+	bool withSucc;
+	bool withCDFForSucc;
+
+	ClassifiedContactStats Fail;
+	bool withFail;
+	bool withCDFForFail;
+
+    /*******************************************************************
+	** 					Scheduling strategies
+	********************************************************************/
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -440,9 +476,19 @@ public:
   		return str;
   	}
 
+  	string dbl2Str(double doubleToConvert)
+  	{
+  		std::stringstream ss;
+  		ss << doubleToConvert;
+  		std::string str = std::string(ss.str());
+  		return str;
+  	}
+
   	void emitSignalForHelloCtrlMsg(long sizeHC_SB_Octets, long sizeHC_SA_Octets, long sizeHC_CL_Octets, long sizeHC_RCC_Octets);
 
   	void emitSignalForOtherCtrlMsg(long sizeOC_SB_Octets, long sizeOC_SA_Octets, long sizeOC_CL_Octets, long sizeOC_RCC_Octets);
+
+  	void emitSignalForAckLifeTime(unsigned long serial, double startTime, double endTime);
 
   public:
 	/*

@@ -61,7 +61,7 @@ void DtnNetwLayer::initialize(int stage)
 
 		withTTL = par("withTTL").boolValue();
 		ttl = par("ttl");
-		nbrDeletedWithTTL = 0;
+		nbrDeletedBundlesByTTL = 0;
 
 		equipedVehPc = par("equipedVehPc").doubleValue();
 		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
@@ -99,7 +99,10 @@ void DtnNetwLayer::initialize(int stage)
 		nbrStoredBundleVector.setName("StoredBundles");
 		nbrStoredBundleVector.record(0);
 
-		deletedBundlesWithAck = 0;
+		nbrStoredAcksVector.setName("StoredAcks");
+		nbrStoredAcksVector.record(0);
+
+		nbrDeletedBundlesByAck = 0;
 
         bundlesReceived = 0;
 
@@ -111,6 +114,8 @@ void DtnNetwLayer::initialize(int stage)
 		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
 
 		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
+
+		t_ackLifeTime = registerSignal("ackLifeTime");
 
 		int tmpScheduleStrategy = par("scheduleStrategy");
 
@@ -151,13 +156,25 @@ void DtnNetwLayer::initialize(int stage)
 		double ttlForCtrlAsDbl = ttl * factorForTTLCtrl;
 		ttlForCtrl = (int) ttlForCtrlAsDbl;
 
-		nbrCtrlDeletedWithTTL = 0;
+		nbrDeletedCtrlByTTL = 0;
 	}
 
 	if (stage == 2){
 		sectorId = getCurrentSector();
 		heartBeatMsg = new cMessage("heartBeatMsg");
 		scheduleAt(simTime(), heartBeatMsg);
+
+		updateInterval = par("updateInterval").doubleValue();
+		if (updateInterval <= 0){
+			opp_error("PyGraphServerManager::initialize - Update Interval should be a strict positive double");
+		}
+		updateMsg = new cMessage("updateMsg");
+		double currentTime = simTime().dbl();
+		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
+		if (currentTime == scheduleTime){
+			scheduleTime+=updateInterval;
+		}
+		scheduleAt(scheduleTime, updateMsg);
 	}
 }
 
@@ -191,8 +208,8 @@ void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
 	  		opp_error("Double insertion in bundles Index");
 	  	}
 
-	  	unsigned int size = bundles.size();
-		nbrStoredBundleVector.record(size);
+//	  	unsigned int size = bundles.size();
+//		nbrStoredBundleVector.record(size);
 	}
 }
 
@@ -248,11 +265,24 @@ void DtnNetwLayer::handleLowerMsg(cMessage *msg)
 
 void DtnNetwLayer::handleSelfMsg(cMessage *msg)
 {
-	switch (msg->getKind()) {
-		case RESTART:
-			break;
-		default:
-			break;
+	if (msg == updateMsg){
+		/**
+		 * Traditional metrics
+		 */
+		if (!bundles.empty()){
+			nbrStoredBundleVector.record(bundles.size());
+		}
+
+		if (!ackSerial.empty()){
+			nbrStoredAcksVector.record(ackSerial.size());
+		}
+
+		double currentTime = simTime().dbl();
+		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
+		if (currentTime == scheduleTime){
+			scheduleTime+=updateInterval;
+		}
+		scheduleAt(scheduleTime, updateMsg);
 	}
 }
 
@@ -734,16 +764,16 @@ void DtnNetwLayer::recordAllScalars()
 
 	if (withAck){
 		recordScalar("# ACKs", acks.size());
-		recordScalar("# DeletedBundles", deletedBundlesWithAck);
+		recordScalar("# DeletedBundles", nbrDeletedBundlesByAck);
 		recordScalar("# Bundles", bundles.size());
 	}
 
 	if (withTTL){
-		recordScalar("# DeletedBundlesWithTTL", nbrDeletedWithTTL);
+		recordScalar("# DeletedBundlesWithTTL", nbrDeletedBundlesByTTL);
 	}
 
 	if (withTTLForCtrl){
-		recordScalar("# DeletedCtrlMsgsWithTTL", nbrCtrlDeletedWithTTL);
+		recordScalar("# DeletedCtrlMsgsWithTTL", nbrDeletedCtrlByTTL);
 	}
 
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
@@ -981,7 +1011,7 @@ void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 		for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
 			storeAckSerial(*it);
 			if (erase(*it)){
-				deletedBundlesWithAck++;
+				nbrDeletedBundlesByAck++;
 			}
 		}
 	}
@@ -998,7 +1028,7 @@ void DtnNetwLayer::deletedAckSerials(){
 	// print range [itlow,itup):
 	for (it=itlow; it!=itup; it++){
 	    //std::cout << (*it).first << " => " << (*it).second << '\n';
-	    nbrCtrlDeletedWithTTL++;
+	    nbrDeletedCtrlByTTL++;
 	    ackSerial.erase((*it).second);
 	    ackSerialDeleted.insert((*it).second);
 	}
@@ -1077,7 +1107,7 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 	// step 3 : Delete Expired Bundles
 	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
 		if (erase(*it)){
-			nbrDeletedWithTTL++;
+			nbrDeletedBundlesByTTL++;
 		}
 	}
 
@@ -1105,4 +1135,10 @@ void DtnNetwLayer::emitSignalForOtherCtrlMsg(long  sizeOC_SB_Octets, long  sizeO
 	string signalStr = lg2Str(sizeOC_SB_Octets * 8)+":"+lg2Str(sizeOC_SA_Octets * 8)+":"
 						+lg2Str(sizeOC_CL_Octets * 8)+":"+lg2Str(sizeOC_RCC_Octets * 8);
 	emit(otherCtrlBitsLengthId,signalStr.c_str());
+}
+
+void DtnNetwLayer::emitSignalForAckLifeTime(unsigned long serial, double startTime, double endTime)
+{
+	string signalStr = lg2Str((long)(serial))+":"+dbl2Str(startTime)+":"+dbl2Str(endTime);
+	emit(t_ackLifeTime,signalStr.c_str());
 }

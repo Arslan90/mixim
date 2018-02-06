@@ -130,6 +130,14 @@ void PyGraphServerManager::initialize(int stage)
 		emit(t_sizeOC_CL , 0);
 		emit(t_sizeOC_RCC, 0);
 
+		simulation.getSystemModule()->subscribe("ackLifeTime", this);
+
+		totalAckLifeTime = 0.0;
+		counterForAckLifeTime = 0.0;
+
+		stats_AckLifeTime = registerSignal("stats_AckLifeTime");
+		emit(stats_AckLifeTime,0.0);
+
 		collectStatOnly = par("collectStatOnly").boolValue();
 
 		updateInterval = par("updateInterval").doubleValue();
@@ -145,8 +153,6 @@ void PyGraphServerManager::initialize(int stage)
 		scheduleAt(scheduleTime, updateMsg);
 
 		initializeConnection();
-
-
 	}
 }
 
@@ -247,6 +253,11 @@ void PyGraphServerManager::handleMessage(cMessage *msg)
 		emit(t_sizeOC_SA, sizeOC_SA_Kbits);
 		emit(t_sizeOC_CL, sizeOC_CL_Kbits);
 		emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+
+		/**
+		 * Metrics related to ACKs life time
+		 */
+		updateStatsForAckLifeTime(false);
 
 		double currentTime = simTime().dbl();
 		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
@@ -402,6 +413,30 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			sizeAsStr = strtok(NULL,":");
 		}
 	}
+
+	if (strcmp(getSignalName(signalID),"ackLifeTime") == 0){
+		char* signalStr = strtok(strdup(s),":");
+		unsigned long serial = strtol(signalStr,NULL,10);
+
+		signalStr = strtok(NULL,":");
+		double creationTime = strtod(signalStr,NULL);
+
+		signalStr = strtok(NULL,":");
+		double expireTime = strtod(signalStr,NULL);
+
+		std::map<unsigned long, std::pair<double,double> >::iterator it = ackLifeTime.find(serial);
+		if (it == ackLifeTime.end()){
+			ackLifeTime.insert(std::make_pair(serial,std::make_pair(creationTime,expireTime)));
+		}else{
+			if (it->second.first == -1){
+				opp_error("PyGraphServerManager::receiveSignal - CreationTime of ACKs cannot be negative");
+			}
+			if (it->second.second < expireTime){
+				ackLifeTime[it->first] = std::make_pair(it->second.first, expireTime);
+			}
+		}
+	}
+
 }
 
 void PyGraphServerManager::finish(){
@@ -450,6 +485,8 @@ void PyGraphServerManager::finish(){
 	emit(t_sizeOC_SA, sizeOC_SA_Kbits);
 	emit(t_sizeOC_CL, sizeOC_CL_Kbits);
 	emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
+
+	updateStatsForAckLifeTime(true);
 
 	finishConnection();
 }
@@ -542,6 +579,32 @@ void PyGraphServerManager::finishConnection()
 	}
 }
 
+void PyGraphServerManager::updateStatsForAckLifeTime(bool recordAllEntries)
+{
+	std::set<unsigned long> entriesToDelete;
+	for (std::map<unsigned long, std::pair<double,double> >::iterator it = ackLifeTime.begin(); it != ackLifeTime.end(); it++){
+		unsigned long serial =it->first;
+		double creationTime = it->second.first;
+		double expireTime = it->second.second;
 
+		if (creationTime < 0){
+			opp_error("PyGraphServerManager::updateStatsForAckLifeTime - CreationTime of ACKs cannot be negative");
+		}
 
+		if (creationTime > expireTime){
+			opp_error("PyGraphServerManager::updateStatsForAckLifeTime - CreationTime of ACKs cannot be higher than ExpireTime");
+		}
 
+		if ((recordAllEntries) || ((!recordAllEntries) && (expireTime < simTime().dbl()))){
+			totalAckLifeTime += expireTime - creationTime;
+			counterForAckLifeTime++;
+			entriesToDelete.insert(serial);
+		}
+	}
+
+	for (std::set<unsigned long>::iterator it2 = entriesToDelete.begin(); it2 != entriesToDelete.end(); it2++){
+		ackLifeTime.erase(*it2);
+	}
+
+	emit(stats_AckLifeTime,totalAckLifeTime/counterForAckLifeTime);
+}

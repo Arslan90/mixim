@@ -23,6 +23,7 @@
 #include "errno.h"
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include "map"
 
 /**
  * TODO - Generated class
@@ -43,6 +44,8 @@ class PyGraphServerManager : public cSimpleModule, cListener
     virtual void initializeConnection();
 
     virtual void finishConnection();
+
+    virtual void updateStatsForAckLifeTime(bool recordAllEntries);
 
     bool debug;
     std::string host;
@@ -127,6 +130,12 @@ class PyGraphServerManager : public cSimpleModule, cListener
 	double updateInterval;
 
 	bool collectStatOnly;
+
+	simsignal_t stats_AckLifeTime;
+	std::map<unsigned long, std::pair<double,double> > ackLifeTime;
+
+	double totalAckLifeTime;
+	double counterForAckLifeTime;
 };
 
 #endif

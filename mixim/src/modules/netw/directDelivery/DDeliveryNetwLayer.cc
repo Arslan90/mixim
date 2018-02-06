@@ -162,6 +162,9 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
+			if (withTTLForCtrl){
+				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+			}
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
@@ -193,6 +196,11 @@ void DDeliveryNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 	storeAckSerials(finalDelivredToBndl);
+	if (withTTLForCtrl){
+		for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+			emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+		}
+	}
 }
 
 ////////////////////////////////////////// Others methods /////////////////////////

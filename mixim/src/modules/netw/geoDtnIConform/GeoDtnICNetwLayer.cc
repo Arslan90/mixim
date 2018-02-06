@@ -45,24 +45,10 @@ void GeoDtnICNetwLayer::initialize(int stage)
 			opp_error("No valid Forwarding Strategy");
 		}
 
-		nbr2Fwds = 0;
-		nbr1Fwds = 0;
-		nbr0ValidFwds = 0;
-		nbr1ValidFwds = 0;
-
 		currentNbrIsrt = 0;
 		lastNbrIsrt = 0;
 
-		bndlInterestVec.setName("Evolve of interesting bundle of neighborhood");
-
-		missedOpprVec.setName("Evolve of missed opportunities");
-
 		inRadioWithVPA = registerSignal("InContact");
-
-		gDistFwd = 0;
-		bDistFwd = 0;
-		gMETDFwd = 0;
-		bMETDFwd = 0;
 
 		Fwd_No  		= 0;
 		Fwd_Yes_METD    = 0;
@@ -145,16 +131,6 @@ void GeoDtnICNetwLayer::handleUpperMsg(cMessage *msg)
 
 void GeoDtnICNetwLayer::finish()
 {
-	recordScalar("# Distinct Forwarders", nbr2Fwds);
-	recordScalar("# Same Forwarders", nbr1Fwds);
-	recordScalar("# Unique valid Forwarders", nbr1ValidFwds);
-	recordScalar("# No valid Forwarders", nbr0ValidFwds);
-
-	recordScalar("Bad choice of METD Fwd", bMETDFwd);
-	recordScalar("Bad choice of Dist Fwd", bDistFwd);
-	recordScalar("Good choice of METD Fwd", gMETDFwd);
-	recordScalar("Good choice of Dist Fwd", gMETDFwd);
-
 	recordScalar("# No Forwarding", Fwd_No);
 	recordScalar("# Yes Forwarding based on METD", Fwd_Yes_METD);
 	recordScalar("# Yes Forwarding based on Dist", Fwd_Yes_Dist);
@@ -448,6 +424,9 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
+			if (withTTLForCtrl){
+				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+			}
 //			cout << "(VPA) Node@: " << myNetwAddr << " NodeType: " << nodeType << "received WSM with serial: " << wsm->getSerial() << endl;
 		}else {
 			/*
@@ -529,6 +508,11 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 		storeAckSerials(finalDelivredToBndl);
+		if (withTTLForCtrl){
+			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+			}
+		}
 	}
 
 	if (custodyMode == Yes_WithACK){
@@ -761,7 +745,7 @@ void GeoDtnICNetwLayer::deletedCustodySerials()
 	for (std::map<unsigned long, double>::iterator it = custodySerial.begin(); it != custodySerial.end(); it++){
 		if ((*it).second < currentTime){
 		    //std::cout << (*it).first << " => " << (*it).second << '\n';
-		    nbrCtrlDeletedWithTTL++;
+		    nbrDeletedCtrlByTTL++;
 		    entriesToDelete.insert((*it).first);
 		}
 	}

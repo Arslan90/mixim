@@ -31,30 +31,13 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   protected:
 	GeoTraCIMobility* geoTraci;
 
-	cOutVector bndlInterestVec;
-	cOutVector missedOpprVec;
-
-	int nbr2Fwds;
-	int nbr1Fwds;
-	int nbr0ValidFwds;
-	int nbr1ValidFwds;
-
-	int gDistFwd;
-	int bDistFwd;
-
-	int gMETDFwd;
-	int bMETDFwd;
 
 	int Fwd_No;
 	int Fwd_Yes_METD;
 	int Fwd_Yes_Dist;
 	int Fwd_Yes_Both;
 
-	//std::set<unsigned long> custodySerial;
-
 	std::map<unsigned long, double> custodySerial;
-
-	std::set<unsigned long > missedOpportunities;
 
 	/**
 	 * Current Number of Insert operation in ACKSerial & Bundle storage

@@ -72,6 +72,9 @@ void EpidemicNetwLayer::handleSelfMsg(cMessage *msg)
 		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
 	}
+	if (msg == updateMsg){
+		DtnNetwLayer::handleSelfMsg(msg);
+	}
 }
 
 void EpidemicNetwLayer::finish()
@@ -120,6 +123,11 @@ void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    if (!receivedE2eAcks.empty()){
 	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
 	    	storeAckSerials(receivedE2eAcks);
+			if (withTTLForCtrl){
+				for (std::set<unsigned long>::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
+					emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+				}
+			}
 	    }
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
 	    if (!storedBundle.empty()){
@@ -223,6 +231,9 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
 			storeAckSerial(wsm->getSerial());
+			if (withTTLForCtrl){
+				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+			}
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
@@ -265,6 +276,11 @@ void EpidemicNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 		storeAckSerials(finalDelivredToBndl);
+		if (withTTLForCtrl){
+			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+			}
+		}
 	}
 }
 

@@ -63,6 +63,8 @@ simple DtnNetwLayer extends BaseNetwLayer
         // equiped vehicle pourcentage, by default 1 (100%)
         double equipedVehPc = default(1);
         
+        double updateInterval = default(10.0);
+        
 //        string cutPoints = default("1;5;20;50;100;500;");
 //        string cutPoints = default("20;50;100");
 
