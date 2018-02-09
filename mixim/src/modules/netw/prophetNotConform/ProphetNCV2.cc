@@ -199,20 +199,24 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 //	/*************************** E2E Acks **********/
 	/***************** Cleaning AckSerials from old entries *****/
 	if (withTTLForCtrl){
-		deletedAckSerials();
+		deleteAckSerials();
 	}
 	/***************** Cleaning AckSerials from old entries *****/
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 
 //	/*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long > storedBundle;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		LAddress::L3Type destAddr = (*it)->getRecipientAddress();
+
+	std::list<unsigned long > myBundles = bundleStocker.getBundleSerials();
+	for (std::list<unsigned long>::iterator it = myBundles.begin(); it != myBundles.end(); it++){
+		unsigned long wsmSerial = (*it);
+		LAddress::L3Type destAddr = bundleStocker.getBundleBySerial(wsmSerial)->getRecipientAddress();
 		if (destAddr == myNetwAddr){
-			opp_error("storing bundles addressed to current node");
+			opp_error("ProphetNCV2::sendingBndlOfferMsg --- storing bundles addressed to current node");
 		}
-		predsIterator myPred = preds.find((*it)->getRecipientAddress());
-		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
+
+		predsIterator myPred = preds.find(destAddr);
+		predsIterator otherPred = predsOfNode.find(destAddr);
 		bool addToOffer = false;
 		if (otherPred != predsOfNode.end()){
 			if (myPred != preds.end()){
@@ -224,10 +228,32 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 			}
 		}
 		if (addToOffer){
-			unsigned long wsmSerial = (*it)->getSerial();
 			storedBundle.insert(wsmSerial);
 		}
 	}
+
+//	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+//		LAddress::L3Type destAddr = (*it)->getRecipientAddress();
+//		if (destAddr == myNetwAddr){
+//			opp_error("storing bundles addressed to current node");
+//		}
+//		predsIterator myPred = preds.find((*it)->getRecipientAddress());
+//		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
+//		bool addToOffer = false;
+//		if (otherPred != predsOfNode.end()){
+//			if (myPred != preds.end()){
+//				if (myPred->second < otherPred->second){
+//					addToOffer = true;
+//				}
+//			}else{
+//				addToOffer = true;
+//			}
+//		}
+//		if (addToOffer){
+//			unsigned long wsmSerial = (*it)->getSerial();
+//			storedBundle.insert(wsmSerial);
+//		}
+//	}
 
 	if (!(storedBundle.empty() & storedAck.empty())){
 		// if at least one of the two sets is not empty
@@ -267,7 +293,8 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 
 	for (std::set<unsigned long>::iterator it = serialStoredBndl.begin(); it != serialStoredBndl.end(); it++){
 		unsigned long serial = *it;
-		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
+//		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
+		if ((ackSerial.count(serial) >= 1) || (bundleStocker.existBundle(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -298,22 +325,23 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
-		unsigned long serial = *it;
-		if (exist(serial)){
-			std::map<unsigned long, int>::iterator it2 = bundlesReplicaIndex.find(serial);
-			if (it2 == bundlesReplicaIndex.end()){
-				opp_error("Bundle Found but not in rmg replica index");
-			}else{
-				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-					if ((*it3)->getSerial() == serial){
-						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
-						break;
-					}
-				}
-			}
-		}
-	}
+//	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
+//		unsigned long serial = *it;
+//		if (exist(serial)){
+//			std::map<unsigned long, int>::iterator it2 = bundlesReplicaIndex.find(serial);
+//			if (it2 == bundlesReplicaIndex.end()){
+//				opp_error("Bundle Found but not in rmg replica index");
+//			}else{
+//				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+//					if ((*it3)->getSerial() == serial){
+//						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica(serialResponseBndl);
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -336,7 +364,8 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		if (destType == Veh){
-			bundlesReplicaIndex[serial]++;
+//			bundlesReplicaIndex[serial]++;
+			bundleStocker.updateSentReplica(serial);
 		}
 	}
 }
@@ -367,12 +396,14 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				storeBundle(wsm);
-				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
-				if (it == bundlesReplicaIndex.end()){
-					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
-				}
+//			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+				bundleStocker.storeBundle(wsm);
+//				storeBundle(wsm);
+//				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
+//				if (it == bundlesReplicaIndex.end()){
+//					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
+//				}
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
 			}

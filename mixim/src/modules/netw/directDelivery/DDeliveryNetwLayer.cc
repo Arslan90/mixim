@@ -78,7 +78,7 @@ void DDeliveryNetwLayer::sendingHelloMsg()
 {
 	/***************** Cleaning AckSerials from old entries *****/
 	if (withTTLForCtrl){
-		deletedAckSerials();
+		deleteAckSerials();
 	}
 	/***************** Cleaning AckSerials from old entries *****/
 
@@ -110,17 +110,18 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 {
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
-		unsigned long serial = it->first;
-		if (exist(serial)){
-			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-				if ((*it3)->getSerial() == serial){
-					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
-					break;
-				}
-			}
-		}
-	}
+//	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
+//		unsigned long serial = it->first;
+//		if (exist(serial)){
+//			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+//				if ((*it3)->getSerial() == serial){
+//					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
+//					break;
+//				}
+//			}
+//		}
+//	}
+	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica();
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -137,9 +138,10 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 		bundleMsg->encapsulate(wsm->dup());
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
-		if (destType == Veh){
-			bundlesReplicaIndex[serial]++;
-		}
+		bundleStocker.updateSentReplica(serial);
+//		if (destType == Veh){
+//			bundlesReplicaIndex[serial]++;
+//		}
 	}
 }
 

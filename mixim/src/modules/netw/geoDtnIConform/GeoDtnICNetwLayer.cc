@@ -121,12 +121,15 @@ void GeoDtnICNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	storeBundle(upper_msg);
-	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
-	if (it == bundlesReplicaIndex.end()){
-		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
+	if (bundleStocker.storeBundle(upper_msg)){
 		currentNbrIsrt++;
 	}
+//	storeBundle(upper_msg);
+//	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
+//	if (it == bundlesReplicaIndex.end()){
+//		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
+//		currentNbrIsrt++;
+//	}
 }
 
 void GeoDtnICNetwLayer::finish()
@@ -151,15 +154,16 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	if (checkBeforeHelloMechanism()){
 		/***************** Cleaning AckSerials from old entries *****/
 		if (withTTLForCtrl){
-			deletedAckSerials();
+			deleteAckSerials();
 		}
 		/***************** Cleaning AckSerials from old entries *****/
 		std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 		netwPkt->setE2eAcks(storedAck);
-		std::set<unsigned long > storedBundle;
-		for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-			storedBundle.insert((*it)->getSerial());
-		}
+		std::set<unsigned long > storedBundle = bundleStocker.getBundleSerialsAsSet();
+//		std::set<unsigned long > storedBundle;
+//		for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+//			storedBundle.insert((*it)->getSerial());
+//		}
 		netwPkt->setH2hAcks(storedBundle);
 		std::map<unsigned long,double > custodyBundle;
 		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
@@ -255,7 +259,8 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    	for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
 	    		storeCustodySerial(it->first, it->second);
 	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
-	    			erase(it->first);
+//	    			erase(it->first);
+	    			bundleStocker.deleteBundle(it->first);
 	    			//erase(*it);
 	    		}
 	    	}
@@ -297,17 +302,18 @@ void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 	if (forwardingDecision){
 		// step 1 : Build bundle list to send before reordering
 		std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-		for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
-			unsigned long serial = it->first;
-			if (exist(serial)){
-				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-					if ((*it3)->getSerial() == serial){
-						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
-						break;
-					}
-				}
-			}
-		}
+//		for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
+//			unsigned long serial = it->first;
+//			if (exist(serial)){
+//				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+//					if ((*it3)->getSerial() == serial){
+//						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
+//						break;
+//					}
+//				}
+//			}
+//		}
+		unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica();
 
 		// step 2 : Reordering bundle list
 		// step 3 : Filtering bundle to send
@@ -334,9 +340,11 @@ void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 			sendDown(bundleMsg, 0, 0, 1);
 			emit(sentL3SignalId,1);
 			if ((custodyMode == No) || (custodyMode == Yes_WithoutACK)){
-				bundlesReplicaIndex[serial]++;
+//				bundlesReplicaIndex[serial]++;
+				bundleStocker.updateSentReplica(serial);
 				if (custodyDecision){
-					erase(serial);
+					//erase(serial);
+					bundleStocker.deleteBundle(serial);
 					if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
 						double currentTimestamp = 0;
 						double currentMETDForSerial = netwPkt->getSrcMETD();
@@ -355,17 +363,18 @@ void GeoDtnICNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 {
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
-		unsigned long serial = it->first;
-		if (exist(serial)){
-			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-				if ((*it3)->getSerial() == serial){
-					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
-					break;
-				}
-			}
-		}
-	}
+//	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
+//		unsigned long serial = it->first;
+//		if (exist(serial)){
+//			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+//				if ((*it3)->getSerial() == serial){
+//					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
+//					break;
+//				}
+//			}
+//		}
+//	}
+	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica();
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -432,16 +441,20 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				storeBundle(wsm);
-				if (custodyMode == Yes_WithACK){
-					receivedWSM.insert(wsm->getSerial());
-				}
-				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
-				if (it == bundlesReplicaIndex.end()){
-					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
+//			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+				if(bundleStocker.storeBundle(wsm)){
 					currentNbrIsrt++;
 				}
+//				storeBundle(wsm);
+//				if (custodyMode == Yes_WithACK){
+//					receivedWSM.insert(wsm->getSerial());
+//				}
+//				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
+//				if (it == bundlesReplicaIndex.end()){
+//					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
+//					currentNbrIsrt++;
+//				}
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
 			}
@@ -518,9 +531,11 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	if (custodyMode == Yes_WithACK){
 		std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
-			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it]++;
+//			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it]++;
+			bundleStocker.updateSentReplica(*it);
 			if (netwPkt->getCustodyTransfert()){
-				erase(*it);
+//				erase(*it);
+				bundleStocker.deleteBundle(*it);
 				if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
 					double currentTimestamp = 0;
 					double currentMETDForSerial = netwPkt->getSrcMETD();
@@ -600,7 +615,8 @@ void GeoDtnICNetwLayer::storeCustodySerials(std::map<unsigned long, double > set
 	    		currentMETD = geoTraci->getCurrentNp().getMetd();
 	    	}
 	    	if (currentMETD != 0){
-	    		erase(serial);
+//	    		erase(serial);
+	    		bundleStocker.deleteBundle(serial);
 	    	}
 	    }
 	}

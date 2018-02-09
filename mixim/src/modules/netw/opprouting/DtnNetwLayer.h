@@ -40,10 +40,12 @@
 #include "ClassifiedContactStats.h"
 #include "NetwSession.h"
 #include "NetwRoute.h"
+#include "BndlStorageHelper.h"
 
 
 
 const double maxDbl = std::numeric_limits<double>::max();
+const int maxInt = std::numeric_limits<int>::max();
 
 /**
  * TODO - Generated class
@@ -142,22 +144,24 @@ class DtnNetwLayer : public BaseNetwLayer {
 	};
 
 	DtnNetwSchedulingPolicy scheduleStrategy;
+
+	BndlStorageHelper bundleStocker;
 	/************************* Related to Bundle Storage ***********/
     bool withTTL;
     int ttl;
 
     /** Size of the WMS Storage structure */
     unsigned int bundlesStructureSize;
-    /** Fifo structure for WMS Storage*/
-    std::list<WaveShortMessage*> bundles;
-    /** Specific map with K as recipient address of WSMessage &
-  	 * V as a pointer to WSMessage.
-  	 * This structure simplify the search of WSMessage destinated
-  	 * to a specific node
-  	 * */
-    std::map<LAddress::L3Type,innerIndexMap> bundlesIndex;
-
-	std::map<unsigned long, int> bundlesReplicaIndex;
+//    /** Fifo structure for WMS Storage*/
+//    std::list<WaveShortMessage*> bundles;
+//    /** Specific map with K as recipient address of WSMessage &
+//  	 * V as a pointer to WSMessage.
+//  	 * This structure simplify the search of WSMessage destinated
+//  	 * to a specific node
+//  	 * */
+//    std::map<LAddress::L3Type,innerIndexMap> bundlesIndex;
+//
+//	std::map<unsigned long, int> bundlesReplicaIndex;
 
 	/************************* Related to Bundle Storage ***********/
 
@@ -189,6 +193,10 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	// E2E Acks serial
 	std::set<unsigned long > ackSerial;
+	// Map for Acks serial with their TimeStamp
+	//std::map<unsigned long, double > ackSerial;
+
+	std::list<unsigned long> FIFOFor_ackSerial;
 
 	std::set<unsigned long> ackSerialDeleted;
 	std::multimap<double, unsigned long> ackSerialTimeStamp;
@@ -202,8 +210,8 @@ class DtnNetwLayer : public BaseNetwLayer {
     long nbrL3Received;
 
 	int bundlesReceived;
-    int nbrDeletedBundlesByTTL;
-    int nbrDeletedBundlesByAck;
+//    int nbrDeletedBundlesByTTL;
+//    int nbrDeletedBundlesByAck;
 
     int nbrDeletedCtrlByTTL;
 
@@ -334,41 +342,41 @@ public:
 
   protected:
 
-  	/**
-  	 * @brief Function that check if the WaveShortMessage identified by
-  	 * @param *msg is currently stored in this node
-  	 */
-  	virtual bool exist(WaveShortMessage *msg);
+//  	/**
+//  	 * @brief Function that check if the WaveShortMessage identified by
+//  	 * @param serial is currently stored in this node
+//  	 */
+//  	virtual bool exist(unsigned long serial);
+//
+//  	/**
+//  	 * @brief Function that erase the WaveShortMessage identified by
+//  	 * @param *msg
+//  	 */
+//  	virtual bool erase(WaveShortMessage *msg);
+//
+//  	/**
+//  	 * @brief Function that erase the WaveShortMessage identified by
+//  	 * it's serial number @param serial, makes call of getStoredWSMFromSerial
+//  	 * then erase with *msg
+//  	 */
+//  	virtual bool erase(unsigned long serial);
+//
+//  	/*
+//  	 * Function that store bundles according to the current Queuing Strategy
+//  	 */
+//  	virtual void storeBundle(WaveShortMessage *msg);
 
-  	/**
-  	 * @brief Function that check if the WaveShortMessage identified by
-  	 * @param serial is currently stored in this node
-  	 */
-  	virtual bool exist(unsigned long serial);
+  	//virtual void storeAckSerial(unsigned long serial, double timestamp);
 
-  	/**
-  	 * @brief Function that erase the WaveShortMessage identified by
-  	 * @param *msg
-  	 */
-  	virtual bool erase(WaveShortMessage *msg);
-
-  	/**
-  	 * @brief Function that erase the WaveShortMessage identified by
-  	 * it's serial number @param serial, makes call of getStoredWSMFromSerial
-  	 * then erase with *msg
-  	 */
-  	virtual bool erase(unsigned long serial);
-
-  	/*
-  	 * Function that store bundles according to the current Queuing Strategy
-  	 */
-  	virtual void storeBundle(WaveShortMessage *msg);
-
+  	//virtual void storeAckSerials(std::map<unsigned long, double > setOfSerials);
+  	
   	virtual void storeAckSerial(unsigned long serial);
 
   	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
 
-  	virtual void deletedAckSerials();
+//  	virtual void deleteAckSerials();
+
+  	virtual void deleteAckSerials();
 
   	/*
   	 * Convert a string to L3Address
@@ -464,7 +472,7 @@ public:
 
   	void sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlLength, short nbrEncapData);
 
-  	virtual WaveShortMessage* getStoredWSMFromSerial(unsigned long serial);
+//  	virtual WaveShortMessage* getStoredWSMFromSerial(unsigned long serial);
 
   	virtual std::vector<WaveShortMessage* > scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType);
 

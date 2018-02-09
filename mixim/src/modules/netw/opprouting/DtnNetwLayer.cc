@@ -20,6 +20,7 @@
 #include "algorithm"
 #include "VEHICLEpOpp.h"
 #include "VPApOpp.h"
+//#include "limits"
 
 
 Define_Module(DtnNetwLayer);
@@ -48,8 +49,6 @@ void DtnNetwLayer::initialize(int stage)
 		if (bundlesStructureSize<=0){
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
-		bundles = std::list<WaveShortMessage*>();
-
 
 		withAck = par("withAck");
 		ackStructureSize = par("ackSize");
@@ -61,7 +60,9 @@ void DtnNetwLayer::initialize(int stage)
 
 		withTTL = par("withTTL").boolValue();
 		ttl = par("ttl");
-		nbrDeletedBundlesByTTL = 0;
+
+//		int maxInt = std::numeric_limits<int>::max();
+		bundleStocker = BndlStorageHelper(bundlesStructureSize, withTTL, double (ttl), false, maxInt);
 
 		equipedVehPc = par("equipedVehPc").doubleValue();
 		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
@@ -101,8 +102,6 @@ void DtnNetwLayer::initialize(int stage)
 
 		nbrStoredAcksVector.setName("StoredAcks");
 		nbrStoredAcksVector.record(0);
-
-		nbrDeletedBundlesByAck = 0;
 
         bundlesReceived = 0;
 
@@ -178,40 +177,38 @@ void DtnNetwLayer::initialize(int stage)
 	}
 }
 
-void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
-{
-	// step 1 : check if the bundle is already stored
-	if (!exist(msg)){
-
-		// step 2 : add the bundle to stored bundles
-		bundlesIndexIterator it;
-		if (bundles.size()==bundlesStructureSize){
-			erase(bundles.front());
-		}else if (bundles.size()>bundlesStructureSize){
-			opp_error("bundles storage structure exceed its maximum size");
-		}
-		bundles.push_back(msg);
-
-		// step 3 : adding this bundle to index
-		it = bundlesIndex.find(msg->getRecipientAddress());
-		innerIndexMap inner_map;
-		if (it != bundlesIndex.end()){
-			inner_map = it->second;
-		}
-		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
-		bundlesIndex[msg->getRecipientAddress()] = inner_map;
-
-	  	std::list<WaveShortMessage*> bundlesCopy = std::list<WaveShortMessage*>(bundles.begin(),bundles.end());
-	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
-
-	  	if (bundles.size() != bundlesCopy.size()){
-	  		opp_error("Double insertion in bundles Index");
-	  	}
-
-//	  	unsigned int size = bundles.size();
-//		nbrStoredBundleVector.record(size);
-	}
-}
+//void DtnNetwLayer::storeBundle(WaveShortMessage *msg)
+//{
+//	// step 1 : check if the bundle is already stored
+//	if (!exist(msg->getSerial())){
+//
+//		// step 2 : add the bundle to stored bundles
+//		bundlesIndexIterator it;
+//		if (bundles.size()==bundlesStructureSize){
+//			unsigned long serialToDelete = bundles.front()->getSerial();
+//			erase(serialToDelete);
+//		}else if (bundles.size()>bundlesStructureSize){
+//			opp_error("bundles storage structure exceed its maximum size");
+//		}
+//		bundles.push_back(msg);
+//
+//		// step 3 : adding this bundle to index
+//		it = bundlesIndex.find(msg->getRecipientAddress());
+//		innerIndexMap inner_map;
+//		if (it != bundlesIndex.end()){
+//			inner_map = it->second;
+//		}
+//		inner_map.insert(std::pair<unsigned long,WaveShortMessage*>(msg->getSerial(),msg));
+//		bundlesIndex[msg->getRecipientAddress()] = inner_map;
+//
+//	  	std::list<WaveShortMessage*> bundlesCopy = std::list<WaveShortMessage*>(bundles.begin(),bundles.end());
+//	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
+//
+//	  	if (bundles.size() != bundlesCopy.size()){
+//	  		opp_error("Double insertion in bundles Index");
+//	  	}
+//	}
+//}
 
 LAddress::L3Type DtnNetwLayer::getAddressFromName(const char *name)
 {
@@ -241,11 +238,12 @@ void DtnNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	storeBundle(upper_msg);
-	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
-	if (it == bundlesReplicaIndex.end()){
-		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
-	}
+	bundleStocker.storeBundle(upper_msg);
+//	storeBundle(upper_msg);
+//	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
+//	if (it == bundlesReplicaIndex.end()){
+//		bundlesReplicaIndex.insert(std::pair<unsigned long, int>(upper_msg->getSerial(), 0));
+//	}
 }
 
 void DtnNetwLayer::handleLowerMsg(cMessage *msg)
@@ -269,8 +267,9 @@ void DtnNetwLayer::handleSelfMsg(cMessage *msg)
 		/**
 		 * Traditional metrics
 		 */
-		if (!bundles.empty()){
-			nbrStoredBundleVector.record(bundles.size());
+		unsigned long nbrStoredBundles = bundleStocker.getNbrStoredBundles();
+		if (nbrStoredBundles != 0){
+			nbrStoredBundleVector.record(nbrStoredBundles);
 		}
 
 		if (!ackSerial.empty()){
@@ -360,33 +359,34 @@ void DtnNetwLayer::handleUpperControl(cMessage *msg)
 	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
 	int newAddr = controlInfo->getNewSectorNetwAddr();
 
-	bundlesIndexIterator it1;
-	innerIndexIterator it2;
-	innerIndexMap innerMap;
-
-	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
-		for (it2 = it1->second.begin(); it2 != it1->second.end() ; it2++){
-			it2->second->setRecipientAddress(newAddr);
-			innerMap.insert(std::pair<unsigned long,WaveShortMessage*>(it2->first,it2->second));
-		}
-	}
-
-	// we clear all the bundlesIndex container and reconstruct it
-	// with one unique destination which correspond to newAddr
-
-
-	if (!innerMap.empty()){
-		bundlesIndex.clear();
-		bundlesIndex[newAddr] = innerMap;
-	}
-
-	unsigned int bundlesIndexSize = 0;
-	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
-		bundlesIndexSize+= it1->second.size();
-	}
-	if (bundlesIndexSize != bundles.size()){
-		opp_warning("Size of Bundles and BundlesIndex data structurs are not the same");
-	}
+    bundleStocker.updateRcvAddrForBundles(newAddr);
+//	bundlesIndexIterator it1;
+//	innerIndexIterator it2;
+//	innerIndexMap innerMap;
+//
+//	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+//		for (it2 = it1->second.begin(); it2 != it1->second.end() ; it2++){
+//			it2->second->setRecipientAddress(newAddr);
+//			innerMap.insert(std::pair<unsigned long,WaveShortMessage*>(it2->first,it2->second));
+//		}
+//	}
+//
+//	// we clear all the bundlesIndex container and reconstruct it
+//	// with one unique destination which correspond to newAddr
+//
+//
+//	if (!innerMap.empty()){
+//		bundlesIndex.clear();
+//		bundlesIndex[newAddr] = innerMap;
+//	}
+//
+//	unsigned int bundlesIndexSize = 0;
+//	for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+//		bundlesIndexSize+= it1->second.size();
+//	}
+//	if (bundlesIndexSize != bundles.size()){
+//		opp_warning("Size of Bundles and BundlesIndex data structurs are not the same");
+//	}
 }
 
 unsigned long DtnNetwLayer::generateContactSerial(int myAddr, int seqNumber, int otherAddr)
@@ -654,78 +654,78 @@ void DtnNetwLayer::recordClassifier(ClassifiedContactStats classifier)
 	classifier.getDurationStats().recordAs(string(classifier.getName()+": DurationStats").c_str());
 }
 
-bool DtnNetwLayer::erase(WaveShortMessage *msg)
-{
-	bool found = false;
-	unsigned long serial = msg->getSerial();
-	LAddress::L3Type addr = msg->getRecipientAddress();
-
-	bundlesIndexIterator it = bundlesIndex.find(addr);
-	if (it != bundlesIndex.end()){
-		innerIndexMap inner_map = it->second;
-		innerIndexIterator it2 = inner_map.find(serial);
-		if (it2 !=inner_map.end()){
-			WaveShortMessage* wsm = it2->second;
-			bundles.remove(wsm);
-			inner_map.erase(serial);
-			if (inner_map.empty()){
-				bundlesIndex.erase(addr);
-			}else {
-				bundlesIndex[addr] = inner_map;
-			}
-			if (wsm->getOwner()==this){
-				delete wsm;
-			}
-			found = true;
-		}else {
-			opp_warning("Unable to locate the bundle, must do a global research to found it");
-			bundlesIndexIterator it1;
-			innerIndexIterator it2;
-
-			for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
-				innerIndexMap inner_map = it1->second;
-				innerIndexIterator it2 = inner_map.find(serial);
-				if (it2 !=inner_map.end()){
-					WaveShortMessage* wsm = it2->second;
-					bundles.remove(wsm);
-					inner_map.erase(serial);
-					if (inner_map.empty()){
-						bundlesIndex.erase(addr);
-					}else {
-						bundlesIndex[addr] = inner_map;
-					}
-					if (wsm->getOwner()==this){
-						delete wsm;
-					}
-					found = true;
-				}
-			}
-
-			if (!found){
-				opp_error("bundle doesn't exist in the index");
-			}
-		}
-	}else{
-		opp_error("bundle exist but not found in the index");
-	}
-	return found;
-}
-
-bool DtnNetwLayer::erase(unsigned long serial)
-{
-	bool found = false;
-
-	WaveShortMessage* wsm = getStoredWSMFromSerial(serial);
-
-	if (wsm !=NULL){
-		found = erase(wsm);
-		if (found){
-			bundlesReplicaIndex.erase(serial);
-		}
-	}
-
-	return found;
-}
+//bool DtnNetwLayer::erase(WaveShortMessage *msg)
+//{
+//	bool found = false;
+//	unsigned long serial = msg->getSerial();
+//	LAddress::L3Type addr = msg->getRecipientAddress();
+//
+//	bundlesIndexIterator it = bundlesIndex.find(addr);
+//	if (it != bundlesIndex.end()){
+//		innerIndexMap inner_map = it->second;
+//		innerIndexIterator it2 = inner_map.find(serial);
+//		if (it2 !=inner_map.end()){
+//			WaveShortMessage* wsm = it2->second;
+//			bundles.remove(wsm);
+//			inner_map.erase(serial);
+//			if (inner_map.empty()){
+//				bundlesIndex.erase(addr);
+//			}else {
+//				bundlesIndex[addr] = inner_map;
+//			}
+//			if (wsm->getOwner()==this){
+//				delete wsm;
+//			}
+//			found = true;
+//		}else {
+//			opp_warning("Unable to locate the bundle, must do a global research to found it");
+//			bundlesIndexIterator it1;
+//			innerIndexIterator it2;
+//
+//			for (it1 = bundlesIndex.begin(); it1 != bundlesIndex.end() ; it1++){
+//				innerIndexMap inner_map = it1->second;
+//				innerIndexIterator it2 = inner_map.find(serial);
+//				if (it2 !=inner_map.end()){
+//					WaveShortMessage* wsm = it2->second;
+//					bundles.remove(wsm);
+//					inner_map.erase(serial);
+//					if (inner_map.empty()){
+//						bundlesIndex.erase(addr);
+//					}else {
+//						bundlesIndex[addr] = inner_map;
+//					}
+//					if (wsm->getOwner()==this){
+//						delete wsm;
+//					}
+//					found = true;
+//				}
+//			}
+//
+//			if (!found){
+//				opp_error("bundle doesn't exist in the index");
+//			}
+//		}
+//	}else{
+//		opp_error("bundle exist but not found in the index");
+//	}
+//	return found;
+//}
+//
+//bool DtnNetwLayer::erase(unsigned long serial)
+//{
+//	bool found = false;
+//
+//	WaveShortMessage* wsm = getStoredWSMFromSerial(serial);
+//
+//	if (wsm !=NULL){
+//		found = erase(wsm);
+//		if (found){
+//			bundlesReplicaIndex.erase(serial);
+//		}
+//	}
+//
+//	return found;
+//}
 
 void DtnNetwLayer::finish()
 {
@@ -733,10 +733,7 @@ void DtnNetwLayer::finish()
 	classifyAll();
 	recordAllClassifier();
 
-	while (!bundles.empty()){
-		delete bundles.front();
-		bundles.pop_front();
-	}
+	delete (&bundleStocker);
 }
 
 void DtnNetwLayer::recordAllClassifier()
@@ -764,12 +761,12 @@ void DtnNetwLayer::recordAllScalars()
 
 	if (withAck){
 		recordScalar("# ACKs", acks.size());
-		recordScalar("# DeletedBundles", nbrDeletedBundlesByAck);
-		recordScalar("# Bundles", bundles.size());
+		recordScalar("# DeletedBundles", bundleStocker.getNbrDeletedBundlesByAck());
+		recordScalar("# Bundles", bundleStocker.getNbrStoredBundles());
 	}
 
 	if (withTTL){
-		recordScalar("# DeletedBundlesWithTTL", nbrDeletedBundlesByTTL);
+		recordScalar("# DeletedBundlesWithTTL", bundleStocker.getNbrDeletedBundlesByTtl());
 	}
 
 	if (withTTLForCtrl){
@@ -922,25 +919,20 @@ void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set
 	}
 }
 
-bool DtnNetwLayer::exist(WaveShortMessage *msg)
-{
-	return exist(msg->getSerial());
-}
-
-bool DtnNetwLayer::exist(unsigned long  serial)
-{
-	bool found = false;
-
-	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
-		innerIndexMap innerMap = it->second;
-		innerIndexIterator it2 = innerMap.find(serial);
-		if (it2 !=innerMap.end()){
-				found = true;
-				break;
-		}
-	}
-	return found;
-}
+//bool DtnNetwLayer::exist(unsigned long  serial)
+//{
+//	bool found = false;
+//
+//	for (bundlesIndexIterator it = bundlesIndex.begin(); it != bundlesIndex.end(); it++){
+//		innerIndexMap innerMap = it->second;
+//		innerIndexIterator it2 = innerMap.find(serial);
+//		if (it2 !=innerMap.end()){
+//				found = true;
+//				break;
+//		}
+//	}
+//	return found;
+//}
 
 std::vector<std::pair<WaveShortMessage*,int> > DtnNetwLayer::compAsFn_schedulingStrategy(std::vector<std::pair<WaveShortMessage*,int> > vectorToSort)
 {
@@ -1005,19 +997,47 @@ void DtnNetwLayer::storeAckSerial(unsigned long  serial)
 	}
 }
 
+//void DtnNetwLayer::storeAckSerial(unsigned long  serial, double timestamp)
+//{
+//	if ((withAck) && (ackSerial.count(serial) == 0)){
+//		FIFOFor_ackSerial.push_back(serial);
+//		ackSerial.insert(std::pair<unsigned long, double>(serial,timestamp));
+//		if (withTTLForCtrl){
+//			emitSignalForAckLifeTime(serial, simTime().dbl(), timestamp);
+//		}
+//	}
+//}
+
 void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 {
 	if (withAck){
 		for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
 			storeAckSerial(*it);
-			if (erase(*it)){
-				nbrDeletedBundlesByAck++;
-			}
+			unsigned long serial = *it;
+			bundleStocker.deleteBundleUponACK(serial);
+//			if (erase(serial)){
+//				nbrDeletedBundlesByAck++;
+//			}
 		}
 	}
 }
 
-void DtnNetwLayer::deletedAckSerials(){
+//void DtnNetwLayer::storeAckSerials(std::map<unsigned long, double > setOfSerials)
+//{
+//	if (withAck){
+//		for (std::map<unsigned long, double >::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+//	    	unsigned long serial = it->first;
+//	    	double expireTime = it->second;
+//	    	storeAckSerial(serial, expireTime);
+//	    	bundleStocker.deleteBundleUponACK(serial);
+////			if (erase(serial)){
+////				nbrDeletedBundlesByAck++;
+////			}
+//		}
+//	}
+//}
+
+void DtnNetwLayer::deleteAckSerials(){
 	double expirationTime = simTime().dbl() - ttlForCtrl;
 	std::multimap<double,unsigned long>::iterator it,itlow,itup;
 	itlow = ackSerialTimeStamp.upper_bound (0.0);  // itlow points to b
@@ -1038,16 +1058,38 @@ void DtnNetwLayer::deletedAckSerials(){
 	ackSerialTimeStamp.erase ( itlow, itup ); // erasing by range
 }
 
-WaveShortMessage* DtnNetwLayer::getStoredWSMFromSerial(unsigned long serial){
-	WaveShortMessage* wsm = NULL;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		if (serial == (*it)->getSerial()){
-			wsm = (*it);
-			break;
-		}
-	}
-	return wsm;
-}
+//void DtnNetwLayer::deleteAckSerials(){
+//	std::set<unsigned long> entriesToDelete;
+//	double currentTime = simTime().dbl();
+//
+//	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
+//
+//	for (std::map<unsigned long, double>::iterator it = ackSerial.begin(); it != ackSerial.end(); it++){
+//		if ((*it).second < currentTime){
+//		    //std::cout << (*it).first << " => " << (*it).second << '\n';
+//		    nbrDeletedCtrlByTTL++;
+//		    entriesToDelete.insert((*it).first);
+//		}
+//	}
+//
+//	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
+//
+//	for(std::set<unsigned long>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+//		FIFOFor_ackSerial.remove((*it));
+//		ackSerial.erase((*it));
+//	}
+//}
+
+//WaveShortMessage* DtnNetwLayer::getStoredWSMFromSerial(unsigned long serial){
+//	WaveShortMessage* wsm = NULL;
+//	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+//		if (serial == (*it)->getSerial()){
+//			wsm = (*it);
+//			break;
+//		}
+//	}
+//	return wsm;
+//}
 
 void DtnNetwLayer::prepareNetwPkt(DtnNetwPkt* myNetwPkt, short  kind, LAddress::L3Type destAddr)
 {
@@ -1106,9 +1148,10 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 
 	// step 3 : Delete Expired Bundles
 	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		if (erase(*it)){
-			nbrDeletedBundlesByTTL++;
-		}
+		bundleStocker.deleteBundleUponTTL(*it);
+//		if (erase(*it)){
+//			nbrDeletedBundlesByTTL++;
+//		}
 	}
 
 	// step 4 : Update stats related Bundles sent to VPA if the encountered node is a VPA

@@ -33,7 +33,7 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
 	int nbrReplica;
 
-	std::map<unsigned long, int> bundlesRmgReplica;
+//	std::map<unsigned long, int> bundlesRmgReplica;
 
 	/*
 	 * Bool withEMethod standing for erroneous method, in order to evaluate the impact of the previous error
@@ -87,7 +87,7 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
 	////////////////////////// Others Methods //////////////////////
 
-  	bool erase(unsigned long serial);
+//  	bool erase(unsigned long serial);
 
   	GeoTraCIMobility* getGeoTraci();
 

@@ -86,7 +86,7 @@ void EpidemicNetwLayer::sendingHelloMsg()
 {
 	/***************** Cleaning AckSerials from old entries *****/
 	if (withTTLForCtrl){
-		deletedAckSerials();
+		deleteAckSerials();
 	}
 	/***************** Cleaning AckSerials from old entries *****/
 
@@ -94,10 +94,11 @@ void EpidemicNetwLayer::sendingHelloMsg()
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	netwPkt->setE2eAcks(storedAck);
-	std::set<unsigned long > storedBundle;
-	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-		storedBundle.insert((*it)->getSerial());
-	}
+	std::set<unsigned long > storedBundle = bundleStocker.getBundleSerialsAsSet();
+//	std::set<unsigned long > storedBundle;
+//	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
+//		storedBundle.insert((*it)->getSerial());
+//	}
 	netwPkt->setH2hAcks(storedBundle);
 	int nbrEntries = ackSerial.size()+ storedBundle.size();
 	long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
@@ -143,7 +144,8 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 	std::set<unsigned long> serialResponseBndl;
 	for (std::set<unsigned long>::iterator it = wsmResponseBndl.begin(); it != wsmResponseBndl.end(); it++){
 		unsigned long serial = *it;
-		if ((ackSerial.count(serial) == 1) || (exist(serial))){
+//		if ((ackSerial.count(serial) == 1) || (exist(serial))){
+		if ((ackSerial.count(serial) == 1) || (bundleStocker.existBundle(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -169,22 +171,23 @@ void EpidemicNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
-		unsigned long serial = *it;
-		if (exist(serial)){
-			std::map<unsigned long, int>::iterator it2 = bundlesReplicaIndex.find(serial);
-			if (it2 == bundlesReplicaIndex.end()){
-				opp_error("Bundle Found but not in rmg replica index");
-			}else{
-				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-					if ((*it3)->getSerial() == serial){
-						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
-						break;
-					}
-				}
-			}
-		}
-	}
+//	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
+//		unsigned long serial = *it;
+//		if (exist(serial)){
+//			std::map<unsigned long, int>::iterator it2 = bundlesReplicaIndex.find(serial);
+//			if (it2 == bundlesReplicaIndex.end()){
+//				opp_error("Bundle Found but not in rmg replica index");
+//			}else{
+//				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
+//					if ((*it3)->getSerial() == serial){
+//						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica(serialResponseBndl);
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -207,7 +210,8 @@ void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		if (destType == Veh){
-			bundlesReplicaIndex[serial]++;
+//			bundlesReplicaIndex[serial]++;
+			bundleStocker.updateSentReplica(serial);
 		}
 	}
 }
@@ -238,12 +242,15 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				storeBundle(wsm);
-				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
-				if (it == bundlesReplicaIndex.end()){
-					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
-				}
+//			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+				bundleStocker.storeBundle(wsm);
+//				storeBundle(wsm);
+//				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
+//				if (it == bundlesReplicaIndex.end()){
+//					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
+//				}
+
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
 			}
