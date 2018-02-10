@@ -18,6 +18,7 @@ cplusplus {{
 #include "Coord.h"
 typedef std::set<unsigned long> E2EAcks;
 typedef std::set<unsigned long> H2PAcks;
+typedef std::map<unsigned long, double> AckSerialsWithExpireTime;
 }}
 packet NetwPkt;
 
@@ -25,6 +26,7 @@ class LAddress::L3Type extends void;
 class noncobject E2EAcks;
 class noncobject H2PAcks;
 class noncobject Coord;
+class noncobject AckSerialsWithExpireTime;
 //
 // TODO generated message class
 //
@@ -37,6 +39,7 @@ packet DtnNetwPkt extends NetwPkt {
     unsigned long contactID;
     E2EAcks e2eAcks;
     H2PAcks h2hAcks;
+    AckSerialsWithExpireTime ackSerialsWithTimestamp;
     Coord currentPos;
     int hopCount = 0;
 }

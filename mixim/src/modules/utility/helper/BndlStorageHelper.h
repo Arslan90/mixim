@@ -11,7 +11,7 @@
 #include "map"
 #include "WaveShortMessage_m.h"
 #include "SimpleAddress.h"
-
+#include "limits"
 
 typedef std::map<unsigned long,WaveShortMessage*> innerIndexMap;
 typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
@@ -19,6 +19,10 @@ typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
 typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
 
 typedef std::multimap<LAddress::L3Type,unsigned long>::iterator multiIter;
+
+namespace NS_BndlStorageHelper {
+	const int maxInt = std::numeric_limits<int>::max();
+};
 
 class BndlStorageHelper : public cObject {
 
@@ -70,13 +74,12 @@ protected:
 
 public:
 	BndlStorageHelper();
-	BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl, bool withLimitedReplica, int maxReplica);
+	BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl);
 	virtual ~BndlStorageHelper();
 
 	void reInitWithLimitedReplica(int maxNbrReplica);
 
-	bool storeBundle(WaveShortMessage *msg);
-	bool storeBundle(WaveShortMessage *msg, int rmgReplica);
+	bool storeBundle(WaveShortMessage *msg, int rmgReplica = NS_BndlStorageHelper::maxInt);
 
 	bool deleteBundle(unsigned long serial);
 	bool deleteBundleUponACK(unsigned long serial);
@@ -104,6 +107,8 @@ public:
 
 	void updateSentReplica(unsigned long serial, int SentReplica = 1);
 
+	bool hasExpired(double expireTime);
+
 	std::list<unsigned long > getBundleSerials() const
 	{
 		return std::list<unsigned long >(bundleSerials);
@@ -127,16 +132,6 @@ public:
     int getNbrDeletedBundlesByTtl() const
     {
         return nbrDeletedBundlesByTTL;
-    }
-
-    void setMaxNbrReplica(int maxNbrReplica)
-    {
-        this->maxNbrReplica = maxNbrReplica;
-    }
-
-    void setWithLimitedReplica(bool withLimitedReplica)
-    {
-        this->withLimitedReplica = withLimitedReplica;
     }
 
 protected:

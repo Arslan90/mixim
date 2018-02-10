@@ -198,19 +198,23 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 {
 //	/*************************** E2E Acks **********/
 	/***************** Cleaning AckSerials from old entries *****/
-	if (withTTLForCtrl){
-		deleteAckSerials();
-	}
+	//	if (withTTLForCtrl){
+	//		deleteAckSerials();
+	//	}
+		if (withTTLForAck){
+			ackModule.deleteExpiredAcks();
+		}
 	/***************** Cleaning AckSerials from old entries *****/
-	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+//	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
 
 //	/*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long > storedBundle;
 
-	std::list<unsigned long > myBundles = bundleStocker.getBundleSerials();
+	std::list<unsigned long > myBundles = bndlModule.getBundleSerials();
 	for (std::list<unsigned long>::iterator it = myBundles.begin(); it != myBundles.end(); it++){
 		unsigned long wsmSerial = (*it);
-		LAddress::L3Type destAddr = bundleStocker.getBundleBySerial(wsmSerial)->getRecipientAddress();
+		LAddress::L3Type destAddr = bndlModule.getBundleBySerial(wsmSerial)->getRecipientAddress();
 		if (destAddr == myNetwAddr){
 			opp_error("ProphetNCV2::sendingBndlOfferMsg --- storing bundles addressed to current node");
 		}
@@ -255,17 +259,23 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 //		}
 //	}
 
-	if (!(storedBundle.empty() & storedAck.empty())){
+//	if (!(storedBundle.empty() & storedAck.empty())){
+	if (!(storedBundle.empty() & ackSerialsWithExpTime.empty())){
 		// if at least one of the two sets is not empty
 		ProphetNCPkt *netwPkt = new ProphetNCPkt();
 		prepareNetwPkt(netwPkt, Bundle_Offer, nodeAddr);
-		netwPkt->setE2eAcks(storedAck);
+//		netwPkt->setE2eAcks(storedAck);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 		netwPkt->setH2hAcks(storedBundle);
-		int nbrEntries = storedAck.size()+ storedBundle.size();
 		long sizeOC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-		long sizeOC_SA_Octets = sizeof(unsigned long) * storedAck.size();
+		long sizeOC_SA_Octets = 0;
+		if (withTTLForAck){
+			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+		}else{
+			sizeOC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
+		}
 		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, sizeOC_SA_Octets, 0, 0);
-		long otherControlBitLength = sizeof(unsigned long) * nbrEntries *8;
+		long otherControlBitLength = (sizeOC_SB_Octets + sizeOC_SA_Octets) *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
@@ -276,11 +286,16 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 {
 	/*************************** E2E Acks **********/
-    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-    if (!receivedE2eAcks.empty()){
-    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-    	storeAckSerials(receivedE2eAcks);
-    }
+//    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+//    if (!receivedE2eAcks.empty()){
+//    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+//    	storeAckSerials(receivedE2eAcks);
+//    }
+	std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
+	if (!receivedAckSerials.empty()){
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+		storeNAckSerial(receivedAckSerials);
+	}
 
     /*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long> serialStoredBndl;
@@ -294,7 +309,8 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 	for (std::set<unsigned long>::iterator it = serialStoredBndl.begin(); it != serialStoredBndl.end(); it++){
 		unsigned long serial = *it;
 //		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
-		if ((ackSerial.count(serial) >= 1) || (bundleStocker.existBundle(serial))){
+//		if ((ackSerial.count(serial) == 1) || (bndlModule.existBundle(serial))){
+		if ((ackModule.existAck(serial)) || (bndlModule.existBundle(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -341,7 +357,7 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 //			}
 //		}
 //	}
-	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica(serialResponseBndl);
+	unsortedWSMPair = bndlModule.getStoredBundlesWithReplica(serialResponseBndl);
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -365,7 +381,7 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 		emit(sentL3SignalId,1);
 		if (destType == Veh){
 //			bundlesReplicaIndex[serial]++;
-			bundleStocker.updateSentReplica(serial);
+			bndlModule.updateSentReplica(serial);
 		}
 	}
 }
@@ -388,17 +404,19 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
-			storeAckSerial(wsm->getSerial());
-			if (withTTLForCtrl){
-				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
-			}
+//			storeAckSerial(wsm->getSerial());
+//			if (withTTLForCtrl){
+//				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+//			}
+			gen1AckSerial(wsm);
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
 //			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				bundleStocker.storeBundle(wsm);
+//			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+				bndlModule.storeBundle(wsm);
 //				storeBundle(wsm);
 //				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
 //				if (it == bundlesReplicaIndex.end()){
@@ -418,10 +436,21 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 {
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+//	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+//	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+
+	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+
+	long sizeOC_SA_Octets = 0;
+	if (withTTLForAck){
+		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+	}else{
+		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+	}
 	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+
+	long otherControlBitLength = sizeOC_SA_Octets *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -429,14 +458,17 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 
 void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 {
-	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-	storeAckSerials(finalDelivredToBndl);
-	if (withTTLForCtrl){
-		for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-			emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-		}
-	}
+//	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+//	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+//	storeAckSerials(finalDelivredToBndl);
+//	if (withTTLForCtrl){
+//		for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//			emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+//		}
+//	}
+	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
+	updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+	storeNAckSerial(finalDelivredToBndl);
 }
 
 /*******************************************************************

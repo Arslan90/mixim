@@ -30,6 +30,8 @@ void DtnNetwLayer::initialize(int stage)
 	BaseNetwLayer::initialize(stage);
 	if (stage==0){
 
+		int simTimeLimit = atoi(ev.getConfig()->getConfigValue("sim-time-limit"));
+
 		DefineNodeType();
 		netwRouteExpirency = par("netwRouteExpirency").doubleValue();
 		netwRoutePending = par("netwRoutePending").doubleValue();
@@ -50,19 +52,39 @@ void DtnNetwLayer::initialize(int stage)
 			opp_error("Size of the structure that store bundles can not be negative");
 		}
 
+		withTTL = par("withTTL").boolValue();
+		if (withTTL){
+			ttl = par("ttl").doubleValue();
+		}else{
+			ttl = double(simTimeLimit);
+		}
+
+		bndlModule = BndlStorageHelper(bundlesStructureSize, withTTL, ttl);
+
+
 		withAck = par("withAck");
 		ackStructureSize = par("ackSize");
 		if (ackStructureSize<=0){
 			opp_error("Size of the structure that store acks can not be negative");
 		}
-		acks = std::list<BundleMeta>();
-		acksIndex = std::map<unsigned long,BundleMeta>();
 
-		withTTL = par("withTTL").boolValue();
-		ttl = par("ttl");
+		withTTLForAck = par("withTTLForAck").boolValue();
+		if (withTTLForAck){
+			ttlForAck = par("ttlForAck").doubleValue();
+		}else{
+			ttlForAck = double(simTimeLimit);
+		}
 
-//		int maxInt = std::numeric_limits<int>::max();
-		bundleStocker = BndlStorageHelper(bundlesStructureSize, withTTL, double (ttl), false, maxInt);
+		ackModule = AckStorageHelper(ackStructureSize, withAck, withTTL);
+
+		int ttlType = par("typeTTLForAck");
+		typeTTLForAck = (TTLForCtrlType) ttlType;
+
+
+//		acks = std::list<BundleMeta>();
+//		acksIndex = std::map<unsigned long,BundleMeta>();
+
+
 
 		equipedVehPc = par("equipedVehPc").doubleValue();
 		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
@@ -149,13 +171,13 @@ void DtnNetwLayer::initialize(int stage)
 		firstSentToVPA = false;
 
 		/* Setting Timers for Ctrl Msgs */
-		withTTLForCtrl = par("withTTLForCtrl").boolValue();
-		factorForTTLCtrl = par("factorForTTLCtrl").doubleValue();
+//		withTTLForCtrl = par("withTTLForCtrl").boolValue();
+//		factorForTTLCtrl = par("factorForTTLCtrl").doubleValue();
+//
+//		double ttlForCtrlAsDbl = ttl * factorForTTLCtrl;
+//		ttlForCtrl = (int) ttlForCtrlAsDbl;
 
-		double ttlForCtrlAsDbl = ttl * factorForTTLCtrl;
-		ttlForCtrl = (int) ttlForCtrlAsDbl;
-
-		nbrDeletedCtrlByTTL = 0;
+//		nbrDeletedCtrlByTTL = 0;
 	}
 
 	if (stage == 2){
@@ -238,7 +260,7 @@ void DtnNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	bundleStocker.storeBundle(upper_msg);
+	bndlModule.storeBundle(upper_msg);
 //	storeBundle(upper_msg);
 //	std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(upper_msg->getSerial());
 //	if (it == bundlesReplicaIndex.end()){
@@ -267,13 +289,13 @@ void DtnNetwLayer::handleSelfMsg(cMessage *msg)
 		/**
 		 * Traditional metrics
 		 */
-		unsigned long nbrStoredBundles = bundleStocker.getNbrStoredBundles();
+		unsigned long nbrStoredBundles = bndlModule.getNbrStoredBundles();
 		if (nbrStoredBundles != 0){
 			nbrStoredBundleVector.record(nbrStoredBundles);
 		}
-
-		if (!ackSerial.empty()){
-			nbrStoredAcksVector.record(ackSerial.size());
+		unsigned long nbrStoredAcks = ackModule.getNbrStoredAcks();
+		if (nbrStoredAcks != 0){
+			nbrStoredAcksVector.record(nbrStoredAcks);
 		}
 
 		double currentTime = simTime().dbl();
@@ -359,7 +381,7 @@ void DtnNetwLayer::handleUpperControl(cMessage *msg)
 	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
 	int newAddr = controlInfo->getNewSectorNetwAddr();
 
-    bundleStocker.updateRcvAddrForBundles(newAddr);
+    bndlModule.updateRcvAddrForBundles(newAddr);
 //	bundlesIndexIterator it1;
 //	innerIndexIterator it2;
 //	innerIndexMap innerMap;
@@ -733,7 +755,7 @@ void DtnNetwLayer::finish()
 	classifyAll();
 	recordAllClassifier();
 
-	delete (&bundleStocker);
+	delete (&bndlModule);
 }
 
 void DtnNetwLayer::recordAllClassifier()
@@ -760,17 +782,21 @@ void DtnNetwLayer::recordAllScalars()
 	recordScalar("# Bundles at L3", bundlesReceived);
 
 	if (withAck){
-		recordScalar("# ACKs", acks.size());
-		recordScalar("# DeletedBundles", bundleStocker.getNbrDeletedBundlesByAck());
-		recordScalar("# Bundles", bundleStocker.getNbrStoredBundles());
+//		recordScalar("# ACKs", ackModule.getNbrStoredAcks());
+		recordScalar("# DeletedBundles", bndlModule.getNbrDeletedBundlesByAck());
+//		recordScalar("# Bundles", bndlModule.getNbrStoredBundles());
 	}
 
 	if (withTTL){
-		recordScalar("# DeletedBundlesWithTTL", bundleStocker.getNbrDeletedBundlesByTtl());
+		recordScalar("# DeletedBundlesWithTTL", bndlModule.getNbrDeletedBundlesByTtl());
 	}
 
-	if (withTTLForCtrl){
-		recordScalar("# DeletedCtrlMsgsWithTTL", nbrDeletedCtrlByTTL);
+//	if (withTTLForCtrl){
+//		recordScalar("# DeletedCtrlMsgsWithTTL", nbrDeletedCtrlByTTL);
+//	}
+
+	if (withTTLForAck){
+		recordScalar("# DeletedAcksWithTTL", ackModule.getNbrDeletedAcksByTtl());
 	}
 
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
@@ -981,21 +1007,21 @@ void DtnNetwLayer::sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlL
 	sendDown(msg);
 }
 
-void DtnNetwLayer::storeAckSerial(unsigned long  serial)
-{
-	if (withAck){
-		if (withTTLForCtrl){
-			if ((ackSerial.count(serial) == 0) && (ackSerialDeleted.count(serial) == 0)){
-				ackSerial.insert(serial);
-				ackSerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
-			}
-		}else{
-			if (ackSerial.count(serial) == 0){
-				ackSerial.insert(serial);
-			}
-		}
-	}
-}
+//void DtnNetwLayer::storeAckSerial(unsigned long  serial)
+//{
+//	if (withAck){
+//		if (withTTLForCtrl){
+//			if ((ackSerial.count(serial) == 0) && (ackSerialDeleted.count(serial) == 0)){
+//				ackSerial.insert(serial);
+//				ackSerialTimeStamp.insert(std::pair<double, unsigned long>(simTime().dbl(), serial));
+//			}
+//		}else{
+//			if (ackSerial.count(serial) == 0){
+//				ackSerial.insert(serial);
+//			}
+//		}
+//	}
+//}
 
 //void DtnNetwLayer::storeAckSerial(unsigned long  serial, double timestamp)
 //{
@@ -1008,19 +1034,19 @@ void DtnNetwLayer::storeAckSerial(unsigned long  serial)
 //	}
 //}
 
-void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
-{
-	if (withAck){
-		for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-			storeAckSerial(*it);
-			unsigned long serial = *it;
-			bundleStocker.deleteBundleUponACK(serial);
-//			if (erase(serial)){
-//				nbrDeletedBundlesByAck++;
-//			}
-		}
-	}
-}
+//void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
+//{
+//	if (withAck){
+//		for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+//			storeAckSerial(*it);
+//			unsigned long serial = *it;
+//			bndlModule.deleteBundleUponACK(serial);
+////			if (erase(serial)){
+////				nbrDeletedBundlesByAck++;
+////			}
+//		}
+//	}
+//}
 
 //void DtnNetwLayer::storeAckSerials(std::map<unsigned long, double > setOfSerials)
 //{
@@ -1037,26 +1063,26 @@ void DtnNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 //	}
 //}
 
-void DtnNetwLayer::deleteAckSerials(){
-	double expirationTime = simTime().dbl() - ttlForCtrl;
-	std::multimap<double,unsigned long>::iterator it,itlow,itup;
-	itlow = ackSerialTimeStamp.upper_bound (0.0);  // itlow points to b
-	itup = ackSerialTimeStamp.lower_bound (expirationTime);   // itup points to e (not d)
-
-	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
-
-	// print range [itlow,itup):
-	for (it=itlow; it!=itup; it++){
-	    //std::cout << (*it).first << " => " << (*it).second << '\n';
-	    nbrDeletedCtrlByTTL++;
-	    ackSerial.erase((*it).second);
-	    ackSerialDeleted.insert((*it).second);
-	}
-
-	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
-
-	ackSerialTimeStamp.erase ( itlow, itup ); // erasing by range
-}
+//void DtnNetwLayer::deleteAckSerials(){
+//	double expirationTime = simTime().dbl() - ttlForCtrl;
+//	std::multimap<double,unsigned long>::iterator it,itlow,itup;
+//	itlow = ackSerialTimeStamp.upper_bound (0.0);  // itlow points to b
+//	itup = ackSerialTimeStamp.lower_bound (expirationTime);   // itup points to e (not d)
+//
+//	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
+//
+//	// print range [itlow,itup):
+//	for (it=itlow; it!=itup; it++){
+//	    //std::cout << (*it).first << " => " << (*it).second << '\n';
+//	    nbrDeletedCtrlByTTL++;
+//	    ackSerial.erase((*it).second);
+//	    ackSerialDeleted.insert((*it).second);
+//	}
+//
+//	//std::cout << "Total Size of AckSerials: " << ackSerial.size() << '\n';
+//
+//	ackSerialTimeStamp.erase ( itlow, itup ); // erasing by range
+//}
 
 //void DtnNetwLayer::deleteAckSerials(){
 //	std::set<unsigned long> entriesToDelete;
@@ -1120,7 +1146,8 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		// step 2.1 : Check if the current bundle is not registered in neighborhoodSession
-		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
+//		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
+		if (ackModule.existAck(wsm->getSerial())) {continue;}
 		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
 		if ((itNode != neighborhoodSession.end())){
 			NetwSession sessionNode = itNode->second;
@@ -1148,7 +1175,7 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 
 	// step 3 : Delete Expired Bundles
 	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		bundleStocker.deleteBundleUponTTL(*it);
+		bndlModule.deleteBundleUponTTL(*it);
 //		if (erase(*it)){
 //			nbrDeletedBundlesByTTL++;
 //		}
@@ -1178,6 +1205,59 @@ void DtnNetwLayer::emitSignalForOtherCtrlMsg(long  sizeOC_SB_Octets, long  sizeO
 	string signalStr = lg2Str(sizeOC_SB_Octets * 8)+":"+lg2Str(sizeOC_SA_Octets * 8)+":"
 						+lg2Str(sizeOC_CL_Octets * 8)+":"+lg2Str(sizeOC_RCC_Octets * 8);
 	emit(otherCtrlBitsLengthId,signalStr.c_str());
+}
+
+void DtnNetwLayer::gen1AckSerial(WaveShortMessage *msg)
+{
+	unsigned long serial = msg->getSerial();
+	double currentTime = simTime().dbl();
+	double expireTime = maxDbl;
+	if (withTTLForAck){
+		if (typeTTLForAck == Fixed_TTL){
+			expireTime = currentTime + ttlForAck;
+		}else if (typeTTLForAck == Adaptative_TTL){
+			expireTime = msg->getTimestamp().dbl() + ttl;
+		}
+	}
+
+	if (store1AckSerial(serial,expireTime)){
+		if (withTTLForAck){
+			emitSignalForAckLifeTime(serial, currentTime, expireTime);
+		}
+	}
+}
+
+bool DtnNetwLayer::store1AckSerial(unsigned long  serial, double expireTime)
+{
+	bool stored = ackModule.storeAck(serial,expireTime);
+
+	if (stored){
+		bndlModule.deleteBundleUponACK(serial);
+	}
+
+	return stored;
+}
+
+void DtnNetwLayer::storeNAckSerial(std::map<unsigned long ,double> ackSerialsWithTimestamp)
+{
+		for (std::map<unsigned long, double >::iterator it = ackSerialsWithTimestamp.begin(); it != ackSerialsWithTimestamp.end(); it++){
+	    	unsigned long serial = it->first;
+	    	double expireTime = it->second;
+	    	if (store1AckSerial(serial,expireTime)){
+	    		if (withTTLForAck){
+	    			emitSignalForAckLifeTime(serial, -1, expireTime);
+	    		}
+	    	}
+		}
+}
+
+std::set<unsigned long > DtnNetwLayer::getKeysFromMap(std::map<unsigned long ,double> myMap)
+{
+	std::set<unsigned long > keys;
+	for (std::map<unsigned long, double >::iterator it = myMap.begin(); it != myMap.end(); it++){
+		keys.insert((*it).first);
+	}
+	return keys;
 }
 
 void DtnNetwLayer::emitSignalForAckLifeTime(unsigned long serial, double startTime, double endTime)

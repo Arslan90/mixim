@@ -41,11 +41,11 @@
 #include "NetwSession.h"
 #include "NetwRoute.h"
 #include "BndlStorageHelper.h"
+#include "AckStorageHelper.h"
 
 
 
 const double maxDbl = std::numeric_limits<double>::max();
-const int maxInt = std::numeric_limits<int>::max();
 
 /**
  * TODO - Generated class
@@ -83,6 +83,11 @@ class DtnNetwLayer : public BaseNetwLayer {
 	** 							Main  variables
 	********************************************************************/
 	TraCIMobility* traci;
+
+	enum TTLForCtrlType {
+		Fixed_TTL = 0,
+		Adaptative_TTL = 1,
+	};
 
 	enum NodeType {
 		VPA = 0x0A,
@@ -145,10 +150,9 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	DtnNetwSchedulingPolicy scheduleStrategy;
 
-	BndlStorageHelper bundleStocker;
 	/************************* Related to Bundle Storage ***********/
     bool withTTL;
-    int ttl;
+    double ttl;
 
     /** Size of the WMS Storage structure */
     unsigned int bundlesStructureSize;
@@ -163,43 +167,52 @@ class DtnNetwLayer : public BaseNetwLayer {
 //
 //	std::map<unsigned long, int> bundlesReplicaIndex;
 
+	BndlStorageHelper bndlModule;
 	/************************* Related to Bundle Storage ***********/
 
 	/************************* Related to ACKs ***********/
 
-	bool withTTLForCtrl;
-	int ttlForCtrl;
-	double factorForTTLCtrl;
+//	bool withTTLForCtrl;
+//	int ttlForCtrl;
+//	double factorForTTLCtrl;
+
+	bool withTTLForAck;
+
+	double ttlForAck;
+
+	TTLForCtrlType typeTTLForAck;
 
 	/**
   	 * Boolean for the activation of PRoPHET ACK mecanism
   	 */
     bool withAck;
 
-    /**
-   	 * Specific map with K as serial of WSM &
-  	 * V as a bndl_meta struct.
-  	 * This structure simplify the search of ACKs
-  	 */
-    std::map<unsigned long ,BundleMeta> acksIndex;
+//    /**
+//   	 * Specific map with K as serial of WSM &
+//  	 * V as a bndl_meta struct.
+//  	 * This structure simplify the search of ACKs
+//  	 */
+//    std::map<unsigned long ,BundleMeta> acksIndex;
     /**
   	 * Size of acks structure
   	 */
     unsigned int ackStructureSize;
-    /**
-  	 * Map structures for ACKs
-  	 */
-    std::list<BundleMeta> acks;
+//    /**
+//  	 * Map structures for ACKs
+//  	 */
+//    std::list<BundleMeta> acks;
+//
+//	// E2E Acks serial
+//	std::set<unsigned long > ackSerial;
+//	// Map for Acks serial with their TimeStamp
+//	//std::map<unsigned long, double > ackSerial;
+//
+//	std::list<unsigned long> FIFOFor_ackSerial;
+//
+//	std::set<unsigned long> ackSerialDeleted;
+//	std::multimap<double, unsigned long> ackSerialTimeStamp;
 
-	// E2E Acks serial
-	std::set<unsigned long > ackSerial;
-	// Map for Acks serial with their TimeStamp
-	//std::map<unsigned long, double > ackSerial;
-
-	std::list<unsigned long> FIFOFor_ackSerial;
-
-	std::set<unsigned long> ackSerialDeleted;
-	std::multimap<double, unsigned long> ackSerialTimeStamp;
+    AckStorageHelper ackModule;
 
 	/************************* Related to ACKs ***********/
 
@@ -213,7 +226,7 @@ class DtnNetwLayer : public BaseNetwLayer {
 //    int nbrDeletedBundlesByTTL;
 //    int nbrDeletedBundlesByAck;
 
-    int nbrDeletedCtrlByTTL;
+//    int nbrDeletedCtrlByTTL;
 
     bool firstSentToVPA;
 	int totalBundlesReceived;
@@ -370,13 +383,21 @@ public:
 
   	//virtual void storeAckSerials(std::map<unsigned long, double > setOfSerials);
   	
-  	virtual void storeAckSerial(unsigned long serial);
+//  	virtual void storeAckSerial(unsigned long serial);
 
-  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
+//  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
 
 //  	virtual void deleteAckSerials();
 
-  	virtual void deleteAckSerials();
+//  	virtual void deleteAckSerials();
+
+    virtual void gen1AckSerial(WaveShortMessage *msg);
+
+    virtual bool store1AckSerial(unsigned long serial, double expireTime = maxDbl);
+
+    virtual void storeNAckSerial(std::map<unsigned long, double > ackSerialsWithTimestamp);
+
+    virtual std::set<unsigned long > getKeysFromMap(std::map<unsigned long, double > myMap);
 
   	/*
   	 * Convert a string to L3Address

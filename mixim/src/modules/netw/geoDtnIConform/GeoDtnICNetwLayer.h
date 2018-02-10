@@ -72,11 +72,11 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	// CBH: CheckBeforeHello
 	bool withCBH;
 
-	simsignal_t inRadioWithVPA;
-
 	bool withExplicitE2EAck;
 
 	int custodyList;
+
+	bool withTTLForCus;
 
 //	std::set<unsigned long> custodySerialDeleted;
 //	std::map<unsigned long,double> custodySerialTimeStamp;

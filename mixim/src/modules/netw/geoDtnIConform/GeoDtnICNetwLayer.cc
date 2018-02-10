@@ -48,12 +48,12 @@ void GeoDtnICNetwLayer::initialize(int stage)
 		currentNbrIsrt = 0;
 		lastNbrIsrt = 0;
 
-		inRadioWithVPA = registerSignal("InContact");
-
 		Fwd_No  		= 0;
 		Fwd_Yes_METD    = 0;
 		Fwd_Yes_Dist    = 0;
 		Fwd_Yes_Both    = 0;
+
+		withTTLForCus = par("withTTLForCus").boolValue();
 
 		withAddressedAck = par("withAddressedAck").boolValue();
 
@@ -121,7 +121,7 @@ void GeoDtnICNetwLayer::handleUpperMsg(cMessage *msg)
 {
 	assert(dynamic_cast<WaveShortMessage*>(msg));
 	WaveShortMessage *upper_msg = dynamic_cast<WaveShortMessage*>(msg);
-	if (bundleStocker.storeBundle(upper_msg)){
+	if (bndlModule.storeBundle(upper_msg)){
 		currentNbrIsrt++;
 	}
 //	storeBundle(upper_msg);
@@ -150,25 +150,30 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	double myCurrentMETD = getCurrentMETD();
 	netwPkt->setSrcMETD(myCurrentMETD);
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
-	int nbrEntries = 0;
+	long helloControlBitLength = 0;
 	if (checkBeforeHelloMechanism()){
 		/***************** Cleaning AckSerials from old entries *****/
-		if (withTTLForCtrl){
-			deleteAckSerials();
+	//	if (withTTLForCtrl){
+	//		deleteAckSerials();
+	//	}
+		if (withTTLForAck){
+			ackModule.deleteExpiredAcks();
 		}
 		/***************** Cleaning AckSerials from old entries *****/
-		std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
-		netwPkt->setE2eAcks(storedAck);
-		std::set<unsigned long > storedBundle = bundleStocker.getBundleSerialsAsSet();
+//		std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+//		netwPkt->setE2eAcks(storedAck);
+		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+		std::set<unsigned long > storedBundle = bndlModule.getBundleSerialsAsSet();
+		netwPkt->setH2hAcks(storedBundle);
 //		std::set<unsigned long > storedBundle;
 //		for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
 //			storedBundle.insert((*it)->getSerial());
 //		}
-		netwPkt->setH2hAcks(storedBundle);
 		std::map<unsigned long,double > custodyBundle;
 		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
 			/***************** Cleaning CustodySerials from old entries *****/
-			if (withTTLForCtrl){
+			if (withTTLForCus){
 				deletedCustodySerials();
 			}
 			/***************** Cleaning CustodySerials from old entries *****/
@@ -196,19 +201,38 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 			}
 			netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
 		}
-		if (withTTLForCtrl){
-			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size()*2;
-			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
-			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size() * 2;
-			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+//		if (withTTLForCtrl){
+//			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size()*2;
+//			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+//			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+//			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size() * 2;
+//			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+//		}else{
+//			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size();
+//			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+//			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+//			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
+//			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+//		}
+
+		long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+		long sizeHC_SA_Octets = 0, sizeHC_CL_Octets = 0;
+		if (withTTLForAck){
+			sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
 		}else{
-			nbrEntries = ackSerial.size()+ storedBundle.size()+ custodyBundle.size();
-			long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-			long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
-			long sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
-			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+			sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
 		}
+
+		if (withTTLForCus){
+			sizeHC_CL_Octets = (sizeof(unsigned long) + sizeof(double)) * custodyBundle.size();
+		}else{
+			sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
+		}
+		emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+
+		helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets + sizeHC_CL_Octets) * 8;
+
+
 
 
 //		nbrEntries = ackSerial.size()+ storedBundle.size();
@@ -226,7 +250,6 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 //			nbrEntries+= custodyAckSerial.size();
 //		}
 	}
-	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
 	int length = helloControlBitLength+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
@@ -242,14 +265,19 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		/*************************** Handling Hello Msg **********/
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-	    if (!receivedE2eAcks.empty()){
-	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-	    	storeAckSerials(receivedE2eAcks);
-//	    	for(std::set<unsigned long >::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
-//	    		custodyAckSerial.erase(*it);
-//	    	}
-	    }
+//	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+//	    if (!receivedE2eAcks.empty()){
+//	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+//	    	storeAckSerials(receivedE2eAcks);
+////	    	for(std::set<unsigned long >::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
+////	    		custodyAckSerial.erase(*it);
+////	    	}
+//	    }
+		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
+		if (!receivedAckSerials.empty()){
+			updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+			storeNAckSerial(receivedAckSerials);
+		}
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
 	    if (!storedBundle.empty()){
 	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
@@ -260,7 +288,7 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    		storeCustodySerial(it->first, it->second);
 	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
 //	    			erase(it->first);
-	    			bundleStocker.deleteBundle(it->first);
+	    			bndlModule.deleteBundle(it->first);
 	    			//erase(*it);
 	    		}
 	    	}
@@ -313,7 +341,7 @@ void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 //				}
 //			}
 //		}
-		unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica();
+		unsortedWSMPair = bndlModule.getStoredBundlesWithReplica();
 
 		// step 2 : Reordering bundle list
 		// step 3 : Filtering bundle to send
@@ -341,10 +369,10 @@ void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 			emit(sentL3SignalId,1);
 			if ((custodyMode == No) || (custodyMode == Yes_WithoutACK)){
 //				bundlesReplicaIndex[serial]++;
-				bundleStocker.updateSentReplica(serial);
+				bndlModule.updateSentReplica(serial);
 				if (custodyDecision){
 					//erase(serial);
-					bundleStocker.deleteBundle(serial);
+					bndlModule.deleteBundle(serial);
 					if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
 						double currentTimestamp = 0;
 						double currentMETDForSerial = netwPkt->getSrcMETD();
@@ -374,7 +402,7 @@ void GeoDtnICNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 //			}
 //		}
 //	}
-	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica();
+	unsortedWSMPair = bndlModule.getStoredBundlesWithReplica();
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -432,18 +460,20 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
-			storeAckSerial(wsm->getSerial());
-			if (withTTLForCtrl){
-				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
-			}
+//			storeAckSerial(wsm->getSerial());
+//			if (withTTLForCtrl){
+//				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+//			}
+			gen1AckSerial(wsm);
 //			cout << "(VPA) Node@: " << myNetwAddr << " NodeType: " << nodeType << "received WSM with serial: " << wsm->getSerial() << endl;
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
 //			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				if(bundleStocker.storeBundle(wsm)){
+//			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+				if(bndlModule.storeBundle(wsm)){
 					currentNbrIsrt++;
 				}
 //				storeBundle(wsm);
@@ -481,11 +511,22 @@ void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	} else if (withAddressedAck){
 		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 	}
-	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-	netwPkt->setE2eAcks(serialOfE2EAck);
-	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+//	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+//	netwPkt->setE2eAcks(serialOfE2EAck);
+//	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+
+	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+
+	long sizeOC_SA_Octets = 0;
+	if (withTTLForAck){
+		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+	}else{
+		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+	}
 	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-	long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+
+	long otherControlBitLength = sizeOC_SA_Octets *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -508,7 +549,7 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setCustodyTransfert(custodyTransfer);
 	long sizeOC_RCC_Octets = sizeof(unsigned long) * serialOfH2HAck.size();
 	emitSignalForOtherCtrlMsg(0, 0, 0, sizeOC_RCC_Octets);
-	long otherControlBitLength = sizeof(unsigned long) * serialOfH2HAck.size() *8;
+	long otherControlBitLength = sizeOC_RCC_Octets *8;
 	int length = otherControlBitLength + netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -518,24 +559,27 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	if (withExplicitE2EAck){
-		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-		storeAckSerials(finalDelivredToBndl);
-		if (withTTLForCtrl){
-			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-			}
-		}
+//		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+//		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+//		storeAckSerials(finalDelivredToBndl);
+//		if (withTTLForCtrl){
+//			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+//			}
+//		}
+		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+		storeNAckSerial(finalDelivredToBndl);
 	}
 
 	if (custodyMode == Yes_WithACK){
 		std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
 //			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it]++;
-			bundleStocker.updateSentReplica(*it);
+			bndlModule.updateSentReplica(*it);
 			if (netwPkt->getCustodyTransfert()){
 //				erase(*it);
-				bundleStocker.deleteBundle(*it);
+				bndlModule.deleteBundle(*it);
 				if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
 					double currentTimestamp = 0;
 					double currentMETDForSerial = netwPkt->getSrcMETD();
@@ -553,18 +597,18 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnICNetwLayer::storeAckSerial(unsigned long  serial)
 {
-	if (ackSerial.count(serial) == 0){
-		DtnNetwLayer::storeAckSerial(serial);
-    	currentNbrIsrt++;
-	}
+//	if (ackSerial.count(serial) == 0){
+//		DtnNetwLayer::storeAckSerial(serial);
+//    	currentNbrIsrt++;
+//	}
 }
 
 void GeoDtnICNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
 {
-	DtnNetwLayer::storeAckSerials(setOfSerials);
-	for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-		custodySerial.erase(*it);
-	}
+//	DtnNetwLayer::storeAckSerials(setOfSerials);
+//	for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+//		custodySerial.erase(*it);
+//	}
 }
 
 void GeoDtnICNetwLayer::storeCustodySerial(unsigned long  serial, double timestamp)
@@ -616,7 +660,7 @@ void GeoDtnICNetwLayer::storeCustodySerials(std::map<unsigned long, double > set
 	    	}
 	    	if (currentMETD != 0){
 //	    		erase(serial);
-	    		bundleStocker.deleteBundle(serial);
+	    		bndlModule.deleteBundle(serial);
 	    	}
 	    }
 	}
@@ -761,7 +805,7 @@ void GeoDtnICNetwLayer::deletedCustodySerials()
 	for (std::map<unsigned long, double>::iterator it = custodySerial.begin(); it != custodySerial.end(); it++){
 		if ((*it).second < currentTime){
 		    //std::cout << (*it).first << " => " << (*it).second << '\n';
-		    nbrDeletedCtrlByTTL++;
+//		    nbrDeletedCtrlByTTL++;
 		    entriesToDelete.insert((*it).first);
 		}
 	}

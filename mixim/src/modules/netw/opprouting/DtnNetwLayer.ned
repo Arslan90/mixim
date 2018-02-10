@@ -31,12 +31,16 @@ simple DtnNetwLayer extends BaseNetwLayer
     	int ackSize = default(1000);
     	
     	bool withTTL = default(false);
-    	int ttl = default(900);
+    	double ttl = default(900);
     	
-    	bool withTTLForCtrl = default(false);
-    	//int ttlForCtrl = default(900);
-    	
-    	double factorForTTLCtrl = default(1.0);
+//    	bool withTTLForCtrl = default(false);
+//    	//int ttlForCtrl = default(900);
+//    	
+//    	double factorForTTLCtrl = default(1.0);
+
+		bool withTTLForAck = default(false);
+		double ttlForAck = default(900);
+		int typeTTLForAck = default(0);
     	
     	bool DF = default(false);
     	int MTU = default(2304); // MTU for WIFI 802.11P in bytes (octets)

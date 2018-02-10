@@ -14,21 +14,21 @@ BndlStorageHelper::BndlStorageHelper()
 	this->serialsIndexedByRcvAddr = std::multimap<LAddress::L3Type, unsigned long>();
 	this->indexForReplica = std::map<unsigned long, std::pair<int,int> >();
 
+	this->withLimitedReplica = false;
+	this->maxNbrReplica = NS_BndlStorageHelper::maxInt;
+
 	nbrDeletedBundlesByTTL = 0;
 	nbrDeletedBundlesByAck = 0;
 	nbrDeletedBundlesByFIFO = 0;
 }
 
-BndlStorageHelper::BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl, bool withLimitedReplica, int maxReplica)
+BndlStorageHelper::BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl)
 {
 	BndlStorageHelper();
 	this->storageSize = sizeOfBundleStorage;
 
 	this->withTTL = withTTL;
 	this->ttl = ttl;
-
-	this->withLimitedReplica = withLimitedReplica;
-	this->maxNbrReplica = maxReplica;
 }
 
 BndlStorageHelper::~BndlStorageHelper() {
@@ -41,44 +41,14 @@ void BndlStorageHelper::reInitWithLimitedReplica(int maxNbrReplica)
 	this->maxNbrReplica = maxNbrReplica;
 }
 
-bool BndlStorageHelper::storeBundle(WaveShortMessage *msg)
-{
-	bool stored = false;
-	unsigned long serial = msg->getSerial();
-	LAddress::L3Type addr = msg->getRecipientAddress();
-	// step 1 : check if the bundle is already stored
-	if (!existBundle(serial)){
-		// step 2 : check if there is enough place to store bundle
-		deleteFirstBundle();
-
-		// step 3 : add the bundle to stored bundles and to all relative indexes
-		bundleSerials.push_back(serial);
-		bundlesIndexedBySerial.insert(std::pair<unsigned long, WaveShortMessage*>(serial,msg));
-		serialsIndexedByRcvAddr.insert(std::pair<LAddress::L3Type, unsigned long>(addr,serial));
-		indexForReplica.insert(std::make_pair(serial,std::make_pair(0,maxNbrReplica)));
-
-//		// step 4 : check if there is not a double insertion
-//	  	std::list<unsigned long> bundlesCopy = std::list<unsigned long>(bundleSerials.begin(),bundleSerials.end());
-//	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
-//
-//	  	if (bundleSerials.size() != bundlesCopy.size()){
-//	  		opp_error("BundleSHelper::storeBundle --- Double insertion of bundle detected");
-//	  	}
-
-	  	stored = true;
-	}
-
-	integrityChecker();
-	return stored;
-}
-
 bool BndlStorageHelper::storeBundle(WaveShortMessage *msg, int rmgReplica)
 {
 	bool stored = false;
 	unsigned long serial = msg->getSerial();
 	LAddress::L3Type addr = msg->getRecipientAddress();
+	double expireTime = msg->getTimestamp().dbl() + ttl;
 	// step 1 : check if the bundle is already stored
-	if (!existBundle(serial)){
+	if ((!existBundle(serial)) && (!hasExpired(expireTime))){
 		// step 2 : check if there is enough place to store bundle
 		deleteFirstBundle();
 
@@ -88,18 +58,10 @@ bool BndlStorageHelper::storeBundle(WaveShortMessage *msg, int rmgReplica)
 		serialsIndexedByRcvAddr.insert(std::pair<LAddress::L3Type, unsigned long>(addr,serial));
 		indexForReplica.insert(std::make_pair(serial,std::make_pair(0,rmgReplica)));
 
-//		// step 4 : check if there is not a double insertion
-//	  	std::list<unsigned long> bundlesCopy = std::list<unsigned long>(bundleSerials.begin(),bundleSerials.end());
-//	  	bundlesCopy.erase(std::unique( bundlesCopy.begin(), bundlesCopy.end() ), bundlesCopy.end());
-//
-//	  	if (bundleSerials.size() != bundlesCopy.size()){
-//	  		opp_error("BundleSHelper::storeBundle --- Double insertion of bundle detected");
-//	  	}
-
 	  	stored = true;
+		integrityChecker();
 	}
 
-	integrityChecker();
 	return stored;
 }
 
@@ -153,9 +115,9 @@ bool BndlStorageHelper::deleteBundle(unsigned long  serial)
 		}
 
 		deleted = true;
+		integrityChecker();
 	}
 
-	integrityChecker();
 	return deleted;
 }
 
@@ -205,7 +167,7 @@ void BndlStorageHelper::deleteFirstBundle()
 			nbrDeletedBundlesByFIFO++;
 		}
 	}else if (bundleSerials.size() > storageSize){
-		opp_error("BundleSHelper::freeBundleStorage --- Bundles storage structure exceed its maximum size");
+		opp_error("BundleSHelper::deleteFirstBundle --- Bundles storage structure exceed its maximum size");
 	}
 }
 
@@ -216,9 +178,8 @@ void BndlStorageHelper::deleteExpiredBundles()
 		for (std::map<unsigned long,WaveShortMessage*>::iterator it = bundlesIndexedBySerial.begin(); it != bundlesIndexedBySerial.end(); it++){
 			// step 1 : Check if the current bundle is up to date and has not expired
 			WaveShortMessage* wsm = it->second;
-			double currentTime = simTime().dbl();
 			double expireTime = wsm->getTimestamp().dbl() + ttl;
-			if (currentTime > expireTime){
+			if (hasExpired(expireTime)){
 				// step 2 : If the current bundle has expired, add it to bundles to delete
 				oldWSM.push_back(wsm->getSerial());
 			}
@@ -226,9 +187,7 @@ void BndlStorageHelper::deleteExpiredBundles()
 
 		// step 3 : Delete Expired Bundles
 		for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-			if (deleteBundle(*it)){
-				nbrDeletedBundlesByTTL++;
-			}
+			deleteBundleUponTTL(*it);
 		}
 	}
 }
@@ -324,7 +283,6 @@ int BndlStorageHelper::computeNbrReplicaToSend(unsigned long  serial)
 			if (it3 == indexForReplica.end()){
 				opp_error("BundleSHelper::computeNbrReplicaToSend --- Bundle exists but not found in indexForReplica");
 			}else{
-				int currentSentReplica = it3->second.first;
 				int currentRmgReplica = it3->second.second;
 
 				if ((currentRmgReplica <= 0 ) || (currentRmgReplica > maxNbrReplica )){
@@ -355,7 +313,6 @@ int BndlStorageHelper::getNbrRmgReplica(unsigned long  serial)
 			if (it3 == indexForReplica.end()){
 				opp_error("BundleSHelper::getNbrRmgReplica --- Bundle exists but not found in indexForReplica");
 			}else{
-				int currentSentReplica = it3->second.first;
 				int currentRmgReplica = it3->second.second;
 
 				nbrRmgReplica = currentRmgReplica;
@@ -367,6 +324,18 @@ int BndlStorageHelper::getNbrRmgReplica(unsigned long  serial)
 		opp_error("BundleSHelper::getNbrRmgReplica --- Getting NbrRmgReplica but Bundle does not exist");
 	}
 	return nbrRmgReplica;
+}
+
+bool BndlStorageHelper::hasExpired(double expireTime)
+{
+	bool hasExpired = false;
+	double currentTime = simTime().dbl();
+
+	if(withTTL & ( currentTime > expireTime)){
+		hasExpired = true;
+	}
+
+	return hasExpired;
 }
 
 void BndlStorageHelper::integrityChecker()

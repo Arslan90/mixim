@@ -85,26 +85,36 @@ void EpidemicNetwLayer::finish()
 void EpidemicNetwLayer::sendingHelloMsg()
 {
 	/***************** Cleaning AckSerials from old entries *****/
-	if (withTTLForCtrl){
-		deleteAckSerials();
-	}
+	//	if (withTTLForCtrl){
+	//		deleteAckSerials();
+	//	}
+		if (withTTLForAck){
+			ackModule.deleteExpiredAcks();
+		}
 	/***************** Cleaning AckSerials from old entries *****/
 
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
-	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
-	netwPkt->setE2eAcks(storedAck);
-	std::set<unsigned long > storedBundle = bundleStocker.getBundleSerialsAsSet();
+//	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
+//	netwPkt->setE2eAcks(storedAck);
+	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
+	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+	std::set<unsigned long > storedBundle = bndlModule.getBundleSerialsAsSet();
+	netwPkt->setH2hAcks(storedBundle);
 //	std::set<unsigned long > storedBundle;
 //	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
 //		storedBundle.insert((*it)->getSerial());
 //	}
-	netwPkt->setH2hAcks(storedBundle);
-	int nbrEntries = ackSerial.size()+ storedBundle.size();
 	long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-	long sizeHC_SA_Octets = sizeof(unsigned long) * ackSerial.size();
+	long sizeHC_SA_Octets = 0;
+	if (withTTLForAck){
+		sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+	}else{
+		sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
+	}
 	emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, 0);
-	long helloControlBitLength = sizeof(unsigned long) * (nbrEntries) *8;
+
+	long helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets) *8;
 	int length = helloControlBitLength+ netwPkt->getBitLength();
 	netwPkt->setBitLength(length);
 		coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
@@ -120,16 +130,21 @@ void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		/*************************** Handling Hello Msg **********/
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-	    if (!receivedE2eAcks.empty()){
-	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-	    	storeAckSerials(receivedE2eAcks);
-			if (withTTLForCtrl){
-				for (std::set<unsigned long>::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
-					emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-				}
-			}
-	    }
+//	    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
+//	    if (!receivedE2eAcks.empty()){
+//	    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
+//	    	storeAckSerials(receivedE2eAcks);
+//			if (withTTLForCtrl){
+//				for (std::set<unsigned long>::iterator it = receivedE2eAcks.begin(); it != receivedE2eAcks.end(); it++){
+//					emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+//				}
+//			}
+//	    }
+		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
+		if (!receivedAckSerials.empty()){
+			updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+			storeNAckSerial(receivedAckSerials);
+		}
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
 	    if (!storedBundle.empty()){
 	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
@@ -145,7 +160,8 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 	for (std::set<unsigned long>::iterator it = wsmResponseBndl.begin(); it != wsmResponseBndl.end(); it++){
 		unsigned long serial = *it;
 //		if ((ackSerial.count(serial) == 1) || (exist(serial))){
-		if ((ackSerial.count(serial) == 1) || (bundleStocker.existBundle(serial))){
+//		if ((ackSerial.count(serial) == 1) || (bndlModule.existBundle(serial))){
+		if ((ackModule.existAck(serial)) || (bndlModule.existBundle(serial))){
 			continue;
 		}else{
 			serialResponseBndl.insert(serial);
@@ -158,7 +174,7 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 		netwPkt->setH2hAcks(serialResponseBndl);
 		long sizeOC_SB_Octets = sizeof(unsigned long) * serialResponseBndl.size();
 		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
-		long otherControlBitLength = sizeof(unsigned long) * (serialResponseBndl.size()) *8;
+		long otherControlBitLength = sizeOC_SB_Octets *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 		sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -187,7 +203,7 @@ void EpidemicNetwLayer::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 //			}
 //		}
 //	}
-	unsortedWSMPair = bundleStocker.getStoredBundlesWithReplica(serialResponseBndl);
+	unsortedWSMPair = bndlModule.getStoredBundlesWithReplica(serialResponseBndl);
 
 	// step 2 : Reordering bundle list
 	// step 3 : Filtering bundle to send
@@ -211,7 +227,7 @@ void EpidemicNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destType
 		emit(sentL3SignalId,1);
 		if (destType == Veh){
 //			bundlesReplicaIndex[serial]++;
-			bundleStocker.updateSentReplica(serial);
+			bndlModule.updateSentReplica(serial);
 		}
 	}
 }
@@ -234,17 +250,19 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
-			storeAckSerial(wsm->getSerial());
-			if (withTTLForCtrl){
-				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
-			}
+//			storeAckSerial(wsm->getSerial());
+//			if (withTTLForCtrl){
+//				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
+//			}
+			gen1AckSerial(wsm);
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
 //			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-			if ((!bundleStocker.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-				bundleStocker.storeBundle(wsm);
+//			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
+			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+				bndlModule.storeBundle(wsm);
 //				storeBundle(wsm);
 //				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
 //				if (it == bundlesReplicaIndex.end()){
@@ -266,11 +284,22 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 	if (withAck){
 		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-		std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-		netwPkt->setE2eAcks(serialOfE2EAck);
-		long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+//		std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
+//		netwPkt->setE2eAcks(serialOfE2EAck);
+//		long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
+
+		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+
+		long sizeOC_SA_Octets = 0;
+		if (withTTLForAck){
+			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+		}else{
+			sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+		}
 		emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-		long otherControlBitLength = sizeof(unsigned long) * serialOfE2EAck.size() *8;
+
+		long otherControlBitLength = sizeOC_SA_Octets *8;
 		int length = otherControlBitLength + netwPkt->getBitLength();
 		netwPkt->setBitLength(length);
 		sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -280,14 +309,17 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 void EpidemicNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	if (withAck){
-		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-		storeAckSerials(finalDelivredToBndl);
-		if (withTTLForCtrl){
-			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-			}
-		}
+//		std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
+//		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+//		storeAckSerials(finalDelivredToBndl);
+//		if (withTTLForCtrl){
+//			for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
+//				emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
+//			}
+//		}
+		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+		storeNAckSerial(finalDelivredToBndl);
 	}
 }
 
