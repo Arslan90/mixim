@@ -72,6 +72,12 @@ protected:
 	/** Stats related to Bundles deleted due to StorageLimit */
 	int nbrDeletedBundlesByFIFO;
 
+	/** Stats related to Bundles deleted due to Custody Transfer */
+	int nbrDeletedBundlesByCustody;
+
+	/** Stats related to Bundles deleted due to No Rmg Replica */
+	int nbrDeletedBundlesByNoRmgReplica;
+
 public:
 	BndlStorageHelper();
 	BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl);
@@ -84,6 +90,8 @@ public:
 	bool deleteBundle(unsigned long serial);
 	bool deleteBundleUponACK(unsigned long serial);
 	bool deleteBundleUponTTL(unsigned long serial);
+	bool deleteBundleUponCustody(unsigned long serial);
+	bool deleteBundleUponNoRmgReplica(unsigned long serial);
 
 	bool existBundle(unsigned long  serial);
 
@@ -132,6 +140,16 @@ public:
     int getNbrDeletedBundlesByTtl() const
     {
         return nbrDeletedBundlesByTTL;
+    }
+
+    int getNbrDeletedBundlesByCustody() const
+    {
+        return nbrDeletedBundlesByCustody;
+    }
+
+    int getNbrDeletedBundlesByNoRmgReplica() const
+    {
+        return nbrDeletedBundlesByNoRmgReplica;
     }
 
 protected:

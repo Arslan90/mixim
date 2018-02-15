@@ -25,6 +25,8 @@ void GeoDtnICNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
+		int simTimeLimit = atoi(ev.getConfig()->getConfigValue("sim-time-limit"));
+
 		withMETDFwd = par("withMETDFwd").boolValue();
 		withDistFwd = par("withDistFwd").boolValue();
 		if (!(withMETDFwd || withDistFwd)) {
@@ -53,16 +55,45 @@ void GeoDtnICNetwLayer::initialize(int stage)
 		Fwd_Yes_Dist    = 0;
 		Fwd_Yes_Both    = 0;
 
-		withTTLForCus = par("withTTLForCus").boolValue();
+
 
 		withAddressedAck = par("withAddressedAck").boolValue();
+
+		custodyStructureSize = par("custodyStructureSize");
+		if (custodyStructureSize<=0){
+			opp_error("Size of the structure that store custodies can not be negative");
+		}
 
 		custodyList = par("custodyList");
 		if ((custodyList != No_Diffuse) && (custodyList != Diffuse) && (custodyList != Diffuse_Delete)){
 			opp_error("No valid CustodyList");
 		}
 
-		majorationOfCustodyTimestamp = par("majorationOfCustodyTimestamp").doubleValue();
+		withTTLForCus = par("withTTLForCus").boolValue();
+		if (withTTLForCus){
+			ttlForCus = par("ttlForCus").doubleValue();
+		}else{
+			ttlForCus = double(simTimeLimit);
+		}
+
+		bool withCustodyList = false;
+		if ( withDistFwd && ((custodyMode == Yes_WithoutACK) || (custodyMode == Yes_WithACK)) ){
+			if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
+				withCustodyList = true;
+			}
+		}
+
+		cusModule = CustStorageHelper(custodyStructureSize, withCustodyList, withTTLForCus);
+
+		int ttlType = par("typeTTLForCus");
+		typeTTLForCus = (TTLForCtrlType) ttlType;
+
+		majorationOfTTLForCus = par("majorationOfTTLForCus").doubleValue();
+
+		t_custodyLifeTime = registerSignal("custodyLifeTime");
+
+		nbrStoredCustodyVector.setName("StoredCustody");
+		nbrStoredCustodyVector.record(0);
 
 	}
 }
@@ -114,6 +145,13 @@ void GeoDtnICNetwLayer::handleSelfMsg(cMessage *msg)
 		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,getCurrentMETD(),getCurrentDist(), simTime(), true, nodeType, getCurrentPos()));
 		sendingHelloMsg();
 		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
+	}
+	if (msg == updateMsg){
+		unsigned long nbrStoredCustody = cusModule.getNbrStoredCustodys();
+		if (nbrStoredCustody != 0){
+			nbrStoredCustodyVector.record(nbrStoredCustody);
+		}
+		DtnNetwLayer::handleSelfMsg(msg);
 	}
 }
 
@@ -174,31 +212,35 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
 			/***************** Cleaning CustodySerials from old entries *****/
 			if (withTTLForCus){
-				deletedCustodySerials();
+//				deletedCustodySerials();
+				cusModule.deleteExpiredCustodys();
 			}
 			/***************** Cleaning CustodySerials from old entries *****/
 			// If we use Dist metric, Custody mode is Yes and Custody list is > 0
-			custodyBundle = std::map<unsigned long,double >(custodySerial);
+//			custodyBundle = std::map<unsigned long,double >(custodySerial);
+			updateNCustodySerial();
+			custodyBundle = cusModule.getCustodySerialsWithExpTime();
 			//custodyBundle = buildCustodySerialWithTimeStamp();
-			if (myCurrentDist == 0){
-				for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-					unsigned long myCustodySerial = (*it);
-					double myCustodyTimestamp = 0;
-					if (  !	((myCurrentMETD <= 0)||(myCurrentMETD == maxDbl)) ) {
-						myCustodyTimestamp = myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl();
-					}
-
-			    	std::map<unsigned long, double >::iterator it2 = custodyBundle.find(myCustodySerial);
-			    	if (it2 == custodyBundle.end()){
-			    		custodyBundle.insert(std::pair<unsigned long, double>(myCustodySerial,myCustodyTimestamp));
-			    	}else{
-			    		// If new timestamp longer than previous we update it otherwise we do nothing
-			    		if (it2->second < myCustodyTimestamp){
-			    			custodyBundle[myCustodySerial] = myCustodyTimestamp;
-			    		}
-			    	}
-				}
-			}
+//			if (myCurrentDist == 0){
+//				for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+//					unsigned long myCustodySerial = (*it);
+//					double myCustodyTimestamp = 0;
+//					if (  !	((myCurrentMETD <= 0)||(myCurrentMETD == maxDbl)) ) {
+////						myCustodyTimestamp = myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl();
+//						myCustodyTimestamp = myCurrentMETD * majorationOfTTLForCus + simTime().dbl();
+//					}
+//
+//			    	std::map<unsigned long, double >::iterator it2 = custodyBundle.find(myCustodySerial);
+//			    	if (it2 == custodyBundle.end()){
+//			    		custodyBundle.insert(std::pair<unsigned long, double>(myCustodySerial,myCustodyTimestamp));
+//			    	}else{
+//			    		// If new timestamp longer than previous we update it otherwise we do nothing
+//			    		if (it2->second < myCustodyTimestamp){
+//			    			custodyBundle[myCustodySerial] = myCustodyTimestamp;
+//			    		}
+//			    	}
+//				}
+//			}
 			netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
 		}
 //		if (withTTLForCtrl){
@@ -283,16 +325,19 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
 	    }
 	    std::map<unsigned long, double > custodyBundle = netwPkt->getCustodySerialsWithTimestamp();
-		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
-	    	for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
-	    		storeCustodySerial(it->first, it->second);
-	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
-//	    			erase(it->first);
-	    			bndlModule.deleteBundle(it->first);
-	    			//erase(*it);
-	    		}
-	    	}
+	    if (!custodyBundle.empty()){
+	    	storeNCustodySerial(custodyBundle);
 	    }
+//		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
+//	    	for(std::map<unsigned long, double >::iterator it = custodyBundle.begin(); it != custodyBundle.end(); it++){
+//	    		storeCustodySerial(it->first, it->second);
+//	    		if ((custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
+////	    			erase(it->first);
+//	    			bndlModule.deleteBundle(it->first);
+//	    			//erase(*it);
+//	    		}
+//	    	}
+//	    }
 //	    if ((custodyMode == Yes_WithACK)||(custodyMode == Yes_WithoutACK)){
 //			/** if the encoutered node is going to pass by the VPA so no need to request theses bundles instead delete them */
 //			if(( netwPkt->getSrcDist_NP_VPA() == 0)){
@@ -368,19 +413,22 @@ void GeoDtnICNetwLayer::sendingBundleMsg(GeoDtnNetwPkt *netwPkt)
 			sendDown(bundleMsg, 0, 0, 1);
 			emit(sentL3SignalId,1);
 			if ((custodyMode == No) || (custodyMode == Yes_WithoutACK)){
+				double currentMETDForSerial = netwPkt->getSrcMETD();
 //				bundlesReplicaIndex[serial]++;
 				bndlModule.updateSentReplica(serial);
 				if (custodyDecision){
 					//erase(serial);
-					bndlModule.deleteBundle(serial);
-					if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
-						double currentTimestamp = 0;
-						double currentMETDForSerial = netwPkt->getSrcMETD();
-						if ( ! ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) ){
-							currentTimestamp = currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl();
-						}
-						storeCustodySerial(serial, currentTimestamp);
-					}
+					bndlModule.deleteBundleUponCustody(serial);
+					gen1CustodySerial(serial, currentMETDForSerial);
+//					if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
+//						double currentTimestamp = 0;
+//						double currentMETDForSerial = netwPkt->getSrcMETD();
+//						if ( ! ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) ){
+////							currentTimestamp = currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl();
+//							currentTimestamp = currentMETDForSerial * majorationOfTTLForCus + simTime().dbl();
+//						}
+//						storeCustodySerial(serial, currentTimestamp);
+//					}
 				}
 			}
 		}
@@ -427,13 +475,14 @@ void GeoDtnICNetwLayer::sendingBundleMsgToVPA(LAddress::L3Type vpaAddr)
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		if(!withExplicitE2EAck){
-			serialsToDelete.insert(serial);
+//			serialsToDelete.insert(serial);
+			gen1AckSerial(wsm);
 		}
 	}
 
-	if(!withExplicitE2EAck){
-		storeAckSerials(serialsToDelete);
-	}
+//	if(!withExplicitE2EAck){
+//		storeAckSerials(serialsToDelete);
+//	}
 }
 
 void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
@@ -575,96 +624,136 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	if (custodyMode == Yes_WithACK){
 		std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
+			unsigned long serial = *it;
+			double currentMETDForSerial = netwPkt->getSrcMETD();
 //			bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it]++;
-			bndlModule.updateSentReplica(*it);
+			bndlModule.updateSentReplica(serial);
 			if (netwPkt->getCustodyTransfert()){
 //				erase(*it);
-				bndlModule.deleteBundle(*it);
-				if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
-					double currentTimestamp = 0;
-					double currentMETDForSerial = netwPkt->getSrcMETD();
-					if ( ! ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) ){
-						currentTimestamp = currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl();
-					}
-					storeCustodySerial((*it),currentTimestamp);
-				}
+				bndlModule.deleteBundleUponCustody(serial);
+				gen1CustodySerial(serial, currentMETDForSerial);
+//				if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
+//					double currentTimestamp = 0;
+//					double currentMETDForSerial = netwPkt->getSrcMETD();
+//					if ( ! ((currentMETDForSerial <= 0)||(currentMETDForSerial == maxDbl)) ){
+////						currentTimestamp = currentMETDForSerial * majorationOfCustodyTimestamp + simTime().dbl();
+//						currentTimestamp = currentMETDForSerial * majorationOfTTLForCus + simTime().dbl();
+//					}
+//					storeCustodySerial((*it),currentTimestamp);
+//				}
 			}
 		}
 	}
 }
 
 ////////////////////////////////////////// Others methods /////////////////////////
-
-void GeoDtnICNetwLayer::storeAckSerial(unsigned long  serial)
+bool GeoDtnICNetwLayer::store1AckSerial(unsigned long  serial, double expireTime)
 {
-//	if (ackSerial.count(serial) == 0){
-//		DtnNetwLayer::storeAckSerial(serial);
-//    	currentNbrIsrt++;
-//	}
+	bool stored = ackModule.storeAck(serial,expireTime);
+
+	if (stored){
+		bndlModule.deleteBundleUponACK(serial);
+		cusModule.deleteCustodyUponACK(serial);
+	}
+
+	return stored;
 }
 
-void GeoDtnICNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
+bool GeoDtnICNetwLayer::store1CustodySerial(unsigned long  serial, double expireTime, bool shouldDelete)
 {
-//	DtnNetwLayer::storeAckSerials(setOfSerials);
-//	for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-//		custodySerial.erase(*it);
-//	}
-}
+	bool stored = cusModule.storeCustody(serial,expireTime);
 
-void GeoDtnICNetwLayer::storeCustodySerial(unsigned long  serial, double timestamp)
-{
-	std::map<unsigned long, double >::iterator it = custodySerial.find(serial);
-	if (it == custodySerial.end()){
-		custodySerial.insert(std::pair<unsigned long, double>(serial,timestamp));
-		currentNbrIsrt++;
-	}else{
-		// If new timestamp longer than previous we update it otherwise we do nothing
-		if (it->second < timestamp){
-			custodySerial[serial] = timestamp;
-			currentNbrIsrt++;
+	if (shouldDelete){
+		if (stored && (custodyList == Diffuse_Delete) && (getCurrentDist() != 0)){
+			bndlModule.deleteBundleUponCustody(serial);
 		}
 	}
 
-//	if (withTTLForCtrl){
-////		if (custodySerial.count(serial) == 0){
-////			custodySerial.insert(serial);
-////	    	currentNbrIsrt++;
-//	    	std::map<unsigned long, double >::iterator it = custodySerialTimeStamp.find(currentSerial);
-//	    	if (it == custodySerialTimeStamp.end()){
-//	    		custodySerialTimeStamp.insert(std::pair<unsigned long, double>(currentSerial,(double)(currentTimestamp)));
-//	    	}else{
-//	    		// If new timestamp longer than previous we update it otherwise we do nothing
-//	    		if (it->second < currentTimestamp){
-//	    			custodySerialTimeStamp[currentSerial] = currentTimestamp;
-//	    		}
-//	    	}
-////		}
-//	}else{
-//		if (custodySerial.count(serial) == 0){
-//			custodySerial.insert(currentSerial);
-//	    	currentNbrIsrt++;
-//		}
-//	}
+	return stored;
 }
 
-void GeoDtnICNetwLayer::storeCustodySerials(std::map<unsigned long, double > setOfSerials)
+void GeoDtnICNetwLayer::storeNCustodySerial(std::map<unsigned long ,double> custodySerialsWithTimestamp)
 {
-	if (nodeType == Veh){
-	    for (std::map<unsigned long, double >::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
-	    	unsigned long serial = it->first;
-	    	double myCustodyTimestamp = it->second;
-	    	storeCustodySerial(serial, myCustodyTimestamp);
-	    	double currentMETD = maxDbl;
-	    	if (withMETDFwd){
-	    		currentMETD = geoTraci->getCurrentNp().getMetd();
-	    	}
-	    	if (currentMETD != 0){
-//	    		erase(serial);
-	    		bndlModule.deleteBundle(serial);
-	    	}
-	    }
+	for (std::map<unsigned long, double >::iterator it = custodySerialsWithTimestamp.begin(); it != custodySerialsWithTimestamp.end(); it++){
+		unsigned long serial = it->first;
+		double expireTime = it->second;
+		if (store1CustodySerial(serial,expireTime, true)){
+			if (withTTLForCus){
+				emitSignalForCustodyLifeTime(serial, -1, expireTime);
+			}
+		}
 	}
 }
+//void GeoDtnICNetwLayer::storeAckSerial(unsigned long  serial)
+//{
+////	if (ackSerial.count(serial) == 0){
+////		DtnNetwLayer::storeAckSerial(serial);
+////    	currentNbrIsrt++;
+////	}
+//}
+
+//void GeoDtnICNetwLayer::storeAckSerials(std::set<unsigned long > setOfSerials)
+//{
+////	DtnNetwLayer::storeAckSerials(setOfSerials);
+////	for (std::set<unsigned long>::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+////		custodySerial.erase(*it);
+////	}
+//}
+
+//void GeoDtnICNetwLayer::storeCustodySerial(unsigned long  serial, double timestamp)
+//{
+//	std::map<unsigned long, double >::iterator it = custodySerial.find(serial);
+//	if (it == custodySerial.end()){
+//		custodySerial.insert(std::pair<unsigned long, double>(serial,timestamp));
+//		currentNbrIsrt++;
+//	}else{
+//		// If new timestamp longer than previous we update it otherwise we do nothing
+//		if (it->second < timestamp){
+//			custodySerial[serial] = timestamp;
+//			currentNbrIsrt++;
+//		}
+//	}
+//
+////	if (withTTLForCtrl){
+//////		if (custodySerial.count(serial) == 0){
+//////			custodySerial.insert(serial);
+//////	    	currentNbrIsrt++;
+////	    	std::map<unsigned long, double >::iterator it = custodySerialTimeStamp.find(currentSerial);
+////	    	if (it == custodySerialTimeStamp.end()){
+////	    		custodySerialTimeStamp.insert(std::pair<unsigned long, double>(currentSerial,(double)(currentTimestamp)));
+////	    	}else{
+////	    		// If new timestamp longer than previous we update it otherwise we do nothing
+////	    		if (it->second < currentTimestamp){
+////	    			custodySerialTimeStamp[currentSerial] = currentTimestamp;
+////	    		}
+////	    	}
+//////		}
+////	}else{
+////		if (custodySerial.count(serial) == 0){
+////			custodySerial.insert(currentSerial);
+////	    	currentNbrIsrt++;
+////		}
+////	}
+//}
+
+//void GeoDtnICNetwLayer::storeCustodySerials(std::map<unsigned long, double > setOfSerials)
+//{
+//	if (nodeType == Veh){
+//	    for (std::map<unsigned long, double >::iterator it = setOfSerials.begin(); it != setOfSerials.end(); it++){
+//	    	unsigned long serial = it->first;
+//	    	double myCustodyTimestamp = it->second;
+//	    	storeCustodySerial(serial, myCustodyTimestamp);
+//	    	double currentMETD = maxDbl;
+//	    	if (withMETDFwd){
+//	    		currentMETD = geoTraci->getCurrentNp().getMetd();
+//	    	}
+//	    	if (currentMETD != 0){
+////	    		erase(serial);
+//	    		bndlModule.deleteBundle(serial);
+//	    	}
+//	    }
+//	}
+//}
 
 GeoTraCIMobility *GeoDtnICNetwLayer::getGeoTraci()
 {
@@ -718,7 +807,8 @@ std::vector<std::pair<WaveShortMessage*,int> > GeoDtnICNetwLayer::specific_sched
 	std::vector<std::pair<WaveShortMessage*, int> > filtered_unsortedWSMPair;
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = unsortedWSMPair.begin(); it != unsortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
-		if (custodySerial.count(wsm->getSerial()) > 0) {continue;}
+//		if (custodySerial.count(wsm->getSerial()) > 0) {continue;}
+		if (cusModule.existCustody(wsm->getSerial())) {continue;}
 		filtered_unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>(it->first,it->second));
 	}
 	return filtered_unsortedWSMPair;
@@ -795,27 +885,27 @@ bool GeoDtnICNetwLayer::makeCustodyDecision(double srcDist)
 	return decision;
 }
 
-void GeoDtnICNetwLayer::deletedCustodySerials()
-{
-	std::set<unsigned long> entriesToDelete;
-	double currentTime = simTime().dbl();
-
-	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
-
-	for (std::map<unsigned long, double>::iterator it = custodySerial.begin(); it != custodySerial.end(); it++){
-		if ((*it).second < currentTime){
-		    //std::cout << (*it).first << " => " << (*it).second << '\n';
-//		    nbrDeletedCtrlByTTL++;
-		    entriesToDelete.insert((*it).first);
-		}
-	}
-
-	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
-
-	for(std::set<unsigned long>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
-		custodySerial.erase((*it));
-	}
-}
+//void GeoDtnICNetwLayer::deletedCustodySerials()
+//{
+//	std::set<unsigned long> entriesToDelete;
+//	double currentTime = simTime().dbl();
+//
+//	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
+//
+//	for (std::map<unsigned long, double>::iterator it = custodySerial.begin(); it != custodySerial.end(); it++){
+//		if ((*it).second < currentTime){
+//		    //std::cout << (*it).first << " => " << (*it).second << '\n';
+////		    nbrDeletedCtrlByTTL++;
+//		    entriesToDelete.insert((*it).first);
+//		}
+//	}
+//
+//	//std::cout << "Total Size of CustodySerials: " << custodySerial.size() << '\n';
+//
+//	for(std::set<unsigned long>::iterator it = entriesToDelete.begin(); it != entriesToDelete.end(); it++){
+//		custodySerial.erase((*it));
+//	}
+//}
 
 std::set<unsigned long> GeoDtnICNetwLayer::buildCustodySerialWithTimeStamp(){
 	std::set<unsigned long> myCustodySerialsWithTimeStamp;
@@ -833,4 +923,87 @@ std::set<unsigned long> GeoDtnICNetwLayer::buildCustodySerialWithTimeStamp(){
 //	}
 
 	return myCustodySerialsWithTimeStamp;
+}
+
+void GeoDtnICNetwLayer::emitSignalForCustodyLifeTime(unsigned long serial, double startTime, double endTime)
+{
+	string signalStr = lg2Str((long)(serial))+":"+dbl2Str(startTime)+":"+dbl2Str(endTime);
+	emit(t_custodyLifeTime,signalStr.c_str());
+}
+
+//std::pair<unsigned long ,double> GeoDtnICNetwLayer::gen1CustodySerial(unsigned long  serial, double currentMETD)
+//{
+//	double currentTime = simTime().dbl();
+//	double expireTime = maxDbl;
+//
+//	if (withDistFwd && ((custodyMode == Yes_WithoutACK) || (custodyMode == Yes_WithACK)) &&
+//			((custodyList == Diffuse) || (custodyList == Diffuse_Delete))) {
+//
+//			if (withTTLForCus){
+//				if (typeTTLForCus == Fixed_TTL){
+//					expireTime = currentTime + ttlForCus;
+//				}else if (typeTTLForCus == Adaptative_TTL){
+//					if ( ! ((currentMETD <= 0)||(currentMETD == maxDbl)) ){
+//						expireTime = currentTime + currentMETD * majorationOfTTLForCus;
+//					}else{
+//						expireTime = currentTime;
+//					}
+//				}
+//
+//				emitSignalForCustodyLifeTime(serial, currentTime, expireTime);
+//			}
+//
+//			return std::pair<unsigned long, double>(serial, expireTime);
+//	} else {
+//		opp_error("GeoDtnICNetwLayer::gen1CustodySerial --- Calling function in inappropriate mode");
+//	}
+//}
+
+void GeoDtnICNetwLayer::gen1CustodySerial(unsigned long  serial, double currentMETD)
+{
+	double currentTime = simTime().dbl();
+	double expireTime = maxDbl;
+
+	if (withTTLForCus){
+		if (typeTTLForCus == Fixed_TTL){
+			expireTime = currentTime + ttlForCus;
+		}else if (typeTTLForCus == Adaptative_TTL){
+			if ( ! ((currentMETD <= 0)||(currentMETD == maxDbl)) ){
+				expireTime = currentTime + currentMETD * majorationOfTTLForCus;
+			}else{
+				expireTime = currentTime;
+			}
+		}
+	}
+
+	if (store1CustodySerial(serial, expireTime, false)){
+		if (withTTLForCus){
+			emitSignalForCustodyLifeTime(serial, currentTime, expireTime);
+		}
+	}
+}
+
+void GeoDtnICNetwLayer::updateNCustodySerial()
+{
+	if (getCurrentDist() == 0){
+		std::set<unsigned long > storedBundle = bndlModule.getBundleSerialsAsSet();
+		for(std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
+			unsigned long myCustodySerial = (*it);
+			gen1CustodySerial(myCustodySerial, getCurrentMETD());
+//			if (  !	((myCurrentMETD <= 0)||(myCurrentMETD == maxDbl)) ) {
+////						myCustodyTimestamp = myCurrentMETD * majorationOfCustodyTimestamp + simTime().dbl();
+//				myCustodyTimestamp = myCurrentMETD * majorationOfTTLForCus + simTime().dbl();
+//			}
+//
+//	    	std::map<unsigned long, double >::iterator it2 = custodyBundle.find(myCustodySerial);
+//	    	if (it2 == custodyBundle.end()){
+//	    		custodyBundle.insert(std::pair<unsigned long, double>(myCustodySerial,myCustodyTimestamp));
+//	    	}else{
+//	    		// If new timestamp longer than previous we update it otherwise we do nothing
+//	    		if (it2->second < myCustodyTimestamp){
+//	    			custodyBundle[myCustodySerial] = myCustodyTimestamp;
+//	    		}
+//	    	}
+		}
+	}
 }

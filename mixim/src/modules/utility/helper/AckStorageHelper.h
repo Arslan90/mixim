@@ -27,10 +27,10 @@ const double maxDbl = std::numeric_limits<double>::max();
 
 class AckStorageHelper {
 protected:
-    /** Size of the WMS Storage structure */
+    /** Size of the Ack Storage structure */
     unsigned int storageSize;
 
-    /** Fifo structure for WMS Storage*/
+    /** Fifo structure for Ack Storage*/
     std::list<unsigned long> ackSerials;
 
     /** Specific map with K as a Ack Serial &
@@ -55,7 +55,7 @@ protected:
 
 public:
 	AckStorageHelper();
-	AckStorageHelper(unsigned int sizeOfBundleStorage, bool withAck, bool withTTL);
+	AckStorageHelper(unsigned int sizeOfStorage, bool withAck, bool withTTL);
 	virtual ~AckStorageHelper();
 
 	bool storeAck(unsigned long serial, double expireTime = NS_AckStorageHelper::maxDbl);

@@ -20,6 +20,8 @@ BndlStorageHelper::BndlStorageHelper()
 	nbrDeletedBundlesByTTL = 0;
 	nbrDeletedBundlesByAck = 0;
 	nbrDeletedBundlesByFIFO = 0;
+	nbrDeletedBundlesByCustody = 0;
+	nbrDeletedBundlesByNoRmgReplica = 0;
 }
 
 BndlStorageHelper::BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl)
@@ -139,6 +141,25 @@ bool BndlStorageHelper::deleteBundleUponTTL(unsigned long  serial)
 	return deleted;
 }
 
+
+bool BndlStorageHelper::deleteBundleUponCustody(unsigned long  serial)
+{
+	bool deleted = deleteBundle(serial);
+	if (deleted){
+		nbrDeletedBundlesByCustody++;
+	}
+	return deleted;
+}
+
+bool BndlStorageHelper::deleteBundleUponNoRmgReplica(unsigned long  serial)
+{
+	bool deleted = deleteBundle(serial);
+	if (deleted){
+		nbrDeletedBundlesByNoRmgReplica++;
+	}
+	return deleted;
+}
+
 bool BndlStorageHelper::existBundle(unsigned long  serial)
 {
 	bool found = false;
@@ -229,12 +250,20 @@ void BndlStorageHelper::updateSentReplica(unsigned long  serial, int sentReplica
 		}else{
 			int currentSentReplica = it3->second.first;
 			int currentRmgReplica = it3->second.second;
+			bool updateEntry = true;
 
 			currentSentReplica += sentReplica;
 			if (withLimitedReplica){
 				currentRmgReplica-= sentReplica;
+				if (currentRmgReplica <= 0){
+					deleteBundleUponNoRmgReplica(serial);
+					updateEntry = false;
+				}
 			}
-			indexForReplica[serial] = std::pair<int, int>(currentSentReplica,currentRmgReplica);
+
+			if(updateEntry){
+				indexForReplica[serial] = std::pair<int, int>(currentSentReplica,currentRmgReplica);
+			}
 		}
 	}
 

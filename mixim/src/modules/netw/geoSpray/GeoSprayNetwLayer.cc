@@ -302,13 +302,14 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		sendDown(netwPkt, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		if (!withExplicitH2HAck){
+			if (custodyTransfert){
+//				erase(serial);
+				bndlModule.deleteBundleUponCustody(serial);
+			}
 //			bundlesReplicaIndex[serial] = bundlesReplicaIndex[serial] + nbrReplicaToSend;
 //			bundlesRmgReplica[serial] = bundlesRmgReplica[serial] - nbrReplicaToSend;
 			bndlModule.updateSentReplica(serial, nbrReplicaToSend);
-			if (custodyTransfert){
-//				erase(serial);
-				bndlModule.deleteBundle(serial);
-			}
+
 		}
 	}
 }
@@ -479,13 +480,16 @@ void GeoSprayNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 			if (bndlModule.existBundle(*it)){
 //				bundlesReplicaIndex[*it] = bundlesReplicaIndex[*it] + netwPkt->getNbrReplica();
 //				bundlesRmgReplica[*it] = bundlesRmgReplica[*it] - netwPkt->getNbrReplica();
+				if (netwPkt->getCustodyTransfert() ){
+					bndlModule.deleteBundleUponCustody(*it);
+				}
 				bndlModule.updateSentReplica(*it, netwPkt->getNbrReplica());
 //				if (netwPkt->getCustodyTransfert() || (bundlesRmgReplica[*it] <= 0)){
 //					erase(*it);
 //				}
-				if (netwPkt->getCustodyTransfert() || (bndlModule.getNbrRmgReplica(*it) <= 0)){
-					bndlModule.deleteBundle(*it);
-				}
+//				if (netwPkt->getCustodyTransfert() || (bndlModule.getNbrRmgReplica(*it) <= 0)){
+//					bndlModule.deleteBundle(*it);
+//				}
 			}
 		}
 	}

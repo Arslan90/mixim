@@ -28,10 +28,10 @@ AckStorageHelper::AckStorageHelper() {
 	nbrUpdatesForAckExpireTime = 0;
 }
 
-AckStorageHelper::AckStorageHelper(unsigned int sizeOfBundleStorage, bool withAck, bool withTTL)
+AckStorageHelper::AckStorageHelper(unsigned int sizeOfStorage, bool withAck, bool withTTL)
 {
 	AckStorageHelper();
-	this->storageSize = sizeOfBundleStorage;
+	this->storageSize = sizeOfStorage;
 	this->withAck = withAck;
 	this->withTTL = withTTL;
 }
@@ -125,7 +125,7 @@ void AckStorageHelper::deleteFirstAck()
 			nbrDeletedAcksByFIFO++;
 		}
 	}else if (ackSerials.size() > storageSize){
-		opp_error("ackSerials::deleteFirstAck --- Acks storage structure exceed its maximum size");
+		opp_error("AckSerials::deleteFirstAck --- Acks storage structure exceed its maximum size");
 	}
 }
 

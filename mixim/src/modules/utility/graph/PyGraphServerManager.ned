@@ -62,6 +62,7 @@ simple PyGraphServerManager
 		@statistic[TOC_RCC](title="TOC_RCC";source="t_sizeOC_RCC";record=mean,last,vector);
 		
 		@statistic[ACK_LT](title="ACK_LT";source="stats_AckLifeTime";record=mean,last,vector);
+		@statistic[CUS_LT](title="CUS_LT";source="stats_CustodyLifeTime";record=mean,last,vector);
 		
 		//@statistic[controlOverhead](title="OverheadControlMsg";source="t_sizeOC_RCC";record=mean,last,vector);
 }

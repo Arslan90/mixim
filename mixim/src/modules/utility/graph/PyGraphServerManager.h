@@ -47,6 +47,8 @@ class PyGraphServerManager : public cSimpleModule, cListener
 
     virtual void updateStatsForAckLifeTime(bool recordAllEntries);
 
+    virtual void updateStatsForCustodyLifeTime(bool recordAllEntries);
+
     bool debug;
     std::string host;
     int port;
@@ -136,6 +138,12 @@ class PyGraphServerManager : public cSimpleModule, cListener
 
 	double totalAckLifeTime;
 	double counterForAckLifeTime;
+
+	simsignal_t stats_CustodyLifeTime;
+	std::map<unsigned long, std::pair<double,double> > custodyLifeTime;
+
+	double totalCustodyLifeTime;
+	double counterForCustodyLifeTime;
 };
 
 #endif

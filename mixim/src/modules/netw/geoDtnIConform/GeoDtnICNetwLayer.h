@@ -20,6 +20,8 @@
 #include "GeoDtnNetwPkt_m.h"
 #include "GeoTraCIMobility.h"
 
+#include "CustStorageHelper.h"
+
 /**
  * TODO - Generated class
  */
@@ -31,13 +33,12 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   protected:
 	GeoTraCIMobility* geoTraci;
 
-
 	int Fwd_No;
 	int Fwd_Yes_METD;
 	int Fwd_Yes_Dist;
 	int Fwd_Yes_Both;
 
-	std::map<unsigned long, double> custodySerial;
+//	std::map<unsigned long, double> custodySerial;
 
 	/**
 	 * Current Number of Insert operation in ACKSerial & Bundle storage
@@ -54,13 +55,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	bool withMETDFwd;
 	bool withDistFwd;
 
-	enum CustodyModeEnum {
-		No,
-		Yes_WithoutACK,
-		Yes_WithACK,
-	};
-	int custodyMode;
-
 	enum ForwardStratEnum{
 		AtLeastOne = 0,
 		Both = 1
@@ -74,20 +68,39 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	bool withExplicitE2EAck;
 
-	int custodyList;
-
-	bool withTTLForCus;
-
 //	std::set<unsigned long> custodySerialDeleted;
 //	std::map<unsigned long,double> custodySerialTimeStamp;
 
-	double majorationOfCustodyTimestamp;
+	enum CustodyModeEnum {
+		No,
+		Yes_WithoutACK,
+		Yes_WithACK,
+	};
+	int custodyMode;
 
 	enum CustodyListEnum {
 		No_Diffuse = 0,
 		Diffuse = 1,
 		Diffuse_Delete = 2
 	};
+	int custodyList;
+
+	CustStorageHelper cusModule;
+
+    /** Size of the Custody Storage structure */
+    unsigned int custodyStructureSize;
+
+	bool withTTLForCus;
+
+	double ttlForCus;
+
+	double majorationOfTTLForCus;
+
+    TTLForCtrlType typeTTLForCus;
+
+	simsignal_t t_custodyLifeTime;
+
+	cOutVector nbrStoredCustodyVector;
 
 	/**
 	 * Comparator used to sort Bundles to sent when using RC Asc strategy
@@ -155,11 +168,13 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 ////////////////////////// Others Methods //////////////////////
 
-  	virtual void storeAckSerial(unsigned long serial);
+//  	virtual void storeAckSerial(unsigned long serial);
 
-  	void storeCustodySerial(unsigned long serial, double timestamp);
+  	virtual bool store1AckSerial(unsigned long  serial, double expireTime);
 
-  	void storeCustodySerials(std::map<unsigned long, double > setOfSerials);
+//  	void storeCustodySerial(unsigned long serial, double timestamp);
+//
+//  	void storeCustodySerials(std::map<unsigned long, double > setOfSerials);
   	
   	std::set<unsigned long> buildCustodySerialWithTimeStamp();
 
@@ -177,9 +192,21 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	bool makeCustodyDecision(double srcDist);
 
-  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
+	void emitSignalForCustodyLifeTime(unsigned long serial, double startTime, double endTime);
 
-  	virtual void deletedCustodySerials();
+//  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
+//
+//  	virtual void deletedCustodySerials();
+
+//	std::pair<unsigned long, double> gen1CustodySerial(unsigned long serial, double currentMETD);
+
+	void gen1CustodySerial(unsigned long serial, double currentMETD);
+
+	void storeNCustodySerial(std::map<unsigned long ,double> ackSerialsWithTimestamp);
+
+	void updateNCustodySerial();
+
+	virtual bool store1CustodySerial(unsigned long  serial, double expireTime, bool shouldDelete);
 };
 
 #endif

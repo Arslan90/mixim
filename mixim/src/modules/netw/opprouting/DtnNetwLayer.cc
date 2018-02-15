@@ -75,7 +75,7 @@ void DtnNetwLayer::initialize(int stage)
 			ttlForAck = double(simTimeLimit);
 		}
 
-		ackModule = AckStorageHelper(ackStructureSize, withAck, withTTL);
+		ackModule = AckStorageHelper(ackStructureSize, withAck, withTTLForAck);
 
 		int ttlType = par("typeTTLForAck");
 		typeTTLForAck = (TTLForCtrlType) ttlType;

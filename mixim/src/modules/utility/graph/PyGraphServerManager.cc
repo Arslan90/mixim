@@ -138,6 +138,14 @@ void PyGraphServerManager::initialize(int stage)
 		stats_AckLifeTime = registerSignal("stats_AckLifeTime");
 		emit(stats_AckLifeTime,0.0);
 
+		simulation.getSystemModule()->subscribe("custodyLifeTime", this);
+
+		totalCustodyLifeTime = 0.0;
+		counterForCustodyLifeTime = 0.0;
+
+		stats_CustodyLifeTime = registerSignal("stats_CustodyLifeTime");
+		emit(stats_CustodyLifeTime,0.0);
+
 		collectStatOnly = par("collectStatOnly").boolValue();
 
 		updateInterval = par("updateInterval").doubleValue();
@@ -258,6 +266,7 @@ void PyGraphServerManager::handleMessage(cMessage *msg)
 		 * Metrics related to ACKs life time
 		 */
 		updateStatsForAckLifeTime(false);
+		updateStatsForCustodyLifeTime(false);
 
 		double currentTime = simTime().dbl();
 		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
@@ -437,6 +446,29 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 		}
 	}
 
+	if (strcmp(getSignalName(signalID),"custodyLifeTime") == 0){
+		char* signalStr = strtok(strdup(s),":");
+		unsigned long serial = strtol(signalStr,NULL,10);
+
+		signalStr = strtok(NULL,":");
+		double creationTime = strtod(signalStr,NULL);
+
+		signalStr = strtok(NULL,":");
+		double expireTime = strtod(signalStr,NULL);
+
+		std::map<unsigned long, std::pair<double,double> >::iterator it = custodyLifeTime.find(serial);
+		if (it == custodyLifeTime.end()){
+			custodyLifeTime.insert(std::make_pair(serial,std::make_pair(creationTime,expireTime)));
+		}else{
+			if (it->second.first == -1){
+				opp_error("PyGraphServerManager::receiveSignal - CreationTime of Custodies cannot be negative");
+			}
+			if (it->second.second < expireTime){
+				custodyLifeTime[it->first] = std::make_pair(it->second.first, expireTime);
+			}
+		}
+	}
+
 }
 
 void PyGraphServerManager::finish(){
@@ -487,6 +519,7 @@ void PyGraphServerManager::finish(){
 	emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
 
 	updateStatsForAckLifeTime(true);
+	updateStatsForCustodyLifeTime(true);
 
 	finishConnection();
 }
@@ -608,3 +641,35 @@ void PyGraphServerManager::updateStatsForAckLifeTime(bool recordAllEntries)
 
 	emit(stats_AckLifeTime,totalAckLifeTime/counterForAckLifeTime);
 }
+
+void PyGraphServerManager::updateStatsForCustodyLifeTime(bool recordAllEntries)
+{
+	std::set<unsigned long> entriesToDelete;
+	for (std::map<unsigned long, std::pair<double,double> >::iterator it = custodyLifeTime.begin(); it != custodyLifeTime.end(); it++){
+		unsigned long serial =it->first;
+		double creationTime = it->second.first;
+		double expireTime = it->second.second;
+
+		if (creationTime < 0){
+			opp_error("PyGraphServerManager::updateStatsForCustodyLifeTime - CreationTime of Custodies cannot be negative");
+		}
+
+		if (creationTime > expireTime){
+			opp_error("PyGraphServerManager::updateStatsForCustodyLifeTime - CreationTime of Custodies cannot be higher than ExpireTime");
+		}
+
+		if ((recordAllEntries) || ((!recordAllEntries) && (expireTime < simTime().dbl()))){
+			totalCustodyLifeTime += expireTime - creationTime;
+			counterForCustodyLifeTime++;
+			entriesToDelete.insert(serial);
+		}
+	}
+
+	for (std::set<unsigned long>::iterator it2 = entriesToDelete.begin(); it2 != entriesToDelete.end(); it2++){
+		custodyLifeTime.erase(*it2);
+	}
+
+	emit(stats_CustodyLifeTime,totalCustodyLifeTime/counterForCustodyLifeTime);
+}
+
+
