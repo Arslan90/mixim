@@ -44,10 +44,7 @@ class DDeliveryNetwLayer : public DtnNetwLayer
   	/** @brief Handle messages from lower layer */
   	virtual void handleLowerMsg(cMessage* msg);
 
-  	/** @brief Handle self messages */
-	virtual void handleSelfMsg(cMessage* msg);
-
-  	void sendingHelloMsg();
+  	virtual void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 

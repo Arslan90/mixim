@@ -20,8 +20,6 @@
 #include "algorithm"
 #include "VEHICLEpOpp.h"
 #include "VPApOpp.h"
-//#include "limits"
-
 
 Define_Module(DtnNetwLayer);
 
@@ -29,155 +27,59 @@ void DtnNetwLayer::initialize(int stage)
 {
 	BaseNetwLayer::initialize(stage);
 	if (stage==0){
-
-		int simTimeLimit = atoi(ev.getConfig()->getConfigValue("sim-time-limit"));
-
 		DefineNodeType();
+
+		maxSimulationTime = atoi(ev.getConfig()->getConfigValue("sim-time-limit"));
+		recomputeMyNetwRoute = true;
+
 		netwRouteExpirency = par("netwRouteExpirency").doubleValue();
 		netwRoutePending = par("netwRoutePending").doubleValue();
 		heartBeatMsgPeriod = par("heartBeatMsgPeriod").doubleValue();
+		if ((netwRouteExpirency <= 0) || (netwRoutePending <= 0) || (heartBeatMsgPeriod <= 0)){
+			opp_error("PyGraphServerManager::initialize - Neighborhood parameters should be a strictly positive doubles");
+		}
+
+		updateInterval = par("updateInterval").doubleValue();
+		if (updateInterval <= 0){
+			opp_error("PyGraphServerManager::initialize - Update Interval should be a strict positive double");
+		}
+
+		initBndlManagementOptions();
+
+		initAckManagementOptions();
+
+		initEquipedVehicle();
+
+		/*
+		 * Initializing statistics & various metrics
+		 */
+		initContactStats();
 
 		NBHTableNbrInsert    = 0;
 		NBHTableNbrDelete    = 0;
 		NBHAddressNbrInsert  = 0;
 		NBHAddressNbrDelete  = 0;
-		/*
-		 * L3Address will be initialized by BaseNetwLayer::initialize(1);
-		 */
-		/*
-		 * Initialization of the used structures
-		 */
-		bundlesStructureSize = par("storageSize");
-		if (bundlesStructureSize<=0){
-			opp_error("Size of the structure that store bundles can not be negative");
-		}
-
-		withTTL = par("withTTL").boolValue();
-		if (withTTL){
-			ttl = par("ttl").doubleValue();
-		}else{
-			ttl = double(simTimeLimit);
-		}
-
-		bndlModule = BndlStorageHelper(bundlesStructureSize, withTTL, ttl);
-
-
-		withAck = par("withAck");
-		ackStructureSize = par("ackSize");
-		if (ackStructureSize<=0){
-			opp_error("Size of the structure that store acks can not be negative");
-		}
-
-		withTTLForAck = par("withTTLForAck").boolValue();
-		if (withTTLForAck){
-			ttlForAck = par("ttlForAck").doubleValue();
-		}else{
-			ttlForAck = double(simTimeLimit);
-		}
-
-		ackModule = AckStorageHelper(ackStructureSize, withAck, withTTLForAck);
-
-		int ttlType = par("typeTTLForAck");
-		typeTTLForAck = (TTLForCtrlType) ttlType;
-
-
-//		acks = std::list<BundleMeta>();
-//		acksIndex = std::map<unsigned long,BundleMeta>();
-
-
-
-		equipedVehPc = par("equipedVehPc").doubleValue();
-		if ((equipedVehPc < 0) || (equipedVehPc > 1)){
-			opp_error("Percentage of equipped vehicle is wrong, please correct it");
-		}
-		if (equipedVehPc == 1){
-			isEquiped = true;
-		}else {
-			double tmp = uniform(0,1);
-			if (tmp <= equipedVehPc){
-				isEquiped = true;
-			}else {
-				isEquiped = false;
-			}
-		}
-
-		/*
-		 * Collecting data & metrics
-		 */
-
-		recordContactStats = par("recordContactStats");
 
 		nbrL3Sent = 0;
 		nbrL3Received = 0;
 
-		nbrContacts =0;
-		sumOfContactDur = 0.0;
-		contacts = std::map<LAddress::L3Type,double>();
-		contactDurVector.setName("Evolution of contact duration mean");
-
-		nbrRecontacts = 0;
-		sumOfInterContactDur = 0.0;
-		intercontactDurVector.setName("Evolution of intercontact duration mean");
-
-		nbrStoredBundleVector.setName("StoredBundles");
-		nbrStoredBundleVector.record(0);
-
-		nbrStoredAcksVector.setName("StoredAcks");
-		nbrStoredAcksVector.record(0);
-
         bundlesReceived = 0;
-
-		receiveL3SignalId = registerSignal("receivedL3Bndl");
-		sentL3SignalId = registerSignal("sentL3Bndl");
-
-		sentBitsLengthSignalId = registerSignal("sentBitsLength");
-
-		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
-
-		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
-
-		t_ackLifeTime = registerSignal("ackLifeTime");
-
-		int tmpScheduleStrategy = par("scheduleStrategy");
-
-		switch (tmpScheduleStrategy) {
-			case 0:
-				scheduleStrategy = RCAscRLDesc;
-				break;
-			case 1:
-				scheduleStrategy = RCAscRLAsc;
-				break;
-			case 2:
-				scheduleStrategy = RCDescRLDesc;
-				break;
-			case 3:
-				scheduleStrategy = RCDescRLAsc;
-				break;
-			case 4:
-				scheduleStrategy = RLAsc;
-				break;
-			case 5:
-				scheduleStrategy = RLDesc;
-				break;
-			default:
-				opp_error("Unrecognized scheduling strategy");
-				break;
-		}
-
 		totalBundlesReceived = 0;
 		bndlSentToVPA = 0;
 		totalBndlSentToVPA = 0;
 
 		firstSentToVPA = false;
 
-		/* Setting Timers for Ctrl Msgs */
-//		withTTLForCtrl = par("withTTLForCtrl").boolValue();
-//		factorForTTLCtrl = par("factorForTTLCtrl").doubleValue();
-//
-//		double ttlForCtrlAsDbl = ttl * factorForTTLCtrl;
-//		ttlForCtrl = (int) ttlForCtrlAsDbl;
+		/*
+		 * Initializing signals
+		 */
+		receiveL3SignalId = registerSignal("receivedL3Bndl");
+		sentL3SignalId = registerSignal("sentL3Bndl");
 
-//		nbrDeletedCtrlByTTL = 0;
+		sentBitsLengthSignalId = registerSignal("sentBitsLength");
+
+		helloCtrlBitsLengthId = registerSignal("helloCtrlBitsLength");
+		otherCtrlBitsLengthId = registerSignal("otherCtrlBitsLength");
 	}
 
 	if (stage == 2){
@@ -185,10 +87,6 @@ void DtnNetwLayer::initialize(int stage)
 		heartBeatMsg = new cMessage("heartBeatMsg");
 		scheduleAt(simTime(), heartBeatMsg);
 
-		updateInterval = par("updateInterval").doubleValue();
-		if (updateInterval <= 0){
-			opp_error("PyGraphServerManager::initialize - Update Interval should be a strict positive double");
-		}
 		updateMsg = new cMessage("updateMsg");
 		double currentTime = simTime().dbl();
 		double scheduleTime = ceil(currentTime/updateInterval)*updateInterval;
@@ -285,10 +183,23 @@ void DtnNetwLayer::handleLowerMsg(cMessage *msg)
 
 void DtnNetwLayer::handleSelfMsg(cMessage *msg)
 {
+	if (msg == heartBeatMsg){
+		/***************** Cleaning Old Entries *****/
+		if (withTTL){
+			bndlModule.deleteExpiredBundles();
+		}
+		if (withAck && withTTLForAck){
+			ackModule.deleteExpiredAcks();
+		}
+		/***************** Cleaning Old Entries *****/
+		if(recomputeMyNetwRoute){
+			myNetwRoute = NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos());
+		}
+		updateNeighborhoodTable(myNetwAddr, myNetwRoute);
+		sendingHelloMsg();
+		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
+	}
 	if (msg == updateMsg){
-		/**
-		 * Traditional metrics
-		 */
 		unsigned long nbrStoredBundles = bndlModule.getNbrStoredBundles();
 		if (nbrStoredBundles != 0){
 			nbrStoredBundleVector.record(nbrStoredBundles);
@@ -305,6 +216,11 @@ void DtnNetwLayer::handleSelfMsg(cMessage *msg)
 		}
 		scheduleAt(scheduleTime, updateMsg);
 	}
+}
+
+void DtnNetwLayer::sendingHelloMsg()
+{
+	// Nothing for the moment
 }
 
 void DtnNetwLayer::handleLowerControl(cMessage *msg)
@@ -773,39 +689,33 @@ void DtnNetwLayer::recordAllClassifier()
 
 void DtnNetwLayer::recordAllScalars()
 {
-	recordScalar("# L3Sent", nbrL3Sent);
-	recordScalar("# L3Received", nbrL3Received);
-
-	recordScalar("# of Contacts", nbrContacts);
-	recordScalar("# of InterContacts", nbrRecontacts);
-
-	recordScalar("# Bundles at L3", bundlesReceived);
-
-	if (withAck){
-//		recordScalar("# ACKs", ackModule.getNbrStoredAcks());
-		recordScalar("# DeletedBundles", bndlModule.getNbrDeletedBundlesByAck());
-//		recordScalar("# Bundles", bndlModule.getNbrStoredBundles());
-	}
-
 	if (withTTL){
 		recordScalar("# DeletedBundlesWithTTL", bndlModule.getNbrDeletedBundlesByTtl());
 	}
+	recordScalar("# DeletedBundlesWithFIFO", bndlModule.getNbrDeletedBundlesByFifo());
 
-//	if (withTTLForCtrl){
-//		recordScalar("# DeletedCtrlMsgsWithTTL", nbrDeletedCtrlByTTL);
-//	}
-
-	if (withTTLForAck){
-		recordScalar("# DeletedAcksWithTTL", ackModule.getNbrDeletedAcksByTtl());
+	if (withAck){
+		recordScalar("# DeletedBundlesWithAck", bndlModule.getNbrDeletedBundlesByAck());
+		if (withTTLForAck){
+			recordScalar("# DeletedAcksWithTTL", ackModule.getNbrDeletedAcksByTtl());
+			recordScalar("# NbrMAJOfAcksExpTime", ackModule.getNbrUpdatesForAckExpireTime());
+		}
+		recordScalar("# DeletedAcksWithFIFO", ackModule.getNbrDeletedAcksByFifo());
 	}
+
+	recordScalar("# of Contacts", nbrContacts);
+	recordScalar("# of InterContacts", nbrRecontacts);
 
 	recordScalar("# insertOper Oracle", NBHAddressNbrInsert);
 	recordScalar("# delOper Oracle", NBHAddressNbrDelete);
 	recordScalar("# insertOper NBHTable", NBHTableNbrInsert);
 	recordScalar("# delOper NBHTable", NBHTableNbrDelete);
 
-	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
+	recordScalar("# L3Sent", nbrL3Sent);
+	recordScalar("# L3Received", nbrL3Received);
 
+	recordScalar("# Redundant Bundle at L3", (totalBundlesReceived- bundlesReceived));
+	recordScalar("# Bundles at L3", bundlesReceived);
 	recordScalar("# Bndl Sent to VPA (total)", totalBndlSentToVPA);
 	recordScalar("# Bndl Sent to VPA (first)", bndlSentToVPA);
 }
@@ -1265,3 +1175,149 @@ void DtnNetwLayer::emitSignalForAckLifeTime(unsigned long serial, double startTi
 	string signalStr = lg2Str((long)(serial))+":"+dbl2Str(startTime)+":"+dbl2Str(endTime);
 	emit(t_ackLifeTime,signalStr.c_str());
 }
+
+void DtnNetwLayer::initBndlManagementOptions()
+{
+	int tmpScheduleStrategy = par("scheduleStrategy");
+
+	switch (tmpScheduleStrategy) {
+		case 0:
+			scheduleStrategy = RCAscRLDesc;
+			break;
+		case 1:
+			scheduleStrategy = RCAscRLAsc;
+			break;
+		case 2:
+			scheduleStrategy = RCDescRLDesc;
+			break;
+		case 3:
+			scheduleStrategy = RCDescRLAsc;
+			break;
+		case 4:
+			scheduleStrategy = RLAsc;
+			break;
+		case 5:
+			scheduleStrategy = RLDesc;
+			break;
+		default:
+			opp_error("Unrecognized scheduling strategy");
+			break;
+	}
+
+	bundlesStructureSize = par("storageSize");
+	if (bundlesStructureSize<=0){
+		opp_error("Size of the structure that store bundles can not be negative");
+	}
+
+	withTTL = par("withTTL").boolValue();
+	if (withTTL){
+		ttl = par("ttl").doubleValue();
+	}else{
+		ttl = double(maxSimulationTime);
+	}
+
+	bndlModule = BndlStorageHelper(bundlesStructureSize, withTTL, ttl);
+
+	nbrStoredBundleVector.setName("StoredBundles");
+	nbrStoredBundleVector.record(0);
+}
+
+void DtnNetwLayer::initAckManagementOptions()
+{
+	ackStructureSize = par("ackSize");
+	if (ackStructureSize<=0){
+		opp_error("Size of the structure that store acks can not be negative");
+	}
+
+	withAck = par("withAck");
+
+	withTTLForAck = par("withTTLForAck").boolValue();
+	if (withTTLForAck){
+		ttlForAck = par("ttlForAck").doubleValue();
+	}else{
+		ttlForAck = double(maxSimulationTime);
+	}
+
+	ackModule = AckStorageHelper(ackStructureSize, withAck, withTTLForAck);
+
+	int ttlType = par("typeTTLForAck");
+	typeTTLForAck = (TTLForCtrlType) ttlType;
+
+	nbrStoredAcksVector.setName("StoredAcks");
+	nbrStoredAcksVector.record(0);
+
+	t_ackLifeTime = registerSignal("ackLifeTime");
+}
+
+void DtnNetwLayer::initEquipedVehicle()
+{
+	equipedVehPc = par("equipedVehPc").doubleValue();
+	if ((equipedVehPc < 0) || (equipedVehPc > 1)){
+		opp_error("Percentage of equipped vehicle is wrong, please correct it");
+	}
+	if (equipedVehPc == 1){
+		isEquiped = true;
+	}else {
+		double tmp = uniform(0,1);
+		if (tmp <= equipedVehPc){
+			isEquiped = true;
+		}else {
+			isEquiped = false;
+		}
+	}
+}
+
+void DtnNetwLayer::initContactStats()
+{
+	recordContactStats = par("recordContactStats");
+
+	nbrContacts =0;
+	sumOfContactDur = 0.0;
+	contactDurVector.setName("Evolution of contact duration mean");
+
+	nbrRecontacts = 0;
+	sumOfInterContactDur = 0.0;
+	intercontactDurVector.setName("Evolution of intercontact duration mean");
+}
+
+long DtnNetwLayer::estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long > *SB_Ctrl, std::map<unsigned long ,double> *SA_Ctrl, std::map<unsigned long ,double> *CL_Ctrl, std::set<unsigned long > *RCC_Ctrl)
+{
+	long sizeSB_Octets = 0, sizeSA_Octets = 0, sizeCL_Octets = 0, sizeRCC_Octets = 0;
+
+	long totalSizeInBits = 0;
+
+	if (SB_Ctrl != NULL){
+		sizeSB_Octets = sizeof(unsigned long) * SB_Ctrl->size();
+	}
+
+	if (SA_Ctrl != NULL){
+		if (withTTLForAck){
+			sizeSA_Octets = (sizeof(unsigned long) + sizeof(double)) * SA_Ctrl->size();
+		}else{
+			sizeSA_Octets = sizeof(unsigned long) * SA_Ctrl->size();
+		}
+	}
+
+	if (CL_Ctrl != NULL){
+		sizeCL_Octets = sizeof(unsigned long) * CL_Ctrl->size();
+	}
+
+	if (RCC_Ctrl != NULL){
+		sizeRCC_Octets = sizeof(unsigned long) * RCC_Ctrl->size();
+	}
+
+	if (isHelloCtrl){
+		emitSignalForHelloCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}else{
+		emitSignalForOtherCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}
+
+	totalSizeInBits = (sizeSB_Octets + sizeSA_Octets + sizeCL_Octets + sizeRCC_Octets) * 8;
+
+	return totalSizeInBits;
+}
+
+
+
+
+

@@ -61,7 +61,7 @@ class GeoSprayNetwLayer : public DtnNetwLayer
   	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
 
-  	void sendingHelloMsg();
+  	virtual void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 

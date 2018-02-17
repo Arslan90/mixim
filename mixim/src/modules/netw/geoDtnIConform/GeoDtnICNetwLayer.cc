@@ -25,27 +25,25 @@ void GeoDtnICNetwLayer::initialize(int stage)
     // TODO - Generated method body
 	DtnNetwLayer::initialize(stage);
 	if (stage == 0){
-		int simTimeLimit = atoi(ev.getConfig()->getConfigValue("sim-time-limit"));
-
+		recomputeMyNetwRoute = false;
 		withMETDFwd = par("withMETDFwd").boolValue();
 		withDistFwd = par("withDistFwd").boolValue();
 		if (!(withMETDFwd || withDistFwd)) {
 			opp_error("No valid forwarder, please choose either one of them or both");
 		}
 
-		custodyMode = par("custodyMode");
-		if ((custodyMode != No) && (custodyMode != Yes_WithoutACK) && (custodyMode != Yes_WithACK)){
-			opp_error("No valid CustodyMode");
-		}
-
-		withCBH = par("withCBH").boolValue();
-
-		withExplicitE2EAck = par("withExplicitE2EAck").boolValue();
-
 		multiMetricFwdStrat = par("multiMetricFwdStrat");
 		if ((multiMetricFwdStrat != AtLeastOne) && (multiMetricFwdStrat != Both)){
 			opp_error("No valid Forwarding Strategy");
 		}
+
+		withExplicitE2EAck = par("withExplicitE2EAck").boolValue();
+
+		withAddressedAck = par("withAddressedAck").boolValue();
+
+		withCBH = par("withCBH").boolValue();
+
+		initCustodyManagementOptions();
 
 		currentNbrIsrt = 0;
 		lastNbrIsrt = 0;
@@ -54,47 +52,6 @@ void GeoDtnICNetwLayer::initialize(int stage)
 		Fwd_Yes_METD    = 0;
 		Fwd_Yes_Dist    = 0;
 		Fwd_Yes_Both    = 0;
-
-
-
-		withAddressedAck = par("withAddressedAck").boolValue();
-
-		custodyStructureSize = par("custodyStructureSize");
-		if (custodyStructureSize<=0){
-			opp_error("Size of the structure that store custodies can not be negative");
-		}
-
-		custodyList = par("custodyList");
-		if ((custodyList != No_Diffuse) && (custodyList != Diffuse) && (custodyList != Diffuse_Delete)){
-			opp_error("No valid CustodyList");
-		}
-
-		withTTLForCus = par("withTTLForCus").boolValue();
-		if (withTTLForCus){
-			ttlForCus = par("ttlForCus").doubleValue();
-		}else{
-			ttlForCus = double(simTimeLimit);
-		}
-
-		bool withCustodyList = false;
-		if ( withDistFwd && ((custodyMode == Yes_WithoutACK) || (custodyMode == Yes_WithACK)) ){
-			if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
-				withCustodyList = true;
-			}
-		}
-
-		cusModule = CustStorageHelper(custodyStructureSize, withCustodyList, withTTLForCus);
-
-		int ttlType = par("typeTTLForCus");
-		typeTTLForCus = (TTLForCtrlType) ttlType;
-
-		majorationOfTTLForCus = par("majorationOfTTLForCus").doubleValue();
-
-		t_custodyLifeTime = registerSignal("custodyLifeTime");
-
-		nbrStoredCustodyVector.setName("StoredCustody");
-		nbrStoredCustodyVector.record(0);
-
 	}
 }
 
@@ -142,9 +99,11 @@ void GeoDtnICNetwLayer::handleLowerMsg(cMessage *msg)
 void GeoDtnICNetwLayer::handleSelfMsg(cMessage *msg)
 {
 	if (msg == heartBeatMsg){
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,getCurrentMETD(),getCurrentDist(), simTime(), true, nodeType, getCurrentPos()));
-		sendingHelloMsg();
-		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
+		if (withTTLForCus && withTTLForCus){
+			cusModule.deleteExpiredCustodys();
+		}
+		myNetwRoute = NetwRoute(myNetwAddr,getCurrentMETD(),getCurrentDist(), simTime(), true, nodeType, getCurrentPos());
+		DtnNetwLayer::handleSelfMsg(msg);
 	}
 	if (msg == updateMsg){
 		unsigned long nbrStoredCustody = cusModule.getNbrStoredCustodys();
@@ -177,6 +136,19 @@ void GeoDtnICNetwLayer::finish()
 	recordScalar("# Yes Forwarding based on Dist", Fwd_Yes_Dist);
 	recordScalar("# Yes Forwarding based on Both", Fwd_Yes_Both);
 
+	recordScalar("# DeletedBundlesWithCustody", bndlModule.getNbrDeletedBundlesByCustody());
+
+	if (withCustodyList){
+		if (withAck){
+			recordScalar("# DeletedCustodyWithAck", cusModule.getNbrDeletedCustByAck());
+		}
+		if (withTTLForCus){
+			recordScalar("# DeletedCustodyWithTTL", cusModule.getNbrDeletedCustByTtl());
+			recordScalar("# NbrMAJOfCustodyExpTime", cusModule.getNbrUpdatesForCustExpireTime());
+		}
+		recordScalar("# DeletedCustodyFIFO", cusModule.getNbrDeletedCustByFifo());
+	}
+
 	recordAllScalars();
 }
 
@@ -190,14 +162,6 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	long helloControlBitLength = 0;
 	if (checkBeforeHelloMechanism()){
-		/***************** Cleaning AckSerials from old entries *****/
-	//	if (withTTLForCtrl){
-	//		deleteAckSerials();
-	//	}
-		if (withTTLForAck){
-			ackModule.deleteExpiredAcks();
-		}
-		/***************** Cleaning AckSerials from old entries *****/
 //		std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 //		netwPkt->setE2eAcks(storedAck);
 		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
@@ -211,10 +175,6 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 		std::map<unsigned long,double > custodyBundle;
 		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
 			/***************** Cleaning CustodySerials from old entries *****/
-			if (withTTLForCus){
-//				deletedCustodySerials();
-				cusModule.deleteExpiredCustodys();
-			}
 			/***************** Cleaning CustodySerials from old entries *****/
 			// If we use Dist metric, Custody mode is Yes and Custody list is > 0
 //			custodyBundle = std::map<unsigned long,double >(custodySerial);
@@ -257,24 +217,25 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 //			emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
 //		}
 
-		long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-		long sizeHC_SA_Octets = 0, sizeHC_CL_Octets = 0;
-		if (withTTLForAck){
-			sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-		}else{
-			sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
-		}
+//		long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+//		long sizeHC_SA_Octets = 0, sizeHC_CL_Octets = 0;
+//		if (withTTLForAck){
+//			sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//		}else{
+//			sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
+//		}
+//
+//		if (withTTLForCus){
+//			sizeHC_CL_Octets = (sizeof(unsigned long) + sizeof(double)) * custodyBundle.size();
+//		}else{
+//			sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
+//		}
+//		emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
+//
+//		helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets + sizeHC_CL_Octets) * 8;
 
-		if (withTTLForCus){
-			sizeHC_CL_Octets = (sizeof(unsigned long) + sizeof(double)) * custodyBundle.size();
-		}else{
-			sizeHC_CL_Octets = sizeof(unsigned long) * custodyBundle.size();
-		}
-		emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, sizeHC_CL_Octets, 0);
-
-		helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets + sizeHC_CL_Octets) * 8;
-
-
+		helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, &custodyBundle, NULL);
+		netwPkt->addBitLength(helloControlBitLength);
 
 
 //		nbrEntries = ackSerial.size()+ storedBundle.size();
@@ -292,8 +253,8 @@ void GeoDtnICNetwLayer::sendingHelloMsg()
 //			nbrEntries+= custodyAckSerial.size();
 //		}
 	}
-	int length = helloControlBitLength+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	int length = helloControlBitLength+ netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
@@ -567,17 +528,19 @@ void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::s
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-	long sizeOC_SA_Octets = 0;
-	if (withTTLForAck){
-		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-	}else{
-		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
-	}
-	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-
-	long otherControlBitLength = sizeOC_SA_Octets *8;
-	int length = otherControlBitLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	long sizeOC_SA_Octets = 0;
+//	if (withTTLForAck){
+//		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//	}else{
+//		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+//	}
+//	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
+//
+//	long otherControlBitLength = sizeOC_SA_Octets *8;
+//	int length = otherControlBitLength + netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
@@ -596,11 +559,13 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 	netwPkt->setSrcMETD(myCurrentMETD);
 	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
 	netwPkt->setCustodyTransfert(custodyTransfer);
-	long sizeOC_RCC_Octets = sizeof(unsigned long) * serialOfH2HAck.size();
-	emitSignalForOtherCtrlMsg(0, 0, 0, sizeOC_RCC_Octets);
-	long otherControlBitLength = sizeOC_RCC_Octets *8;
-	int length = otherControlBitLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	long sizeOC_RCC_Octets = sizeof(unsigned long) * serialOfH2HAck.size();
+//	emitSignalForOtherCtrlMsg(0, 0, 0, sizeOC_RCC_Octets);
+//	long otherControlBitLength = sizeOC_RCC_Octets *8;
+//	int length = otherControlBitLength + netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, NULL, NULL, &serialOfH2HAck);
+	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
@@ -1007,3 +972,49 @@ void GeoDtnICNetwLayer::updateNCustodySerial()
 		}
 	}
 }
+
+void GeoDtnICNetwLayer::initCustodyManagementOptions()
+{
+	custodyStructureSize = par("custodyStructureSize");
+	if (custodyStructureSize<=0){
+		opp_error("Size of the structure that store custodies can not be negative");
+	}
+
+	custodyList = par("custodyList");
+	if ((custodyList != No_Diffuse) && (custodyList != Diffuse) && (custodyList != Diffuse_Delete)){
+		opp_error("No valid CustodyList");
+	}
+
+	custodyMode = par("custodyMode");
+	if ((custodyMode != No) && (custodyMode != Yes_WithoutACK) && (custodyMode != Yes_WithACK)){
+		opp_error("No valid CustodyMode");
+	}
+
+	withCustodyList = false;
+	if ( withDistFwd && ((custodyMode == Yes_WithoutACK) || (custodyMode == Yes_WithACK)) ){
+		if ((custodyList == Diffuse) || (custodyList == Diffuse_Delete)){
+			withCustodyList = true;
+		}
+	}
+
+	withTTLForCus = par("withTTLForCus").boolValue();
+	if (withTTLForCus){
+		ttlForCus = par("ttlForCus").doubleValue();
+	}else{
+		ttlForCus = double(maxSimulationTime);
+	}
+
+	cusModule = CustStorageHelper(custodyStructureSize, withCustodyList, withTTLForCus);
+
+	int ttlType = par("typeTTLForCus");
+	typeTTLForCus = (TTLForCtrlType) ttlType;
+
+	majorationOfTTLForCus = par("majorationOfTTLForCus").doubleValue();
+
+	t_custodyLifeTime = registerSignal("custodyLifeTime");
+
+	nbrStoredCustodyVector.setName("StoredCustody");
+	nbrStoredCustodyVector.record(0);
+}
+
+

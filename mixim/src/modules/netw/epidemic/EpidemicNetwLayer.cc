@@ -65,18 +65,6 @@ void EpidemicNetwLayer::handleLowerMsg(cMessage *msg)
     delete msg;
 }
 
-void EpidemicNetwLayer::handleSelfMsg(cMessage *msg)
-{
-	if (msg == heartBeatMsg){
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-		sendingHelloMsg();
-		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
-	}
-	if (msg == updateMsg){
-		DtnNetwLayer::handleSelfMsg(msg);
-	}
-}
-
 void EpidemicNetwLayer::finish()
 {
 	recordAllScalars();
@@ -84,15 +72,6 @@ void EpidemicNetwLayer::finish()
 
 void EpidemicNetwLayer::sendingHelloMsg()
 {
-	/***************** Cleaning AckSerials from old entries *****/
-	//	if (withTTLForCtrl){
-	//		deleteAckSerials();
-	//	}
-		if (withTTLForAck){
-			ackModule.deleteExpiredAcks();
-		}
-	/***************** Cleaning AckSerials from old entries *****/
-
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
 //	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
@@ -105,19 +84,20 @@ void EpidemicNetwLayer::sendingHelloMsg()
 //	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
 //		storedBundle.insert((*it)->getSerial());
 //	}
-	long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-	long sizeHC_SA_Octets = 0;
-	if (withTTLForAck){
-		sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-	}else{
-		sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
-	}
-	emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, 0);
+//	long sizeHC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+//	long sizeHC_SA_Octets = 0;
+//	if (withTTLForAck){
+//		sizeHC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//	}else{
+//		sizeHC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
+//	}
+//	emitSignalForHelloCtrlMsg(sizeHC_SB_Octets, sizeHC_SA_Octets, 0, 0);
+//
+//	long helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets) *8;
 
-	long helloControlBitLength = (sizeHC_SB_Octets + sizeHC_SA_Octets) *8;
-	int length = helloControlBitLength+ netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
-		coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	long helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
+	netwPkt->addBitLength(helloControlBitLength);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
@@ -172,11 +152,11 @@ void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::s
 		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 		prepareNetwPkt(netwPkt, Bundle_Response, nodeAddr);
 		netwPkt->setH2hAcks(serialResponseBndl);
-		long sizeOC_SB_Octets = sizeof(unsigned long) * serialResponseBndl.size();
-		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
-		long otherControlBitLength = sizeOC_SB_Octets *8;
-		int length = otherControlBitLength + netwPkt->getBitLength();
-		netwPkt->setBitLength(length);
+//		long sizeOC_SB_Octets = sizeof(unsigned long) * serialResponseBndl.size();
+//		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
+//		long otherControlBitLength = sizeOC_SB_Octets *8;
+		long otherControlBitLength = estimateInBitsCtrlSize(false, &serialResponseBndl, NULL, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
 		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
 }
@@ -291,17 +271,18 @@ void EpidemicNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<
 		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
 		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-		long sizeOC_SA_Octets = 0;
-		if (withTTLForAck){
-			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-		}else{
-			sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
-		}
-		emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
+//		long sizeOC_SA_Octets = 0;
+//		if (withTTLForAck){
+//			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//		}else{
+//			sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+//		}
+//		emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
+//
+//		long otherControlBitLength = sizeOC_SA_Octets *8;
 
-		long otherControlBitLength = sizeOC_SA_Octets *8;
-		int length = otherControlBitLength + netwPkt->getBitLength();
-		netwPkt->setBitLength(length);
+		long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
 		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
 }

@@ -132,15 +132,6 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
     delete msg;
 }
 
-void ProphetNCV2::handleSelfMsg(cMessage* msg)
-{
-	if (msg == heartBeatMsg){
-		updateNeighborhoodTable(myNetwAddr, NetwRoute(myNetwAddr,maxDbl,maxDbl, simTime(), true, nodeType, getCurrentPos()));
-		sendingHelloMsg();
-		scheduleAt(simTime()+heartBeatMsgPeriod, heartBeatMsg);
-	}
-}
-
 void ProphetNCV2::finish()
 {
 	recordScalar("# failed contacts before RIB", nbrFailedContactBeforeRIB);
@@ -166,15 +157,8 @@ void ProphetNCV2::sendingHelloMsg()
 	ageDeliveryPreds();
 	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
 	netwPkt->setPreds(predToSend);
-	long helloControlBitLength = 0;
-	if (withPredLength){
-		int predsLength = (sizeof(int ) + sizeof(double)) * predToSend.size();
-		long sizeHC_CL_Octets = predsLength;
-		emitSignalForHelloCtrlMsg(0, 0, sizeHC_CL_Octets, 0);
-		helloControlBitLength = (predsLength) *8;
-		int length = helloControlBitLength + netwPkt->getBitLength();
-		netwPkt->setBitLength(length);
-	}
+	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, NULL, &predToSend, NULL);
+	netwPkt->addBitLength(helloControlBitLength);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
@@ -196,15 +180,6 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
 {
-//	/*************************** E2E Acks **********/
-	/***************** Cleaning AckSerials from old entries *****/
-	//	if (withTTLForCtrl){
-	//		deleteAckSerials();
-	//	}
-		if (withTTLForAck){
-			ackModule.deleteExpiredAcks();
-		}
-	/***************** Cleaning AckSerials from old entries *****/
 //	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
 
@@ -267,17 +242,18 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 //		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 		netwPkt->setH2hAcks(storedBundle);
-		long sizeOC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-		long sizeOC_SA_Octets = 0;
-		if (withTTLForAck){
-			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-		}else{
-			sizeOC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
-		}
-		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, sizeOC_SA_Octets, 0, 0);
-		long otherControlBitLength = (sizeOC_SB_Octets + sizeOC_SA_Octets) *8;
-		int length = otherControlBitLength + netwPkt->getBitLength();
-		netwPkt->setBitLength(length);
+//		long sizeOC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
+//		long sizeOC_SA_Octets = 0;
+//		if (withTTLForAck){
+//			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//		}else{
+//			sizeOC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
+//		}
+//		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, sizeOC_SA_Octets, 0, 0);
+//		long otherControlBitLength = (sizeOC_SB_Octets + sizeOC_SA_Octets) *8;
+//		int length = otherControlBitLength + netwPkt->getBitLength();
+		long otherControlBitLength = estimateInBitsCtrlSize(false, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
@@ -327,11 +303,13 @@ void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<u
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-	long sizeOC_SB_Octets = sizeof(unsigned long) * wsmResponseBndl.size();
-	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
-	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
-	int length = otherControlBitLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	long sizeOC_SB_Octets = sizeof(unsigned long) * wsmResponseBndl.size();
+//	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
+//	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
+//	int length = otherControlBitLength + netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+	long otherControlBitLength = estimateInBitsCtrlSize(false, &wsmResponseBndl, NULL, NULL, NULL);
+	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
@@ -442,17 +420,19 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-	long sizeOC_SA_Octets = 0;
-	if (withTTLForAck){
-		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-	}else{
-		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
-	}
-	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-
-	long otherControlBitLength = sizeOC_SA_Octets *8;
-	int length = otherControlBitLength + netwPkt->getBitLength();
-	netwPkt->setBitLength(length);
+//	long sizeOC_SA_Octets = 0;
+//	if (withTTLForAck){
+//		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
+//	}else{
+//		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
+//	}
+//	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
+//
+//	long otherControlBitLength = sizeOC_SA_Octets *8;
+//	int length = otherControlBitLength + netwPkt->getBitLength();
+//	netwPkt->setBitLength(length);
+	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
@@ -796,6 +776,45 @@ void ProphetNCV2::initAllClassifier()
 	if ((withFailBndlAck)&&(withAck)){
 		FailBndlAck = ClassifiedContactStats("BndlAckFail",false,withCDFForFailBndlAck);
 	}
+}
+
+long ProphetNCV2::estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long > *SB_Ctrl, std::map<unsigned long ,double> *SA_Ctrl, std::map<LAddress::L3Type ,double> *CL_Ctrl, std::set<unsigned long > *RCC_Ctrl)
+{
+	long sizeSB_Octets = 0, sizeSA_Octets = 0, sizeCL_Octets = 0, sizeRCC_Octets = 0;
+
+	long totalSizeInBits = 0;
+
+	if (SB_Ctrl != NULL){
+		sizeSB_Octets = sizeof(unsigned long) * SB_Ctrl->size();
+	}
+
+	if (SA_Ctrl != NULL){
+		if (withTTLForAck){
+			sizeSA_Octets = (sizeof(unsigned long) + sizeof(double)) * SA_Ctrl->size();
+		}else{
+			sizeSA_Octets = sizeof(unsigned long) * SA_Ctrl->size();
+		}
+	}
+
+	if (CL_Ctrl != NULL){
+		if (withPredLength){
+			sizeCL_Octets = (sizeof(int ) + sizeof(double)) * CL_Ctrl->size();
+		}
+	}
+
+	if (RCC_Ctrl != NULL){
+		sizeRCC_Octets = sizeof(unsigned long) * RCC_Ctrl->size();
+	}
+
+	if (isHelloCtrl){
+		emitSignalForHelloCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}else{
+		emitSignalForOtherCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}
+
+	totalSizeInBits = (sizeSB_Octets + sizeSA_Octets + sizeCL_Octets + sizeRCC_Octets) * 8;
+
+	return totalSizeInBits;
 }
 
 /*******************************************************************

@@ -76,6 +76,45 @@ public:
 	unsigned int getNbrStoredCustodys();
 
 	bool hasExpired(double expireTime);
+    int getNbrDeletedCustByAck() const
+    {
+        return nbrDeletedCustByAck;
+    }
+
+    int getNbrDeletedCustByFifo() const
+    {
+        return nbrDeletedCustByFIFO;
+    }
+
+    int getNbrDeletedCustByTtl() const
+    {
+        return nbrDeletedCustByTTL;
+    }
+
+    int getNbrUpdatesForCustExpireTime() const
+    {
+        return nbrUpdatesForCustExpireTime;
+    }
+
+    void setNbrDeletedCustByAck(int nbrDeletedCustByAck)
+    {
+        this->nbrDeletedCustByAck = nbrDeletedCustByAck;
+    }
+
+    void setNbrDeletedCustByFifo(int nbrDeletedCustByFifo)
+    {
+        nbrDeletedCustByFIFO = nbrDeletedCustByFifo;
+    }
+
+    void setNbrDeletedCustByTtl(int nbrDeletedCustByTtl)
+    {
+        nbrDeletedCustByTTL = nbrDeletedCustByTtl;
+    }
+
+    void setNbrUpdatesForCustExpireTime(int nbrUpdatesForCustExpireTime)
+    {
+        this->nbrUpdatesForCustExpireTime = nbrUpdatesForCustExpireTime;
+    }
 
 	std::map<unsigned long ,double> getCustodySerialsWithExpTime() const
 	{

@@ -243,9 +243,6 @@ private:
 	/** @brief Handle messages from lower layer */
 	virtual void handleLowerMsg(cMessage* msg);
 
-	/** @brief Handle self messages */
-	virtual void handleSelfMsg(cMessage* msg);
-
 //	/** @brief Handle control messages from lower layer */
 //	virtual void handleUpperControl(cMessage* msg);
 
@@ -269,7 +266,7 @@ private:
 
 	void recordAllClassifier();
 
-  	void sendingHelloMsg();
+  	virtual void sendingHelloMsg();
 
   	void handleHelloMsg(ProphetNCPkt *netwPkt);
 
@@ -288,6 +285,8 @@ private:
 	void sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd);
 
   	void handleBundleAckMsg(ProphetNCPkt *netwPkt);
+
+  	virtual long estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long > *SB_Ctrl, std::map<unsigned long ,double> *SA_Ctrl, std::map<LAddress::L3Type ,double> *CL_Ctrl, std::set<unsigned long > *RCC_Ctrl);
 
 	/*******************************************************************
 	** 							End of metrics methods section

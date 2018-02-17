@@ -71,6 +71,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 //	std::set<unsigned long> custodySerialDeleted;
 //	std::map<unsigned long,double> custodySerialTimeStamp;
 
+	bool withCustodyList;
+
 	enum CustodyModeEnum {
 		No,
 		Yes_WithoutACK,
@@ -146,7 +148,7 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	/** @brief Handle self messages */
 	virtual void handleSelfMsg(cMessage* msg);
 
-  	void sendingHelloMsg();
+  	virtual void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
@@ -207,6 +209,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	void updateNCustodySerial();
 
 	virtual bool store1CustodySerial(unsigned long  serial, double expireTime, bool shouldDelete);
+
+  	virtual void initCustodyManagementOptions();
 };
 
 #endif

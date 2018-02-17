@@ -74,6 +74,9 @@ class DtnNetwLayer : public BaseNetwLayer {
 	std::map<LAddress::L3Type, NetwRoute> neighborhoodTable;
 	std::map<LAddress::L3Type, NetwSession> neighborhoodSession;
 
+	bool recomputeMyNetwRoute;
+	NetwRoute myNetwRoute;
+
 	int NBHTableNbrInsert;
 	int NBHTableNbrDelete;
 	int NBHAddressNbrInsert;
@@ -82,6 +85,8 @@ class DtnNetwLayer : public BaseNetwLayer {
 	/*******************************************************************
 	** 							Main  variables
 	********************************************************************/
+	int maxSimulationTime;
+
 	TraCIMobility* traci;
 
 	enum TTLForCtrlType {
@@ -518,6 +523,18 @@ public:
   	void emitSignalForOtherCtrlMsg(long sizeOC_SB_Octets, long sizeOC_SA_Octets, long sizeOC_CL_Octets, long sizeOC_RCC_Octets);
 
   	void emitSignalForAckLifeTime(unsigned long serial, double startTime, double endTime);
+
+  	virtual void initBndlManagementOptions();
+
+  	virtual void initAckManagementOptions();
+
+  	virtual void initEquipedVehicle();
+
+  	virtual void initContactStats();
+
+  	virtual void sendingHelloMsg();
+
+  	virtual long estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long>* SB_Ctrl, std::map<unsigned long, double >* SA_Ctrl, std::map<unsigned long, double >* CL_Ctrl, std::set<unsigned long>* RCC_Ctrl);
 
   public:
 	/*
