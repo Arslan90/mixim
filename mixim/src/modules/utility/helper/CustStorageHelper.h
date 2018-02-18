@@ -61,6 +61,8 @@ public:
 	CustStorageHelper(unsigned int sizeOfStorage, bool withCustodyList, bool withTTL);
 	virtual ~CustStorageHelper();
 
+	virtual void init();
+
 	bool storeCustody(unsigned long serial, double expireTime = NS_CustStorageHelper::maxDbl);
 
 	bool deleteCustody(unsigned long serial);

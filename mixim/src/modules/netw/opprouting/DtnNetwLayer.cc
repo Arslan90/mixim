@@ -671,7 +671,7 @@ void DtnNetwLayer::finish()
 	classifyAll();
 	recordAllClassifier();
 
-	delete (&bndlModule);
+//	delete (&bndlModule);
 }
 
 void DtnNetwLayer::recordAllClassifier()
@@ -819,40 +819,30 @@ void DtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute 
 	}
 }
 
-void DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle)
+void DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > bundlesToStore)
 {
+	NetwSession currentSession;
 	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
-		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-			newSession.insertInDelivredToBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+		currentSession = NetwSession(srcAddr,0);
 	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
-			newSession.insertInDelivredToBndl(*it);
-		}
-		neighborhoodSession[srcAddr] = newSession;
+		currentSession = it2->second;
 	}
+	currentSession.updateStoredBundle(bundlesToStore);
+	neighborhoodSession[srcAddr] = currentSession;
 }
 
-void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks)
+void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > acksToStore)
 {
+	NetwSession currentSession;
 	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
-		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+		currentSession = NetwSession(srcAddr,0);
 	}else{
-		NetwSession newSession = it2->second;
-		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
-			newSession.insertInDelivredToVpaBndl(*it);
-		}
-		neighborhoodSession[srcAddr] = newSession;
+		currentSession = it2->second;
 	}
+	currentSession.updateStoredAck(acksToStore);
+	neighborhoodSession[srcAddr] = currentSession;
 }
 
 //bool DtnNetwLayer::exist(unsigned long  serial)
@@ -1045,6 +1035,10 @@ void DtnNetwLayer::prepareNetwPkt(DtnNetwPkt* myNetwPkt, short  kind, LAddress::
 }
 
 std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<std::pair<WaveShortMessage*,int> > unsortedWSMPair, LAddress::L3Type destAddr, int destType){
+	// step 0: Deleting expired bundles
+	if (withTTL){
+		bndlModule.deleteExpiredBundles();
+	}
 
 	// step 1 : Reordering Bundles list
 	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
@@ -1056,40 +1050,35 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		// step 2.1 : Check if the current bundle is not registered in neighborhoodSession
-//		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
 		if (ackModule.existAck(wsm->getSerial())) {continue;}
 		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
 		if ((itNode != neighborhoodSession.end())){
 			NetwSession sessionNode = itNode->second;
-			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
-				continue;
-			}else if ((sessionNode.getDelivredToVpaBndl().count(wsm->getSerial()) > 0)){
+			if(sessionNode.existInStoredBundleOrAck(wsm->getSerial())){
 				continue;
 			}
 		}
 
-		// step 2.2 : Check if the current bundle is up to date and has not expired
-		if (withTTL){
-			double duration = (simTime()-wsm->getTimestamp()).dbl();
-			if (duration > ttl){
-				oldWSM.push_back(wsm->getSerial());
-				continue;
-			}
-		}
+//		// step 2.2 : Check if the current bundle is up to date and has not expired
+//		if (withTTL){
+//			double duration = (simTime()-wsm->getTimestamp()).dbl();
+//			if (duration > ttl){
+//				oldWSM.push_back(wsm->getSerial());
+//				continue;
+//			}
+//		}
 
 		// step 2.3 : If bundle is fine, then add it to list of Bundles to sends
 		sentWSM.push_back(wsm);
 	}
 
-	// step 3 : Delete Expired Bundles
-	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
-		bndlModule.deleteBundleUponTTL(*it);
-//		if (erase(*it)){
-//			nbrDeletedBundlesByTTL++;
-//		}
-	}
+//	// step 3 : Delete Expired Bundles
+//	for (std::vector<unsigned long >::iterator it = oldWSM.begin(); it != oldWSM.end(); it++){
+//		bndlModule.deleteBundleUponTTL(*it);
+////		if (erase(*it)){
+////			nbrDeletedBundlesByTTL++;
+////		}
+//	}
 
 	// step 4 : Update stats related Bundles sent to VPA if the encountered node is a VPA
 	if (destType == VPA){
@@ -1150,24 +1139,15 @@ bool DtnNetwLayer::store1AckSerial(unsigned long  serial, double expireTime)
 
 void DtnNetwLayer::storeNAckSerial(std::map<unsigned long ,double> ackSerialsWithTimestamp)
 {
-		for (std::map<unsigned long, double >::iterator it = ackSerialsWithTimestamp.begin(); it != ackSerialsWithTimestamp.end(); it++){
-	    	unsigned long serial = it->first;
-	    	double expireTime = it->second;
-	    	if (store1AckSerial(serial,expireTime)){
-	    		if (withTTLForAck){
-	    			emitSignalForAckLifeTime(serial, -1, expireTime);
-	    		}
-	    	}
+	for (std::map<unsigned long, double >::iterator it = ackSerialsWithTimestamp.begin(); it != ackSerialsWithTimestamp.end(); it++){
+		unsigned long serial = it->first;
+		double expireTime = it->second;
+		if (store1AckSerial(serial,expireTime)){
+			if (withTTLForAck){
+				emitSignalForAckLifeTime(serial, -1, expireTime);
+			}
 		}
-}
-
-std::set<unsigned long > DtnNetwLayer::getKeysFromMap(std::map<unsigned long ,double> myMap)
-{
-	std::set<unsigned long > keys;
-	for (std::map<unsigned long, double >::iterator it = myMap.begin(); it != myMap.end(); it++){
-		keys.insert((*it).first);
 	}
-	return keys;
 }
 
 void DtnNetwLayer::emitSignalForAckLifeTime(unsigned long serial, double startTime, double endTime)

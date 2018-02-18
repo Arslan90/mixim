@@ -58,6 +58,8 @@ public:
 	AckStorageHelper(unsigned int sizeOfStorage, bool withAck, bool withTTL);
 	virtual ~AckStorageHelper();
 
+	virtual void init();
+
 	bool storeAck(unsigned long serial, double expireTime = NS_AckStorageHelper::maxDbl);
 
 	bool deleteAck(unsigned long serial);

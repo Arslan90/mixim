@@ -20,6 +20,19 @@
 
 CustStorageHelper::CustStorageHelper() {
 	// TODO Auto-generated constructor stub
+	init();
+}
+
+CustStorageHelper::CustStorageHelper(unsigned int sizeOfStorage, bool withCustodyList, bool withTTL)
+{
+	init();
+	this->storageSize = sizeOfStorage;
+	this->withCustodyList = withCustodyList;
+	this->withTTL = withTTL;
+}
+
+void CustStorageHelper::init()
+{
 	this->custodySerials = std::list<unsigned long>();
 	this->custodySerialsWithExpireTime = std::map<unsigned long,double>();
 
@@ -27,14 +40,6 @@ CustStorageHelper::CustStorageHelper() {
 	nbrDeletedCustByFIFO = 0;
 	nbrDeletedCustByAck = 0;
 	nbrUpdatesForCustExpireTime = 0;
-}
-
-CustStorageHelper::CustStorageHelper(unsigned int sizeOfStorage, bool withCustodyList, bool withTTL)
-{
-	CustStorageHelper();
-	this->storageSize = sizeOfStorage;
-	this->withCustodyList = withCustodyList;
-	this->withTTL = withTTL;
 }
 
 CustStorageHelper::~CustStorageHelper() {

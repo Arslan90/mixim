@@ -256,9 +256,9 @@ void EpidemicNetwLayerV2::handleBundleResponseMsg(GeoDtnNetwPkt *netwPkt)
 		for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 			WaveShortMessage* wsm = it->first;
 			if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-			std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
+			std::map<LAddress::L3Type, LEG_NetwSession>::iterator itNode = neighborhoodSession.find(netwPkt->getSrcAddr());
 			if ((itNode != neighborhoodSession.end())){
-				NetwSession sessionNode = itNode->second;
+				LEG_NetwSession sessionNode = itNode->second;
 				if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
 					continue;
 				}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){
@@ -369,17 +369,17 @@ void EpidemicNetwLayerV2::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<
 
 void EpidemicNetwLayerV2::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	std::map<LAddress::L3Type, NetwSession>::iterator it2;
+	std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2;
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
+		LEG_NetwSession newSession = LEG_NetwSession(netwPkt->getSrcAddr(),0);
 		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, LEG_NetwSession>(netwPkt->getSrcAddr(), newSession));
 	}else{
-		NetwSession newSession = it2->second;
+		LEG_NetwSession newSession = it2->second;
 		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
@@ -436,9 +436,9 @@ std::vector<WaveShortMessage*> EpidemicNetwLayerV2::bundleForVPA(LAddress::L3Typ
 	for (std::vector<WaveShortMessage*>::iterator it = sortedWSM.begin(); it!= sortedWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(vpaAddr);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2 = neighborhoodSession.find(vpaAddr);
 		if (it2 != neighborhoodSession.end()){
-			NetwSession newSession = it2->second;
+			LEG_NetwSession newSession = it2->second;
 			if (newSession.getStoredBndl().count(wsm->getSerial()) > 0){
 				continue;
 			}else if (newSession.getDelivredToBndl().count(wsm->getSerial()) > 0){
@@ -473,9 +473,9 @@ std::vector<WaveShortMessage*> EpidemicNetwLayerV2::bundleForNode(LAddress::L3Ty
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(node);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator itNode = neighborhoodSession.find(node);
 		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
+			LEG_NetwSession sessionNode = itNode->second;
 			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
 				continue;
 			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){

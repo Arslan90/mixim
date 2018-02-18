@@ -122,7 +122,7 @@ void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 //	    }
 		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
 		if (!receivedAckSerials.empty()){
-			updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+			updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
 			storeNAckSerial(receivedAckSerials);
 		}
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
@@ -299,7 +299,7 @@ void EpidemicNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 //			}
 //		}
 		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 		storeNAckSerial(finalDelivredToBndl);
 	}
 }

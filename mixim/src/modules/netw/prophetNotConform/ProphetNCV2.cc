@@ -269,7 +269,7 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 //    }
 	std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
 	if (!receivedAckSerials.empty()){
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
 		storeNAckSerial(receivedAckSerials);
 	}
 
@@ -447,7 +447,7 @@ void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 //		}
 //	}
 	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+	updateStoredAcksForSession(netwPkt->getSrcAddr(), finalDelivredToBndl);
 	storeNAckSerial(finalDelivredToBndl);
 }
 

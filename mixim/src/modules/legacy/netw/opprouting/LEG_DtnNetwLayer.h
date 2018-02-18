@@ -38,7 +38,7 @@
 #include "BundleMeta.h"
 #include "SimpleContactStats.h"
 #include "ClassifiedContactStats.h"
-#include "NetwSession.h"
+#include "LEG_NetwSession.h"
 #include "NetwRoute.h"
 
 
@@ -68,7 +68,7 @@ class LEG_DtnNetwLayer : public BaseNetwLayer {
 	double netwRoutePending;
 	cMessage* heartBeatMsg;
 	std::map<LAddress::L3Type, NetwRoute> neighborhoodTable;
-	std::map<LAddress::L3Type, NetwSession> neighborhoodSession;
+	std::map<LAddress::L3Type, LEG_NetwSession> neighborhoodSession;
 
 	int NBHTableNbrInsert;
 	int NBHTableNbrDelete;

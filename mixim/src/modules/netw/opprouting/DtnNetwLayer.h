@@ -402,8 +402,6 @@ public:
 
     virtual void storeNAckSerial(std::map<unsigned long, double > ackSerialsWithTimestamp);
 
-    virtual std::set<unsigned long > getKeysFromMap(std::map<unsigned long, double > myMap);
-
   	/*
   	 * Convert a string to L3Address
   	 */
@@ -490,9 +488,9 @@ public:
 
   	virtual void updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRoute neighborEntry);
 
-  	virtual void updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle);
+  	virtual void updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > bundlesToStore);
 
-  	virtual void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks);
+  	virtual void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > acksToStore);
 
   	void sendDown(cMessage* msg);
 

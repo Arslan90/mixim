@@ -83,6 +83,8 @@ public:
 	BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl);
 	virtual ~BndlStorageHelper();
 
+	virtual void init();
+
 	void reInitWithLimitedReplica(int maxNbrReplica);
 
 	bool storeBundle(WaveShortMessage *msg, int rmgReplica = NS_BndlStorageHelper::maxInt);

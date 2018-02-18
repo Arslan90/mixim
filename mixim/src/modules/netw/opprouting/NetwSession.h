@@ -14,24 +14,27 @@ class NetwSession {
 protected:
 	LAddress::L3Type destAddr;
 	unsigned long sessionId;
-	std::set<unsigned long> storedBndl;
-	std::set<unsigned long> delivredToBndl;
-	std::set<unsigned long> delivredToVPABndl;
+	std::set<unsigned long> storedBundles;
+	std::map<unsigned long, double > storedAcks;
+	std::map<unsigned long, double > storedCustody;
 
 public:
 	NetwSession();
 	NetwSession(LAddress::L3Type addr, unsigned long sessionId);
 	virtual ~NetwSession();
-    std::set<unsigned long > getDelivredToBndl() const;
-    std::set<unsigned long > getDelivredToVpaBndl() const;
-    std::set<unsigned long > getStoredBndl() const;
-    void setDelivredToBndl(std::set<unsigned long > delivredToBndl);
-    void setDelivredToVpaBndl(std::set<unsigned long > delivredToVpaBndl);
-    void setStoredBndl(std::set<unsigned long > storedBndl);
 
-    void insertInDelivredToBndl(unsigned long delivredSerial);
-    void insertInDelivredToVpaBndl(unsigned long delivredToVpaSerial);
-    void insertInStoredBndl(unsigned long storedSerial);
+	virtual void init();
+
+//    void insertInDelivredToBndl(unsigned long delivredSerial);
+//    void insertInDelivredToVpaBndl(unsigned long delivredToVpaSerial);
+    void updateStoredBundle(std::set<unsigned long> bundleToStore);
+    void updateStoredAck(std::map<unsigned long, double > ackToStore);
+    void updateStoredCustody(std::map<unsigned long, double > custodyToStore);
+
+    bool existInStoredBundle(unsigned long serial);
+    bool existInStoredAck(unsigned long serial);
+    bool existInStoredCustody(unsigned long serial);
+    bool existInStoredBundleOrAck(unsigned long serial);
 
 };
 

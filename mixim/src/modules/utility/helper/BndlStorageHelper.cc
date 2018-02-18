@@ -9,6 +9,20 @@
 
 BndlStorageHelper::BndlStorageHelper()
 {
+	init();
+}
+
+BndlStorageHelper::BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl)
+{
+	init();
+	this->storageSize = sizeOfBundleStorage;
+
+	this->withTTL = withTTL;
+	this->ttl = ttl;
+}
+
+void BndlStorageHelper::init()
+{
 	this->bundleSerials = std::list<unsigned long>();
 	this->bundlesIndexedBySerial = std::map<unsigned long,WaveShortMessage*>();
 	this->serialsIndexedByRcvAddr = std::multimap<LAddress::L3Type, unsigned long>();
@@ -22,15 +36,6 @@ BndlStorageHelper::BndlStorageHelper()
 	nbrDeletedBundlesByFIFO = 0;
 	nbrDeletedBundlesByCustody = 0;
 	nbrDeletedBundlesByNoRmgReplica = 0;
-}
-
-BndlStorageHelper::BndlStorageHelper(unsigned int sizeOfBundleStorage, bool withTTL, double ttl)
-{
-	BndlStorageHelper();
-	this->storageSize = sizeOfBundleStorage;
-
-	this->withTTL = withTTL;
-	this->ttl = ttl;
 }
 
 BndlStorageHelper::~BndlStorageHelper() {

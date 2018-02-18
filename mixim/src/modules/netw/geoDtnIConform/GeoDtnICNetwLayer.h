@@ -211,6 +211,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	virtual bool store1CustodySerial(unsigned long  serial, double expireTime, bool shouldDelete);
 
   	virtual void initCustodyManagementOptions();
+
+  	virtual void updateStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > custodysToStore);
 };
 
 #endif

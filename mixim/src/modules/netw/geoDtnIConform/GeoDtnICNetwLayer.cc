@@ -278,7 +278,7 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 //	    }
 		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
 		if (!receivedAckSerials.empty()){
-			updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(receivedAckSerials));
+			updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
 			storeNAckSerial(receivedAckSerials);
 		}
 	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
@@ -287,6 +287,7 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 	    }
 	    std::map<unsigned long, double > custodyBundle = netwPkt->getCustodySerialsWithTimestamp();
 	    if (!custodyBundle.empty()){
+			updateStoredCustodysForSession(netwPkt->getSrcAddr(),custodyBundle);
 	    	storeNCustodySerial(custodyBundle);
 	    }
 //		if (withDistFwd && (custodyMode != No) && (!custodyBundle.empty()) && (custodyList != No_Diffuse)){
@@ -582,7 +583,7 @@ void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 //			}
 //		}
 		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
-		updateStoredAcksForSession(netwPkt->getSrcAddr(),getKeysFromMap(finalDelivredToBndl));
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 		storeNAckSerial(finalDelivredToBndl);
 	}
 
@@ -1016,5 +1017,20 @@ void GeoDtnICNetwLayer::initCustodyManagementOptions()
 	nbrStoredCustodyVector.setName("StoredCustody");
 	nbrStoredCustodyVector.record(0);
 }
+
+void GeoDtnICNetwLayer::updateStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long ,double> custodysToStore)
+{
+	NetwSession currentSession;
+	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	if (it2 == neighborhoodSession.end()){
+		currentSession = NetwSession(srcAddr,0);
+	}else{
+		currentSession = it2->second;
+	}
+	currentSession.updateStoredCustody(custodysToStore);
+	neighborhoodSession[srcAddr] = currentSession;
+}
+
+
 
 

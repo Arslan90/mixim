@@ -20,20 +20,25 @@
 
 AckStorageHelper::AckStorageHelper() {
 	// TODO Auto-generated constructor stub
+	init();
+}
+
+AckStorageHelper::AckStorageHelper(unsigned int sizeOfStorage, bool withAck, bool withTTL)
+{
+	init();
+	this->storageSize = sizeOfStorage;
+	this->withAck = withAck;
+	this->withTTL = withTTL;
+}
+
+void AckStorageHelper::init()
+{
 	this->ackSerials = std::list<unsigned long>();
 	this->ackSerialsWithExpireTime = std::map<unsigned long,double>();
 
 	nbrDeletedAcksByTTL = 0;
 	nbrDeletedAcksByFIFO = 0;
 	nbrUpdatesForAckExpireTime = 0;
-}
-
-AckStorageHelper::AckStorageHelper(unsigned int sizeOfStorage, bool withAck, bool withTTL)
-{
-	AckStorageHelper();
-	this->storageSize = sizeOfStorage;
-	this->withAck = withAck;
-	this->withTTL = withTTL;
 }
 
 AckStorageHelper::~AckStorageHelper() {

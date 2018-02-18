@@ -1231,15 +1231,15 @@ void LEG_DtnNetwLayer::updateNeighborhoodTable(LAddress::L3Type neighbor, NetwRo
 
 void LEG_DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedBundle)
 {
-	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
+		LEG_NetwSession newSession = LEG_NetwSession(srcAddr,0);
 		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
 			newSession.insertInDelivredToBndl(*it);
 		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, LEG_NetwSession>(srcAddr, newSession));
 	}else{
-		NetwSession newSession = it2->second;
+		LEG_NetwSession newSession = it2->second;
 		for (std::set<unsigned long >::iterator it = storedBundle.begin(); it != storedBundle.end(); it++){
 			newSession.insertInDelivredToBndl(*it);
 		}
@@ -1249,15 +1249,15 @@ void LEG_DtnNetwLayer::updateStoredBndlForSession(LAddress::L3Type srcAddr, std:
 
 void LEG_DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::set<unsigned long > storedAcks)
 {
-	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+	std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(srcAddr,0);
+		LEG_NetwSession newSession = LEG_NetwSession(srcAddr,0);
 		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(srcAddr, newSession));
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, LEG_NetwSession>(srcAddr, newSession));
 	}else{
-		NetwSession newSession = it2->second;
+		LEG_NetwSession newSession = it2->second;
 		for (std::set<unsigned long >::iterator it = storedAcks.begin(); it != storedAcks.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
@@ -1427,9 +1427,9 @@ std::vector<WaveShortMessage* > LEG_DtnNetwLayer::scheduleFilterBundles(std::vec
 		WaveShortMessage* wsm = it->first;
 		// step 2.1 : Check if the current bundle is not registered in neighborhoodSession
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator itNode = neighborhoodSession.find(destAddr);
 		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionNode = itNode->second;
+			LEG_NetwSession sessionNode = itNode->second;
 			if ((sessionNode.getStoredBndl().count(wsm->getSerial()) > 0)){
 				continue;
 			}else if ((sessionNode.getDelivredToBndl().count(wsm->getSerial()) > 0)){

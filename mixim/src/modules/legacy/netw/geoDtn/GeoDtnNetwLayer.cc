@@ -525,15 +525,15 @@ void GeoDtnNetwLayer::sendingBundleAckMsg(GeoDtnNetwPkt *netwPkt, std::list<unsi
 void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
 	std::set<unsigned long> delivredToBndl = netwPkt->getH2hAcks();
-	std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
+	std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
+		LEG_NetwSession newSession = LEG_NetwSession(netwPkt->getSrcAddr(),0);
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
 			newSession.insertInDelivredToBndl(*it);
 		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, LEG_NetwSession>(netwPkt->getSrcAddr(), newSession));
 	}else{
-		NetwSession newSession = it2->second;
+		LEG_NetwSession newSession = it2->second;
 		for (std::set<unsigned long >::iterator it = delivredToBndl.begin(); it != delivredToBndl.end(); it++){
 			newSession.insertInDelivredToBndl(*it);
 		}
@@ -550,13 +550,13 @@ void GeoDtnNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
 	it2 = neighborhoodSession.find(netwPkt->getSrcAddr());
 	if (it2 == neighborhoodSession.end()){
-		NetwSession newSession = NetwSession(netwPkt->getSrcAddr(),0);
+		LEG_NetwSession newSession = LEG_NetwSession(netwPkt->getSrcAddr(),0);
 		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
-		neighborhoodSession.insert(std::pair<LAddress::L3Type, NetwSession>(netwPkt->getSrcAddr(), newSession));
+		neighborhoodSession.insert(std::pair<LAddress::L3Type, LEG_NetwSession>(netwPkt->getSrcAddr(), newSession));
 	}else{
-		NetwSession newSession = it2->second;
+		LEG_NetwSession newSession = it2->second;
 		for (std::set<unsigned long >::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
 			newSession.insertInDelivredToVpaBndl(*it);
 		}
@@ -619,9 +619,9 @@ std::vector<WaveShortMessage*> GeoDtnNetwLayer::bundleForVPA(LAddress::L3Type vp
 	for (std::vector<WaveShortMessage*>::iterator it = sortedWSM.begin(); it!= sortedWSM.end(); it++){
 		WaveShortMessage* wsm = *it;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(vpaAddr);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator it2 = neighborhoodSession.find(vpaAddr);
 		if (it2 != neighborhoodSession.end()){
-			NetwSession newSession = it2->second;
+			LEG_NetwSession newSession = it2->second;
 			if (newSession.getStoredBndl().count(wsm->getSerial()) > 0){
 				continue;
 			}else if (newSession.getDelivredToBndl().count(wsm->getSerial()) > 0){
@@ -659,9 +659,9 @@ std::vector<WaveShortMessage*> GeoDtnNetwLayer::bundleForNode(LAddress::L3Type n
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
 		if (custodyAckSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itNode = neighborhoodSession.find(node);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator itNode = neighborhoodSession.find(node);
 		if ((itNode != neighborhoodSession.end())){
-			NetwSession sessionFwdDist = itNode->second;
+			LEG_NetwSession sessionFwdDist = itNode->second;
 			if ((sessionFwdDist.getStoredBndl().count(wsm->getSerial()) > 0)){
 				continue;
 			}else if ((sessionFwdDist.getDelivredToBndl().count(wsm->getSerial()) > 0)){
@@ -715,11 +715,11 @@ std::vector<WaveShortMessage*> GeoDtnNetwLayer::bundleForFwds(LAddress::L3Type f
 	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = sortedWSMPair.begin(); it != sortedWSMPair.end(); it++){
 		WaveShortMessage* wsm = it->first;
 		if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
-		std::map<LAddress::L3Type, NetwSession>::iterator itFwdDist = neighborhoodSession.find(fwdDist);
-		std::map<LAddress::L3Type, NetwSession>::iterator itFwdMETD = neighborhoodSession.find(fwdMETD);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator itFwdDist = neighborhoodSession.find(fwdDist);
+		std::map<LAddress::L3Type, LEG_NetwSession>::iterator itFwdMETD = neighborhoodSession.find(fwdMETD);
 		if ((itFwdDist != neighborhoodSession.end()) && (itFwdMETD != neighborhoodSession.end())){
-			NetwSession sessionFwdDist = itFwdDist->second;
-			NetwSession sessionFwdMETD = itFwdMETD->second;
+			LEG_NetwSession sessionFwdDist = itFwdDist->second;
+			LEG_NetwSession sessionFwdMETD = itFwdMETD->second;
 			if ((sessionFwdDist.getStoredBndl().count(wsm->getSerial()) > 0) &&
 					(sessionFwdMETD.getStoredBndl().count(wsm->getSerial()) > 0)){
 				continue;
@@ -755,9 +755,9 @@ std::vector<std::pair<WaveShortMessage*, int> > GeoDtnNetwLayer::bundleFor1Fwd(L
 			if (wsm->getSerial() == it->first){
 				if (ackSerial.count(wsm->getSerial()) > 0) {continue;}
 				if (custodyAckSerial.count(wsm->getSerial()) > 0) {continue;}
-				std::map<LAddress::L3Type, NetwSession>::iterator itFwd = neighborhoodSession.find(fwdNode);
+				std::map<LAddress::L3Type, LEG_NetwSession>::iterator itFwd = neighborhoodSession.find(fwdNode);
 				if (itFwd != neighborhoodSession.end()){
-					NetwSession sessionFwdDist = itFwd->second;
+					LEG_NetwSession sessionFwdDist = itFwd->second;
 					if (sessionFwdDist.getStoredBndl().count(wsm->getSerial()) > 0) {
 						break;
 					}else if (sessionFwdDist.getDelivredToBndl().count(wsm->getSerial()) > 0) {
@@ -808,7 +808,7 @@ bool GeoDtnNetwLayer::existInNetwSession(WaveShortMessage *wsm)
 {
 	bool found = false;
 
-	for (std::map<LAddress::L3Type, NetwSession>::iterator it = neighborhoodSession.begin(); it != neighborhoodSession.end(); it++){
+	for (std::map<LAddress::L3Type, LEG_NetwSession>::iterator it = neighborhoodSession.begin(); it != neighborhoodSession.end(); it++){
 		if (it->second.getDelivredToVpaBndl().count(wsm->getSerial()) > 0){
 			found = true;
 			break;

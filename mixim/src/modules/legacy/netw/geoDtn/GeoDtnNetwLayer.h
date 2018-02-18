@@ -19,7 +19,7 @@
 #include <omnetpp.h>
 #include "LEG_DtnNetwLayer.h"
 #include "GeoDtnNetwPkt_m.h"
-#include "NetwSession.h"
+#include "LEG_NetwSession.h"
 #include "NetwRoute.h"
 #include "GeoTraCIMobility.h"
 #include "set"
@@ -35,7 +35,7 @@ class GeoDtnNetwLayer : public LEG_DtnNetwLayer
   protected:
 	GeoTraCIMobility* geoTraci;
 	std::map<LAddress::L3Type, NetwRoute> neighborhoodTable;
-	std::map<LAddress::L3Type, NetwSession> neighborhoodSession;
+	std::map<LAddress::L3Type, LEG_NetwSession> neighborhoodSession;
 
 	cOutVector bndlInterestVec;
 	cOutVector missedOpprVec;
