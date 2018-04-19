@@ -68,9 +68,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 	bool withExplicitE2EAck;
 
-//	std::set<unsigned long> custodySerialDeleted;
-//	std::map<unsigned long,double> custodySerialTimeStamp;
-
 	bool withCustodyList;
 
 	enum CustodyModeEnum {
@@ -170,13 +167,7 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 ////////////////////////// Others Methods //////////////////////
 
-//  	virtual void storeAckSerial(unsigned long serial);
-
   	virtual bool store1AckSerial(unsigned long  serial, double expireTime);
-
-//  	void storeCustodySerial(unsigned long serial, double timestamp);
-//
-//  	void storeCustodySerials(std::map<unsigned long, double > setOfSerials);
   	
   	std::set<unsigned long> buildCustodySerialWithTimeStamp();
 
@@ -195,12 +186,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	bool makeCustodyDecision(double srcDist);
 
 	void emitSignalForCustodyLifeTime(unsigned long serial, double startTime, double endTime);
-
-//  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
-//
-//  	virtual void deletedCustodySerials();
-
-//	std::pair<unsigned long, double> gen1CustodySerial(unsigned long serial, double currentMETD);
 
 	void gen1CustodySerial(unsigned long serial, double currentMETD);
 

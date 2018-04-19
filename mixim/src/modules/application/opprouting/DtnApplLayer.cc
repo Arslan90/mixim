@@ -190,38 +190,6 @@ void DtnApplLayer::finish()
 	}
 }
 
-
-
-//void DtnApplLayer::handleLowerMsg(cMessage *msg)
-//{
-//}
-//
-//
-//
-//void DtnApplLayer::handleSelfMsg(cMessage *msg)
-//{
-//}
-//
-//
-//
-//WaveShortMessage *DtnApplLayer::prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial)
-//{
-//}
-//
-//
-//
-//void DtnApplLayer::sendWSM(WaveShortMessage *wsm)
-//{
-//}
-//
-//
-//
-//void DtnApplLayer::handlePositionUpdate(cObject *obj)
-//{
-//}
-
-
-
 void DtnApplLayer::onBeacon(WaveShortMessage *wsm)
 {
 }
