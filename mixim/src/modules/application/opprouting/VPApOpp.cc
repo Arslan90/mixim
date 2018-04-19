@@ -202,7 +202,14 @@ void VPApOpp::handleLowerMsg(cMessage* msg) {
 			delays.record(avgDelay);
 			delayStats.collect(time.dbl());
 
-			hopCountVector.record(wsm->getHopCount());
+			totalHops = totalHops + wsm->getHopCount();
+			if (nbrUniqueBundleReceived>0){
+				avgHops = totalHops / nbrUniqueBundleReceived;
+			}else{
+				opp_error("Nbr Unique Bundle Received equal or less then zero(VPApOpp::handleLowerMsg)");
+			}
+
+			hopCountVector.record(avgHops);
 			hopCountStats.collect(wsm->getHopCount());
 
 			emit(receiveSignalId, nbrUniqueBundleReceived);

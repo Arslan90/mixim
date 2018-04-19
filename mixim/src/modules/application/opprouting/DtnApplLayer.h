@@ -158,6 +158,9 @@ protected:
 		cOutVector delays;
 		cDoubleHistogram delayStats;
 
+		double avgHops;
+		double totalHops;
+
 		cLongHistogram hopCountStats;
 		cOutVector hopCountVector;
 

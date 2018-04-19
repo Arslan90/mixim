@@ -133,6 +133,9 @@ void DtnApplLayer::initialize(int stage)
 		avgDelay = 0;
 		totalDelay = 0;
 
+		avgHops = 0;
+		totalHops = 0;
+
     	delayStats.setName("DelayStats for 1st Copy");
 	    hopCountStats.setName("HopCountStats for 1st Copy");
 
