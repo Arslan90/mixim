@@ -189,25 +189,28 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 	std::list<unsigned long > myBundles = bndlModule.getBundleSerials();
 	for (std::list<unsigned long>::iterator it = myBundles.begin(); it != myBundles.end(); it++){
 		unsigned long wsmSerial = (*it);
-		LAddress::L3Type destAddr = bndlModule.getBundleBySerial(wsmSerial)->getRecipientAddress();
-		if (destAddr == myNetwAddr){
-			opp_error("ProphetNCV2::sendingBndlOfferMsg --- storing bundles addressed to current node");
-		}
+		WaveShortMessage* wsm = bndlModule.getBundleBySerial(wsmSerial);
+		if (wsm != NULL){
+			LAddress::L3Type destAddr = wsm->getRecipientAddress();
+			if (destAddr == myNetwAddr){
+				opp_error("ProphetNCV2::sendingBndlOfferMsg --- storing bundles addressed to current node");
+			}
 
-		predsIterator myPred = preds.find(destAddr);
-		predsIterator otherPred = predsOfNode.find(destAddr);
-		bool addToOffer = false;
-		if (otherPred != predsOfNode.end()){
-			if (myPred != preds.end()){
-				if (myPred->second < otherPred->second){
+			predsIterator myPred = preds.find(destAddr);
+			predsIterator otherPred = predsOfNode.find(destAddr);
+			bool addToOffer = false;
+			if (otherPred != predsOfNode.end()){
+				if (myPred != preds.end()){
+					if (myPred->second < otherPred->second){
+						addToOffer = true;
+					}
+				}else{
 					addToOffer = true;
 				}
-			}else{
-				addToOffer = true;
 			}
-		}
-		if (addToOffer){
-			storedBundle.insert(wsmSerial);
+			if (addToOffer){
+				storedBundle.insert(wsmSerial);
+			}
 		}
 	}
 
@@ -373,6 +376,10 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 	if (wsm != NULL){
 		wsm->setHopCount(wsm->getHopCount()+1);
 		totalBundlesReceived++;
+
+		if (withCtrlForSectorReAddr){
+			wsm->setRecipientAddress(newSectorAddr);
+		}
 
 		std::set<unsigned long> finalReceivedWSM;
 

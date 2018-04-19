@@ -119,6 +119,8 @@ public:
 
 	bool hasExpired(double expireTime);
 
+	bool isRecipientAddress(unsigned long serial, LAddress::L3Type possibleRcvAddr);
+
 	std::list<unsigned long > getBundleSerials() const
 	{
 		return std::list<unsigned long >(bundleSerials);

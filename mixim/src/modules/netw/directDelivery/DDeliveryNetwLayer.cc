@@ -140,6 +140,10 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 		wsm->setHopCount(wsm->getHopCount()+1);
 		totalBundlesReceived++;
 
+		if (withCtrlForSectorReAddr){
+			wsm->setRecipientAddress(newSectorAddr);
+		}
+
 		std::set<unsigned long> finalReceivedWSM;
 
 		if (wsm->getRecipientAddress() == myNetwAddr){

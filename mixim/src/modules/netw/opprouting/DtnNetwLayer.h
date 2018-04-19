@@ -155,6 +155,13 @@ class DtnNetwLayer : public BaseNetwLayer {
 
 	DtnNetwSchedulingPolicy scheduleStrategy;
 
+	/**
+	 * @brief Various control for re-addressing of bundles after sector changes
+	 */
+	bool withCtrlForSectorReAddr;
+	LAddress::L3Type oldSectorAddr;
+	LAddress::L3Type newSectorAddr;
+
 	/************************* Related to Bundle Storage ***********/
     bool withTTL;
     double ttl;

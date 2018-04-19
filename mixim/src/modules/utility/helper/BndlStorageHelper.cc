@@ -372,6 +372,19 @@ bool BndlStorageHelper::hasExpired(double expireTime)
 	return hasExpired;
 }
 
+bool BndlStorageHelper::isRecipientAddress(unsigned long  serial, LAddress::L3Type possibleRcvAddr)
+{
+	bool isRecipientAddress = false;
+	WaveShortMessage *bundle = getBundleBySerial(serial);
+	if (bundle != NULL){
+		if (bundle->getRecipientAddress() == possibleRcvAddr){
+			isRecipientAddress = true;
+		}
+	}
+
+	return isRecipientAddress;
+}
+
 void BndlStorageHelper::integrityChecker()
 {
 	// If not all Data Structures are equal in size, there is an error and we must throw an error message

@@ -50,6 +50,10 @@ void DtnNetwLayer::initialize(int stage)
 
 		initEquipedVehicle();
 
+		withCtrlForSectorReAddr = false;
+		oldSectorAddr = LAddress::L3NULL;
+		newSectorAddr = LAddress::L3NULL;
+
 		/*
 		 * Initializing statistics & various metrics
 		 */
@@ -295,9 +299,14 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 void DtnNetwLayer::handleUpperControl(cMessage *msg)
 {
 	ApplOppControlInfo* controlInfo = check_and_cast<ApplOppControlInfo* >(msg->getControlInfo());
-	int newAddr = controlInfo->getNewSectorNetwAddr();
 
-    bndlModule.updateRcvAddrForBundles(newAddr);
+	withCtrlForSectorReAddr = true;
+	oldSectorAddr = controlInfo->getOldSectorNetwAddr();
+	newSectorAddr = controlInfo->getNewSectorNetwAddr();
+
+	if (withCtrlForSectorReAddr){
+		bndlModule.updateRcvAddrForBundles(newSectorAddr);
+	}
 //	bundlesIndexIterator it1;
 //	innerIndexIterator it2;
 //	innerIndexMap innerMap;
@@ -1041,8 +1050,24 @@ std::vector<WaveShortMessage* > DtnNetwLayer::scheduleFilterBundles(std::vector<
 	}
 
 	// step 1 : Reordering Bundles list
-	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = compAsFn_schedulingStrategy(unsortedWSMPair);
+	std::vector<std::pair<WaveShortMessage*, int> >addressedToDestAddrWSMPair;
+	std::vector<std::pair<WaveShortMessage*, int> >notAddressedToDestAddrWSMPair;
+	for (std::vector<std::pair<WaveShortMessage*, int> >::iterator it = unsortedWSMPair.begin(); it != unsortedWSMPair.end(); it++){
+		WaveShortMessage* wsm = it->first;
+		if (wsm->getRecipientAddress() == destAddr){
+			addressedToDestAddrWSMPair.push_back(std::pair<WaveShortMessage*, int>(it->first, it->second));
+		}else{
+			notAddressedToDestAddrWSMPair.push_back(std::pair<WaveShortMessage*, int>(it->first, it->second));
+		}
+	}
 
+	std::vector<std::pair<WaveShortMessage*, int> >addressed_sortedWSMPair = compAsFn_schedulingStrategy(addressedToDestAddrWSMPair);
+	std::vector<std::pair<WaveShortMessage*, int> >sortedWSMPair = addressed_sortedWSMPair;
+
+	std::vector<std::pair<WaveShortMessage*, int> >notAddressed_sortedWSMPair = compAsFn_schedulingStrategy(notAddressedToDestAddrWSMPair);
+	if (destType != VPA){
+		sortedWSMPair.insert(sortedWSMPair.end(), notAddressed_sortedWSMPair.begin(), notAddressed_sortedWSMPair.end());
+	}
 
 	// step 2 : Filtering Bundles to send
 	std::vector<WaveShortMessage* > sentWSM;
