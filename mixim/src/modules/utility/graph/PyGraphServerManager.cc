@@ -282,27 +282,20 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	Enter_Method_Silent();
 	if (strcmp(getSignalName(signalID),"sentBndl") == 0){
 		nbrBundleSent++;
-//		emit(tSentSignalId, nbrBundleSent);
 	}
 	if (strcmp(getSignalName(signalID),"receivedBndl") == 0){
 		nbrUniqueBundleReceived++;
-//		emit(tReceiveSignalId, nbrUniqueBundleReceived);
-//		emit(dR, (double) nbrUniqueBundleReceived / (double) nbrBundleSent);
 		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
 			double uniqDataReceived = (double) (nbrUniqueBundleReceived * DtnApplLayer::getDataLengthBitsAsStatic()) / 1024;
 			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
-//			emit(rRecvSent, ratio);
 		}
 	}
 	if (strcmp(getSignalName(signalID),"receivedL3Bndl") == 0){
 		nbrL3BundleReceived++;
-//		emit(tReceiveL3SignalId, nbrL3BundleReceived);
-//		emit(oT, (double) nbrL3BundleReceived / (double) nbrBundleSent);
 	}
 
 	if (strcmp(getSignalName(signalID),"sentL3Bndl") == 0){
 		nbrL3BundleSent++;
-//		emit(tSentL3SignalId, nbrL3BundleSent);
 	}
 }
 
@@ -326,34 +319,20 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 
 		if (helloCtrlSize != 0){
 			helloCtrlSentSizeKbits += ((double)helloCtrlSize / 1024);
-//			emit(sizeHelloCtrl, helloCtrlSentSizeKbits);
 		}
 
 		if (otherCtrlSize != 0){
 			otherCtrlSentSizeKbits += ((double)otherCtrlSize / 1024);
-//			emit(sizeOtherCtrl, otherCtrlSentSizeKbits);
 		}
 
 		int dataLength = DtnApplLayer::getDataLengthBitsAsStatic();
 		if (nbrEncapData != 0){
 			dataSentSizeKbits += ((double)nbrEncapData * dataLength / 1024);
-//			emit(sizeData, dataSentSizeKbits);
-		}
-
-		if ((helloCtrlSize != 0) || (otherCtrlSize != 0)){
-//			emit(sizeCtrl, helloCtrlSentSizeKbits+otherCtrlSentSizeKbits);
-		}
-
-		if ((helloCtrlSize != 0) || (otherCtrlSize != 0) || (nbrEncapData != 0)){
-			if (dataSentSizeKbits != 0){
-//				emit(rCtrlData, (double) (helloCtrlSentSizeKbits+otherCtrlSentSizeKbits)/ (double) dataSentSizeKbits);
-			}
 		}
 
 		if ((dataSentSizeKbits != 0) || (sizeCtrl != 0)){
 			double uniqDataReceived = (double) (nbrUniqueBundleReceived * dataLength) / 1024;
 			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
-//			emit(rRecvSent, ratio);
 		}
 
 		free((void*) signalStr);
@@ -368,19 +347,15 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			switch (index) {
 				case 0:	{
 						sizeHC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeHC_SB, sizeHC_SB_Kbits);
 				}break;
 				case 1:	{
 						sizeHC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeHC_SA, sizeHC_SA_Kbits);
 				}break;
 				case 2:	{
 						sizeHC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeHC_CL, sizeHC_CL_Kbits);
 				}break;
 				case 3:	{
 						sizeHC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeHC_RCC, sizeHC_RCC_Kbits);
 				}break;
 				default:{
 					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Hello Ctrl Msg Lengths");
@@ -400,19 +375,15 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			switch (index) {
 				case 0:	{
 						sizeOC_SB_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeOC_SB, sizeOC_SB_Kbits);
 				}break;
 				case 1:	{
 						sizeOC_SA_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeOC_SA, sizeOC_SA_Kbits);
 				}break;
 				case 2:	{
 						sizeOC_CL_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeOC_CL, sizeOC_CL_Kbits);
 				}break;
 				case 3:	{
 						sizeOC_RCC_Kbits += ((double)sizeAsLong[index] / 1024);
-//						emit(t_sizeOC_RCC, sizeOC_RCC_Kbits);
 				}break;
 				default:{
 					opp_error("PyGraphServerManager::receiveSignal - No more than 4 entries for Other Ctrl Msg Lengths");
@@ -548,15 +519,6 @@ void PyGraphServerManager::initializeConnection()
 
 		int returnCode = 0;
 
-//		returnCode = bind(connectionFd,
-//		  (struct sockaddr *) &localAddr, sizeof(localAddr));
-//		if (returnCode == -1){
-//			std::stringstream ss;
-//			ss << errno;
-//			std::string errorMsg = "(BIND) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
-//			opp_error(errorMsg.c_str());
-//		}
-
 		// Connect to Server
 		returnCode = connect(connectionFd,(struct sockaddr *)&servAddr, sizeof(servAddr));
 		if (returnCode == -1){
@@ -565,21 +527,6 @@ void PyGraphServerManager::initializeConnection()
 			std::string errorMsg = "(CONNECT) Socket error returned: "+std::string(strerror(errno))+ " Code: "+ss.str();
 			opp_error(errorMsg.c_str());
 		}
-
-
-//		std::string command = "pkill -f ProdServer.py";
-//		system(command.c_str());
-
-//		char cwd[1024];
-//		if (getcwd(cwd, sizeof(cwd)) != NULL){
-//			std::cout <<"Current working dir:"<< cwd << std::endl;
-//		} else {
-//			opp_error("getCWD() command failed");
-//		}
-//
-//		command = "python "+std::string(cwd)+"/ProdServer.py";
-//		popen(command.c_str(), "r");
-//		sleep(waitingTime);
 	}
 }
 

@@ -38,8 +38,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	int Fwd_Yes_Dist;
 	int Fwd_Yes_Both;
 
-//	std::map<unsigned long, double> custodySerial;
-
 	/**
 	 * Current Number of Insert operation in ACKSerial & Bundle storage
 	 * (in order to allow us to check if something new have been added)
@@ -67,9 +65,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	bool withCBH;
 
 	bool withExplicitE2EAck;
-
-//	std::set<unsigned long> custodySerialDeleted;
-//	std::map<unsigned long,double> custodySerialTimeStamp;
 
 	bool withCustodyList;
 
@@ -152,10 +147,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
-//  	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt, std::pair<LAddress::L3Type, double> FwdDist, std::pair<LAddress::L3Type, double> FwdMETD);
-
-//  	void sendingBundleMsg();
-
   	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt);
 
   	void sendingBundleMsgToVPA(LAddress::L3Type vpaAddr);
@@ -170,13 +161,7 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 
 ////////////////////////// Others Methods //////////////////////
 
-//  	virtual void storeAckSerial(unsigned long serial);
-
   	virtual bool store1AckSerial(unsigned long  serial, double expireTime);
-
-//  	void storeCustodySerial(unsigned long serial, double timestamp);
-//
-//  	void storeCustodySerials(std::map<unsigned long, double > setOfSerials);
   	
   	std::set<unsigned long> buildCustodySerialWithTimeStamp();
 
@@ -195,12 +180,6 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
 	bool makeCustodyDecision(double srcDist);
 
 	void emitSignalForCustodyLifeTime(unsigned long serial, double startTime, double endTime);
-
-//  	virtual void storeAckSerials(std::set<unsigned long > setOfSerials);
-//
-//  	virtual void deletedCustodySerials();
-
-//	std::pair<unsigned long, double> gen1CustodySerial(unsigned long serial, double currentMETD);
 
 	void gen1CustodySerial(unsigned long serial, double currentMETD);
 

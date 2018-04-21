@@ -143,11 +143,6 @@ void ProphetNCV2::finish()
 	recordAllScalars();
 	classifyAll();
 	recordAllClassifier();
-
-//	while (!bundles.empty()){
-//		delete bundles.front();
-//		bundles.pop_front();
-//	}
 }
 
 void ProphetNCV2::sendingHelloMsg()
@@ -214,47 +209,12 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		}
 	}
 
-//	for (std::list<WaveShortMessage*>::iterator it = bundles.begin(); it != bundles.end(); it++){
-//		LAddress::L3Type destAddr = (*it)->getRecipientAddress();
-//		if (destAddr == myNetwAddr){
-//			opp_error("storing bundles addressed to current node");
-//		}
-//		predsIterator myPred = preds.find((*it)->getRecipientAddress());
-//		predsIterator otherPred = predsOfNode.find((*it)->getRecipientAddress());
-//		bool addToOffer = false;
-//		if (otherPred != predsOfNode.end()){
-//			if (myPred != preds.end()){
-//				if (myPred->second < otherPred->second){
-//					addToOffer = true;
-//				}
-//			}else{
-//				addToOffer = true;
-//			}
-//		}
-//		if (addToOffer){
-//			unsigned long wsmSerial = (*it)->getSerial();
-//			storedBundle.insert(wsmSerial);
-//		}
-//	}
-
-//	if (!(storedBundle.empty() & storedAck.empty())){
 	if (!(storedBundle.empty() & ackSerialsWithExpTime.empty())){
 		// if at least one of the two sets is not empty
 		ProphetNCPkt *netwPkt = new ProphetNCPkt();
 		prepareNetwPkt(netwPkt, Bundle_Offer, nodeAddr);
-//		netwPkt->setE2eAcks(storedAck);
 		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 		netwPkt->setH2hAcks(storedBundle);
-//		long sizeOC_SB_Octets = sizeof(unsigned long) * storedBundle.size();
-//		long sizeOC_SA_Octets = 0;
-//		if (withTTLForAck){
-//			sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-//		}else{
-//			sizeOC_SA_Octets = sizeof(unsigned long) * ackSerialsWithExpTime.size();
-//		}
-//		emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, sizeOC_SA_Octets, 0, 0);
-//		long otherControlBitLength = (sizeOC_SB_Octets + sizeOC_SA_Octets) *8;
-//		int length = otherControlBitLength + netwPkt->getBitLength();
 		long otherControlBitLength = estimateInBitsCtrlSize(false, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
 		netwPkt->addBitLength(otherControlBitLength);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
@@ -265,11 +225,6 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 {
 	/*************************** E2E Acks **********/
-//    std::set<unsigned long> receivedE2eAcks = netwPkt->getE2eAcks();
-//    if (!receivedE2eAcks.empty()){
-//    	updateStoredAcksForSession(netwPkt->getSrcAddr(), receivedE2eAcks);
-//    	storeAckSerials(receivedE2eAcks);
-//    }
 	std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
 	if (!receivedAckSerials.empty()){
 		updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
@@ -287,8 +242,6 @@ void ProphetNCV2::handleBundleOfferMsg(ProphetNCPkt *netwPkt)
 
 	for (std::set<unsigned long>::iterator it = serialStoredBndl.begin(); it != serialStoredBndl.end(); it++){
 		unsigned long serial = *it;
-//		if ((ackSerial.count(serial) >= 1) || (exist(serial))){
-//		if ((ackSerial.count(serial) == 1) || (bndlModule.existBundle(serial))){
 		if ((ackModule.existAck(serial)) || (bndlModule.existBundle(serial))){
 			continue;
 		}else{
@@ -306,11 +259,6 @@ void ProphetNCV2::sendingBundleResponseMsg(LAddress::L3Type destAddr, std::set<u
 	ProphetNCPkt *netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Response, destAddr);
 	netwPkt->setH2hAcks(wsmResponseBndl);
-//	long sizeOC_SB_Octets = sizeof(unsigned long) * wsmResponseBndl.size();
-//	emitSignalForOtherCtrlMsg(sizeOC_SB_Octets, 0, 0, 0);
-//	long otherControlBitLength = sizeof(unsigned long) * wsmResponseBndl.size() *8;
-//	int length = otherControlBitLength + netwPkt->getBitLength();
-//	netwPkt->setBitLength(length);
 	long otherControlBitLength = estimateInBitsCtrlSize(false, &wsmResponseBndl, NULL, NULL, NULL);
 	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -322,22 +270,6 @@ void ProphetNCV2::handleBundleResponseMsg(ProphetNCPkt *netwPkt)
 
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-//	for (std::set<unsigned long>::iterator it = serialResponseBndl.begin(); it != serialResponseBndl.end(); it++){
-//		unsigned long serial = *it;
-//		if (exist(serial)){
-//			std::map<unsigned long, int>::iterator it2 = bundlesReplicaIndex.find(serial);
-//			if (it2 == bundlesReplicaIndex.end()){
-//				opp_error("Bundle Found but not in rmg replica index");
-//			}else{
-//				for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-//					if ((*it3)->getSerial() == serial){
-//						unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it2->second));
-//						break;
-//					}
-//				}
-//			}
-//		}
-//	}
 	unsortedWSMPair = bndlModule.getStoredBundlesWithReplica(serialResponseBndl);
 
 	// step 2 : Reordering bundle list
@@ -361,7 +293,6 @@ void ProphetNCV2::sendingBundleMsg(LAddress::L3Type destAddr, int destType, std:
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		if (destType == Veh){
-//			bundlesReplicaIndex[serial]++;
 			bndlModule.updateSentReplica(serial);
 		}
 	}
@@ -389,24 +320,13 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
-//			storeAckSerial(wsm->getSerial());
-//			if (withTTLForCtrl){
-//				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
-//			}
 			gen1AckSerial(wsm);
 		}else {
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-//			if ((!exist(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
-//			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackSerial.count(wsm->getSerial()) == 0)){
 			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
 				bndlModule.storeBundle(wsm);
-//				storeBundle(wsm);
-//				std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.find(wsm->getSerial());
-//				if (it == bundlesReplicaIndex.end()){
-//					bundlesReplicaIndex.insert(std::pair<unsigned long, int>(wsm->getSerial(), 0));
-//				}
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
 			}
@@ -421,23 +341,10 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 {
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-//	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-//	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
 
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-//	long sizeOC_SA_Octets = 0;
-//	if (withTTLForAck){
-//		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-//	}else{
-//		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
-//	}
-//	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-//
-//	long otherControlBitLength = sizeOC_SA_Octets *8;
-//	int length = otherControlBitLength + netwPkt->getBitLength();
-//	netwPkt->setBitLength(length);
 	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
 	netwPkt->addBitLength(otherControlBitLength);
 	sendDown(netwPkt, 0, otherControlBitLength, 0);
@@ -445,14 +352,6 @@ void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsign
 
 void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 {
-//	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-//	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-//	storeAckSerials(finalDelivredToBndl);
-//	if (withTTLForCtrl){
-//		for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-//			emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-//		}
-//	}
 	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(), finalDelivredToBndl);
 	storeNAckSerial(finalDelivredToBndl);

@@ -95,17 +95,6 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 {
 	// step 1 : Build bundle list to send before reordering
 	std::vector<std::pair<WaveShortMessage*, int> >unsortedWSMPair;
-//	for (std::map<unsigned long, int>::iterator it = bundlesReplicaIndex.begin(); it != bundlesReplicaIndex.end(); it++){
-//		unsigned long serial = it->first;
-//		if (exist(serial)){
-//			for (std::list<WaveShortMessage*>::iterator it3 = bundles.begin(); it3 != bundles.end(); it3++){
-//				if ((*it3)->getSerial() == serial){
-//					unsortedWSMPair.push_back(std::pair<WaveShortMessage*, int>((*it3), it->second));
-//					break;
-//				}
-//			}
-//		}
-//	}
 	unsortedWSMPair = bndlModule.getStoredBundlesWithReplica();
 
 	// step 2 : Reordering bundle list
@@ -124,9 +113,6 @@ void DDeliveryNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, int destTyp
 		sendDown(bundleMsg, 0, 0, 1);
 		emit(sentL3SignalId,1);
 		bndlModule.updateSentReplica(serial);
-//		if (destType == Veh){
-//			bundlesReplicaIndex[serial]++;
-//		}
 	}
 }
 
@@ -152,10 +138,6 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			finalReceivedWSM.insert(wsm->getSerial());
 			bundlesReceived++;
 			emit(receiveL3SignalId,bundlesReceived);
-			//			storeAckSerial(wsm->getSerial());
-			//			if (withTTLForCtrl){
-			//				emitSignalForAckLifeTime(wsm->getSerial(), simTime().dbl(), ttlForCtrl+simTime().dbl());
-			//			}
 			gen1AckSerial(wsm);
 		}else {
 			/*
@@ -173,22 +155,9 @@ void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
-//	std::set<unsigned long> serialOfE2EAck = std::set<unsigned long>(wsmFinalDeliverd);
-//	netwPkt->setE2eAcks(serialOfE2EAck);
-//	long sizeOC_SA_Octets = sizeof(unsigned long) * serialOfE2EAck.size();
 
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-
-//	long sizeOC_SA_Octets = 0;
-//	if (withTTLForAck){
-//		sizeOC_SA_Octets = (sizeof(unsigned long) + sizeof(double)) * ackSerialsWithExpTime.size();
-//	}else{
-//		sizeOC_SA_Octets = (sizeof(unsigned long)) * ackSerialsWithExpTime.size();
-//	}
-//	emitSignalForOtherCtrlMsg(0, sizeOC_SA_Octets, 0, 0);
-//
-//	long otherControlBitLength = sizeOC_SA_Octets * 8;
 
 	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
 	netwPkt->addBitLength(otherControlBitLength);
@@ -197,15 +166,6 @@ void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set
 
 void DDeliveryNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-//	std::set<unsigned long> finalDelivredToBndl = netwPkt->getE2eAcks();
-//	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-	//	storeAckSerials(finalDelivredToBndl);
-	//	if (withTTLForCtrl){
-	//		for (std::set<unsigned long>::iterator it = finalDelivredToBndl.begin(); it != finalDelivredToBndl.end(); it++){
-	//			emitSignalForAckLifeTime((*it), -1, ttlForCtrl+simTime().dbl());
-	//		}
-	//	}
-
 	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
 	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 	storeNAckSerial(finalDelivredToBndl);

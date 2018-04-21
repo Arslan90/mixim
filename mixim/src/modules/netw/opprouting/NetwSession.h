@@ -25,8 +25,6 @@ public:
 
 	virtual void init();
 
-//    void insertInDelivredToBndl(unsigned long delivredSerial);
-//    void insertInDelivredToVpaBndl(unsigned long delivredToVpaSerial);
     void updateStoredBundle(std::set<unsigned long> bundleToStore);
     void updateStoredAck(std::map<unsigned long, double > ackToStore);
     void updateStoredCustody(std::map<unsigned long, double > custodyToStore);
