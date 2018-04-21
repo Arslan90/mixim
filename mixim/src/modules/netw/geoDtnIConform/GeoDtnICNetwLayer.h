@@ -146,6 +146,10 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	virtual void sendingHelloMsg();
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
+  	
+  	void sendingInitMsg( LAddress::L3Type nodeAddr);
+
+  	void handleInitMsg(GeoDtnNetwPkt *netwPkt);
 
   	void sendingBundleMsg(GeoDtnNetwPkt *netwPkt);
 

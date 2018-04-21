@@ -100,6 +100,11 @@ void ProphetNCV2::handleLowerMsg(cMessage* msg)
 			case HELLO:
 				handleHelloMsg(netwPkt);
 				break;
+			case INIT:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleInitMsg(netwPkt);
+				}
+				break;
 			case Bundle_Offer:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleOfferMsg(netwPkt);
@@ -149,13 +154,8 @@ void ProphetNCV2::sendingHelloMsg()
 {
 	ProphetNCPkt* netwPkt = new ProphetNCPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
-	ageDeliveryPreds();
-	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
-	netwPkt->setPreds(predToSend);
-	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, NULL, &predToSend, NULL);
-	netwPkt->addBitLength(helloControlBitLength);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt,helloControlBitLength, 0, 0);
+	sendDown(netwPkt,0, 0, 0);
 }
 
 void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
@@ -167,10 +167,29 @@ void ProphetNCV2::handleHelloMsg(ProphetNCPkt *netwPkt)
 		/*************************** Handling Hello Msg **********/
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), maxDbl, maxDbl, simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-	    update(netwPkt);
-	    /*************************** Sending BundleOffer Msg **********/
-	    sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
+		/*************************** Sending Init Msg **********/
+	    sendingInitMsg(netwPkt->getSrcAddr());
 	}
+}
+
+void ProphetNCV2::sendingInitMsg(LAddress::L3Type nodeAddr)
+{
+	ProphetNCPkt* netwPkt = new ProphetNCPkt();
+	prepareNetwPkt(netwPkt, INIT, nodeAddr);
+	ageDeliveryPreds();
+	std::map<LAddress::L3Type, double> predToSend = std::map<LAddress::L3Type, double>(preds);
+	netwPkt->setPreds(predToSend);
+	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, NULL, &predToSend, NULL);
+	netwPkt->addBitLength(helloControlBitLength);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,helloControlBitLength, 0, 0);
+}
+
+void ProphetNCV2::handleInitMsg(ProphetNCPkt *netwPkt)
+{
+	update(netwPkt);
+	/*************************** Sending BundleOffer Msg **********/
+	sendingBndlOfferMsg(netwPkt->getSrcAddr(),netwPkt->getPreds());
 }
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)

@@ -45,6 +45,11 @@ void GeoSprayNetwLayer::handleLowerMsg(cMessage *msg)
 			case HELLO:
 				handleHelloMsg(netwPkt);
 				break;
+			case INIT:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleInitMsg(netwPkt);
+				}
+				break;
 			case Bundle_Offer:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleOfferMsg(netwPkt);
@@ -107,14 +112,8 @@ void GeoSprayNetwLayer::sendingHelloMsg()
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
-
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
-	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-
-	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, &ackSerialsWithExpTime, NULL, NULL);
-	netwPkt->addBitLength(helloControlBitLength);
 	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt,helloControlBitLength, 0, 0);
+	sendDown(netwPkt,0, 0, 0);
 }
 
 void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
@@ -126,19 +125,38 @@ void GeoSprayNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 		/*************************** Handling Hello Msg **********/
 	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
 	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+		/*************************** Sending Init Msg **********/
+	    sendingInitMsg(netwPkt->getSrcAddr());
+	}
+}
 
-		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
-		if (!receivedAckSerials.empty()){
-			updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
-			storeNAckSerial(receivedAckSerials);
-		}
-	    /*************************** Sending Bundle Msg **********/
-		if (nodeType == Veh){
-			if (netwPkt->getSrcType() == VPA){
-				sendingBundleMsgToVPA(netwPkt->getSrcAddr());
-			}else if (netwPkt->getSrcType() == Veh){
-				sendingBundleOfferMsg(netwPkt->getSrcAddr());
-			}
+void GeoSprayNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, INIT, nodeAddr);
+	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
+	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+
+	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, &ackSerialsWithExpTime, NULL, NULL);
+	netwPkt->addBitLength(helloControlBitLength);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,helloControlBitLength, 0, 0);
+}
+
+void GeoSprayNetwLayer::handleInitMsg(GeoDtnNetwPkt *netwPkt)
+{
+    /*************************** Handle Init Msg **********/
+	std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
+	if (!receivedAckSerials.empty()){
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
+		storeNAckSerial(receivedAckSerials);
+	}
+    /*************************** Sending Bundle Msg **********/
+	if (nodeType == Veh){
+		if (netwPkt->getSrcType() == VPA){
+			sendingBundleMsgToVPA(netwPkt->getSrcAddr());
+		}else if (netwPkt->getSrcType() == Veh){
+			sendingBundleOfferMsg(netwPkt->getSrcAddr());
 		}
 	}
 }

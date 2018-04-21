@@ -133,6 +133,7 @@ class DtnNetwLayer : public BaseNetwLayer {
 	enum DtnNetwMsgKinds {
 		HELLO = 0x00,
 		ERROR = 0x01,
+		INIT  = 0x10,
 		RIBD  = 0xA0,
 		RIB   = 0xA1,
 		Bundle_Offer = 0xA4,

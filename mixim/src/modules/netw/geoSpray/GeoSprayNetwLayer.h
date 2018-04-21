@@ -63,6 +63,10 @@ class GeoSprayNetwLayer : public DtnNetwLayer
 
   	void handleHelloMsg(GeoDtnNetwPkt *netwPkt);
 
+  	void sendingInitMsg( LAddress::L3Type nodeAddr);
+
+  	void handleInitMsg(GeoDtnNetwPkt *netwPkt);
+
   	void sendingBundleOfferMsg(LAddress::L3Type destAddr);
 
   	void handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt);

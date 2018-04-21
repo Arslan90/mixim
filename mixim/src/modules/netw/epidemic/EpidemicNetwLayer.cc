@@ -38,6 +38,11 @@ void EpidemicNetwLayer::handleLowerMsg(cMessage *msg)
 			case HELLO:
 				handleHelloMsg(netwPkt);
 				break;
+			case INIT:
+				if (netwPkt->getDestAddr() == myNetwAddr){
+					handleInitMsg(netwPkt);
+				}
+				break;
 			case Bundle_Response:
 				if (netwPkt->getDestAddr() == myNetwAddr){
 					handleBundleResponseMsg(netwPkt);
@@ -74,6 +79,28 @@ void EpidemicNetwLayer::sendingHelloMsg()
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, HELLO, LAddress::L3BROADCAST);
+	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+	sendDown(netwPkt,0, 0, 0);
+}
+
+void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+{
+	// If not the same sector ignore message
+	if (netwPkt->getVpaSectorId() != sectorId){
+		return;
+	}else{
+		/*************************** Handling Hello Msg **********/
+	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
+	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
+		/*************************** Sending Bundle Init Msg **********/
+	    sendingInitMsg(netwPkt->getSrcAddr());
+	}
+}
+
+void EpidemicNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
+{
+	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+	prepareNetwPkt(netwPkt, INIT, nodeAddr);
 
 	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
@@ -86,28 +113,20 @@ void EpidemicNetwLayer::sendingHelloMsg()
 	sendDown(netwPkt,helloControlBitLength, 0, 0);
 }
 
-void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
+void EpidemicNetwLayer::handleInitMsg(GeoDtnNetwPkt *netwPkt)
 {
-	// If not the same sector ignore message
-	if (netwPkt->getVpaSectorId() != sectorId){
-		return;
-	}else{
-		/*************************** Handling Hello Msg **********/
-	    NetwRoute neighborEntry = NetwRoute(netwPkt->getSrcAddr(), netwPkt->getSrcMETD(), netwPkt->getSrcDist_NP_VPA(), simTime() , true, netwPkt->getSrcType(), netwPkt->getCurrentPos());
-	    updateNeighborhoodTable(netwPkt->getSrcAddr(), neighborEntry);
-
-		std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
-		if (!receivedAckSerials.empty()){
-			updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
-			storeNAckSerial(receivedAckSerials);
-		}
-	    std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
-	    if (!storedBundle.empty()){
-	    	updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
-	    }
-		/*************************** Sending Bundle Msg **********/
-		sendingBndlResponseMsg(netwPkt->getSrcAddr(), storedBundle);
+	/*************************** Handling Init Msg **********/
+	std::map<unsigned long, double > receivedAckSerials = netwPkt->getAckSerialsWithTimestamp();
+	if (!receivedAckSerials.empty()){
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),receivedAckSerials);
+		storeNAckSerial(receivedAckSerials);
 	}
+	std::set<unsigned long> storedBundle = netwPkt->getH2hAcks();
+	if (!storedBundle.empty()){
+		updateStoredBndlForSession(netwPkt->getSrcAddr(), storedBundle);
+	}
+	/*************************** Sending Bundle Msg **********/
+	sendingBndlResponseMsg(netwPkt->getSrcAddr(), storedBundle);
 }
 
 void EpidemicNetwLayer::sendingBndlResponseMsg(LAddress::L3Type nodeAddr, std::set<unsigned long > wsmResponseBndl)
