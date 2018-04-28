@@ -134,7 +134,7 @@ void GeoSprayNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
 {
 	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
 	prepareNetwPkt(netwPkt, INIT, nodeAddr);
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
+	std::map<unsigned long, double > ackSerialsWithExpTime = getUnStoredAcksForSession(nodeAddr, ackModule.getAckSerialsWithExpTime());
 	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
 	long helloControlBitLength = estimateInBitsCtrlSize(true, NULL, &ackSerialsWithExpTime, NULL, NULL);
@@ -163,15 +163,16 @@ void GeoSprayNetwLayer::handleInitMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoSprayNetwLayer::sendingBundleOfferMsg(LAddress::L3Type destAddr)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, Bundle_Offer, destAddr);
-	std::set<unsigned long> serialOfH2hAck = bndlModule.getBundleSerialsAsSet();
+	std::set<unsigned long > serialOfH2hAck = getUnStoredBndlForSession(destAddr, bndlModule.getBundleSerialsAsSet());
 
-	netwPkt->setH2hAcks(serialOfH2hAck);
-
-	long otherControlBitLength = estimateInBitsCtrlSize(false, &serialOfH2hAck, NULL, NULL, NULL);
-	netwPkt->addBitLength(otherControlBitLength);
-	sendDown(netwPkt, 0, otherControlBitLength, 0);
+	if (! (serialOfH2hAck.empty())){
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, Bundle_Offer, destAddr);
+		netwPkt->setH2hAcks(serialOfH2hAck);
+		long otherControlBitLength = estimateInBitsCtrlSize(false, &serialOfH2hAck, NULL, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
+	}
 }
 
 void GeoSprayNetwLayer::handleBundleOfferMsg(GeoDtnNetwPkt *netwPkt)
@@ -242,28 +243,31 @@ void GeoSprayNetwLayer::sendingBundleMsg(LAddress::L3Type destAddr, std::vector<
 		// Fixing the number of replica to send
 
 		bool custodyTransfert = false;
-		int nbrReplicaToSend = 0;
+		int nbrReplicaToSend  = bndlModule.computeNbrReplicaToSend(serial);
 
-		nbrReplicaToSend = bndlModule.computeNbrReplicaToSend(serial);
-		if (nbrReplicaToSend == 1){
-			custodyTransfert = true;
-		}
-
-
-		// step 2 : sending Bundles
-		GeoDtnNetwPkt *netwPkt = new GeoDtnNetwPkt();
-		prepareNetwPkt(netwPkt, Bundle, destAddr);
-		netwPkt->setNbrReplica(nbrReplicaToSend);
-		netwPkt->setCustodyTransfert(custodyTransfert);
-		netwPkt->encapsulate(wsm->dup());
-		sendDown(netwPkt, 0, 0, 1);
-		emit(sentL3SignalId,1);
-		if (!withExplicitH2HAck){
-			if (custodyTransfert){
-				bndlModule.deleteBundleUponCustody(serial);
+		// Decide whether we send bundles or not based on Nbr of Replica to Send
+		if (nbrReplicaToSend == 0){
+			continue;
+		}else{
+			if (nbrReplicaToSend == 1){
+				custodyTransfert = true;
 			}
-			bndlModule.updateSentReplica(serial, nbrReplicaToSend);
 
+			// step 2 : sending Bundles
+			GeoDtnNetwPkt *netwPkt = new GeoDtnNetwPkt();
+			prepareNetwPkt(netwPkt, Bundle, destAddr);
+			netwPkt->setNbrReplica(nbrReplicaToSend);
+			netwPkt->setCustodyTransfert(custodyTransfert);
+			netwPkt->encapsulate(wsm->dup());
+			sendDown(netwPkt, 0, 0, 1);
+			emit(sentL3SignalId,1);
+			if (!withExplicitH2HAck){
+				if (custodyTransfert){
+					bndlModule.deleteBundleUponCustody(serial);
+				}
+				bndlModule.updateSentReplica(serial, nbrReplicaToSend);
+
+			}
 		}
 	}
 }

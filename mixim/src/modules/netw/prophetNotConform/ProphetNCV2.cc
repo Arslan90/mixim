@@ -194,8 +194,7 @@ void ProphetNCV2::handleInitMsg(ProphetNCPkt *netwPkt)
 
 void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddress::L3Type, double> predsOfNode)
 {
-//	std::set<unsigned long> storedAck = std::set<unsigned long>(ackSerial);
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
+	std::map<unsigned long, double > ackSerialsWithExpTime = getUnStoredAcksForSession(nodeAddr, ackModule.getAckSerialsWithExpTime());
 
 //	/*************************** H2H Acks (stored bundles) **********/
 	std::set<unsigned long > storedBundle;
@@ -228,13 +227,15 @@ void ProphetNCV2::sendingBndlOfferMsg(LAddress::L3Type nodeAddr, std::map<LAddre
 		}
 	}
 
-	if (!(storedBundle.empty() & ackSerialsWithExpTime.empty())){
+	std::set<unsigned long > storedFilteredBundle = getUnStoredBndlForSession(nodeAddr, storedBundle);
+
+	if (!(storedFilteredBundle.empty() & ackSerialsWithExpTime.empty())){
 		// if at least one of the two sets is not empty
 		ProphetNCPkt *netwPkt = new ProphetNCPkt();
 		prepareNetwPkt(netwPkt, Bundle_Offer, nodeAddr);
 		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-		netwPkt->setH2hAcks(storedBundle);
-		long otherControlBitLength = estimateInBitsCtrlSize(false, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->setH2hAcks(storedFilteredBundle);
+		long otherControlBitLength = estimateInBitsCtrlSize(false, &storedFilteredBundle, &ackSerialsWithExpTime, NULL, NULL);
 		netwPkt->addBitLength(otherControlBitLength);
 		//cout << "Sending BundleOffer packet from " << netwPkt->getSrcAddr() << " addressed to " << netwPkt->getDestAddr() << std::endl;
 		sendDown(netwPkt, 0, otherControlBitLength, 0);

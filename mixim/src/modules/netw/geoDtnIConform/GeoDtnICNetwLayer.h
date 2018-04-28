@@ -196,6 +196,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	virtual void initCustodyManagementOptions();
 
   	virtual void updateStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > custodysToStore);
+
+  	virtual std::map<unsigned long ,double> getUnStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long ,double> custodysToFilter);
 };
 
 #endif

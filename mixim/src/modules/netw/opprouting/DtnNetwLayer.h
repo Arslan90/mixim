@@ -424,6 +424,10 @@ public:
 
   	virtual void updateStoredAcksForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > acksToStore);
 
+  	virtual std::set<unsigned long > getUnStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > bundlesToFilter);
+
+  	virtual std::map<unsigned long, double > getUnStoredAcksForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > acksToFilter);
+
   	void sendDown(cMessage* msg);
 
   	void sendDown(cMessage *msg, long HelloCtrlLength, long OtherCtrlLength, short nbrEncapData);

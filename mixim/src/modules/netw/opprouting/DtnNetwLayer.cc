@@ -714,6 +714,43 @@ void DtnNetwLayer::updateStoredAcksForSession(LAddress::L3Type srcAddr, std::map
 	neighborhoodSession[srcAddr] = currentSession;
 }
 
+std::set<unsigned long > DtnNetwLayer::getUnStoredBndlForSession(LAddress::L3Type srcAddr, std::set<unsigned long > bundlesToFilter)
+{
+	std::set<unsigned long > filteredBundles;
+	for (std::set<unsigned long >::iterator it = bundlesToFilter.begin(); it != bundlesToFilter.end(); it++){
+		unsigned long serial = (*it);
+		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+		if (it2 == neighborhoodSession.end()){
+			filteredBundles.insert(serial);
+		}else{
+			NetwSession srcSession = it2->second;
+			if(!srcSession.existInStoredBundle(serial)){
+				filteredBundles.insert(serial);
+			}
+		}
+	}
+	return filteredBundles;
+}
+
+std::map<unsigned long ,double> DtnNetwLayer::getUnStoredAcksForSession(LAddress::L3Type srcAddr, std::map<unsigned long ,double> acksToFilter)
+{
+	std::map<unsigned long ,double> filteredAcks;
+	for (std::map<unsigned long ,double>::iterator it = acksToFilter.begin(); it != acksToFilter.end(); it++){
+		unsigned long serial = it->first;
+		double expTime = it->second;
+		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+		if (it2 == neighborhoodSession.end()){
+			filteredAcks.insert(std::pair<unsigned long ,double>(serial,expTime));
+		}else{
+			NetwSession srcSession = it2->second;
+			if(!srcSession.existInStoredAck(serial)){
+				filteredAcks.insert(std::pair<unsigned long ,double>(serial,expTime));
+			}
+		}
+	}
+	return filteredAcks;
+}
+
 std::vector<std::pair<WaveShortMessage*,int> > DtnNetwLayer::compAsFn_schedulingStrategy(std::vector<std::pair<WaveShortMessage*,int> > vectorToSort)
 {
 	switch (scheduleStrategy) {

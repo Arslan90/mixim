@@ -99,18 +99,21 @@ void EpidemicNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 void EpidemicNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, INIT, nodeAddr);
+	std::map<unsigned long, double > ackSerialsWithExpTime = getUnStoredAcksForSession(nodeAddr, ackModule.getAckSerialsWithExpTime());
+	std::set<unsigned long > storedBundle = getUnStoredBndlForSession(nodeAddr, bndlModule.getBundleSerialsAsSet());
 
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
-	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-	std::set<unsigned long > storedBundle = bndlModule.getBundleSerialsAsSet();
-	netwPkt->setH2hAcks(storedBundle);
+	if (! (ackSerialsWithExpTime.empty() && storedBundle.empty())){
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, INIT, nodeAddr);
 
-	long helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
-	netwPkt->addBitLength(helloControlBitLength);
-	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt,helloControlBitLength, 0, 0);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+		netwPkt->setH2hAcks(storedBundle);
+
+		long helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(helloControlBitLength);
+		coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+		sendDown(netwPkt,helloControlBitLength, 0, 0);
+	}
 }
 
 void EpidemicNetwLayer::handleInitMsg(GeoDtnNetwPkt *netwPkt)

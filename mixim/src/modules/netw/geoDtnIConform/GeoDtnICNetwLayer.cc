@@ -174,34 +174,38 @@ void GeoDtnICNetwLayer::handleHelloMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnICNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, INIT, nodeAddr);	
-	double myCurrentDist = getCurrentDist();
-	double myCurrentMETD = getCurrentMETD();
-	netwPkt->setSrcMETD(myCurrentMETD);
-	netwPkt->setSrcDist_NP_VPA(myCurrentDist);
-	long helloControlBitLength = 0;
 	if (checkBeforeHelloMechanism()){
-		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime();
-		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-		std::set<unsigned long > storedBundle = bndlModule.getBundleSerialsAsSet();
-		netwPkt->setH2hAcks(storedBundle);
+		std::map<unsigned long, double > ackSerialsWithExpTime = getUnStoredAcksForSession(nodeAddr, ackModule.getAckSerialsWithExpTime());
+		std::set<unsigned long > storedBundle = getUnStoredBndlForSession(nodeAddr, bndlModule.getBundleSerialsAsSet());
 		std::map<unsigned long,double > custodyBundle;
 		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
-			/***************** Cleaning CustodySerials from old entries *****/
-			/***************** Cleaning CustodySerials from old entries *****/
 			// If we use Dist metric, Custody mode is Yes and Custody list is > 0
 			updateNCustodySerial();
-			custodyBundle = cusModule.getCustodySerialsWithExpTime();
-			netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
+			custodyBundle = getUnStoredCustodysForSession(nodeAddr, cusModule.getCustodySerialsWithExpTime());
 		}
 
-		helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, &custodyBundle, NULL);
-		netwPkt->addBitLength(helloControlBitLength);
-	}
+		if (! (ackSerialsWithExpTime.empty() && storedBundle.empty() && custodyBundle.empty())){
+			GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+			prepareNetwPkt(netwPkt, INIT, nodeAddr);
+			double myCurrentDist = getCurrentDist();
+			double myCurrentMETD = getCurrentMETD();
+			netwPkt->setSrcMETD(myCurrentMETD);
+			netwPkt->setSrcDist_NP_VPA(myCurrentDist);
+			long helloControlBitLength = 0;
+			netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+			netwPkt->setH2hAcks(storedBundle);
 
-	coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-	sendDown(netwPkt,helloControlBitLength, 0, 0);
+			if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
+				netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
+			}
+
+			helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, &custodyBundle, NULL);
+			netwPkt->addBitLength(helloControlBitLength);
+
+			coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+			sendDown(netwPkt,helloControlBitLength, 0, 0);
+		}
+	}
 }
 
 void GeoDtnICNetwLayer::handleInitMsg(GeoDtnNetwPkt *netwPkt)
@@ -695,4 +699,23 @@ void GeoDtnICNetwLayer::updateStoredCustodysForSession(LAddress::L3Type srcAddr,
 	}
 	currentSession.updateStoredCustody(custodysToStore);
 	neighborhoodSession[srcAddr] = currentSession;
+}
+
+std::map<unsigned long ,double> GeoDtnICNetwLayer::getUnStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long ,double> custodysToFilter)
+{
+	std::map<unsigned long ,double> filteredCustodys;
+	for (std::map<unsigned long ,double>::iterator it = custodysToFilter.begin(); it != custodysToFilter.end(); it++){
+		unsigned long serial = it->first;
+		double expTime = it->second;
+		std::map<LAddress::L3Type, NetwSession>::iterator it2 = neighborhoodSession.find(srcAddr);
+		if (it2 == neighborhoodSession.end()){
+			filteredCustodys.insert(std::pair<unsigned long ,double>(serial,expTime));
+		}else{
+			NetwSession srcSession = it2->second;
+			if(!srcSession.existInStoredCustody(serial)){
+				filteredCustodys.insert(std::pair<unsigned long ,double>(serial,expTime));
+			}
+		}
+	}
+	return filteredCustodys;
 }
