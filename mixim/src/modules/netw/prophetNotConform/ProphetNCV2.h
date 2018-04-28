@@ -25,14 +25,6 @@
 
 typedef std::map<LAddress::L3Type, double>::iterator predsIterator;
 
-//typedef std::map<unsigned long ,WaveShortMessage*> innerIndexMap;
-//typedef std::map<unsigned long,WaveShortMessage*>::iterator innerIndexIterator;
-//
-//typedef std::map<LAddress::L3Type, innerIndexMap>::iterator bundlesIndexIterator;
-//
-//typedef std::map<LAddress::L3Type, std::list<unsigned long> >::iterator iteratorContactID;
-//typedef std::map<unsigned long, SimpleContactStats>::iterator iteratorContactStats;
-
 class ProphetNCV2: public DtnNetwLayer {
 /*******************************************************************
 **
@@ -242,9 +234,6 @@ private:
 
 	/** @brief Handle messages from lower layer */
 	virtual void handleLowerMsg(cMessage* msg);
-
-//	/** @brief Handle control messages from lower layer */
-//	virtual void handleUpperControl(cMessage* msg);
 
 	/*******************************************************************
 	** 							Metrics methods section

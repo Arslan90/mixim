@@ -333,7 +333,10 @@ int BndlStorageHelper::computeNbrReplicaToSend(unsigned long  serial)
 			opp_error("BundleSHelper::computeNbrReplicaToSend --- Requesting computation of NbrReplicaToSend but not in limitedReplica mode");
 		}
 	}else{
-		opp_error("BundleSHelper::computeNbrReplicaToSend --- Requesting computation of NbrReplicaToSend but Bundle does not exist");
+		/*
+		 * If Bundle does not exist, It may be due to an old bundle already deleted,
+		 * or to another reason. anyway returned value must be equal to 0.
+		 */
 	}
 	return nbrReplicaToSend;
 }

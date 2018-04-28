@@ -113,23 +113,3 @@ bool NetwSession::existInStoredBundleOrAck(unsigned long  serial)
 {
 	return (existInStoredBundle(serial) || existInStoredAck(serial));
 }
-
-
-
-
-
-//void NetwSession::insertInDelivredToBndl(unsigned long  delivredSerial)
-//{
-//	this->delivredToBndl.insert(delivredSerial);
-//}
-//
-//void NetwSession::insertInDelivredToVpaBndl(unsigned long  delivredToVpaSerial)
-//{
-//	this->delivredToVPABndl.insert(delivredToVpaSerial);
-//}
-
-
-
-
-
-

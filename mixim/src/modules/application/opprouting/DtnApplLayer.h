@@ -172,17 +172,8 @@ protected:
 
 		int netwAddr;
 
-//		/** @brief handle messages from below */
-//		virtual void handleLowerMsg(cMessage* msg);
-//		/** @brief handle self messages */
-//		virtual void handleSelfMsg(cMessage* msg);
-//
-//		virtual WaveShortMessage* prepareWSM(std::string name, int dataLengthBits, t_channel channel, int priority, int rcvId, int serial=0);
-//		virtual void sendWSM(WaveShortMessage* wsm);
 		virtual void onBeacon(WaveShortMessage* wsm);
 		virtual void onData(WaveShortMessage* wsm);
-//
-//		virtual void handlePositionUpdate(cObject* obj);
 
 		/*
 		 *	Method to get the Data Source string from strategy
