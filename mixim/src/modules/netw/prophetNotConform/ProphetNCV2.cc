@@ -325,7 +325,7 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+			if (! (bndlModule.existBundle(wsm->getSerial()) || ackModule.existAck(wsm->getSerial())) ){
 				bndlModule.storeBundle(wsm);
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
@@ -339,22 +339,26 @@ void ProphetNCV2::handleBundleMsg(ProphetNCPkt *netwPkt)
 
 void ProphetNCV2::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd)
 {
-	ProphetNCPkt* netwPkt = new ProphetNCPkt();
-	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	if (withAck){
+		ProphetNCPkt* netwPkt = new ProphetNCPkt();
+		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
-	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
-	netwPkt->addBitLength(otherControlBitLength);
-	sendDown(netwPkt, 0, otherControlBitLength, 0);
+		long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
+	}
 }
 
 void ProphetNCV2::handleBundleAckMsg(ProphetNCPkt *netwPkt)
 {
-	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(), finalDelivredToBndl);
-	storeNAckSerial(finalDelivredToBndl);
+	if (withAck){
+		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(), finalDelivredToBndl);
+		storeNAckSerial(finalDelivredToBndl);
+	}
 }
 
 /*******************************************************************

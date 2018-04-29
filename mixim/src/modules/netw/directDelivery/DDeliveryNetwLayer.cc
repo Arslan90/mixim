@@ -153,22 +153,26 @@ void DDeliveryNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 void DDeliveryNetwLayer::sendingBundleAckMsg(LAddress::L3Type destAddr, std::set<unsigned long > wsmFinalDeliverd)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	if (withAck){
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
 
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
-	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
 
-	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
-	netwPkt->addBitLength(otherControlBitLength);
-	sendDown(netwPkt, 0, otherControlBitLength, 0);
+		long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
+	}
 }
 
 void DDeliveryNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
-	updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
-	storeNAckSerial(finalDelivredToBndl);
+	if (withAck){
+		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
+		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
+		storeNAckSerial(finalDelivredToBndl);
+	}
 }
 
 ////////////////////////////////////////// Others methods /////////////////////////
