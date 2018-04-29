@@ -215,7 +215,7 @@ void EpidemicNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+			if (! (bndlModule.existBundle(wsm->getSerial()) || ackModule.existAck(wsm->getSerial())) ){
 				bndlModule.storeBundle(wsm);
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);

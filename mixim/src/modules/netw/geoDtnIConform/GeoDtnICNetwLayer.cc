@@ -347,10 +347,11 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 			/*
 			 * Process to avoid storing twice the same msg
 			 */
-			if ((!bndlModule.existBundle(wsm->getSerial())) && (ackModule.existAck(wsm->getSerial()) == 0)){
+			if (! (bndlModule.existBundle(wsm->getSerial()) || ackModule.existAck(wsm->getSerial())) ){
 				if(bndlModule.storeBundle(wsm)){
 					currentNbrIsrt++;
 				}
+				receivedWSM.insert(wsm->getSerial());
 				bundlesReceived++;
 				emit(receiveL3SignalId,bundlesReceived);
 			}
@@ -368,19 +369,21 @@ void GeoDtnICNetwLayer::handleBundleMsg(GeoDtnNetwPkt *netwPkt)
 
 void GeoDtnICNetwLayer::sendingBundleE2EAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmFinalDeliverd)
 {
-	GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-	if (!withAddressedAck){
-		prepareNetwPkt(netwPkt, Bundle_Ack, LAddress::L3BROADCAST);
-	} else if (withAddressedAck){
-		prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+	if (withAck) {
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		if (!withAddressedAck){
+			prepareNetwPkt(netwPkt, Bundle_Ack, LAddress::L3BROADCAST);
+		} else if (withAddressedAck){
+			prepareNetwPkt(netwPkt, Bundle_Ack, destAddr);
+		}
+
+		std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+
+		long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
+		netwPkt->addBitLength(otherControlBitLength);
+		sendDown(netwPkt, 0, otherControlBitLength, 0);
 	}
-
-	std::map<unsigned long, double > ackSerialsWithExpTime = ackModule.getAckSerialsWithExpTime(wsmFinalDeliverd);
-	netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-
-	long otherControlBitLength = estimateInBitsCtrlSize(false, NULL, &ackSerialsWithExpTime, NULL, NULL);
-	netwPkt->addBitLength(otherControlBitLength);
-	sendDown(netwPkt, 0, otherControlBitLength, 0);
 }
 
 void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::set<unsigned long> wsmDeliverd, bool custodyTransfer)
@@ -407,7 +410,7 @@ void GeoDtnICNetwLayer::sendingBundleH2HAckMsg(LAddress::L3Type destAddr, std::s
 
 void GeoDtnICNetwLayer::handleBundleAckMsg(GeoDtnNetwPkt *netwPkt)
 {
-	if (withExplicitE2EAck){
+	if (withAck && withExplicitE2EAck){
 		std::map<unsigned long, double > finalDelivredToBndl = netwPkt->getAckSerialsWithTimestamp();
 		updateStoredAcksForSession(netwPkt->getSrcAddr(),finalDelivredToBndl);
 		storeNAckSerial(finalDelivredToBndl);
