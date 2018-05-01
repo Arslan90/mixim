@@ -674,3 +674,46 @@ void GeoDtnICNetwLayer::updateStoredCustodysForSession(LAddress::L3Type srcAddr,
 	currentSession.updateStoredCustody(custodysToStore);
 	neighborhoodSession[srcAddr] = currentSession;
 }
+
+long GeoDtnICNetwLayer::estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long > *SB_Ctrl, std::map<unsigned long ,double> *SA_Ctrl, std::map<unsigned long ,double> *CL_Ctrl, std::set<unsigned long > *RCC_Ctrl)
+{
+	long sizeSB_Octets = 0, sizeSA_Octets = 0, sizeCL_Octets = 0, sizeRCC_Octets = 0;
+
+	long totalSizeInBits = 0;
+
+	if (SB_Ctrl != NULL){
+		sizeSB_Octets = sizeof(unsigned long) * SB_Ctrl->size();
+	}
+
+	if (SA_Ctrl != NULL){
+		if (withTTLForAck){
+			sizeSA_Octets = (sizeof(unsigned long) + sizeof(double)) * SA_Ctrl->size();
+		}else{
+			sizeSA_Octets = sizeof(unsigned long) * SA_Ctrl->size();
+		}
+	}
+
+	if (CL_Ctrl != NULL){
+		if (withTTLForCus){
+			sizeCL_Octets = (sizeof(unsigned long) + sizeof(double)) * CL_Ctrl->size();
+		}else{
+			sizeCL_Octets = sizeof(unsigned long) * CL_Ctrl->size();
+		}
+	}
+
+	if (RCC_Ctrl != NULL){
+		sizeRCC_Octets = sizeof(unsigned long) * RCC_Ctrl->size();
+	}
+
+	if (isHelloCtrl){
+		emitSignalForHelloCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}else{
+		emitSignalForOtherCtrlMsg(sizeSB_Octets, sizeSA_Octets, sizeCL_Octets, sizeRCC_Octets);
+	}
+
+	totalSizeInBits = (sizeSB_Octets + sizeSA_Octets + sizeCL_Octets + sizeRCC_Octets) * 8;
+
+	return totalSizeInBits;
+}
+
+

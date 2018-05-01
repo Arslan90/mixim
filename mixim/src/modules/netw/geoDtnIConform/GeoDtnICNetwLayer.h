@@ -192,6 +192,8 @@ class GeoDtnICNetwLayer : public DtnNetwLayer
   	virtual void initCustodyManagementOptions();
 
   	virtual void updateStoredCustodysForSession(LAddress::L3Type srcAddr, std::map<unsigned long, double > custodysToStore);
+
+  	virtual long estimateInBitsCtrlSize(bool isHelloCtrl, std::set<unsigned long>* SB_Ctrl, std::map<unsigned long, double >* SA_Ctrl, std::map<unsigned long, double >* CL_Ctrl, std::set<unsigned long>* RCC_Ctrl);
 };
 
 #endif
