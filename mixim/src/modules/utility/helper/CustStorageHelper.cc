@@ -194,7 +194,7 @@ bool CustStorageHelper::hasExpired(double expireTime)
 	bool hasExpired = false;
 	double currentTime = simTime().dbl();
 
-	if(withTTL & ( currentTime > expireTime)){
+	if(withTTL && ( currentTime > expireTime)){
 		hasExpired = true;
 	}
 
