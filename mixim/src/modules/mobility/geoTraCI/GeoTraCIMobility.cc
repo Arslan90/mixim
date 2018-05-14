@@ -426,7 +426,7 @@ void GeoTraCIMobility::updateMETD(bool reComputeETA_NP_VPA)
 						// but if previously with get a maxDbl value for it, then we recalculate it
 						currentETA_NP_VPA = calculateETA_NP_VPA();
 						if (currentETA_NP_VPA != maxDbl){
-							currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+							currentNP.setEtaNpVpa(currentETA_NP_VPA);
 						}
 //						opp_error("Calling updateMETD without previous calculation of ETA_NP_VPA");
 					}
@@ -434,7 +434,7 @@ void GeoTraCIMobility::updateMETD(bool reComputeETA_NP_VPA)
 					// It is a full compute of METD, with calculation of both ETA_NP and ETA_NP_VPA
 					currentETA_NP_VPA = calculateETA_NP_VPA();
 					if (currentETA_NP_VPA != maxDbl){
-						currentNP.setEtaNpVpa(calculateETA_NP_VPA());
+						currentNP.setEtaNpVpa(currentETA_NP_VPA);
 					}
 				}
 				currentNP.setMetd(currentRmgRoadBestTT+currentETA_NP+currentNP.getEtaNpVpa());
@@ -469,12 +469,13 @@ double GeoTraCIMobility::calculateRmgRoadBestTT()
 			opp_warning(warning_str.c_str());
 			opp_warning("Assuming that vehicle has traversed the current lane");
 			rmgRoadBestTT = 0;
-		}
-		if (laneMaxSpeed == 0.0){
-			std::string warning_str = "Max Speed for LaneIdPos "+laneId+" equals 0.0";
-			opp_warning(warning_str.c_str());
-		}else{
-			rmgRoadBestTT = (laneTotalLength-currentVehLanePos) / laneMaxSpeed;
+		}else {
+			if (laneMaxSpeed == 0.0){
+				std::string warning_str = "Max Speed for LaneIdPos "+laneId+" equals 0.0";
+				opp_warning(warning_str.c_str());
+			}else{
+				rmgRoadBestTT = (laneTotalLength-currentVehLanePos) / laneMaxSpeed;
+			}
 		}
 	}
 	return rmgRoadBestTT;

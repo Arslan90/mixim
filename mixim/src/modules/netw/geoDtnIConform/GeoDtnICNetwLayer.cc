@@ -184,27 +184,25 @@ void GeoDtnICNetwLayer::sendingInitMsg(LAddress::L3Type nodeAddr)
 			custodyBundle = getUnStoredCustodysForSession(nodeAddr, cusModule.getCustodySerialsWithExpTime());
 		}
 
-		if (! (ackSerialsWithExpTime.empty() && storedBundle.empty() && custodyBundle.empty())){
-			GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
-			prepareNetwPkt(netwPkt, INIT, nodeAddr);
-			double myCurrentDist = getCurrentDist();
-			double myCurrentMETD = getCurrentMETD();
-			netwPkt->setSrcMETD(myCurrentMETD);
-			netwPkt->setSrcDist_NP_VPA(myCurrentDist);
-			long helloControlBitLength = 0;
-			netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
-			netwPkt->setH2hAcks(storedBundle);
+		GeoDtnNetwPkt* netwPkt = new GeoDtnNetwPkt();
+		prepareNetwPkt(netwPkt, INIT, nodeAddr);
+		double myCurrentDist = getCurrentDist();
+		double myCurrentMETD = getCurrentMETD();
+		netwPkt->setSrcMETD(myCurrentMETD);
+		netwPkt->setSrcDist_NP_VPA(myCurrentDist);
+		long helloControlBitLength = 0;
+		netwPkt->setAckSerialsWithTimestamp(ackSerialsWithExpTime);
+		netwPkt->setH2hAcks(storedBundle);
 
-			if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
-				netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
-			}
-
-			helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, &custodyBundle, NULL);
-			netwPkt->addBitLength(helloControlBitLength);
-
-			coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
-			sendDown(netwPkt,helloControlBitLength, 0, 0);
+		if (withDistFwd && (custodyMode != No) && (custodyList != No_Diffuse)){
+			netwPkt->setCustodySerialsWithTimestamp(custodyBundle);
 		}
+
+		helloControlBitLength = estimateInBitsCtrlSize(true, &storedBundle, &ackSerialsWithExpTime, &custodyBundle, NULL);
+		netwPkt->addBitLength(helloControlBitLength);
+
+		coreEV << "Sending GeoDtnNetwPkt packet from " << netwPkt->getSrcAddr() << " Destinated to " << netwPkt->getDestAddr() << std::endl;
+		sendDown(netwPkt,helloControlBitLength, 0, 0);
 	}
 }
 
