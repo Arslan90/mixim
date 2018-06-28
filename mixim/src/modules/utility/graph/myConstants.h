@@ -165,6 +165,7 @@ std::vector<std::string> tokenizeMSG(char* msg_data){
 	}
 
 	free(one_entry);
+	free((void*) copyOfMsgData);
 
 	return tokens;
 }
@@ -180,26 +181,31 @@ std::vector<std::string> tokenizeMSG(std::string msg_data){
 	}
 
 	for (std::vector<std::string>::iterator it = one_entryTokens.begin(); it != one_entryTokens.end(); it++){
-		char* one_tuple= strtok (strdup((*it).c_str()),";");
+		char* copyOfTuple = strdup((*it).c_str());
+		char* one_tuple= strtok(copyOfTuple,";");
 		while (one_tuple != NULL)
 		{
 			one_tupleTokens.push_back(std::string(one_tuple));
 			one_tuple = strtok (NULL, ";");
 		}
 		free (one_tuple);
+		free((void*) copyOfTuple);
 	}
 
 	for (std::vector<std::string>::iterator it = one_tupleTokens.begin(); it != one_tupleTokens.end(); it++){
-		char* one_arg= strtok (strdup((*it).c_str()),":");
+		char* copyOfArg = strdup((*it).c_str());
+		char* one_arg= strtok (copyOfArg,":");
 		while (one_arg != NULL)
 		{
 			tokens.push_back(std::string(one_arg));
 			one_arg = strtok (NULL, ":");
 		}
 		free (one_arg);
+		free((void*) copyOfArg);
 	}
 
 	free(one_entry);
+	free((void*) copyOfMsgData);
 
 	return tokens;
 }

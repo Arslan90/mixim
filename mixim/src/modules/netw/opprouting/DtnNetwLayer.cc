@@ -223,6 +223,8 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 						}
 
 						NBHAddressNbrInsert++;
+
+						free((void*) msgName);
 					}
 				}
 				break;
@@ -250,12 +252,14 @@ void DtnNetwLayer::handleLowerControl(cMessage *msg)
 					recordEndContactStats(addr,time);
 
 					NBHAddressNbrDelete++;
+
+					free((void*) msgName);
 				}
 				break;
 		}
 
-		}
-		delete msg;
+	}
+	delete msg;
 }
 
 void DtnNetwLayer::handleUpperControl(cMessage *msg)

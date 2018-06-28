@@ -302,11 +302,11 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalID, const char *s)
 {
 	Enter_Method_Silent();
+	char* signalStr = strdup(s);
+
 	if (strcmp(getSignalName(signalID),"sentBitsLength") == 0){
 		std::string hCtrlSizeAsStr = "", oCtrlSizeAsStr = "", nbrEncapDataAsStr = "";
 		long helloCtrlSize = 0, otherCtrlSize = 0, nbrEncapData = 0;
-
-		char* signalStr = strdup(s);
 
 		hCtrlSizeAsStr = std::string(strtok(signalStr,":"));
 		if (hCtrlSizeAsStr != ""){ helloCtrlSize = strtol(hCtrlSizeAsStr.c_str(),NULL,10);}
@@ -334,12 +334,10 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 			double uniqDataReceived = (double) (nbrUniqueBundleReceived * dataLength) / 1024;
 			double ratio = uniqDataReceived / (double) (dataSentSizeKbits + sizeCtrl);
 		}
-
-		free((void*) signalStr);
 	}
 
 	if (strcmp(getSignalName(signalID),"helloCtrlBitsLength") == 0){
-		char* sizeAsStr = strtok(strdup(s),":");
+		char* sizeAsStr = strtok(signalStr,":");
 		std::vector<long> sizeAsLong (4,0);
 		int index = 0;
 		while (sizeAsStr != NULL){
@@ -367,7 +365,7 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	}
 
 	if (strcmp(getSignalName(signalID),"otherCtrlBitsLength") == 0){
-		char* sizeAsStr = strtok(strdup(s),":");
+		char* sizeAsStr = strtok(signalStr,":");
 		std::vector<long> sizeAsLong (4,0);
 		int index = 0;
 		while (sizeAsStr != NULL){
@@ -395,14 +393,14 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	}
 
 	if (strcmp(getSignalName(signalID),"ackLifeTime") == 0){
-		char* signalStr = strtok(strdup(s),":");
-		unsigned long serial = strtol(signalStr,NULL,10);
+		char* lifeTimeAsStr = strtok(signalStr,":");
+		unsigned long serial = strtol(lifeTimeAsStr,NULL,10);
 
-		signalStr = strtok(NULL,":");
-		double creationTime = strtod(signalStr,NULL);
+		lifeTimeAsStr = strtok(NULL,":");
+		double creationTime = strtod(lifeTimeAsStr,NULL);
 
-		signalStr = strtok(NULL,":");
-		double expireTime = strtod(signalStr,NULL);
+		lifeTimeAsStr = strtok(NULL,":");
+		double expireTime = strtod(lifeTimeAsStr,NULL);
 
 		std::map<unsigned long, std::pair<double,double> >::iterator it = ackLifeTime.find(serial);
 		if (it == ackLifeTime.end()){
@@ -418,14 +416,14 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 	}
 
 	if (strcmp(getSignalName(signalID),"custodyLifeTime") == 0){
-		char* signalStr = strtok(strdup(s),":");
-		unsigned long serial = strtol(signalStr,NULL,10);
+		char* lifeTimeAsStr = strtok(signalStr,":");
+		unsigned long serial = strtol(lifeTimeAsStr,NULL,10);
 
-		signalStr = strtok(NULL,":");
-		double creationTime = strtod(signalStr,NULL);
+		lifeTimeAsStr = strtok(NULL,":");
+		double creationTime = strtod(lifeTimeAsStr,NULL);
 
-		signalStr = strtok(NULL,":");
-		double expireTime = strtod(signalStr,NULL);
+		lifeTimeAsStr = strtok(NULL,":");
+		double expireTime = strtod(lifeTimeAsStr,NULL);
 
 		std::map<unsigned long, std::pair<double,double> >::iterator it = custodyLifeTime.find(serial);
 		if (it == custodyLifeTime.end()){
@@ -440,6 +438,7 @@ void PyGraphServerManager::receiveSignal(cComponent *source, simsignal_t signalI
 		}
 	}
 
+	free((void*) signalStr);
 }
 
 void PyGraphServerManager::finish(){
