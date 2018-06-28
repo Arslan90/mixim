@@ -650,7 +650,8 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 
 		double distance = maxDbl;
 		std::list<std::string> route;
-		char* edges = strtok(strdup(reponse_tokens[11].c_str())," ");
+		char* response11AsStr = strdup(reponse_tokens[11].c_str());
+		char* edges = strtok(response11AsStr," ");
 		std::list<std::string> keysValues;
 		while (edges != NULL){
 				   keysValues.push_back(std::string(edges));
@@ -664,6 +665,7 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 		distance = MY_CONST::convertToDbl(reponse_tokens[13]);
 
 		returnedNP = NearestPoint(reponse_tokens[3], reponse_tokens[5], reponse_tokens[7], reponse_tokens[9], route, distance);
+		free((void*) response11AsStr);
 	}
 
 	return returnedNP;
@@ -671,7 +673,8 @@ NearestPoint GeoTraCIMobility::getNearestPoint(int vpaSectorId, std::list<std::s
 
 std::pair<std::string, double>  GeoTraCIMobility::addEntryToEdgeBTTIndex(std::string edgeAndValue)
 {
-	char* edge =  strtok(strdup(edgeAndValue.c_str()),"=");
+	char* edgeAndValueAsStr = strdup(edgeAndValue.c_str());
+	char* edge =  strtok(edgeAndValueAsStr,"=");
 	std::string edgeAsStr = std::string(edge);
 	char* value = strtok(NULL,"=");
 	double valueAsFloat = maxDbl;
@@ -683,6 +686,7 @@ std::pair<std::string, double>  GeoTraCIMobility::addEntryToEdgeBTTIndex(std::st
 			edgesBTTIndex.insert(std::pair<std::string,double>(edgeAsStr,valueAsFloat));
 		}
 	}
+	free((void*) edgeAndValueAsStr);
 	return std::pair<std::string, double>(edgeAsStr,valueAsFloat);
 }
 
